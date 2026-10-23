@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 380" width="1280" height="380" role="img" aria-label="素问 Suwen — 本地优先的 AI Agent 工作室">
+  <title>素问 Suwen</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0e14"/>
+      <stop offset="1" stop-color="#10141d"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9ecf5"/>
+      <stop offset="0.45" stop-color="#c4b5fd"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <radialGradient id="glowL" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowR" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1280" height="380" fill="url(#bg)"/>
+  <ellipse cx="330" cy="60" rx="420" ry="260" fill="url(#glowL)"/>
+  <ellipse cx="1010" cy="330" rx="380" ry="240" fill="url(#glowR)"/>
+
+  <g stroke="#ffffff" stroke-opacity="0.035" stroke-width="1">
+    <path d="M0 95h1280M0 190h1280M0 285h1280"/>
+    <path d="M160 0v380M480 0v380M800 0v380M1120 0v380"/>
+  </g>
+
+  <g transform="translate(640 78)" fill="none" stroke="url(#brand)" stroke-linecap="round">
+    <path d="M-18-26c0 15 27 21 27 36S-18 41-18 56" stroke-width="4.6"/>
+    <path d="M18-26c0 15-27 21-27 36S18 41 18 56" stroke-width="4.6"/>
+    <path d="M-13-13h18M-16 5h22M-13 23h18" stroke-width="3.2" opacity="0.85"/>
+  </g>
+
+  <text x="640" y="206" text-anchor="middle" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif" font-size="74" font-weight="700" letter-spacing="1.5" fill="url(#brand)">素问 Suwen</text>
+  <text x="640" y="252" text-anchor="middle" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif" font-size="21" letter-spacing="0.6" fill="#aab4ca">本地优先的 AI Agent 工作室 · 日常工作与科研</text>
+  <text x="640" y="290" text-anchor="middle" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif" font-size="16" letter-spacing="2.2" fill="#6f7d99">PERSISTENT TASKS · SKILLS · MCP · EVIDENCE GATES</text>
+
+  <g opacity="0.9">
+    <rect x="515" y="318" width="250" height="28" rx="14" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="640" y="337" text-anchor="middle" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif" font-size="13" letter-spacing="1" fill="#8d99b3">v2.0.0 · Apache-2.0 · Self-hosted</text>
+  </g>
+</svg>

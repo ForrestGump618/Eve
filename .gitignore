@@ -78,6 +78,6 @@ ssh_known_hosts.json
 *.pem
 *.key
 /docs/DATA-MIGRATION-V2.json
+# Keep the committed documentation screenshots (real PNGs), ignore scratch captures.
 /docs/screenshots/*
-!/docs/screenshots/suwen-2-settings-light.png
-!/docs/screenshots/suwen-2-settings-dark.png
+!/docs/screenshots/*.png
