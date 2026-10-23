@@ -18,3 +18,7 @@
 | [Europe PMC REST](https://europepmc.org/RestfulWebService) / [UniProt API](https://www.uniprot.org/help/api) | 可追溯文献与蛋白注释 | 真实 API 查询，来源元数据与科学结论验证分开 |
 
 用户提供的[知乎文章](https://zhuanlan.zhihu.com/p/1916045864771786659)在环境中返回 403；Biomni 相关设计转而依据官方仓库，未假装读到该文章的完整内容。
+
+---
+
+本文件对应 Suwen 2.0.0；许可证总览见 [LICENSE](../LICENSE)。

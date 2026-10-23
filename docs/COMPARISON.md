@@ -31,7 +31,7 @@
 | **多工作区隔离** | ✅ | ✅ | OmicsLab 支持注册多个本地/SSH 工作区（默认 `ws_main`），会话绑定工作区，各工作区内核作用域独立，避免变量互相污染。 |
 | **统一执行后端** | ✅ | ✅ | 文件、Shell、内核执行都经 `ExecutionBackend`：同一套工具可在本机或远端 SSH 工作区执行，结果标注 `execution_target`；远端不可用时不静默回退本地。 |
 | **Agent 可配置** | ✅ | ✅ | OmicsLab 用 Markdown frontmatter 定义 Agent（`omicslab/agents/*.md` 或工作区 `agents/`），无需改代码。 |
-| **技能库（Skills）** | ✅ | ✅ | OmicsLab 内置 18 个组学/科研技能包，按需加载 `SKILL.md`；支持环境变量目录覆盖与新增。 |
+| **技能库（Skills）** | ✅ | ✅ | OmicsLab 内置 23 个组学/科研技能包，按需加载 `SKILL.md`；支持环境变量目录覆盖与新增。 |
 | **多智能体协作** | ✅ | ✅ | OmicsLab 内置 `lead` + 12 个专职 Agent（含 6 个科研发现/远程计算专职 Agent），Agent 之间可 `delegate_agent` 分派**子运行 + 子任务**；子任务有独立 trace、预算与结果树，父运行取消可级联。 |
 | **RSI 科研发现闭环** | ✅（据公开资料有科研 Agent 能力） | ✅ | OmicsLab 内置 7 步闭环（观察→假设→预注册→执行→证据→反思→策略），账本落盘可审查。 |
 | **函数注册表（Function Registry）** | ❓ | ✅ | 索引已安装包的函数签名/摘要，Agent 用 `registry_lookup` 查真实 API 后再写代码。 |
@@ -112,3 +112,7 @@ OmicsLab 需求清单
 ---
 
 *本文档随项目演进更新；最后核对时间以 git 提交记录为准。*
+
+---
+
+本文件对应 Suwen 2.0.0（对照内容主要整理于 1.3.0 时期）。

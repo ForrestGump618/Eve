@@ -1,5 +1,7 @@
 # 安装指南（INSTALL）
 
+本指南对应 Suwen 2.0.0（Python 包名为 `omicslab`）。
+
 本文覆盖从零安装、可选依赖、离线（无网络）安装、内核解释器选择与 Windows 终端注意事项。
 
 ---
@@ -13,7 +15,7 @@
 | 磁盘 | 基础安装 ≈ 200 MB；`[bio]` 全套 ≈ 1.5–2 GB |
 | 网络 | 安装时需要访问 PyPI；离线安装见 [§5](#5-离线安装) |
 
-> **当前验证状态（1.2.0）**：Windows 10/11 + Python 3.11.9 上实测通过 —— `pytest` 357 项、`scripts/smoke.py` 端到端自检、`scripts/publish.ps1` 产物校验、wheel 安装与 `omicslab env doctor`。macOS / Linux 的安装与发布脚本以 bash 编写，但本仓库维护环境没有对应主机，尚未实测；如遇问题请提交 issue。SSH 远端主机与真实模型调用不在自动化验证范围内（见 [README「发布与打包」](../README.md#发布与打包) 与 [ARCHITECTURE §8](ARCHITECTURE.md#8-测试策略)）。
+> **当前验证状态（2.0.0）**：Windows 10/11 + Python 3.11 上实测通过 —— `pytest` 439 项、`scripts/smoke.py` 端到端自检、`scripts/publish.ps1` 产物校验、wheel 安装与 `omicslab env doctor`。记录见 [2.0.0 验证记录](VALIDATION-V2.md)。macOS / Linux 的安装与发布脚本以 bash 编写，但本仓库维护环境没有对应主机，尚未实测；如遇问题请提交 issue。SSH 远端主机与真实模型调用不在自动化验证范围内（见 [ARCHITECTURE §8](ARCHITECTURE.md#8-测试策略)）。
 
 检查版本：
 
@@ -35,7 +37,7 @@ python3 --version       # macOS / Linux
 ### 2.1 Windows（PowerShell）
 
 ```powershell
-cd omicslab
+cd suwen
 
 # 允许本地脚本执行（仅当前用户，安全）
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
@@ -49,14 +51,17 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 # 只建 .venv、不装依赖（离线准备或手动安装时用）：
 .\scripts\bootstrap.ps1 -NoInstall
 
-# 启动
+# 启动（CLI 默认监听 127.0.0.1:5077）
 .venv\Scripts\python.exe -m omicslab serve --port 5077
+
+# 也可以直接运行根目录的启动脚本（默认端口 8766）：
+# .\启动工作台.ps1
 ```
 
 ### 2.2 macOS / Linux（bash）
 
 ```bash
-cd omicslab
+cd suwen
 
 chmod +x scripts/*.sh          # 首次需要
 ./scripts/bootstrap.sh
@@ -111,15 +116,15 @@ python3 -m venv .venv
 
 ### 2.5 从发布包安装（wheel）
 
-想直接用、不建虚拟环境？把 wheel 装进任意 Python 3.10+ 环境即可（wheel 在 `dist/` 下，构建方法见 [README「发布与打包」](../README.md#发布与打包)）：
+想直接用、不建虚拟环境？把 wheel 装进任意 Python 3.10+ 环境即可（wheel 在 `dist/` 下，用 `scripts/publish.ps1` / `scripts/publish.sh` 构建）：
 
 ```powershell
-python -m pip install dist\omicslab-1.2.0-py3-none-any.whl
+python -m pip install dist\omicslab-2.0.0-py3-none-any.whl
 python -m omicslab serve --port 5077
 ```
 
 ```bash
-python -m pip install dist/omicslab-1.2.0-py3-none-any.whl
+python -m pip install dist/omicslab-2.0.0-py3-none-any.whl
 python -m omicslab serve --port 5077
 ```
 
@@ -183,12 +188,12 @@ $env:OMICSLAB_KERNEL_PYTHON = "C:\Users\me\miniconda3\envs\bio\python.exe"
 export OMICSLAB_KERNEL_PYTHON="$HOME/miniconda3/envs/bio/bin/python"
 ```
 
-- 项目用单独的 `venv`（例如 `D:\envs\scanpy`）：
+- 项目用单独的 `venv`（例如 `D:\envs\suwen`）：
 
 ```json
 // ~/.omicslab/settings.json
 {
-  "kernel_python": "D:\\envs\\scanpy\\Scripts\\python.exe"
+  "kernel_python": "D:\\envs\\suwen\\Scripts\\python.exe"
 }
 ```
 
@@ -246,7 +251,7 @@ mkdir wheels
 
 ```powershell
 # 离线机器
-cd omicslab
+cd suwen
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install --no-index --find-links wheels -e . --no-build-isolation
 ```
@@ -345,7 +350,7 @@ rm -rf .venv ~/.omicslab
 | SSL / 代理报错 | 设置 `HTTPS_PROXY` / `HTTP_PROXY`，或 `pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org ...`（仅内网镜像场景） |
 | `externally-managed-environment` | 系统 Python 受保护，用 venv（本项目脚本已默认用 venv） |
 | 端口 5077 被占用 | `--port 5078`，或查占用进程：`Get-NetTCPConnection -LocalPort 5077` |
-| 启动后设置页显示「无可用 provider」 | 未配置 Key；见 [README 配置章节](../README.md#配置-llm) |
+| 启动后设置页显示「无可用 provider」 | 未配置 Key；见 [常见问题 Q5](FAQ.md) |
 | 内核能起但 import scanpy 失败 | 内核解释器与分析环境不是同一个，见 [§4](#4-jupyter-内核解释器) |
 | `bootstrap.ps1` 提示禁止运行 | 执行策略问题，见 [§6.1](#61-执行策略) |
 | SSH 连接失败 / 超时 | 检查主机/端口/用户名与网络；`GET /api/ssh/diagnostics` 可看连接池、凭据后端与最近命令；先 `POST /api/ssh/profiles/{id}/test` 试连 |
@@ -354,3 +359,7 @@ rm -rf .venv ~/.omicslab
 | 升级后旧会话/轨迹还在吗 | 在；旧 `trajectories/**` 只读兼容，会话文件原样保留，新运行写入 SQLite |
 
 更多问题：先跑 `python -m omicslab env`（或 `doctor`），再查 `~/.omicslab/logs/server.log`。
+
+---
+
+本文件对应 Suwen 2.0.0。

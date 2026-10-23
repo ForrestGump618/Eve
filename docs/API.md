@@ -1,12 +1,14 @@
 # API 参考（API）
 
-OmicsLab 的服务是一个本地 FastAPI 应用，默认地址：
+本页对应 Suwen 2.0.0；正文中的“1.2.0 起”表示该能力首次引入的版本，不代表当前版本号。
+
+素问 Suwen 的服务是一个本地 FastAPI 应用，默认地址（`启动工作台.ps1` 默认使用 8766）：
 
 ```text
 http://127.0.0.1:5077
 ```
 
-> 本页依据 [`CONTRACTS-3.md`](CONTRACTS-3.md)（1.2.0 接口契约）与实际服务端代码整理。契约是接口的约定来源，而字段与错误码以 `omicslab/server/routes_*.py`、`chat.py` 的实现为准；若你发现两者不一致，请先看 `GET /api/health` 与 `GET /api/runtime/diagnostics` 确认运行版本，再提 Issue。
+> 本页依据 [`archive/CONTRACTS-3.md`](archive/CONTRACTS-3.md)（1.2.0 时期接口契约）与实际服务端代码整理。契约文档已归档，仅作历史参考；当前字段与错误码以 `omicslab/server/routes_*.py`、`chat.py` 的实现为准。若你发现两者不一致，请先看 `GET /api/health` 与 `GET /api/runtime/diagnostics` 确认运行版本，再提 Issue。
 
 ## 0. 通用约定
 
@@ -85,7 +87,7 @@ curl -s http://127.0.0.1:5077/api/health
     "error": null
   },
   "vision": {"configured": false, "model": ""},
-  "workspace": "D:\\projects\\pbmc",
+  "workspace": "D:\\data\\pbmc",
   "workspaces_count": 1,
   "runs": {"active": 0, "recovered": 1},
   "runtime": {
@@ -292,7 +294,7 @@ Accept: text/event-stream
     "trace_id": "tr_1f0c9b8e7d",
     "message_id": "m_1a2b3c4d5e6f",
     "agent": "lead",
-    "workspace": {"workspace_id": "ws_main", "backend": "local", "root": "D:\\projects\\pbmc"},
+    "workspace": {"workspace_id": "ws_main", "backend": "local", "root": "D:\\data\\pbmc"},
     "idempotent": false,
     "ts": 1761181201.52
   }
@@ -374,7 +376,7 @@ curl -s -X POST http://127.0.0.1:5077/api/runs/run_7ac1d2e3f401/messages \
 # 待审批（可按运行筛；status=pending 时 pending 与持久化记录一起返回 policy）
 curl -s "http://127.0.0.1:5077/api/approvals?status=pending"
 # {"pending":[{"id":"appr_x1y2z3","run_id":"run_...","task_id":null,"tool":"run_shell",
-#   "arguments":{...},"reason":"...","target":{"kind":"local","root":"D:\\projects\\pbmc"},
+#   "arguments":{...},"reason":"...","target":{"kind":"local","root":"D:\\data\\pbmc"},
 #   "expires_at":1761181320.0,"created_at":"2026-10-23T06:20:00+00:00"}],
 #  "persisted":[...],"policy":"ask"}
 
@@ -482,7 +484,7 @@ data: {"type":"text","data":{"delta":"我先检查一下数据规模。"},"ts":1
 
 data: {"type":"tool_call","data":{"id":"call_abc","name":"run_python_code","arguments":{"code":"adata.shape"},"agent":"lead","category":"python"},"ts":1761181202.3,"seq":5}
 
-data: {"type":"tool_result","data":{"id":"call_abc","name":"run_python_code","ok":true,"preview":"(2700, 32738)","data":{"duration_ms":42,"execution_target":{"kind":"local","root":"D:\\projects\\pbmc"}},"duration_ms":42},"ts":1761181202.36,"seq":6}
+data: {"type":"tool_result","data":{"id":"call_abc","name":"run_python_code","ok":true,"preview":"(2700, 32738)","data":{"duration_ms":42,"execution_target":{"kind":"local","root":"D:\\data\\pbmc"}},"duration_ms":42},"ts":1761181202.36,"seq":6}
 
 data: {"type":"figure","data":{"name":"fig_ab12.png","url":"/api/figures/fig_ab12.png","title":"UMAP"},"ts":1761181250.0,"seq":7}
 
@@ -931,7 +933,7 @@ curl -s http://127.0.0.1:5077/api/settings
 ```json
 {
   "settings": {
-    "workspace": "D:\\projects\\pbmc",
+    "workspace": "D:\\data\\pbmc",
     "home": "C:\\Users\\me\\.omicslab",
     "host": "127.0.0.1",
     "port": 5077,
@@ -1120,13 +1122,13 @@ curl -s http://127.0.0.1:5077/api/system/info
   "platform": "Windows",
   "platform_release": "10",
   "python": "3.11.9",
-  "python_executable": "C:\\projects\\omicslab\\.venv\\Scripts\\python.exe",
-  "cwd": "C:\\projects\\omicslab",
-  "workspace": "D:\\projects\\pbmc",
+  "python_executable": "C:\\projects\\suwen\\.venv\\Scripts\\python.exe",
+  "cwd": "C:\\projects\\suwen",
+  "workspace": "D:\\data\\pbmc",
   "home": "C:\\Users\\me\\.omicslab",
   "cpu_count": 16,
   "version": "1.2.0",
-  "kernel_python": "C:\\projects\\omicslab\\.venv\\Scripts\\python.exe",
+  "kernel_python": "C:\\projects\\suwen\\.venv\\Scripts\\python.exe",
   "uptime_s": 128.4
 }
 ```
@@ -1182,7 +1184,7 @@ curl -s "$BASE/api/runtime/runs?limit=10" | python -m json.tool
 curl -s $BASE/api/runtime/config | python -m json.tool
 ```
 
-若 `health.llm.configured` 为 `false`，按 [README 的配置章节](../README.md#配置-llm) 设置 Key 后重试。
+若 `health.llm.configured` 为 `false`，按 [常见问题 Q5](FAQ.md) 设置 Key 后重试。
 
 ---
 
@@ -1637,7 +1639,7 @@ curl -s http://127.0.0.1:5077/api/ssh/diagnostics
 
 ---
 
-## 16. 运行与恢复（Runtime）
+## 16. 运行与恢复
 
 1.2.0 把「对话回合」升级成可持久化、可重放的**运行（run）**。设计要点：**先把状态写进数据库，再对外广播**；
 前端断线、进程重启、页面切换都不会丢结果。实现位于 `omicslab/runtime/`（`events.py` 是 SQLite 存储，`runs.py` 是 `RunService`）。
@@ -1668,7 +1670,7 @@ curl -s http://127.0.0.1:5077/api/ssh/diagnostics
   "root_run_id": "run_7ac1d2e3f401",
   "status": "succeeded",
   "agent_id": "lead",
-  "workspace": {"workspace_id": "ws_main", "root": "D:\\projects\\pbmc", "backend": "local"},
+  "workspace": {"workspace_id": "ws_main", "root": "D:\\data\\pbmc", "backend": "local"},
   "created_at": "2026-10-23T06:12:00+00:00",
   "started_at": "2026-10-23T06:12:00+00:00",
   "ended_at": "2026-10-23T06:13:40+00:00",
@@ -1832,7 +1834,7 @@ curl -s -X PUT http://127.0.0.1:5077/api/runtime/config \
   "workspace_id": "ws_ab12cd34ef",
   "name": "GPU 节点",
   "backend": "local",
-  "resolved_path": "D:\\projects\\pbmc",
+  "resolved_path": "D:\\data\\pbmc",
   "remote": {},
   "conversation_id": null,
   "project_id": null,
@@ -1886,7 +1888,7 @@ curl -s -X PUT http://127.0.0.1:5077/api/runtime/config \
 # 建一个本地工作区
 curl -s -X POST http://127.0.0.1:5077/api/workspaces \
   -H "Content-Type: application/json" \
-  -d '{"name":"肺纤维化项目","backend":"local","local_path":"D:\\projects\\ipf"}'
+  -d '{"name":"肺纤维化项目","backend":"local","local_path":"D:\\data\\ipf"}'
 
 # 建一个 SSH 工作区（远端根目录默认 ~）
 curl -s -X POST http://127.0.0.1:5077/api/workspaces \
@@ -1907,9 +1909,13 @@ curl -s -X POST http://127.0.0.1:5077/api/workspaces \
 工具输出里的 `data.execution_target` 标明本次操作真正发生在哪：
 
 ```json
-{"execution_target": {"kind": "local", "root": "D:\\projects\\pbmc", "cwd": "D:\\projects\\pbmc", "connection_id": null}}
+{"execution_target": {"kind": "local", "root": "D:\\data\\pbmc", "cwd": "D:\\data\\pbmc", "connection_id": null}}
 ```
 
 远端不可用时抛 `BackendUnavailable`（HTTP 层映射为可读错误），**禁止自动回退本地执行**——避免把数据算在本机却当成远端结果。
 SSH 后端的连接、凭据与 SFTP 走 §15 的连接服务；SSH 文件端点（`/api/workspaces/{id}/files/*`）目前只支持 `local` 工作区，
 SSH 工作区的文件操作请走 §15 的 SSH 端点或智能体工具。
+
+---
+
+本文件对应 Suwen 2.0.0。正文中的“1.2.0 起”表示该能力首次引入的版本。

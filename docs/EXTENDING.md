@@ -242,7 +242,7 @@ title: PBMC 数据字典
 | `memory_create(slug, title, body)` | 新建；slug 已存在时失败 |
 | `memory_edit(slug, title?, body?)` | 局部更新 |
 
-REST 对应接口见 [API.md](API.md#26-智能体--技能--记忆)。
+REST 对应接口见 [API.md §6](API.md#6-智能体--技能--记忆)。
 
 ---
 
@@ -541,10 +541,10 @@ export OMICSLAB_KERNEL_PYTHON="$HOME/miniconda3/envs/bio/bin/python"
 | `vision` | `analyze_image` | 用视觉模型解读图表、显微图像、截图 |
 | `ssh` | `ssh_list_profiles`、`ssh_exec`、`ssh_upload`、`ssh_download`、`ssh_remote_info` | 远程算力：跑命令、传文件、看主机信息 |
 
-一期已有：`python`、`shell`、`files`、`skills`、`memory`、`agents`、`jobs`、`system`、`notebook`。
-完整工具清单（31 个 / 13 个 toolset）见 [API.md](API.md) 与 `omicslab/agent/tools.py` 的 `build_registry()`。
+一期已有：`python`、`shell`、`files`、`skills`、`memory`、`agents`、`jobs`、`system`、`notebook`，共 17 个核心内置工具、9 个 toolset。
+加上二期的 `discovery`（7）、`ssh`（5）、`registry`（1）、`vision`（1）四个工具包后，Agent 注册表共 **31 个工具 / 13 个 toolset**。完整清单见 [API.md](API.md) 与 `omicslab/agent/tools.py` 的 `build_registry()`；另有平台层的 6 个生物医学工具（`bio_*`）与 Docker `sandbox_python` 不在该注册表内。
 
-### 7.2 全部内置工具（31 个）
+### 7.2 Agent 注册表内置工具（31 个）
 
 | 分组 | 工具 |
 |---|---|
@@ -575,6 +575,8 @@ remote-compute-ssh    # SSH 远程跑批、产物回收、断点续跑
 function-registry     # 用函数索引定位正确 API
 vision-interpretation # 图表/显微图像解读的提问模板与校验
 ```
+
+2.0.0 起另有 5 个公开方法技能：`biomedical-discovery`、`co-scientist`、`empirical-research`、`paper2agent`、`robin`（完整目录与触发时机见 [SKILLS.md](SKILLS.md)）。
 
 **智能体**（6 个，均位于 `omicslab/agents/*.md`，`tier: specialist`）：
 `discovery-lead`、`hypothesis-smith`、`experiment-designer`、`evidence-critic`、
@@ -694,3 +696,7 @@ class ExecutionBackend:  # omicslab/execution/base.py
 
 > 约定：后端只负责「在哪里执行」，不负责审批与运行生命周期；审批仍由 `Approver` 与工具层处理，
 > 运行状态仍由 `RunService` 持有。这样同一套工具与 Agent 不用改代码即可切换执行环境。
+
+---
+
+本文件对应 Suwen 2.0.0。

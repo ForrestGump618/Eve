@@ -1,6 +1,8 @@
 # OmicsLab
 
-> **1.3.0 工作区升级版**：SSH 页可直接把已有连接与远程目录设为工作区；工作台控制台、文件、变量和智能体工具在选定工作区执行。新增统一明暗 Studio 主题。[升级说明与验证范围](docs/UPGRADE-1.3.md)。Windows 可运行根目录 `启动工作台.ps1`。
+> **归档文档（历史）**：本文件是 Suwen 1.2→2.0 开发过程的原始记录，仅用于追溯，不是当前用户文档。当前文档入口见 [docs/README.md](../README.md)。
+
+> **1.3.0 工作区升级版**：SSH 页可直接把已有连接与远程目录设为工作区；工作台控制台、文件、变量和智能体工具在选定工作区执行。新增统一明暗 Studio 主题。[升级说明与验证范围](../UPGRADE-1.3.md)。Windows 可运行根目录 `启动工作台.ps1`。
 
 **本地优先、开源、无订阅的生物医学分析工作台。**
 
@@ -10,7 +12,7 @@ OmicsLab 把「对话式 AI」「共享 Jupyter 内核」「变量 / 文件 / �
 >
 > OmicsLab 是一个**独立开源实现**。它的功能范围参考了同类商业数据分析工作台（例如 OmicOS）**公开文档中描述的功能面**，用于确定「一个现代组学分析工作台应该有哪些能力」。本项目**不包含、不复制、不反编译**任何第三方产品的代码、prompt、技能文本、图标或其他资源；**不提供、也不实现任何订阅或授权校验的绕过**。本项目所有代码、提示词、技能与文档均从零编写。请通过官方渠道支持你使用的商业产品。
 
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
 ---
@@ -80,7 +82,7 @@ OmicsLab 把「对话式 AI」「共享 Jupyter 内核」「变量 / 文件 / �
 
 - **Python 3.10+**（开发环境使用 3.11）
 - Windows 10/11、macOS 或 Linux
-- 首次安装依赖需要网络（离线安装见 [docs/INSTALL.md](docs/INSTALL.md)）
+- 首次安装依赖需要网络（离线安装见 [docs/INSTALL.md](../INSTALL.md)）
 
 ### Windows（PowerShell）
 
@@ -215,7 +217,7 @@ ollama pull qwen2.5:7b
 
 **技能包**（`omicslab/skills/*/SKILL.md`，18 个）：一期的 `single-cell-upstream`、`single-cell-downstream`、`spatial-transcriptomics`、`flow-cytometry`、`bulk-transcriptomics`、`cadd-cheminformatics`、`geo-public-data`、`figure-style`、`report-writing`、`notebook-ops`，以及二期的 `rsi-discovery-loop`、`hypothesis-generation`、`experimental-design`、`statistical-rigor`、`causal-inference`、`remote-compute-ssh`、`function-registry`、`vision-interpretation`。
 
-技能不会一次性塞进上下文：Agent 先用 `skill_list` 看目录，需要时再用 `skill_view` 读取正文与附带脚本。详见 [docs/SKILLS.md](docs/SKILLS.md)。
+技能不会一次性塞进上下文：Agent 先用 `skill_list` 看目录，需要时再用 `skill_view` 读取正文与附带脚本。详见 [docs/SKILLS.md](../SKILLS.md)。
 
 ---
 
@@ -386,8 +388,8 @@ POST /api/chat
 进程崩溃后重启：所有未完成运行被对账为 `interrupted`（不假装成功），可在 `/api/health` 的
 `runs.recovered` 与 `/api/runtime/diagnostics` 里看到清单。
 
-更细的设计（并发、取消、路径沙箱、密钥存储、运行状态机）见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) 与
-[docs/API.md](docs/API.md) 的 §16-§17。
+更细的设计（并发、取消、路径沙箱、密钥存储、运行状态机）见 [docs/ARCHITECTURE.md](../ARCHITECTURE.md) 与
+[docs/API.md](../API.md) 的 §16-§17。
 
 ---
 
@@ -465,7 +467,7 @@ spec = ToolSpec(
 继承 `omicslab/execution/base.py` 的 `ExecutionBackend`，实现 `start/close/execute_python/shell` 与文件方法，
 即可让工作区跑在别的算力上（容器、集群、云主机）。`local` 与 `ssh` 是两个已实现的后端，可作为模板。
 
-详见 [docs/EXTENDING.md](docs/EXTENDING.md)。
+详见 [docs/EXTENDING.md](../EXTENDING.md)。
 
 ---
 
@@ -615,7 +617,7 @@ omicslab serve --port 5077
 `trajectories/` 不受影响）。
 
 **Q：和 OmicOS 是什么关系？**
-没有任何代码或授权关系。OmicsLab 是独立开源实现，只参考了公开文档描述的功能面，不包含、不复用任何第三方代码或内容，也不提供授权绕过。详见 [docs/COMPARISON.md](docs/COMPARISON.md)。
+没有任何代码或授权关系。OmicsLab 是独立开源实现，只参考了公开文档描述的功能面，不包含、不复用任何第三方代码或内容，也不提供授权绕过。详见 [docs/COMPARISON.md](../COMPARISON.md)。
 
 ---
 
@@ -623,13 +625,13 @@ omicslab serve --port 5077
 
 | 文档 | 内容 |
 |---|---|
-| [docs/INSTALL.md](docs/INSTALL.md) | 安装、extras、离线安装、内核选择、终端说明 |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 组件图、请求生命周期、落盘位置、并发/取消、运行状态机、安全边界 |
-| [docs/EXTENDING.md](docs/EXTENDING.md) | 自定义 Agent / Skill / Memory / Tool / 执行后端 / LLM 端点 |
-| [docs/SKILLS.md](docs/SKILLS.md) | 内置技能目录与触发时机 |
-| [docs/API.md](docs/API.md) | REST + SSE 接口参考与示例（含运行/工作区/SSH） |
-| [docs/COMPARISON.md](docs/COMPARISON.md) | 与商业方案的功能对照（及边界声明） |
-| [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
+| [docs/INSTALL.md](../INSTALL.md) | 安装、extras、离线安装、内核选择、终端说明 |
+| [docs/ARCHITECTURE.md](../ARCHITECTURE.md) | 组件图、请求生命周期、落盘位置、并发/取消、运行状态机、安全边界 |
+| [docs/EXTENDING.md](../EXTENDING.md) | 自定义 Agent / Skill / Memory / Tool / 执行后端 / LLM 端点 |
+| [docs/SKILLS.md](../SKILLS.md) | 内置技能目录与触发时机 |
+| [docs/API.md](../API.md) | REST + SSE 接口参考与示例（含运行/工作区/SSH） |
+| [docs/COMPARISON.md](../COMPARISON.md) | 与商业方案的功能对照（及边界声明） |
+| [CHANGELOG.md](../../CHANGELOG.md) | 版本变更记录 |
 
 ---
 
@@ -646,6 +648,6 @@ omicslab serve --port 5077
 
 ## 许可证
 
-本项目基于 [Apache License 2.0](LICENSE) 发布。© OmicsLab contributors.
+本项目基于 [Apache License 2.0](../../LICENSE) 发布。© OmicsLab contributors.
 
 第三方商业产品（包括但不限于 OmicOS）的名称与商标归各自所有者所有，本项目与它们没有隶属或背书关系。

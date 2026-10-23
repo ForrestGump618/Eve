@@ -1,8 +1,8 @@
 # 架构说明（ARCHITECTURE）
 
-> 本文描述 OmicsLab v1.2（1.2.0）的设计与实现约定。接口的**唯一事实来源**是
-> [`CONTRACTS.md`](CONTRACTS.md) / [`CONTRACTS-2.md`](CONTRACTS-2.md) / [`CONTRACTS-3.md`](CONTRACTS-3.md)；
-> 若本文与代码不一致，以代码与契约为准，并欢迎提 PR 修正本文。
+> 本文描述素问 Suwen 2.0.0 的架构与实现约定（主体设计自 1.2.0 延续）。接口历史契约归档在
+> [`archive/CONTRACTS.md`](archive/CONTRACTS.md) / [`archive/CONTRACTS-2.md`](archive/CONTRACTS-2.md) / [`archive/CONTRACTS-3.md`](archive/CONTRACTS-3.md)；
+> 当前字段与错误码以 `omicslab/server/` 代码为准。若本文与代码不一致，以代码为准，并欢迎提 PR 修正本文。
 
 ## 1. 设计目标
 
@@ -372,3 +372,7 @@ POST /api/runs/{run_id}/cancel（或 /api/chat/stop）
 - `scripts/smoke.py`：真实启动服务（mock provider）的端到端自检：对话/内核/图表/文件 API。
 - 全部测试**不依赖网络**：LLM 使用 `mock` provider；SSH/视觉/发现均用伪连接或启发式路径。
 - **未覆盖**：真实 SSH 远端主机的端到端行为（网络、认证、PTY、远端 worker）与真实模型调用不在自动化测试范围内。
+
+---
+
+本文件对应 Suwen 2.0.0；正文中的“1.2.0 起”表示该能力首次引入的版本。

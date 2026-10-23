@@ -1,5 +1,7 @@
 # 素问 V2 运行与维护
 
+本文件说明 2.0.0 的启动参数、数据目录、模型配置、SSH 工作区、任务与恢复、MCP/渠道、代码隔离和备份流程；接口细节见 [API.md](API.md)，实现状态见 [实现清单](SUWEN-V2-CHECKLIST.md)。
+
 ## 文件与服务
 
 本交付是原工程的独立副本。运行根目录 `启动工作台.ps1`，或在项目根目录执行：
@@ -10,7 +12,7 @@ python -m omicslab serve --workspace . --home .omicslab --port 8766
 
 本地地址：<http://127.0.0.1:8766/>。API 文档：<http://127.0.0.1:8766/api/docs>。使用其他端口时同步替换地址。后台进程退出后，任务不继续运行；关闭浏览器不会停止仍在运行的后端。
 
-`settings.json`、SSH 档案与主机指纹保留兼容格式。原工程的会话、图表和轨迹已复制，原执行数据库使用 SQLite backup API 一致性复制。`workspaces.json` 的默认本地根目录重定位到交付副本，并保留已建立的 SSH 工作区。详见 `DATA-MIGRATION-V2.json`。不复制旧进程的连接文件、活动内核或内存中的临时密码。
+`settings.json`、SSH 档案与主机指纹保留兼容格式。原工程的会话、图表和轨迹已复制，原执行数据库使用 SQLite backup API 一致性复制。`workspaces.json` 的默认本地根目录重定位到交付副本，并保留已建立的 SSH 工作区。迁移清单为内部交付产物，未随仓库发布（`DATA-MIGRATION-V2.json` 已被 `.gitignore` 排除）。不复制旧进程的连接文件、活动内核或内存中的临时密码。
 
 新增平台数据：
 
@@ -94,3 +96,7 @@ WebChat 是本地适配层；Telegram 使用 Bot API。Webhook 必须有共享�
 | HTTP | `server/routes_platform.py` | 统一前缀 `/api/platform`，有 scope 的接口先校验工作区 |
 
 接口错误不回退其他工作区；配置导入先逐项验证，再备份与写入。UI 调用真实服务，额外公共能力以 API 文档和实现清单为准。
+
+---
+
+本文件对应 Suwen 2.0.0。
