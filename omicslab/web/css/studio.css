@@ -1,0 +1,99 @@
+/* Studio theme: quiet surfaces, one accent, consistent native-control styling.
+   Loaded last so legacy views share the same interaction language. */
+:root {
+  --bg: #111315; --bg-deep: #0c0e10; --bg-soft: #15181b;
+  --panel: #191d21; --panel-2: #20252a; --panel-3: #292f35;
+  --sidebar-bg: #131619; --input-bg: #13171a;
+  --border: #30363d; --border-soft: #252b31; --border-strong: #49535d;
+  --text: #edf1f3; --text-2: #b9c2c9; --text-3: #929ea8; --text-4: #82909c;
+  --accent: #65d6c0; --accent-strong: #2fb49b; --accent-2: #82b8e5;
+  --accent-soft: #65d6c015; --accent-soft-2: #65d6c028;
+  --radius-xl: 18px; --radius-lg: 14px; --radius: 10px; --radius-sm: 8px;
+  --sidebar-w: 204px;
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+[data-theme="light"] {
+  --bg: #f5f7f8; --bg-deep: #edf1f3; --bg-soft: #f9fafb;
+  --panel: #fff; --panel-2: #f2f5f6; --panel-3: #e7edef;
+  --sidebar-bg: #eef2f3; --input-bg: #fff;
+  --border: #dce3e6; --border-soft: #e7ecef; --border-strong: #b5c3c9;
+  --text: #202a31; --text-2: #465963; --text-3: #5c707b; --text-4: #647985;
+  --accent: #087e70; --accent-strong: #066b60; --accent-2: #276a9e;
+  --accent-soft: #087e700d; --accent-soft-2: #087e701c;
+}
+body, [data-theme="light"] body { background: var(--bg); }
+button, input, textarea, select { font: inherit; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]), textarea, select {
+  color: var(--text); background-color: var(--input-bg);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 9px 12px; min-width: 0; outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+select {
+  appearance: none; padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b9ba6' stroke-width='1.7'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+select option { background: var(--panel); color: var(--text); }
+input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color: var(--accent); }
+:is(input, textarea, select):focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px;
+}
+.field:focus-within .field-label { color: var(--accent); }
+.field-hint { color: var(--text-3); font-size: 12px; line-height: 1.7; }
+[hidden] { display: none !important; }
+.btn { border-radius: 8px; box-shadow: none; font-weight: 550; }
+.btn-primary { background: var(--accent); color: var(--bg-deep); border-color: transparent; }
+[data-theme="light"] .btn-primary { color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-strong); box-shadow: none; }
+.btn-ghost { background: transparent; }
+.btn-ghost:hover { background: var(--panel-2); }
+.app-sidebar { background: var(--sidebar-bg); border-right-color: var(--border-soft); }
+.nav-item { margin-bottom: 3px; border-radius: 8px; padding-top: 10px; padding-bottom: 10px; }
+.nav-item.is-active { background: var(--accent-soft-2); color: var(--accent); box-shadow: none; }
+.nav-item.is-active::before { display: none; }
+.app-topbar { background: var(--bg); border-bottom-color: var(--border-soft); box-shadow: none; }
+.page-head h1 { font-size: 22px; letter-spacing: -.035em; }
+.modal { border-radius: 18px; background: var(--panel); border: 1px solid var(--border); }
+.modal-head, .modal-footer { background: transparent; }
+.modal-backdrop { backdrop-filter: blur(7px); }
+.wb-topbar { padding: 14px 18px; gap: 16px; background: var(--bg); border-color: var(--border-soft); flex-wrap: wrap; }
+.wb-ws-btn { background: var(--panel); border-color: var(--border); border-radius: 10px; padding: 9px 12px; }
+.wb-topmeta { gap: 8px; }
+.wb-chip { border: 0; background: var(--panel-2); border-radius: 6px; }
+.wb-main { background: var(--bg); }
+.wb-center .chat-header { flex-wrap: wrap; padding: 12px 16px; gap: 8px; }
+.wb-center .chat-heading { min-width: 140px; }
+.wb-center .chat-header-actions { flex-wrap: wrap; }
+.wb-left, .wb-right, .wb-bottom { background: var(--bg-soft); }
+.wb-left { border-right: 1px solid var(--border-soft); padding: 8px; }
+.wb-right-head, .wb-bottom-head { background: transparent; }
+.wb-conv { border-radius: 8px; margin-bottom: 4px; }
+.wb-conv.is-active { background: var(--accent-soft-2); border-color: transparent; }
+.wb-right-tab, .wb-compute-tab { border-radius: 6px; }
+.wb-right-tab.is-active, .wb-compute-tab.is-active { color: var(--accent); background: var(--accent-soft); }
+.wb-term-output { background: var(--bg-deep); color: var(--text-2); padding: 16px; line-height: 1.7; }
+.wb-term-input-row { padding: 8px 12px; }
+.wb-ws-option { padding: 16px; border-radius: 10px; }
+.wb-ws-option.is-active { border-color: var(--accent); background: var(--accent-soft); }
+.wb-ws-option-path { color: var(--text-3); }
+.composer-box { border: 1px solid var(--border-strong); border-radius: 16px; box-shadow: 0 6px 24px #0000000a; background: var(--panel); }
+.composer-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea.composer-input { border: 0; background: transparent; box-shadow: none; border-radius: 16px; }
+.ssh-layout { border-color: var(--border-soft); border-radius: 14px; overflow: hidden; }
+.ssh-detail-head { background: var(--bg-soft); padding: 22px; }
+.ssh-host-name { letter-spacing: -.02em; }
+.ssh-detail-actions { flex-wrap: wrap; }
+.ssh-profile-card { border-radius: 10px; box-shadow: none; }
+.ssh-profile-card.is-active { background: var(--accent-soft); border-color: var(--accent); }
+.empty-state { color: var(--text-3); }
+.sidebar-actions .approval-dock { position: static; padding: 6px 9px; border-radius: 7px; box-shadow: none; font-size: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+@media (max-width: 1180px) { .wb-topbar { padding: 10px; gap: 8px; } }
+@media (min-width: 901px) and (max-width: 1400px) {
+  .wb-main { grid-template-columns: 160px minmax(0, 1fr) 5px minmax(240px, min(var(--wb-right-w), 280px)); }
+  .wb-center .chat-header-actions #resend-btn { display: none; }
+}
+@media (max-width: 600px) { .ssh-detail-head { padding: 14px; } .ssh-detail-actions .btn { flex: 1; } }

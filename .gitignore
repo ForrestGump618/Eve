@@ -1,0 +1,83 @@
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+pip-build-tracker-*/
+pip-install-*/
+pip-ephem-wheel-cache-*/
+
+# --- Packaging / build ------------------------------------------------------
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+sdist/
+wheels/
+MANIFEST
+.installed.cfg
+
+# --- Tests / tooling --------------------------------------------------------
+.pytest_cache/
+pytest-of-*/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- OmicsLab runtime state -------------------------------------------------
+# Global app home (settings, conversations, figures, jobs, memory, logs, keys).
+# Never commit: auth.json holds API keys.
+.omicslab/
+auth.json
+settings.json
+conversations/
+trajectories/
+figures/
+jobs/
+memory/
+logs/
+kernels/
+uploads/
+
+# --- Local analysis artifacts (workspace root only) -------------------------
+# Package data under omicslab/data/ is tracked; only user datasets are ignored.
+/data/
+*.h5ad
+*.h5mu
+*.loom
+*.rds
+*.rda
+*.mtx.gz
+*.log
+
+# --- Editor / OS ------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+node_modules/
+
+# Local credentials and machine-specific delivery records
+.env
+.env.*
+!.env.example
+ssh.json
+ssh_known_hosts.json
+*.pem
+*.key
+/docs/DATA-MIGRATION-V2.json
+/docs/screenshots/*
+!/docs/screenshots/suwen-2-settings-light.png
+!/docs/screenshots/suwen-2-settings-dark.png

@@ -1,0 +1,971 @@
+/* SSH 视图样式：档案列表 + 命令终端 + 远程目录 + 远端信息。
+   仅使用 base.css 主题变量，深色/浅色主题自动适配。 */
+
+.ssh-page {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ssh-page .page-head {
+  flex: none;
+}
+
+.ssh-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------ 侧边档案栏 -- */
+
+.ssh-sidebar {
+  width: 300px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  overflow: hidden;
+}
+
+.ssh-sidebar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--border-soft);
+  flex: none;
+}
+
+.ssh-sidebar-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+
+.ssh-sidebar-sub {
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+.ssh-profile-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ssh-profile-list .empty-state {
+  margin: auto;
+}
+
+.ssh-profile-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  cursor: pointer;
+  transition: border-color var(--speed), background var(--speed), transform var(--speed) var(--ease);
+}
+
+.ssh-profile-card:hover {
+  border-color: var(--border);
+  background: var(--panel-3);
+}
+
+.ssh-profile-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.ssh-profile-card.is-active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-soft);
+}
+
+.ssh-profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ssh-profile-name {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ssh-profile-top .status-chip {
+  flex: none;
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+.ssh-profile-meta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ssh-profile-sub {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-4);
+  min-width: 0;
+}
+
+.ssh-dot {
+  color: var(--text-4);
+  opacity: 0.7;
+}
+
+.ssh-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+  opacity: 0;
+  transition: opacity var(--speed);
+}
+
+.ssh-profile-card:hover .ssh-profile-actions,
+.ssh-profile-card.is-active .ssh-profile-actions,
+.ssh-profile-card:focus-within .ssh-profile-actions {
+  opacity: 1;
+}
+
+.ssh-profile-actions .icon-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-xs);
+}
+
+.ssh-sidebar-foot {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-4);
+}
+
+.ssh-sidebar-foot svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--text-3);
+}
+
+/* ---------------------------------------------------------------- 主区域 -- */
+
+.ssh-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--panel) 76%, transparent);
+  overflow: hidden;
+}
+
+.ssh-main-empty {
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.ssh-detail-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 15px 18px 13px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.ssh-detail-title {
+  min-width: 0;
+}
+
+.ssh-host-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ssh-host-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.ssh-host-meta .status-chip {
+  font-size: 10.5px;
+}
+
+.ssh-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ssh-btn-danger:hover {
+  color: var(--red);
+  background: var(--red-soft);
+  border-color: color-mix(in srgb, var(--red) 30%, transparent);
+}
+
+/* ------------------------------------------------------------------ tabs -- */
+
+.ssh-tabs {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border-soft);
+  overflow-x: auto;
+}
+
+.ssh-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 11px 9px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--speed), border-color var(--speed), background var(--speed);
+}
+
+.ssh-tab:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel-2) 60%, transparent);
+}
+
+.ssh-tab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.ssh-tab svg {
+  flex: none;
+}
+
+.ssh-tab-count {
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: var(--panel-3);
+  color: var(--text-3);
+  font-size: 10px;
+  text-align: center;
+}
+
+.ssh-tab-busy {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--text-4);
+  padding-right: 2px;
+  animation: fade-in var(--speed) var(--ease) both;
+}
+
+.ssh-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------- 命令终端 -- */
+
+.ssh-terminal-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.ssh-cmdbar {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ssh-command-input {
+  width: 100%;
+  min-height: 66px;
+  max-height: 200px;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.ssh-cmdbar-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ssh-cmdbar-fields {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ssh-mini-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-4);
+  white-space: nowrap;
+}
+
+.ssh-mini-field .input {
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.ssh-mini-field .ssh-timeout-input {
+  width: 74px;
+}
+
+.ssh-mini-field .ssh-cwd-input {
+  width: 160px;
+}
+
+.ssh-cmdbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.ssh-terminal {
+  flex: 1;
+  min-height: 160px;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+  outline: none;
+}
+
+.ssh-terminal:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.ssh-term-line {
+  display: flex;
+  gap: 7px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 1px 0;
+}
+
+.ssh-term-prompt {
+  flex: none;
+  color: var(--accent);
+  font-weight: 700;
+  user-select: none;
+}
+
+.ssh-term-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.ssh-term-line.is-cmd {
+  color: var(--text);
+}
+
+.ssh-term-line.is-out {
+  color: var(--text-2);
+}
+
+.ssh-term-line.is-err {
+  color: var(--red);
+}
+
+.ssh-term-line.is-meta {
+  color: var(--text-4);
+  font-size: 11.5px;
+  padding-top: 3px;
+}
+
+.ssh-term-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-4);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  text-align: center;
+  padding: 30px 16px;
+}
+
+.ssh-term-empty svg {
+  color: var(--text-3);
+}
+
+/* ------------------------------------------------------------- 远程目录 -- */
+
+.ssh-files-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.ssh-files-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ssh-files-path {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-4);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 45%;
+}
+
+.ssh-breadcrumb {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--panel-2) 55%, transparent);
+}
+
+.ssh-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: color var(--speed), background var(--speed);
+}
+
+.ssh-crumb:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.ssh-crumb-sep {
+  display: inline-flex;
+  color: var(--text-4);
+  opacity: 0.6;
+}
+
+.ssh-file-table {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--panel) 55%, transparent);
+}
+
+.ssh-file-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 92px 150px 46px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 12.5px;
+  color: var(--text-2);
+  transition: background var(--speed);
+}
+
+.ssh-file-row:last-child {
+  border-bottom: 0;
+}
+
+.ssh-file-row.is-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--panel-2);
+  color: var(--text-4);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.ssh-file-row.is-dir {
+  cursor: pointer;
+}
+
+.ssh-file-row.is-dir:hover {
+  background: var(--accent-soft);
+}
+
+.ssh-file-row:not(.is-head):not(.is-dir):hover {
+  background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+}
+
+.ssh-file-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-4);
+}
+
+.ssh-file-row.is-dir .ssh-file-icon {
+  color: var(--accent);
+}
+
+.ssh-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.ssh-file-row.is-dir .ssh-file-name {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.ssh-file-size,
+.ssh-file-time {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ssh-file-op {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ssh-file-op .icon-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.ssh-files-loading {
+  padding: 40px 10px;
+}
+
+.ssh-files-loading .spinner-wrap,
+.ssh-files-loading {
+  color: var(--text-4);
+}
+
+.ssh-files-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-4);
+}
+
+.ssh-files-foot svg {
+  flex: none;
+}
+
+/* ------------------------------------------------------------- 远端信息 -- */
+
+.ssh-info-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ssh-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.ssh-info-card {
+  padding: 12px 13px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  min-width: 0;
+}
+
+.ssh-info-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-4);
+  margin-bottom: 7px;
+}
+
+.ssh-info-value {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.ssh-info-value.is-empty {
+  color: var(--text-4);
+}
+
+.ssh-info-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ssh-info-hint {
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+/* ---------------------------------------------------------------- 对话框 -- */
+
+.ssh-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ssh-form .field {
+  margin: 0;
+}
+
+.ssh-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 12px;
+}
+
+.ssh-form-grid .field {
+  min-width: 0;
+}
+
+.ssh-req {
+  color: var(--red);
+}
+
+.ssh-form-error {
+  display: none;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ssh-form-error.is-visible {
+  display: block;
+}
+
+.ssh-remember-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ssh-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ssh-check input[type='checkbox'] {
+  accent-color: var(--accent);
+}
+
+.ssh-warn-hint {
+  color: var(--amber);
+  opacity: 0.85;
+}
+
+.ssh-dialog-hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+
+.ssh-test-dialog .field {
+  margin-bottom: 6px;
+}
+
+.ssh-test-result {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ssh-test-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.ssh-test-badge.is-ok {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.ssh-test-badge.is-fail {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.ssh-test-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+.ssh-test-facts > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.ssh-test-facts dt {
+  flex: none;
+  width: 78px;
+  color: var(--text-4);
+}
+
+.ssh-test-facts dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-all;
+  font-family: var(--font-mono);
+  color: var(--text-2);
+}
+
+.ssh-test-error {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.ssh-test-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--amber-soft);
+  color: var(--amber);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.ssh-test-warning svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------- 加载/错误占位 -- */
+
+.ssh-boot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.ssh-boot-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 26px 22px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--panel-2);
+  color: var(--text-2);
+  text-align: center;
+  max-width: 460px;
+}
+
+.ssh-boot-error svg {
+  color: var(--red);
+}
+
+.ssh-boot-error p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* ------------------------------------------------------------------ 响应 -- */
+
+@media (max-width: 1080px) {
+  .ssh-sidebar {
+    width: 258px;
+  }
+
+  .ssh-mini-field .ssh-cwd-input {
+    width: 128px;
+  }
+}
+
+@media (max-width: 900px) {
+  .ssh-page {
+    height: auto;
+    overflow: visible;
+  }
+
+  .ssh-layout {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ssh-sidebar {
+    width: auto;
+    max-height: 264px;
+  }
+
+  .ssh-main {
+    min-height: 540px;
+    flex: none;
+  }
+
+  .ssh-file-row {
+    grid-template-columns: 22px minmax(0, 1fr) 74px 108px 42px;
+    gap: 6px;
+    padding: 7px 8px;
+  }
+
+  .ssh-files-path {
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (hover: none) {
+  .ssh-profile-actions {
+    opacity: 1;
+  }
+}

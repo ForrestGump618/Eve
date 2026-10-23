@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0f1117" />
+    <meta name="description" content="素问 Suwen · 本地生物医学分析工作台：对话式智能体、Jupyter 内核、文件与图表管理、后台任务与技能记忆。" />
+    <title>素问 Suwen · 本地生物医学分析工作台</title>
+    <link rel="icon" href="assets/favicon.svg?v=2.0.0" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/base.css?v=2.0.0" />
+    <link rel="stylesheet" href="css/components.css?v=2.0.0" />
+    <link rel="stylesheet" href="css/views.css?v=2.0.0" />
+    <link rel="stylesheet" href="css/ssh.css?v=2.0.0" />
+    <link rel="stylesheet" href="css/studio.css?v=2.0.0" />
+    <link rel="stylesheet" href="css/platform.css?v=2.0.0" />
+    <script>
+      // Apply the persisted theme before first paint to avoid a flash.
+      (function () {
+        try {
+          var raw = localStorage.getItem('omicslab.theme');
+          var value = raw ? JSON.parse(raw) : null;
+          if (value === "system") value = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          if (value === 'light' || value === 'dark') {
+            document.documentElement.dataset.theme = value;
+          }
+        } catch (err) {
+          /* ignore unavailable storage */
+        }
+      })();
+    </script>
+    <style>
+      /* Critical boot styles: visible even if the module graph fails to load. */
+      .boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 900;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 24px;
+        text-align: center;
+        background:
+          radial-gradient(900px 520px at 50% 18%, rgba(139, 92, 246, 0.16), transparent 60%),
+          var(--bg, #0f1117);
+        color: var(--text, #e9ecf5);
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      }
+      .boot-splash svg {
+        filter: drop-shadow(0 8px 26px rgba(139, 92, 246, 0.45));
+        animation: boot-float 2.8s ease-in-out infinite;
+      }
+      .boot-splash-title {
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        background: linear-gradient(100deg, #e9ecf5 30%, #a78bfa 72%, #22d3ee);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .boot-splash-sub {
+        font-size: 12.5px;
+        color: var(--text-3, #7d89a3);
+      }
+      .boot-splash-bar {
+        width: 168px;
+        height: 3px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(127, 137, 163, 0.22);
+      }
+      .boot-splash-bar::after {
+        content: "";
+        display: block;
+        width: 46%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #a78bfa, #22d3ee);
+        animation: boot-slide 1.15s ease-in-out infinite;
+      }
+      .boot-splash.is-error .boot-splash-bar {
+        display: none;
+      }
+      .boot-splash-error {
+        display: none;
+        max-width: 460px;
+        font-size: 12.5px;
+        line-height: 1.7;
+        color: #fbbf24;
+        white-space: pre-wrap;
+      }
+      .boot-splash.is-error .boot-splash-error {
+        display: block;
+      }
+      @keyframes boot-slide {
+        0% {
+          transform: translateX(-110%);
+        }
+        100% {
+          transform: translateX(330%);
+        }
+      }
+      @keyframes boot-float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="boot-splash" id="boot-splash">
+        <svg width="56" height="56" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="boot-grad" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a78bfa" />
+              <stop offset="1" stop-color="#22d3ee" />
+            </linearGradient>
+          </defs>
+          <path d="M15 5c0 10 18 14 18 24S15 39 15 43" stroke="url(#boot-grad)" stroke-width="3.4" stroke-linecap="round" />
+          <path d="M33 5c0 10-18 14-18 24s18 10 18 14" stroke="url(#boot-grad)" stroke-width="3.4" stroke-linecap="round" />
+          <path d="M18 14h12M16.5 22h15M18 30h12" stroke="url(#boot-grad)" stroke-width="2.6" stroke-linecap="round" />
+        </svg>
+        <div class="boot-splash-title">素问 Suwen</div>
+        <div class="boot-splash-sub">本地生物医学分析工作台 · 正在加载界面</div>
+        <div class="boot-splash-bar" aria-hidden="true"></div>
+        <div class="boot-splash-error" id="boot-error">
+          界面脚本加载失败。请刷新页面重试；如果问题持续，请确认后端服务是否正常运行。
+        </div>
+      </div>
+    </div>
+
+    <noscript>
+      <div style="padding: 40px; color: #e9ecf5; background: #0f1117; min-height: 100vh; font-family: sans-serif">
+        <h1 style="font-size: 20px">素问 Suwen 需要启用 JavaScript</h1>
+        <p style="color: #aab4ca; font-size: 13px">
+          界面使用原生 ES modules 构建，请在浏览器中启用 JavaScript 后刷新页面。
+        </p>
+      </div>
+    </noscript>
+
+    <script type="module" src="js/app.js?v=2.0.0"></script>
+    <script>
+      // Safety net for an unrecoverable module-load failure (e.g. 404 on js files).
+      window.setTimeout(function () {
+        if (document.getElementById('app-shell')) return;
+        var splash = document.getElementById('boot-splash');
+        if (splash) {
+          splash.classList.add('is-error');
+          var sub = splash.querySelector('.boot-splash-sub');
+          if (sub) sub.textContent = '界面未能启动';
+        }
+      }, 8000);
+    </script>
+  </body>
+</html>

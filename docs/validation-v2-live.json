@@ -1,0 +1,8 @@
+{
+  "task": "task_e397080d2bdb",
+  "status": "needs_review",
+  "executed_python": true,
+  "evidence_gate_blocked_unverified_discovery": true,
+  "model": "explicit mock integration test",
+  "source_queries": "Europe PMC and UniProt live calls separately passed"
+}

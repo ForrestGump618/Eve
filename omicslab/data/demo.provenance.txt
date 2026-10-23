@@ -1,0 +1,5 @@
+generator=make_demo_fcs.py
+seed=42
+events=6000
+channels=5
+spillover=3,FL1-A,FL2-A,FL3-A,1,0.12,0.05,0,1,0.2,0,0,1

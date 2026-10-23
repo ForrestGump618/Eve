@@ -1,0 +1,10 @@
+include LICENSE README.md CHANGELOG.md pyproject.toml
+include 启动工作台.ps1
+recursive-include docs *.md
+recursive-include scripts *.py *.ps1 *.sh
+recursive-include tests *.py
+recursive-include omicslab/web *
+recursive-include omicslab/skills *
+recursive-include omicslab/agents *
+recursive-include omicslab/data *
+global-exclude __pycache__ *.py[cod] *.pyo

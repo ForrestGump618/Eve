@@ -1,0 +1,9 @@
+sample_id,group,batch,sex,age,rin
+S1,control,B1,male,42,8.6
+S2,control,B1,female,55,9.1
+S3,control,B2,male,61,7.8
+S4,control,B2,female,48,8.9
+S5,treated,B1,male,50,8.4
+S6,treated,B1,female,44,9.3
+S7,treated,B2,male,58,8.1
+S8,treated,B2,female,52,8.8
