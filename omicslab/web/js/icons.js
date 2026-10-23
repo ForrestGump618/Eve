@@ -109,7 +109,8 @@ export function icon(name, opts = {}) {
 
 /** Brand mark: gradient rounded square with a stylised double helix. */
 export function brandMark(size = 30, idSuffix = '') {
-  return `<svg class="brand-mark" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="12" fill="#155d51"/><path d="M12 14c1-5 13-5 15 0 3 7-12 7-12 13M13 29h.01" stroke="#c5eee2" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M10 22c5-6 13-6 20 0" stroke="#95ceaf" stroke-width="1.5" fill="none" opacity=".55"/></svg>`;
+  const gradientId = `brand-gradient-${idSuffix || 'default'}`;
+  return `<svg class="brand-mark" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#0e7490"/></linearGradient></defs><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#${gradientId})"/><path d="M12 14c1-5 13-5 15 0 3 7-12 7-12 13M13 29h.01" stroke="#ece7ff" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M10 22c5-6 13-6 20 0" stroke="#67e8f9" stroke-width="1.5" fill="none" opacity=".62"/></svg>`;
 }
 
 export const ICON_NAMES = Object.keys(PATHS);
