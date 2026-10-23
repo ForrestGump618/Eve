@@ -21,7 +21,7 @@
     .\scripts\dev.ps1
 
 .EXAMPLE
-    .\scripts\dev.ps1 -Port 5078 -Workspace D:\projects\pbmc
+    .\scripts\dev.ps1 -Port 5078 -Workspace C:\data\pbmc
 #>
 [CmdletBinding()]
 param(
