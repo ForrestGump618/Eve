@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use Suwen (素问) in your research or product, please cite it as below."
+title: "Suwen (素问)"
+abstract: "A local-first, single-cell and spatial-omics analysis workbench built on a Python kernel, a FastAPI backend, a vanilla ES-module Web UI, and an evidence chain with reproducible run records."
+type: software
+authors:
+  - name: "ForrestGump618"
+  - name: "OmicsLab contributors"
+version: "2.0.0"
+date-released: "2026-10-23"
+license: Apache-2.0
+repository-code: "https://github.com/ForrestGump618/suwen"
+url: "https://github.com/ForrestGump618/suwen"
+keywords:
+  - bioinformatics
+  - single-cell
+  - spatial-omics
+  - analysis workbench
+  - LLM agents
+  - reproducibility
+  - Python
+  - FastAPI

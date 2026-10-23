@@ -1,0 +1,44 @@
+# EditorConfig 帮助编辑器在不同平台/IDE 间保持一致的编码与缩进。
+# 规范见 https://editorconfig.org ，与 .gitattributes 配合：文本文件统一 UTF-8（无 BOM）+ LF。
+# 本文件自身及仓库内全部文本文件均为 UTF-8 无 BOM、LF 换行。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Python：社区默认 4 空格
+[*.{py,pyi}]
+indent_size = 4
+
+# Web（原生 ES Modules / 无构建步骤）与配置：2 空格
+[*.{js,mjs,cjs,jsx,ts,tsx,css,html,htm,json,jsonl,yml,yaml,toml}]
+indent_size = 2
+
+# Shell：仓库现有脚本使用 4 空格续行缩进
+[*.{sh,bash}]
+indent_size = 4
+
+# Windows PowerShell：沿用仓库现有 4 空格缩进；换行统一 LF（PowerShell 5.1+ 均支持）
+[*.ps1]
+indent_size = 4
+
+# Markdown：行尾两个空格是有意义的硬换行，不能自动裁剪
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# CFF / 许可证等纯文本
+[*.{cff,txt,in}]
+indent_size = 2
+
+# 二进制文件：不应用文本编码/换行规则
+[*.{png,jpg,jpeg,gif,ico,webp,pdf,zip,gz,fcs,h5ad,h5mu,loom,rds,rda,feather,parquet}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安装与使用文档 / Documentation
+    url: https://github.com/ForrestGump618/suwen/blob/main/docs/INSTALL.md
+    about: 先看安装、配置与常见问题，很多疑问这里有答案。
+  - name: 参与贡献 / Contributing
+    url: https://github.com/ForrestGump618/suwen/blob/main/CONTRIBUTING.md
+    about: 提交代码或文档前，请先阅读开发环境、测试与 PR 约定。
+  - name: 安全问题 / Security reports
+    url: https://github.com/ForrestGump618/suwen/security/advisories/new
+    about: 漏洞请走私密渠道，不要开公开 issue。详见 SECURITY.md。

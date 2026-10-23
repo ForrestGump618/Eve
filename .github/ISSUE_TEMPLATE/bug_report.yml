@@ -1,0 +1,118 @@
+name: "Bug 报告 / Bug report"
+description: 报告可复现的问题，帮助我们定位并修复 / Report a reproducible problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你花时间报告问题！提交前请：
+
+        1. 先搜索[已有 issue](https://github.com/ForrestGump618/suwen/issues)，避免重复；
+        2. 阅读[安装指南](https://github.com/ForrestGump618/suwen/blob/main/docs/INSTALL.md)，确认环境符合要求；
+        3. **删除日志和截图中的 API Key、密码、私钥与私有路径**，只保留脱敏后的内容。
+
+        > 安全漏洞请勿在此公开报告，请按 [SECURITY.md](https://github.com/ForrestGump618/suwen/blob/main/SECURITY.md) 私下提交。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 提交前检查 / Before submitting
+      description: 请确认以下几点，这能显著减少来回沟通。
+      options:
+        - label: 我已搜索过已有 issue 与文档，没有找到相同的问题。
+          required: true
+        - label: 我使用的版本与下方填写一致，且不是已声明不支持的旧版本。
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 素问版本 / Version
+      description: 运行 `python -m omicslab --version` 得到的输出。
+      placeholder: "例如 2.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统 / OS
+      description: 你实际运行服务或 CLI 的操作系统。
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS（Apple Silicon）
+        - macOS（Intel）
+        - Linux（x86_64）
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python 版本 / Python version
+      description: 运行 `python --version` 得到的输出；使用 `scripts/bootstrap.ps1` 或 `scripts/bootstrap.sh` 时是 `.venv` 里的 Python。
+      placeholder: "例如 3.12.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: 模型提供方 / LLM provider
+      description: 问题与模型调用相关时选择对应项；否则选「不涉及」。
+      options:
+        - 不涉及 / Not applicable
+        - 官方 OpenAI
+        - DeepSeek
+        - 自定义 OpenAI-compatible
+        - 本地模型（Ollama 等）
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 提供最小、可稳定复现的步骤；涉及界面时请写清从哪个页面开始点击。
+      placeholder: |
+        1. 启动 `python -m omicslab serve --port 5077`
+        2. 打开工作台，进入 ...
+        3. 点击 ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果 / Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果 / Actual behavior
+      description: 包括报错文本、界面异常、数据错乱等；如涉及数据，请说明是否可稳定复现。
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 脱敏后的日志 / Sanitized logs
+      description: 服务日志、浏览器控制台报错或 traceback。粘贴前请删除 API Key、密码、私钥、私有文件路径与个人数据。
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 补充信息 / Additional context
+      description: 截图、录屏、数据规模、是否使用 Docker、是否启用 SSH / Webhook / MCP 等。
+    validations:
+      required: false

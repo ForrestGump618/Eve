@@ -1,0 +1,52 @@
+# 文本文件统一按 LF 检出/提交：仓库内文本均为 UTF-8 无 BOM、LF 换行。
+# 这样在 Windows/macOS/Linux 上 diff 更稳定，也避免 CRLF/LF 混入。
+* text=auto eol=lf
+
+# 明确声明为文本的类型（避免被误判为二进制）
+*.py      text
+*.pyi     text
+*.sh      text eol=lf
+*.bash    text eol=lf
+*.ps1     text eol=lf
+*.psm1    text eol=lf
+*.toml    text
+*.cff     text
+*.yml     text
+*.yaml    text
+*.json    text
+*.jsonl   text
+*.md      text
+*.txt     text
+*.in      text
+*.cfg     text
+*.ini     text
+*.css     text
+*.js      text
+*.mjs     text
+*.cjs     text
+*.html    text
+*.svg     text
+LICENSE   text
+
+# Windows PowerShell 脚本也使用 LF：PowerShell 5.1 与 PowerShell 7 都能正确解析 LF
+# 换行的 .ps1，统一 LF 可避免 Git 的 CRLF/LF 往返与跨平台不一致。
+# 若未来确有工具强制要求 CRLF，请单独为对应路径加 eol=crlf，不要全局切换。
+
+# 二进制文件：不参与换行转换，不做文本 diff
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.webp    binary
+*.pdf     binary
+*.zip     binary
+*.gz      binary
+*.fcs     binary
+*.h5ad    binary
+*.h5mu    binary
+*.loom    binary
+*.rds     binary
+*.rda     binary
+*.feather binary
+*.parquet binary
