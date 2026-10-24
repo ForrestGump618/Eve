@@ -65,7 +65,7 @@ bio = [
   "scanpy>=1.10",
   "anndata>=0.10",
 ]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+dev = ["pytest>=9.1.1", "pytest-asyncio>=1.4.0"]
 
 [project.scripts]
 suwen = "omicslab.cli:main"
