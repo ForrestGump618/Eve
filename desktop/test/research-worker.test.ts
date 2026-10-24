@@ -137,8 +137,13 @@ test('resolves the bundled worker script and reports a healthy Python worker', {
   assert.match(health.python ?? '', /^\d+\.\d+\.\d+/);
   assert.equal(health.version, '2.0.0');
   assert.deepEqual(health.capabilities, ['health', 'describe', 'flowSummary', 'datasetProfile', 'discoveryScan', 'runScript']);
-  assert.equal(typeof health.deps?.numpy, 'string');
-  assert.equal(typeof health.deps?.scipy, 'string');
+  // Optional scientific dependencies: a version string when importable, otherwise null.
+  // They are not required by the stdlib-only worker, so a CI image without preinstalled
+  // numpy/scipy must not be reported as a worker failure.
+  for (const dependency of ['numpy', 'scipy'] as const) {
+    const value = health.deps?.[dependency];
+    assert.ok(value === null || typeof value === 'string', `${dependency} must be a version string or null`);
+  }
   const status = client.status();
   assert.equal(status.state, 'ready');
   assert.ok(typeof status.pid === 'number' && status.pid > 0);
