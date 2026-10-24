@@ -100,9 +100,9 @@ scan clean, publication **not performed**.
 
 ## 6. Final 3.2.0 artifact facts (for the eventual upload)
 
-- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — 129,446,526 B — SHA-256
-  `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` — **UNSIGNED**.
-- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,974 B — SHA-256 `BCD62E14…1AC2`.
+- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — 129,447,101 B — SHA-256
+  `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` — **UNSIGNED**.
+- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B — SHA-256 `283B27E1…1AC2`.
 - `desktop/release/SHA256SUMS` — mirrored at `docs/release/SHA256SUMS.txt`.
 - Publication status: **BLOCKED_EXTERNAL** (no `gh` CLI, no token); CI has **never executed**.
   Never claim a Release URL, a green CI run, a signed installer, or a clean-VM-verified release.

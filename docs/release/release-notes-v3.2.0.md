@@ -1,8 +1,8 @@
 # SuWen Desktop v3.2.0 — release notes (final evidence round; NOT published)
 
 **Status: final 3.2.0 build measured — NOT published.** The final installer is
-`desktop/release/SuWen-Setup-3.2.0-win-x64.exe` (**129,446,526 B**, SHA256
-`7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`, **UNSIGNED**); all measured
+`desktop/release/SuWen-Setup-3.2.0-win-x64.exe` (**129,447,101 B**, SHA256
+`4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`, **UNSIGNED**); all measured
 numbers are in the "Final release evidence" section at the end of this file. Clean-Windows-VM
 lifecycle, code signing, endurance (8/24/72 h, reboot, power-loss) and GitHub publication are
 **NOT done** — see `docs/release/final-acceptance-report.md` and `docs/release/release-gates.md`.
@@ -34,7 +34,7 @@ lifecycle, code signing, endurance (8/24/72 h, reboot, power-loss) and GitHub pu
 | RPC E2E (real detached daemon, live public DBs) | 42 passed / 0 failed / ~7 s, incl. Europe PMC PMID 42878939 and UniProt Q9Y2B4 release 2026_03 |
 | Packaged Electron smoke | 8/8 checks, exit 0 (final 3.2.0 build) |
 | UI DOM QA | 19 passed / 0 failed / 12 warnings (main-process bridge methods) |
-| Short-window chaos | 12/12 checks in 51.4 s |
+| Short-window chaos | 12/12 checks in 51.7 s |
 | Installer host lifecycle | host 12/12 PASS on the final 3.2.0 artifact + upgrade source 3.0.0-preview.1 installed (clean VM NOT RUN) |
 | Secret scan / npm audit | PASS (0 HIGH), 0 production vulnerabilities |
 | Performance baseline | daemon ready p50 391 ms, create p50 0.82 ms, events.stream p50 1.49 ms, worker flowSummary 20.9 ms |
@@ -45,7 +45,7 @@ lifecycle, code signing, endurance (8/24/72 h, reboot, power-loss) and GitHub pu
 | --- | --- |
 | Path | `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` (built 2026-10-24T19:16:10Z) |
 | Version | 3.2.0 — confirmed in `desktop/package.json:3`, package-lock root and the built installer metadata |
-| Size / SHA256 | 129,446,526 B / `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` |
+| Size / SHA256 | 129,447,101 B / `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` |
 | Signature | UNSIGNED — no code-signing certificate; SmartScreen warning expected. Never claim signed. |
 | Checksums | `desktop/release/SHA256SUMS` mirrored in `docs/release/SHA256SUMS.txt` (3 lines, same values) |
 | Upgrade path | from 3.1.0 (previous cross-version 3.0.0-preview.1→3.1.0 passed 8/8 on host; 3.2.0 path not yet run) |
@@ -86,8 +86,8 @@ on the final 3.2.0 build in the TARGET workspace; where something was not run it
 
 | Item | Measured value |
 |---|---|
-| Installer | `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,446,526 B** — SHA256 `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` — built 2026-10-24T19:16:10Z — **UNSIGNED** (no certificate; SmartScreen warning expected) |
-| Blockmap | 135,974 B — SHA256 `BCD62E14C146F7B9E03E35A373FA7804DAD2AA38C8E5706C63EF0C108CDD1AC2` |
+| Installer | `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,447,101 B** — SHA256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` — built 2026-10-24T19:16:10Z — **UNSIGNED** (no certificate; SmartScreen warning expected) |
+| Blockmap | 135,948 B — SHA256 `283B27E19D2A943DD940B8E83F748CEB2627950A87CAD509069EFAE4230CBB72` |
 | Unpacked app | `release/win-unpacked/SuWen.exe` — 249,801,728 B — SHA256 `8F7EAF76FEB66A61E51D5F8B9B67EEFA375FEDD0018A5566D64C27F0570A22E1` |
 | Checksums | `desktop/release/SHA256SUMS` and `docs/release/SHA256SUMS.txt` (3 lines, same values) |
 | Typecheck/build | `npx tsc -p tsconfig.json --noEmit` exit 0; `npm run build` exit 0 |
@@ -97,7 +97,7 @@ on the final 3.2.0 build in the TARGET workspace; where something was not run it
 | UI DOM QA | 19 passed / 0 failed / 12 warnings (warnings are the intended main-process bridge methods) |
 | Streaming UI E2E | Deterministic local-fixture suite: 22 cases — 19 pass / 0 fail / 3 skip, 10.8 s; 100/1,000/10,000-delta integrity via exact DOM sha256; composer 0 px deviation; scroll 0 px forced drift |
 | Functional/live E2E | Deterministic 19 pass / 0 fail / 3 skip; live 21/21, 13.7 s (real daemon + real public databases) |
-| Chaos | 12/12 scenarios, 51.4 s (worker/daemon SIGKILL, idempotent operation id, committed step not replayed, cancel, provider 429→500→200 with human approvals) |
+| Chaos | 12/12 scenarios, 51.7 s (worker/daemon SIGKILL, idempotent operation id, committed step not replayed, cancel, provider 429→500→200 with human approvals) |
 | Installer lifecycle | 12/12 host steps on the final artifact (silent install/reinstall/uninstall, installed app daemon, daemon survives UI close, data preserved, registry removed); upgrade source 3.0.0-preview.1 installed OK |
 | Clean Windows VM | **NOT RUN** — host probe only |
 | Endurance 8/24/72 h, reboot, power-loss | **NOT RUN** |

@@ -8,6 +8,8 @@ Anything not executed is marked **NOT RUN** / **UNVERIFIED** / **PENDING_LEAD** 
 > (`SuWen-Setup-3.1.0-win-x64.exe`, 129,425,145 B, SHA256 `E1A1062C…` for the earlier 3.1.0 build). Those values are historical and superseded. The delivered artifact is the
 > final **3.2.0** build below (conflict C-17 in `docs/requirements/conflicts.md`).
 
+> **Artifact supersession (2026-10-25):** the installer was rebuilt after the final T2 P2 fix (waiting_approval review notice + paint/lifecycle guard). Current artifact: **129,447,101 B, SHA256 4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897** (unsigned). Earlier builds (3.1.0 `E1A1062C…`, and the pre-P2 round-3 build) are superseded; see `docs/verification/artifacts/installer-lifecycle.json` for the lifecycle run on this exact build.
+
 ## 1. Build facts
 
 | Item | Value |
@@ -26,8 +28,8 @@ Anything not executed is marked **NOT RUN** / **UNVERIFIED** / **PENDING_LEAD** 
 
 | Artifact | Bytes | SHA-256 |
 |---|---:|---|
-| `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` (delivered) | **129,446,526** | `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` |
-| `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` | 135,974 | `bcd62e14c146f7b9e03e35a373fa7804dad2aa38c8e5706c63ef0c108cdd1ac2` |
+| `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` (delivered) | **129,447,101** | `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` |
+| `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` | 135,948 | `283b27e19d2a943dd940b8e83f748ceb2627950a87cad509069efae4230cbb72` |
 | `desktop/release/win-unpacked/SuWen.exe` | **249,801,728** | `8f7eaf76feb66a61e51d5f8b9b67eefa375fedd0018a5566d64c27f0570a22e1` |
 
 `SHA256SUMS` is written next to the built artifacts at `desktop/release/SHA256SUMS` and mirrored in
@@ -52,7 +54,7 @@ in this session). These three hashes are the authoritative values for the delive
 ## 4. Host lifecycle probe on the FINAL 3.2.0 artifact (12/12 PASS — not a clean-VM test)
 
 Artifact: `docs/verification/artifacts/installer-lifecycle.json`
-(`version=3.2.0`, `installerBytes=129,446,526`, `installerSha256=7B0DDE7B…2199546`; `ok=true`,
+(`version=3.2.0`, `installerBytes=129,447,101`, `installerSha256=4590B7F3…2199546`; `ok=true`,
 `passed=12`, `failed=0`; `note` = "host-level only; no clean VM used"). Steps:
 
 | Step | Status | Detail |
@@ -95,7 +97,7 @@ defect; the shipped app is unmodified.
 
 | Requirement | Status |
 |---|---|
-| R100 NSIS x64 + SHA256SUMS + install/start/upgrade/uninstall | installer + final hashes measured (129,446,526 B, SHA256 `7B0DDE7B…`); `SHA256SUMS` in `desktop/release/SHA256SUMS` + `docs/release/SHA256SUMS.txt`; host install/start/reinstall/uninstall **12/12 passed**; clean-VM lifecycle NOT RUN → row kept **UNVERIFIED/PARTIAL** in the master CSV |
+| R100 NSIS x64 + SHA256SUMS + install/start/upgrade/uninstall | installer + final hashes measured (129,447,101 B, SHA256 `4590B7F3…`); `SHA256SUMS` in `desktop/release/SHA256SUMS` + `docs/release/SHA256SUMS.txt`; host install/start/reinstall/uninstall **12/12 passed**; clean-VM lifecycle NOT RUN → row kept **UNVERIFIED/PARTIAL** in the master CSV |
 | R101 optional Python runtime bootstrap | NOT_STARTED (worker uses user-selected interpreter; no bundled Python) |
 | R102 upgrade migrates DB with backup; uninstall keeps data | host upgrade source 3.0.0-preview.1 install PASS; uninstall keeps user data; DB migration with backup under upgrade not separately measured → UNVERIFIED |
 | R103 SmartScreen truthfulness | PASS for honesty: unsigned status documented; certificate absent |

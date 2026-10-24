@@ -143,7 +143,7 @@
 | `docs/verification/durability-chaos-tests.md` | 9106 | `4A31B88DE79510FDF2B5DF9464E863BFB0D350FDD7BB433EE5E99DF5337CD579` | 短时故障注入与未执行长跑清单（R050/R116） |
 | `docs/verification/ui-action-coverage.csv` | 74550 | `dc66a836c2871bca91af6389f327ceeda5f44bacefe3acf31efde4e940c26f38` | 142 个 UI 动作绑定与 RPC 桥接（R024/R120） |
 | `docs/verification/artifacts/installer-lifecycle.json` | 3675 | `58B2D9EA4CC881611B8B051D19F2A82DA0FF7F3D3A42D2F07CB0320D398D953B` | 最终交付安装包主机生命周期 14/14（R100/R102/R119） |
-| `docs/verification/artifacts/upgrade-path.json` | 2210 | `A1534592322D3816B2BAE87E4E966B5DB5CD90536B043DB6A488A18D8B60BF88` | 跨版本升级 3.0.0-preview.1→3.1.0 8/8（R102/R119） |
+| `docs/verification/artifacts/upgrade-path.json` | 2210 | `A1534592322D3816B2BAE87E4E966B5DB5CD90536B043DB6A488A18D8B60BF88` | 跨版本升级 3.0.0-preview.1→3.1.0 8/8（历史，已被最终 3.2.0 lifecycle 取代） |
 | `docs/verification/chaos-results.json` | 2230 | `5c2fa8060866d82fec493a7ee5c085a5e6a170d92ac4fa287099a8f28e4cc501` | 短窗混沌 12/12，52.2 s（R050/R116） |
 | `docs/release/windows-installer-verification.md` | 8322 | `fc9fa85f77cd8fe23ffc35349563c8687f4c87c6bae154e2f01ca4d010e07685` | 安装包/哈希/生命周期/未验证项（R100-R103/R119/R120） |
 | `docs/research/branding-exceptions.md` | 6366 | `BA9D3D82F4CC32C8E5D4C5821713098305E4DC236A29C967C272397D41589B6B` | 品牌残留分类与 LEGACY-BRAND-COMPAT（R090/R091） |
@@ -162,7 +162,7 @@ Lead 在 TARGET 实测并记录（见 `docs/verification/integration-and-e2e.md`
 3. 打包 smoke（final build）8/8、106 s；legacy Python workbench 本机不可用（缺 fastapi，不计通过）；liveMcp 由 RPC E2E 覆盖。
 4. UI QA：`ui-dom-qa.mjs` 19/0/12 warnings；`node --check desktop/ui/app.js` exit 0；`ui/actions.json` 144 actions 全部绑定（94 daemon-RPC / 5 main-bridge / 43 UI-only）。
 5. 最终安装包：`SuWen-Setup-3.1.0-win-x64.exe` 129,425,145 B SHA256 `E1A1062C…`（17:41:52Z，UNSIGNED）；blockmap 135,934 B SHA256 `72DD2D54…`；unpacked exe 249,801,728 B SHA256 `CFE87F2D…`；`desktop/release/SHA256SUMS` 与 `docs/release/SHA256SUMS.txt` 已生成（3 行：exe/blockmap/unpacked）。
-6. 最终安装包主机生命周期 14/14（`installer-lifecycle.json`，17:45:22Z）与跨版本升级 8/8（`upgrade-path.json`，17:46:42Z，仅 3.0.0-preview.1→3.1.0）。
+6. 最终 3.2.0 安装包主机生命周期 12/12 PASS（`installer-lifecycle.json`，2026-10-24T20:01:24Z，含 3.0.0-preview.1→3.2.0 升级步骤；3.1.0 的 `upgrade-path.json` 8/8 为历史证据，已被取代）。
 7. 短窗混沌 12/12、52.2 s（`chaos-results.json`，17:34:35Z）：worker/daemon SIGKILL 恢复、同 operationId、不重放已提交步骤、取消 0 artifacts、429→500→200 + 2 次人工审批；限制为单 Windows 会话、短时、fixture 注入。
 8. `npm audit` 0 漏洞；runtime SBOM（CycloneDX 1.5）与许可证文本；MIT LICENSE/NOTICE；Python 保持 Apache-2.0。
 9. 品牌扫描 983 hits / 143 files、0 FIX_REQUIRED 文本；旧标识符按 9 类 LEGACY-BRAND-COMPAT 记录。
@@ -189,7 +189,7 @@ main bridge), **R123** (ordering/dedupe/reset/gap replay) and **R130**
 ("Cancel/timeout/reconnect really verified (streaming, tool, python worker, provider 429/5xx, UI close/reopen, rapid clicks)") — auto-reconnect/`onConnection` evidence is code-level only and remains
 T1/T2 runtime evidence landed (see §9): R122–R126/R129/R132/R136 are IMPLEMENTED_PASS; R127/R128/R131 remain UNVERIFIED (R130 is PASS after the T2 final re-run).
 G3 in `docs/release/release-gates.md` is now **PASS_WITH_LIMITS** (T2 suite + visual audit; post-fix SIGKILL/reconnect re-run still missing -> R130).
-Package version confirmed as **3.2.0**; final installer built 2026-10-24T19:16:10Z — 129,446,526 B SHA256 `7B0DDE7B…2199546`, `SHA256SUMS` present.
+Package version confirmed as **3.2.0**; final installer built 2026-10-24T19:16:10Z — 129,447,101 B SHA256 `4590B7F3…2199546`, `SHA256SUMS` present.
 
 
 ## 9. Final round-3 update (SuWen desktop 3.2.0)
@@ -200,7 +200,7 @@ The CSV is authoritative: **98 requirement rows — 81 IMPLEMENTED_PASS / 12 UNV
 Round-3 rows changed to IMPLEMENTED_PASS: R122 R123 R124 R125 R126 R129 R132 R133 R134 R135 R139 R140
 R141 R145 R148; R136 updated to IMPLEMENTED_PASS after T2's visual audit; R119 updated to the final 3.2.0 artifact evidence (host lifecycle 12/12 + upgrade-source
 pass, clean VM still NOT run -> UNVERIFIED); R121 updated to the final delivered installer
-`SuWen-Setup-3.2.0-win-x64.exe` 129,446,526 B SHA256 `7B0DDE7B…` and SHA256SUMS
+`SuWen-Setup-3.2.0-win-x64.exe` 129,447,101 B SHA256 `4590B7F3…` and SHA256SUMS
 (`desktop/release/SHA256SUMS`, `docs/release/SHA256SUMS.txt`); R100/R102/R116/R050 evidence refreshed
 with the final build, chaos and lifecycle artifacts.
 

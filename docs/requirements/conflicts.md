@@ -157,7 +157,7 @@ Resolution status of the earlier conflicts/actions:
   install 18 s, exe 249,801,728 B, uninstaller, HKCU `SuWen 3.1.0`, FileVersion 3.1.0, installed app
   running, authenticated named-pipe daemon health version 3.1.0 mode `user-background`, daemon survives
   UI close (uptime 13.6 s), reinstall 24 s, uninstall 11 s, install dir removed, user data preserved,
-  registry removed. `upgrade-path.json` (`2026-10-24T17:46:42Z`) records **8/8 steps passed** for
+  registry removed. `upgrade-path.json` (`2026-10-24T17:46:42Z`, **3.1.0 historical, superseded**) recorded **8/8 steps passed** for
   `3.0.0-preview.1 -> 3.1.0`.
 - Environment caveat: the developer shell inherits `ELECTRON_RUN_AS_NODE=1`; probes removed it from
   the launching shell only — a test-environment caveat, not a product defect; the shipped app is not
@@ -210,9 +210,9 @@ endurance, real external model accounts, and the legacy Python workbench runtime
 
 Any earlier reference to `SuWen-Setup-3.1.0-win-x64.exe` 129,425,145 B SHA256 `E1A1062C…` (and any
 `82779B90…` pre-final 3.1.0 hash) is historical only. The delivered artifact is
-`SuWen-Setup-3.2.0-win-x64.exe` **129,446,526 B** SHA256
-`7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` (UNSIGNED), with blockmap
-135,974 B SHA256 `BCD62E14…` and `win-unpacked/SuWen.exe` 249,801,728 B SHA256 `8F7EAF76…`;
+`SuWen-Setup-3.2.0-win-x64.exe` **129,447,101 B** SHA256
+`4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` (UNSIGNED), with blockmap
+135,948 B SHA256 `283B27E1…` and `win-unpacked/SuWen.exe` 249,801,728 B SHA256 `8F7EAF76…`;
 `desktop/release/SHA256SUMS` + `docs/release/SHA256SUMS.txt`. Resolution: release notes, installer
 report, acceptance report and progress were updated; 3.1.0 rows in historical sections are marked
 superseded there.
@@ -248,12 +248,12 @@ repo promise is not yet satisfied online.
 ## C-17 Final 3.2.0 evidence supersedes earlier lifecycle/hash numbers (2026-10-25)
 
 The final 3.2.0 build is authoritative: `desktop/release/SuWen-Setup-3.2.0-win-x64.exe`
-**129,446,526 B** SHA-256 `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`
-(**UNSIGNED**); blockmap 135,974 B SHA-256 `BCD62E14…1AC2`; unpacked `win-unpacked/SuWen.exe`
+**129,447,101 B** SHA-256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`
+(**UNSIGNED**); blockmap 135,948 B SHA-256 `283B27E1…1AC2`; unpacked `win-unpacked/SuWen.exe`
 249,801,728 B SHA-256 `8F7EAF76…22E1`; `SHA256SUMS` present in `desktop/release/` and mirrored at
 `docs/release/SHA256SUMS.txt`. Host lifecycle **12/12** (including installing 3.0.0-preview.1 and
 upgrading to 3.2.0) passed; final `npm test` 182 tests / 180 pass / 2 skipped / 33.4 s; packaged smoke
-8/8; `e2e-rpc --live` 42/0; chaos 12/12 in 51.4 s. Earlier numbers for 3.1.0 (`E1A1062C…`,
+8/8; `e2e-rpc --live` 42/0; chaos 12/12 in 51.7 s. Earlier numbers for 3.1.0 (`E1A1062C…`,
 129,425,145 B, 14/14 lifecycle, `82779B90…` pre-final) are historical and must never be reported as
 the delivered 3.2.0 artifact. Not done: clean-Windows-VM lifecycle, code signing, 8/24/72 h endurance,
 real external accounts, GitHub publication (`docs/release/final-acceptance-report.md`).

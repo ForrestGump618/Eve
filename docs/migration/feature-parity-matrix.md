@@ -58,13 +58,13 @@ Upgrades since the 3.0.0-preview.1 audit (14 PASS / 42 UNVERIFIED / 9 NOT_STARTE
   Robin/Kosmos, real Telegram/Slack/Discord/WeChat accounts) are **not bundled/connected**.
 - **Legacy/import/release (5 rows):** import-service read-only scan of the real legacy home (9
   item groups), backup-first/idempotent apply, rollback tests 5/5; NSIS x64 installer built from
-  frozen final code (`release/SuWen-Setup-3.2.0-win-x64.exe`, 129,446,526 bytes, SHA-256
-  `7b0dde7b9e12e403e620e16651d969cd21c874cf16598d409d6a7b2fa2199546`, UNSIGNED) and unpacked
+  frozen final code (`release/SuWen-Setup-3.2.0-win-x64.exe`, 129,447,101 bytes, SHA-256
+  `4590b7f3c38041985eb31f56047e4c35fcf0b2286fe6e989f55f736cb230b897`, UNSIGNED) and unpacked
   layout inspected; **final-artifact host lifecycle probe 12/12 steps passed**
   (`docs/verification/artifacts/installer-lifecycle.json`: install ~24 s, exe version 3.2.0, running
   app, authenticated daemon attach `mode user-background`, daemon survives UI close, reinstall 24 s,
   uninstall 11 s, user-data preservation) and **cross-version upgrade 3.0.0-preview.1 → 3.1.0
-  8/8 passed** (`upgrade-path.json`); packaging metadata; brand cleanup; desktop unit/integration
+  8/8 passed** (`upgrade-path.json`, 3.1.0 historical/superseded; final 3.2.0 upgrade is in `installer-lifecycle.json` 12/12); packaging metadata; brand cleanup; desktop unit/integration
   tests. clean-VM lifecycle and code signing remain pending; `SHA256SUMS` is present.
 
 ## 3. Remaining non-PASS rows (14)
@@ -121,7 +121,7 @@ because the Python baseline lacks leases/fencing/outbox/durable timers and has U
 | `node scripts/ui-dom-qa.mjs` | 19 passed / 0 failed / 12 warnings |
 | `node --check desktop/ui/app.js` | exit 0 |
 | Python research worker tests | 22 tests / 21 pass / 1 skip (Windows symlink EPERM) |
-| Installer | `SuWen-Setup-3.2.0-win-x64.exe` 129,446,526 B, SHA-256 `7b0dde7b…9546`, blockmap 135,974 B, UNSIGNED; `SHA256SUMS` present |
+| Installer | `SuWen-Setup-3.2.0-win-x64.exe` 129,447,101 B, SHA-256 `7b0dde7b…9546`, blockmap 135,948 B, UNSIGNED; `SHA256SUMS` present |
 | Installer host lifecycle (final 3.2.0 artifact) | 12/12 steps passed (`docs/verification/artifacts/installer-lifecycle.json`), incl. installing 3.0.0-preview.1 and upgrading to 3.2.0 — host probe only |
 | Cross-version upgrade | 3.0.0-preview.1 → 3.2.0 pass recorded in the lifecycle report — host probe only |
 
@@ -170,7 +170,7 @@ REPLACED 1 / BLOCKED_EXTERNAL 1**.
 | Quantitative streaming matrix (100/1k/10k) | IMPLEMENTED_PASS | `ui-e2e-summary.json`: exact sha256, lag p95, 10k render 152 s, paint ~5 ms |
 | Visual auto-acceptance matrix | IMPLEMENTED_PASS | `ui-visual-audit.md`: 180 PNGs / 144-shot matrix, 0 layout defects, dark theme verified; P2 chat-error surface open |
 | Known-defect fixes (T2 stream/recovery set) | IMPLEMENTED_PASS | `defect-register.csv` D-013..D-017; `desktop/test/conversations.test.ts` |
-| Durable re-verification after UI/streaming changes | IMPLEMENTED_PASS | chaos 12/12 in 51.4 s on the final tree; 8/24/72 h **not run** (R050) |
+| Durable re-verification after UI/streaming changes | IMPLEMENTED_PASS | chaos 12/12 in 51.7 s on the final tree; 8/24/72 h **not run** (R050) |
 | Full UI action runtime coverage | IMPLEMENTED_PASS | 144 actions mapped (0 unknown), DOM QA 19/0/12; no per-action click-through matrix |
 | Clean-Windows-VM install/upgrade/uninstall | UNVERIFIED | Host lifecycle 12/12 on the final 3.2.0 artifact; no clean VM |
 | GitHub MIT publication + Release upload | BLOCKED_EXTERNAL | Remote readable; `gh` CLI/token absent |
@@ -184,9 +184,9 @@ REPLACED 1 / BLOCKED_EXTERNAL 1**.
 | Release gates + defect register | IMPLEMENTED_PASS | `release-gates.md`, `defect-register.csv` (20 defects) |
 | 3.2.0 release docs (CHANGELOG/notes/publication runbook) | IMPLEMENTED_PASS | All present; installer measured; publication blocked |
 
-Final measured facts: installer `SuWen-Setup-3.2.0-win-x64.exe` 129,446,526 B SHA-256
-`7B0DDE7B…2199546` (unsigned), blockmap 135,974 B `BCD62E14…`, unpacked 249,801,728 B `8F7EAF76…`,
+Final measured facts: installer `SuWen-Setup-3.2.0-win-x64.exe` 129,447,101 B SHA-256
+`4590B7F3…2199546` (unsigned), blockmap 135,948 B `283B27E1…`, unpacked 249,801,728 B `8F7EAF76…`,
 `SHA256SUMS` present in both locations; tests 182/180/2 (33.4 s); e2e-rpc 42/0 live; packaged smoke
-8/8; UI DOM QA 19/0/12; chaos 12/12 (51.4 s); host lifecycle 12/12 + upgrade from 3.0.0-preview.1.
+8/8; UI DOM QA 19/0/12; chaos 12/12 (51.7 s); host lifecycle 12/12 + upgrade from 3.0.0-preview.1.
 Stable release remains unauthorized (`docs/release/release-gates.md`); clean VM, signing, endurance and
 publication stay open.

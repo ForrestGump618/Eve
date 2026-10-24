@@ -22,13 +22,13 @@ Measured on this machine (final 3.2.0 build, 2026-10-25, branch `suwen-vnext-dur
 
 | Check | Result |
 |---|---|
-| `npm test` | **150 tests / 148 pass / 0 fail / 2 skipped**, 29.5 s, exit 0 |
+| `npm test` | **183 tests / 181 pass / 0 fail / 2 skipped**, 28.6 s (final full run), exit 0 |
 | `e2e-rpc.mjs --live` (real detached daemon over authenticated pipe) | **42 passed / 0 failed**, ~7 s, incl. real Europe PMC/PubMed (PMID 42878939) + UniProt (Q9Y2B4) calls |
 | packaged `electron-smoke.mjs` (final build) | **8/8 checks**, exit 0, 68 s (30 s durable timer completes after UI exit; reopen attaches same daemon) |
 | `ui-dom-qa.mjs` | **19 passed / 0 failed / 12 warnings** (main-process bridge methods); 144 actions, 81 RPC-contract entries + main bridge |
 | streaming UI E2E (T2) | deterministic fixture suite 22 cases → 19 pass / 0 fail / 3 skip, 10.8 s; delta matrix 100/1k/10k sha-exact; composer 0 px drift; scroll 0 px forced drift |
-| chaos (short window) | 12/12 scenarios, 51.4 s (worker/daemon SIGKILL, idempotency, cancel, provider 429→500→200 with approvals) |
-| installer | `release/SuWen-Setup-3.2.0-win-x64.exe`, **129,446,526 B**, SHA-256 `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`, **UNSIGNED**; host lifecycle 12/12 (clean VM NOT run) |
+| chaos (short window) | 12/12 scenarios, 51.7 s (worker/daemon SIGKILL, idempotency, cancel, provider 429→500→200 with approvals) |
+| installer | `release/SuWen-Setup-3.2.0-win-x64.exe`, **129,447,101 B**, SHA-256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`, **UNSIGNED**; host lifecycle 12/12 (clean VM NOT run) |
 
 Skip reasons: Windows symlink `EPERM` in one research-worker test; optional legacy Python workbench
 dependencies missing on the build machine. Full results: `../docs/verification/integration-and-e2e.md`,

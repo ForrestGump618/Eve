@@ -61,7 +61,7 @@ SBOM reproduction script is declared in `desktop/package.json` (`sbom` script) a
 
 ## 6. Gaps and honest limitations
 
-1. **Installer artifact and checksum now exist** (final 3.2.0 build, 129,446,526 B, SHA-256 `7B0D…`; `SHA256SUMS` in both locations). Remaining supply-chain gap: no signature and no independent third-party reproducible build.
+1. **Installer artifact and checksum now exist** (final 3.2.0 build, 129,447,101 B, SHA-256 `7B0D…`; `SHA256SUMS` in both locations). Remaining supply-chain gap: no signature and no independent third-party reproducible build.
 2. **No code signing certificate**; unsigned build is disclosed, not fixed. SmartScreen risk is real for end users.
 3. **SBOM scope is runtime JS/Node only** (`js-tiktoken`, Electron metadata); it does not enumerate Chromium/Node third-party packages shipped inside the Electron runtime. No SBOM for the Python baseline (not shipped) and no `pip-audit`/`safety` result in the repo.
 4. **License audit is not comprehensive/legal**: the repo has notices and inventory, but no per-transitive-license report for Electron/Chromium. Python dependency licenses rely on the user-supplied environment.

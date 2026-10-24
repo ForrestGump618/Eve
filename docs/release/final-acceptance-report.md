@@ -25,8 +25,8 @@ desktop takeover, durable harness and Windows release") · remote
 
 | Item | Value |
 | --- | --- |
-| Installer (delivered) | `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,446,526 B** — SHA256 **`7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`** — built 2026-10-24T19:16:10Z — **UNSIGNED** (no certificate; SmartScreen warning expected) |
-| Blockmap | `SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,974 B — SHA256 `BCD62E14C146F7B9E03E35A373FA7804DAD2AA38C8E5706C63EF0C108CDD1AC2` |
+| Installer (delivered) | `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,447,101 B** — SHA256 **`4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`** — built 2026-10-24T19:16:10Z — **UNSIGNED** (no certificate; SmartScreen warning expected) |
+| Blockmap | `SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B — SHA256 `283B27E19D2A943DD940B8E83F748CEB2627950A87CAD509069EFAE4230CBB72` |
 | Unpacked app | `release/win-unpacked/SuWen.exe` — 249,801,728 B — SHA256 `8F7EAF76FEB66A61E51D5F8B9B67EEFA375FEDD0018A5566D64C27F0570A22E1` |
 | Checksums | `desktop/release/SHA256SUMS` + committed mirror `docs/release/SHA256SUMS.txt` (3 lines, identical) |
 | Package version | 3.2.0 (`desktop/package.json`, package-lock root) |
@@ -68,7 +68,7 @@ desktop takeover, durable harness and Windows release") · remote
 
 | Item | Evidence |
 | --- | --- |
-| Chaos (short window) | `docs/verification/chaos-results.json`: **12/12 scenarios, 51.4 s** — worker SIGKILL retry (attempts 2), daemon SIGKILL mid-step recovered from durable lease (same operation id, 1 artifact), committed step not replayed, cancel → 0 artifacts, provider 429→500→200 with 2 human approvals + reconciliation events |
+| Chaos (short window) | `docs/verification/chaos-results.json`: **12/12 scenarios, 51.7 s** — worker SIGKILL retry (attempts 2), daemon SIGKILL mid-step recovered from durable lease (same operation id, 1 artifact), committed step not replayed, cancel → 0 artifacts, provider 429→500→200 with 2 human approvals + reconciliation events |
 | Endurance 8/24/72 h, reboot, power-loss, disk-full | **NOT RUN** — must stay NOT_VERIFIED (R050/R116) |
 | DB/context recovery | durable tests + 10-round ~201k-token compaction (round-2 evidence), versions/manual compaction/rollback; semantic losslessness not claimed |
 | Security audit | `docs/verification/security-review.md` + `scripts/security-scan.mjs`: **PASS — 0 HIGH / 18 LOW / 10 documented test fixtures**; `npm audit --omit=dev` 0 vulnerabilities; contextIsolation + sandbox renderer, CSP `connect-src 'none'`, sender/frame-checked IPC, path-confinement guards, safeStorage credentials, named-pipe random token. No OS-level CPU/memory/disk quotas (R144 NOT_STARTED) |
@@ -98,8 +98,8 @@ desktop takeover, durable harness and Windows release") · remote
 
 - Final test numbers: **150 tests / 148 pass / 0 fail / 2 skipped, 29.5 s, exit 0** (final 3.2.0 build)
 - RPC / smoke / UI: **42/0 ~7 s; 8/8 68 s; 19/0/12**
-- Final installer: **129,446,526 B**, SHA256 `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`
-  (+ blockmap 135,974 B `BCD62E14…`, unpacked 249,801,728 B `8F7EAF76…`; `SHA256SUMS` present)
+- Final installer: **129,447,101 B**, SHA256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`
+  (+ blockmap 135,948 B `283B27E1…`, unpacked 249,801,728 B `8F7EAF76…`; `SHA256SUMS` present)
 - CI run link/status: **NOT RUN**
 - GitHub Release URL/tag: **NOT CREATED** (blocked)
 - Clean-VM machine + steps: **NOT AVAILABLE**

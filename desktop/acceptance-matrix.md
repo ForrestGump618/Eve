@@ -19,7 +19,7 @@ Measured evidence and full caveats: `../docs/release/final-acceptance-report.md`
 | UI DOM QA / actions wiring | **Pass with warnings** — 19/0/12 (warnings = intentional main-process bridge methods); `actions.json` **144 actions**, coverage 91 daemon RPC / 10 main process / 43 UI-only / **0 unknown methods** |
 | Real public research DB calls | **Pass** — Europe PMC/PubMed `CRISPR base editing` PMID **42878939**; UniProt TP53 **Q9Y2B4** (release 2026_03), artifacts with sha256 |
 | Python research worker | **Pass for implemented scope** — v2.0.0 stdlib worker, 22/21 tests (1 Windows symlink skip), real demo.fcs metrics + sandboxed `runScript`; no scientific stacks/OS sandbox |
-| SQLite/durable state machine/lease/outbox/timers/checkpoints/budgets | **Implemented + short-window chaos tested** — 12/12 scenarios passed in 51.4 s (worker/daemon SIGKILL, idempotency, cancel, billing-unknown reconciliation); **8/24/72 h NOT run** |
+| SQLite/durable state machine/lease/outbox/timers/checkpoints/budgets | **Implemented + short-window chaos tested** — 12/12 scenarios passed in 51.7 s (worker/daemon SIGKILL, idempotency, cancel, billing-unknown reconciliation); **8/24/72 h NOT run** |
 | Context compaction / versions | **Pass for implemented behavior** — ten-round ~201k-token compaction, versions/manual compaction/rollback; semantic losslessness NOT claimed |
 | Two provider adapters | **Local HTTP protocol fixtures pass** — real external model accounts UNVERIFIED/BLOCKED_EXTERNAL |
 | MCP / Skill registries | **Pass at registry/scan/install/test level** — no live third-party repo install exercise; 23 legacy scientific skills NOT migrated into the new registry |
@@ -28,7 +28,7 @@ Measured evidence and full caveats: `../docs/release/final-acceptance-report.md`
 | Legacy data import | **Pass (backup-first, explicit)** — real legacy home read-only scan; apply idempotent, rollback 5/5 unit tests; user data untouched; no automatic migration |
 | Optional legacy Python workbench | **Unavailable on this host** (Python lacks `fastapi`) — source preserved under `resources/legacy`; not a pass |
 | Branding | **Pass** — 983 raw hits / 143 files, 0 requiring change; all retained hits documented legacy-compat paths/fields |
-| Build / installer artifacts | **Pass** — NSIS x64 installer `release/SuWen-Setup-3.2.0-win-x64.exe`, **129,446,526 B**, SHA-256 `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`, blockmap 135,974 B, unpacked exe hash verified; **UNSIGNED** |
+| Build / installer artifacts | **Pass** — NSIS x64 installer `release/SuWen-Setup-3.2.0-win-x64.exe`, **129,447,101 B**, SHA-256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`, blockmap 135,948 B, unpacked exe hash verified; **UNSIGNED** |
 | Install/upgrade/uninstall lifecycle | **Host probe PASS** — final-artifact lifecycle **12/12** (install, version metadata, running app, authenticated daemon attach, daemon survives UI close, reinstall, uninstall, user-data preservation) and upgrade source `3.0.0-preview.1` installed PASS; **clean-VM lifecycle NOT verified** |
 | `SHA256SUMS` / Windows CI execution | **`SHA256SUMS` present** (`release/SHA256SUMS`, mirrored `docs/release/SHA256SUMS.txt`); Windows CI workflow exists but was **never executed** |
 | Security | **Pass for implemented layer** — contextIsolation/sandbox renderer, CSP, schema IPC/sender checks, path guards, safeStorage, timing-safe token; scan PASS 0 HIGH/18 LOW/10 test fixtures; npm audit 0; full OS sandbox/quotas NOT implemented |

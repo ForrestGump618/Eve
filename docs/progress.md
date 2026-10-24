@@ -176,7 +176,7 @@ round-2 status; it never overwrites a previous measurement.
 ### Still open (honest blockers after the final round-3 evidence)
 
 1. **Endurance (G6):** 8/24/72 h, sleep/hibernate, power loss, OS reboot and disk-full were **not run**;
-   only short-window chaos 12/12 in 51.4 s is evidenced.
+   only short-window chaos 12/12 in 51.7 s is evidenced.
 2. **Clean-Windows-VM lifecycle (G8):** not run. Host lifecycle is 12/12 on the final 3.2.0 artifact
    (including installing 3.0.0-preview.1 and upgrading), but that is **not** a clean-machine test.
 3. **Code signing:** BLOCKED_EXTERNAL — no certificate; installer UNSIGNED (SmartScreen risk disclosed).
@@ -199,13 +199,13 @@ No row may be marked IMPLEMENTED_PASS without executed evidence; the CSV remains
 All numbers below were measured on the final 3.2.0 build in the TARGET workspace
 (`C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`).
 
-- Final installer: `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,446,526 bytes** — SHA-256
-  `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` — **UNSIGNED**. Blockmap 135,974 B; unpacked `win-unpacked/SuWen.exe` 249,801,728 B;
+- Final installer: `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,447,101 bytes** — SHA-256
+  `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` — **UNSIGNED**. Blockmap 135,948 B; unpacked `win-unpacked/SuWen.exe` 249,801,728 B;
   `SHA256SUMS` written to `desktop/release/SHA256SUMS` and mirrored at `docs/release/SHA256SUMS.txt`.
 - Final tests: `npm test` 182 tests / 180 pass / 0 fail / 2 skipped / 33.4 s / exit 0;
   `e2e-rpc --live` 42/0 (real Europe PMC PMID 42878939 + UniProt Q9Y2B4); packaged smoke 8/8;
   UI DOM QA 19/0/12; T1 stream-core 23/23; T2 visual audit 144-shot matrix / 0 layout defects;
-  T3 deterministic 19 PASS / 0 FAIL / 3 live-gated SKIP + live 21/21; chaos 12/12 in 51.4 s;
+  T3 deterministic 19 PASS / 0 FAIL / 3 live-gated SKIP + live 21/21; chaos 12/12 in 51.7 s;
   host installer lifecycle 12/12 including installing 3.0.0-preview.1 and upgrading to 3.2.0.
 - Machine-readable state: `master-requirements.csv` 98 rows — **81 IMPLEMENTED_PASS / 12 UNVERIFIED /
   4 NOT_STARTED / 1 BLOCKED_EXTERNAL**; `feature-parity-matrix.csv` 85 rows (67/6/9/1/1/1);

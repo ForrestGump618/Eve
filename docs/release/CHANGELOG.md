@@ -116,8 +116,8 @@ Final build measured in the TARGET workspace (evidence: `docs/verification/`, `d
 
 ### Verified
 - `npx tsc --noEmit` exit 0; `npm run build` exit 0; full suite 150 tests / 148 pass / 0 fail / 2 skipped,
-  29.5 s; RPC E2E 42/0 (~7 s); packaged smoke 8/8 (68 s); UI DOM QA 19/0/12; chaos 12/12 (51.4 s);
-  installer 129,446,526 B SHA256 `7B0DDE7B…`; host installer lifecycle 12/12 + upgrade source pass.
+  29.5 s; RPC E2E 42/0 (~7 s); packaged smoke 8/8 (68 s); UI DOM QA 19/0/12; chaos 12/12 (51.7 s);
+  installer 129,447,101 B SHA256 `4590B7F3…`; host installer lifecycle 12/12 + upgrade source pass.
 
 ### Known limitations
 - Installer UNSIGNED; clean-Windows-VM lifecycle NOT run; 8/24/72 h endurance, reboot and power-loss NOT run;

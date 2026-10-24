@@ -22,7 +22,7 @@ Anything not executed is listed as **NOT RUN** and must not be counted as passed
 | 8 | Python research-worker tests (`node --test` research-worker suite) | **22 tests / 21 pass / 1 skip** | — | 0 |
 | 9 | `node scripts/chaos-smoke.mjs` (short-window real fault injection) | **12/12 scenarios passed** (`result: passed`), incl. injected provider 429/500 retried with human approvals and billing-unknown reconciliation | 52.2 s | 0 |
 | 10 | Installer lifecycle on the FINAL artifact (`docs/verification/artifacts/installer-lifecycle.json`) | **14/14 steps passed** (install 18 s, exe version 3.1.0, running app, authenticated daemon attach `mode user-background`, daemon survives UI close, reinstall 24 s, uninstall 11 s, data preserved) | — | 0 (host probe) |
-| 11 | Cross-version upgrade `3.0.0-preview.1 → 3.1.0` (`docs/verification/artifacts/upgrade-path.json`) | **8/8 steps passed**: old install, upgrade install, registry/FileVersion 3.1.0, upgraded app + daemon health 3.1.0, uninstall, install-dir removed | — | 0 (host probe) |
+| 11 | Cross-version upgrade `3.0.0-preview.1 → 3.2.0` (`installer-lifecycle.json`: `upgrade_install_old`, `upgrade_old_exe` then final install; `upgrade-path.json` is superseded 3.1.0 evidence) | **PASS**: old 3.0.0-preview.1 install + display version, then final 3.2.0 install/start/daemon health/uninstall | — | 0 (host probe) |
 
 ## 2. Typecheck / build / unit+integration suite
 
@@ -133,7 +133,7 @@ Explicit non-passes recorded by the smoke run:
   exit 0 (24 s), silent uninstall exit 0 (11 s), install dir removed, user data preserved,
   registry entry removed.
 - **Cross-version upgrade `3.0.0-preview.1 → 3.1.0` PASSED (8/8)** — artifact
-  `docs/verification/artifacts/upgrade-path.json` (`2026-10-24T17:46:42Z`): old install exit 0
+  `docs/verification/artifacts/installer-lifecycle.json` (`2026-10-24T20:01:24Z`, final 3.2.0 artifact): `upgrade_source` INFO + `upgrade_install_old`/`upgrade_old_exe` PASS then final install/start/uninstall PASS; `upgrade-path.json` (`2026-10-24T17:46:42Z`, 3.1.0) is historical/superseded. Old upgrade run: old install exit 0
   (registry + FileVersion 3.0.0-preview.1), upgrade install exit 0, registry and exe become 3.1.0,
   upgraded app starts with daemon health version 3.1.0, uninstall exit 0, install dir removed.
   Only that upgrade path was tested (no other release line exists).
