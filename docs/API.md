@@ -1774,7 +1774,7 @@ queued → preparing → running ⇄ waiting_approval
 | 子智能体嵌套深度上限 | 2 | `max_child_depth`（1–4） |
 | 内核作用域数量上限 | 4 | `max_workspace_scopes`（1–16） |
 
-子任务有独立 trace 与独立内核作用域（`task:<task_id>`），预算 `budget` 描述迭代/时间/token 上限；
+子任务有独立 trace 与独立内核作用域（`task:<task_id>`），`budget` 仅记录运行时派生层级；步骤、工具和 Token 上限按回合自动施加，见 [自动回合治理](TURN-GOVERNANCE.md)；
 结果契约为 `{"task_id","status","summary","artifact_refs","evidence_refs","warnings","error","usage"}`。
 子任务失败时父运行收到 `ok=false` 的工具结果，**不会**被包装成成功；父运行取消会级联取消整棵子树。
 子任务详情字段：
@@ -1791,7 +1791,7 @@ queued → preparing → running ⇄ waiting_approval
   "created_at": "2026-10-23T06:12:30+00:00",
   "updated_at": "2026-10-23T06:13:10+00:00",
   "ended_at": "2026-10-23T06:13:10+00:00",
-  "budget": {"max_iterations": 6, "timeout_s": 300, "max_tokens": 40000},
+  "budget": {"depth": 1, "max_depth": 2},
   "result": {"text": "...", "usage": {...}, "finish_reason": "stop", "duration_ms": 40000},
   "error": null,
   "position": 0
@@ -1919,3 +1919,16 @@ SSH 工作区的文件操作请走 §15 的 SSH 端点或智能体工具。
 ---
 
 本文件对应 Suwen 2.0.0。正文中的“1.2.0 起”表示该能力首次引入的版本。
+
+
+## 2.1.1：自动治理与微信扫码
+
+运行快照新增 `stop_reason`，SSE 新增 `stop_reason` 与 `resource_degraded` 事件。旧 `max_iterations` 更新项不再接受；资源阈值由每轮代码策略管理。受控停止记为 `interrupted`，不会作为成功工作流节点继续执行。
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| POST | `/api/platform/channels/wechat/login?scope=ws_main` | 获取真实二维码，body 可含 name / agent / allow_send（默认 false） |
+| POST | `/api/platform/channels/wechat/login/{id}/status?scope=ws_main` | 查询状态，可传 verify_code；确认后返回 channel_id，不返回 Token |
+| DELETE | `/api/platform/channels/wechat/login/{id}?scope=ws_main` | 取消等待 |
+
+二维码登录按当前工作区隔离。登录成功后复用现有 channels test/send、联系人授权、消息去重与受限任务机制。操作步骤见 [消息渠道设置](CHANNELS.md)。

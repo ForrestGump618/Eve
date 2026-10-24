@@ -13,6 +13,8 @@ from ..config import Settings
 from .context import build_system_prompt
 from .providers import LLMError, ProviderConfig, make_provider
 from .types import AgentCancelled, AgentEvent, ChatMessage, Conversation, ToolResult, new_id
+from .governance import TurnGuard, TurnPolicy
+from .streaming import merged_stream
 
 if TYPE_CHECKING:  # pragma: no cover
     from ..kernel.manager import KernelService
@@ -143,10 +145,19 @@ class AgentLoop:
                 extra_system=extra_system,
             )
         except AgentCancelled:
+            reason = {"code": "cancelled", "message": "用户取消本轮执行"}
+            conv.meta["stop_reason"] = reason
+            await emit(AgentEvent("stop_reason", reason))
             if recorder is not None:
                 recorder.finish("cancelled", error="用户取消")
             self._save(conv)
             raise
+        except Exception as exc:
+            reason = {"code": "runtime_error", "message": str(exc)}
+            conv.meta["stop_reason"] = reason
+            await emit(AgentEvent("stop_reason", reason))
+            result = {"finish_reason": "error", "text": "本轮执行异常，详情已记录。", "stop_reason": reason,
+                      "error": {"code": "runtime_error", "message": str(exc)}}
         if recorder is not None:
             recorder.finish(
                 result.get("finish_reason", "done") if isinstance(result, dict) else "done",
@@ -155,7 +166,7 @@ class AgentLoop:
             )
         self._save(conv)
         platform = getattr(self.registry, "platform", None)
-        if platform is not None and result.get("finish_reason") == "stop":
+        if platform is not None and result.get("finish_reason") == "stop" and result.get("stop_reason", {}).get("code") == "completed":
             import re
             workspace_id = getattr(getattr(backend, "workspace", None), "workspace_id", "ws_main")
             from ..suwen.biomedical import is_research
@@ -165,8 +176,10 @@ class AgentLoop:
             if gate["status"] == "needs_review":
                 note = "\n\n[证据门禁：待复核] 计算或回答已完成，但生物学结论尚未通过证据复核。请在“科研与证据”中检查来源、指标与局限。"
                 result["text"] = result.get("text", "") + note
-                if conv.messages and conv.messages[-1].role == "assistant":
-                    conv.messages[-1].content += note
+                for message in reversed(conv.messages):
+                    if message.role == "assistant":
+                        message.content += note
+                        break
                 await emit(AgentEvent("text", {"delta": note}))
                 await emit(AgentEvent("status", {"text": "证据待复核", "evidence_gate": gate}))
             self._save(conv)
@@ -366,21 +379,41 @@ class AgentLoop:
             tools = [tool for tool in tools if not tool["function"]["name"].startswith("mcp_") or any(
                 platform.mcp.allowed(server, workspace_id, agent.id) and tool["function"]["name"].startswith(server["id"]+"__")
                 for server in platform.store.list("mcp"))]
-            budget = platform.config.get("budget", workspace_id)["value"]
-            max_iterations = min(max_iterations or self.settings.max_iterations, budget["max_iterations"])
-        limit = int(max_iterations or self.settings.max_iterations or 24)
+        # Per-turn built-ins; legacy user iteration/cost settings cannot weaken or exhaust them.
+        guard = TurnGuard(TurnPolicy(steps=min(24, max_iterations) if max_iterations else 24))
         total_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
         tool_call_count = 0
-        repeated_signature = ""
-        repeated_count = 0
         last_text = ""
-        finish_reason = "stop"
+        degraded_notified = False
 
-        for iteration in range(limit):
+        async def settle(code, message="", *, error=None):
+            reason = {"code": code, "message": message or "本轮正常完成", "counters": guard.snapshot()}
+            if code != "completed":
+                from ..suwen.store import redact
+                reason["diagnostics"] = {"attempted_calls": [{"name": a["name"], "arguments_preview": _truncate(json.dumps(redact(a["arguments"]), ensure_ascii=False), 256)} for a in guard.attempted[-8:]],
+                                         "recovery": guard.last_recovery}
+                if code == "no_progress" and guard.last_recovery:
+                    message += " " + guard.last_recovery["strategy"]
+                    reason["message"] = message
+            conv.meta["stop_reason"] = reason
+            conv.messages.append(ChatMessage(role="system", content=json.dumps(reason, ensure_ascii=False), meta={"kind": "stop_reason"}))
+            await emit(AgentEvent("stop_reason", reason))
+            output = last_text
+            if message and code != "completed":
+                note = f"\n\n[本轮停止：{code}] {message}"
+                output += note
+                conv.messages.append(ChatMessage(role="assistant", content=note, meta={"stop_reason": reason}))
+                await emit(AgentEvent("text", {"delta": note}))
+            self._save(conv)
+            return {"finish_reason": "error" if error else "stop", "text": output, "usage": total_usage,
+                    "tool_calls": tool_call_count, "stop_reason": reason, **({"error": error} if error else {})}
+
+        iteration = 0
+        while True:
             self._check_cancel(cancel_event)
-            if platform is not None:
-                platform.models.check_budget(workspace_id, task=run_id or conv.id)
-                platform.models.check_budget(workspace_id)
+            blocked = guard.pre_step()
+            if blocked:
+                return await settle(blocked, "运行时已阻止下一次模型请求。连续重复、调用数量、用量或时长已达到本轮内置限制；已完成的工具结果保留，可从诊断继续。")
             if steer is not None:
                 try:
                     incoming = list(steer() or [])
@@ -400,13 +433,28 @@ class AgentLoop:
                 AgentEvent("status", {"text": f"{agent.name} 正在思考…" if iteration == 0 else "继续处理…"})
             )
             messages = self._build_messages(system, conv.messages)
+            from dataclasses import replace
+            output_cap = min(cfg.max_tokens or 4096, 4096, max(1, guard.policy.tokens-guard.tokens))
+            if guard.degraded:
+                output_cap = min(output_cap, 1024)
+                for item in messages:
+                    if item.get("role") == "tool":
+                        item["content"] = _truncate(item.get("content", ""), 2000)
+                if not degraded_notified:
+                    await emit(AgentEvent("resource_degraded", {"strategy": "compact_tool_results", "max_output_tokens": output_cap, "counters": guard.snapshot()}))
+                    degraded_notified = True
+            request_cfg = replace(cfg, max_tokens=output_cap)
 
             text_parts: list[str] = []
             reasoning_parts: list[str] = []
             round_tool_calls: list[dict[str, Any]] = []
             finish = "stop"
+            stream_stop = ""
+            usage_received = False
             try:
-                async for event in llm.stream_chat(messages, tools, cfg):
+                async for event in merged_stream(llm.stream_chat(messages, [] if guard.finalizing else tools, request_cfg),
+                                                cancel_event=cancel_event,
+                                                duration=min(120, max(.01, guard.policy.seconds-(time.monotonic()-guard.started)))):
                     self._check_cancel(cancel_event)
                     etype = event.get("type")
                     if etype == "text":
@@ -420,11 +468,15 @@ class AgentLoop:
                             reasoning_parts.append(delta)
                             await emit(AgentEvent("reasoning", {"delta": delta}))
                     elif etype == "tool_calls":
-                        round_tool_calls = list(event.get("tool_calls") or [])
+                        round_tool_calls = list(event.get("tool_calls") or [])[:guard.policy.tools+1]
                     elif etype == "usage":
                         usage = event.get("usage") or {}
+                        usage_received = True
+                        guard.add_usage(usage)
                         for key in total_usage:
                             total_usage[key] += int(usage.get(key) or 0)
+                    elif etype == "stream_stop":
+                        stream_stop = str(event["reason"])
                     elif etype == "done":
                         finish = str(event.get("finish_reason") or "stop")
             except AgentCancelled:
@@ -440,21 +492,29 @@ class AgentLoop:
                     ChatMessage(role="error", content=message, meta={"kind": "llm", "retryable": exc.retryable})
                 )
                 self._save(conv)
-                return {
-                    "finish_reason": "error",
-                    "text": "".join(text_parts),
-                    "usage": total_usage,
-                    "tool_calls": tool_call_count,
-                    "error": {
+                last_text = "".join(text_parts)
+                return await settle("llm_error", message, error={
                         "message": message,
                         "code": "llm_error",
                         "retryable": bool(exc.retryable),
-                    },
-                }
+                    })
 
             text = "".join(text_parts)
+            if not usage_received:
+                # Providers may omit usage or lose the final packet after truncation.
+                # A conservative local estimate still consumes the automatic allowance.
+                estimated = {"prompt_tokens": max(1, len(json.dumps(messages, ensure_ascii=False))//2),
+                             "completion_tokens": max(1, len(text+"".join(reasoning_parts)+json.dumps(round_tool_calls))//2)}
+                estimated["total_tokens"] = estimated["prompt_tokens"]+estimated["completion_tokens"]
+                guard.add_usage(estimated)
+                for key in total_usage:
+                    total_usage[key] += estimated[key]
+                await emit(AgentEvent("usage", {**estimated, "source": "local_estimate", "estimated": True}))
             if text:
                 last_text = text
+            if stream_stop:
+                self._append_assistant(conv, text, [], reasoning_parts, interrupted=True)
+                return await settle(stream_stop, "模型流已由管道截断并完成收尾，未执行本次未完成的工具请求；请检查已保留的结果。")
             if total_usage["total_tokens"]:
                 await emit(
                     AgentEvent(
@@ -469,14 +529,6 @@ class AgentLoop:
                 )
 
             if round_tool_calls:
-                signature = json.dumps([call.get('function', {}) for call in round_tool_calls], sort_keys=True, ensure_ascii=False)
-                repeated_count = repeated_count + 1 if signature == repeated_signature else 1
-                repeated_signature = signature
-                if repeated_count >= 3:
-                    message = '已阻止连续重复的相同工具调用。请检查工具结果、输入是否变化以及剩余预算后再继续。'
-                    await emit(AgentEvent('error', {'message': message, 'retryable': False}))
-                    return {'finish_reason': 'error', 'text': last_text, 'usage': total_usage,
-                            'tool_calls': tool_call_count, 'error': {'message': message, 'code': 'repeated_tool_loop'}}
                 self._append_assistant(conv, text, round_tool_calls, reasoning_parts)
                 self._save(conv)
                 run_sub = None
@@ -500,31 +552,20 @@ class AgentLoop:
                         workspace=workspace,
                         backend=backend,
                         agent_task_id=agent_task_id,
+                        turn_guard=guard,
                     )
                 self._save(conv)
+                if guard.finalizing:
+                    return await settle(guard.final_reason or "tool_budget", "模型在收尾阶段仍请求工具，运行时已拒绝；现有结果已保存。")
+                if guard.final_reason:
+                    guard.finalizing = True
+                iteration += 1
                 continue
 
             self._append_assistant(conv, text, [], reasoning_parts)
             self._save(conv)
-            finish_reason = "stop" if finish in ("stop", "end_turn", "") else finish
-            return {"finish_reason": finish_reason, "text": last_text, "usage": total_usage,
-                    "tool_calls": tool_call_count}
-
-        message = f"已达到单轮最大迭代次数（{limit}），任务可能尚未完成。请拆解任务后继续。"
-        await emit(AgentEvent("error", {"message": message, "detail": "", "retryable": False}))
-        conv.messages.append(ChatMessage(role="error", content=message, meta={"kind": "max_iterations"}))
-        self._save(conv)
-        return {
-            "finish_reason": "max_iterations",
-            "text": last_text,
-            "usage": total_usage,
-            "tool_calls": tool_call_count,
-            "error": {
-                "message": message,
-                "code": "max_iterations",
-                "retryable": False,
-            },
-        }
+            code = guard.final_reason or ("completed" if finish in ("stop", "end_turn", "") else "provider_"+finish)
+            return await settle(code, "本轮资源限制已触发，以上为已完成部分。" if guard.final_reason else "" if code == "completed" else "模型返回了非正常完成状态，已保存输出。")
 
     async def _execute_tool(
         self,
@@ -541,6 +582,7 @@ class AgentLoop:
         workspace: Any | None = None,
         backend: Any | None = None,
         agent_task_id: str | None = None,
+        turn_guard: TurnGuard | None = None,
     ) -> None:
         fn = tc.get("function") or {}
         name = str(fn.get("name") or "")
@@ -584,12 +626,21 @@ class AgentLoop:
             agent_task_id=agent_task_id,
         )
         started = time.perf_counter()
+        ctx.turn_guard = turn_guard
         result: ToolResult
         if parse_error:
             result = ToolResult(
                 tool_call_id=call_id, name=name, ok=False, content=parse_error,
                 data={"parse_error": True}, duration_ms=0, error=parse_error,
             )
+            if turn_guard is not None:
+                invalid_args = {"_invalid_json": str(raw_args)[:1000]}
+                refused, slot = turn_guard.before(ctx, name, invalid_args)
+                if refused is not None:
+                    result = refused
+                else:
+                    turn_guard.observe(ctx, name, invalid_args, slot, result)
+                    turn_guard.inflight.discard(slot)
         else:
             await emit(AgentEvent("status", {"text": f"正在执行工具 {name}…"}))
             try:
@@ -762,7 +813,7 @@ class AgentLoop:
                 provider=provider,
                 model=model,
                 persist=False,
-                max_iterations=min(10, int(self.settings.max_iterations or 24)),
+                max_iterations=10,
                 allow_delegate=False,
             )
         except AgentCancelled:

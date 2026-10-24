@@ -59,6 +59,7 @@ def run_snapshot(row: dict[str, Any], *, children: list[dict[str, Any]] | None =
         "ended_at": row.get("ended_at"),
         "last_activity": row.get("last_activity"),
         "finish_reason": row.get("finish_reason"),
+        "stop_reason": (row.get("meta") or {}).get("stop_reason"),
         "error": row.get("error"),
         "usage": row.get("usage") or {},
         "result_text": row.get("result_text") or "",
@@ -343,6 +344,9 @@ class RunService:
             elif finish_reason in {"error", "max_iterations"}:
                 status = "failed"
                 error = {"message": (result.get("error") or {}).get("message") if isinstance(result.get("error"), dict) else result.get("error") or "运行失败", "code": finish_reason}
+            elif result.get("stop_reason", {}).get("code", "completed") != "completed":
+                status = "interrupted"
+                finish_reason = result["stop_reason"]["code"]
             else:
                 status = "succeeded"
         except AgentCancelled:
@@ -369,6 +373,14 @@ class RunService:
             handle.status = status
             ended = utc_now()
             try:
+                row = self.events.get_run(handle.run_id)
+                if not (row.get("meta") or {}).get("stop_reason"):
+                    await self._on_loop_event(handle, AgentEvent("stop_reason", {
+                        "code": finish_reason or status, "message": str((error or {}).get("message") or status),
+                    }))
+            except Exception:
+                logger.exception("写入停止原因失败")
+            try:
                 self.events.update_run(
                     handle.run_id,
                     status=status,
@@ -389,6 +401,7 @@ class RunService:
                         "run_id": handle.run_id,
                         "session_id": handle.session_id,
                         "finish_reason": finish_reason or status,
+                        "stop_reason": (self.events.get_run(handle.run_id).get("meta") or {}).get("stop_reason"),
                         "status": status,
                     },
                 )
@@ -432,6 +445,9 @@ class RunService:
         if event_type == "approval_request":
             handle.status = "waiting_approval"
             self._persist_approval(handle, data)
+        elif event_type == "stop_reason":
+            row = self.events.get_run(handle.run_id)
+            self.events.update_run(handle.run_id, meta=dict(row.get("meta") or {}, stop_reason=data))
         elif event_type in {"approval_resolved", "tool_result", "text", "reasoning", "tool_call"}:
             if handle.status == "waiting_approval":
                 handle.status = "running"
@@ -859,6 +875,9 @@ class RunService:
                 status = "failed"
                 err = result.get("error")
                 error = err if isinstance(err, dict) else {"message": str(err or "子任务失败"), "code": finish_reason}
+            elif result.get("stop_reason", {}).get("code", "completed") != "completed":
+                status = "interrupted"
+                finish_reason = result["stop_reason"]["code"]
             else:
                 status = "succeeded"
         except AgentCancelled:
@@ -883,6 +902,14 @@ class RunService:
             error = {"message": str(exc), "code": "internal_error"}
         finally:
             ended = utc_now()
+            try:
+                row = self.events.get_run(handle.run_id)
+                if not (row.get("meta") or {}).get("stop_reason"):
+                    await self._on_loop_event(handle, AgentEvent("stop_reason", {
+                        "code": finish_reason or status, "message": str((error or {}).get("message") or status),
+                    }))
+            except Exception:
+                logger.exception("写入停止原因失败")
             duration_ms = int((time.monotonic() - started) * 1000)
             handle.status = status
             try:
@@ -916,6 +943,7 @@ class RunService:
                         "run_id": handle.run_id,
                         "session_id": handle.session_id,
                         "finish_reason": finish_reason or status,
+                        "stop_reason": (self.events.get_run(handle.run_id).get("meta") or {}).get("stop_reason"),
                         "status": status,
                         "agent_task_id": task["task_id"],
                     },

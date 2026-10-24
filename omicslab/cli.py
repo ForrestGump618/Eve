@@ -481,7 +481,6 @@ def cmd_config(args: argparse.Namespace) -> int:
         "api_base": settings.api_base,
         "temperature": settings.temperature,
         "max_tokens": settings.max_tokens,
-        "max_iterations": settings.max_iterations,
         "approval_policy": settings.approval_policy,
         "allow_shell": settings.allow_shell,
         "allow_file_write": settings.allow_file_write,

@@ -176,6 +176,27 @@ async def test_run_service_success_and_idempotency(settings: Settings, events: E
 
 
 @pytest.mark.asyncio()
+async def test_controlled_stop_settles_with_diagnostics_and_never_claims_success(settings, events):
+    class StoppedLoop:
+        async def run(self, conv, message, **kwargs):
+            reason = {"code":"no_progress", "message":"missing directory", "counters":{"tool_calls":6}}
+            await kwargs['emit'](AgentEvent('stop_reason', reason))
+            return {"finish_reason":"stop", "text":"目录不存在，已停止重试。", "stop_reason":reason}
+    conv = ConversationStore(settings).create(agent='lead', title='stopped')
+    service = _service(settings, events, StoppedLoop())
+    submitted = await service.submit(session_id=conv.id, message='inspect')
+    run_id = submitted['run']['run_id']
+    row = await _wait_terminal(events, run_id)
+    assert row['status']=='interrupted'
+    assert row['finish_reason']=='no_progress'
+    assert row['meta']['stop_reason']['counters']['tool_calls']==6
+    assert service.snapshot(run_id)['stop_reason']['code']=='no_progress'
+    trace = events.list_events(row['trace_id'])
+    done = next(e for e in trace if e['type']=='done')
+    assert done['data']['stop_reason']['code']=='no_progress'
+
+
+@pytest.mark.asyncio()
 async def test_run_service_rejects_second_active_run(settings: Settings, events: EventStore) -> None:
     store = ConversationStore(settings)
     conv = store.create(agent="lead", title="t")

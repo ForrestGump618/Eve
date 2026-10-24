@@ -45,7 +45,6 @@ def public_settings(settings: Settings) -> dict[str, Any]:
         "api_base": settings.api_base,
         "temperature": settings.temperature,
         "max_tokens": settings.max_tokens,
-        "max_iterations": settings.max_iterations,
         "request_timeout_s": settings.request_timeout_s,
         "kernel_python": settings.kernel_python,
         "kernel_timeout_s": settings.kernel_timeout_s,

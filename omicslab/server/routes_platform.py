@@ -45,11 +45,11 @@ def guarded(fn):
 @router.get('/bootstrap')
 async def bootstrap(request:Request,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope)
-    return {'brand':'素问 Suwen','version':'2.1.0','schema_version':2,'scope':scope,
+    return {'brand':'素问 Suwen','version':'2.1.1','schema_version':2,'scope':scope,
         'settings':{key:p.config.get(key,scope) for key in DEFAULTS},
         'sections':list(DEFAULTS),'migration':redact(p.store.get('migration','v2')),
         'scientific':SCIENTIFIC,'capabilities':{'persistent_tasks':True,'mcp':['stdio','http'],'knowledge':['text','markdown','docx','pdf_optional'],
-          'channels':['webchat','telegram'],'os_sandbox':p.sandbox.status(),'multiuser_rbac':False}}
+          'channels':['webchat','telegram','wechat'],'os_sandbox':p.sandbox.status(),'multiuser_rbac':False}}
 
 
 @router.get('/config/{section}')
@@ -141,6 +141,7 @@ async def registry_list(request:Request,kind:str,scope:str='ws_main'):
     if kind=='skill':return {'items':p.skills.installed(scope),'scientific':SCIENTIFIC}
     items=p.store.list(kind,'global' if kind in {'mcp','channel','agent'} else scope)
     if kind=='mcp':items=[dict(r,status=p.store.get('mcp_status',r['id'])) for r in items]
+    if kind=='channel':items=[dict(r,connection=p.store.get('channel_status',r['id'])) for r in items if r.get('workspace')==scope]
     return {'items':redact(items)}
 
 
@@ -329,6 +330,22 @@ async def review(request:Request,scope:str='ws_main'):
 
 @router.post('/channels/{id}/test')
 async def channel_test(request:Request,id:str):return await platform(request).channels.test(id)
+
+
+@router.post('/channels/wechat/login')
+async def wechat_login(request:Request,scope:str='ws_main'):
+    return await platform(request).channels.wechat.begin(scope,await body(request))
+
+
+@router.post('/channels/wechat/login/{id}/status')
+async def wechat_login_status(request:Request,id:str,scope:str='ws_main'):
+    data=await body(request)
+    return await platform(request).channels.wechat.status(id,scope,str(data.get('verify_code') or ''))
+
+
+@router.delete('/channels/wechat/login/{id}')
+async def wechat_login_cancel(request:Request,id:str,scope:str='ws_main'):
+    return platform(request).channels.wechat.cancel(id,scope)
 
 
 @router.post('/channels/{id}/send')

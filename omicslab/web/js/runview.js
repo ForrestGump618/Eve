@@ -6,10 +6,10 @@
  * chat live bubble, the session run list and child task cards.
  */
 
-import { api, errorMessage } from './api.js?v=2.1.0';
-import { icon } from './icons.js?v=2.1.0';
-import { esc, escAttr, cleanValue, fmtClock, fmtDuration, truncate } from './util.js?v=2.1.0';
-import { openModal, spinnerHtml, toastError, toastSuccess, toastWarn } from './ui.js?v=2.1.0';
+import { api, errorMessage } from './api.js?v=2.1.1';
+import { icon } from './icons.js?v=2.1.1';
+import { esc, escAttr, cleanValue, fmtClock, fmtDuration, truncate } from './util.js?v=2.1.1';
+import { openModal, spinnerHtml, toastError, toastSuccess, toastWarn } from './ui.js?v=2.1.1';
 
 const RUN_LABELS = {
   queued: '排队中',
@@ -43,6 +43,8 @@ const EVENT_META = {
   figure: { icon: 'figures', title: '图表', cls: 'is-figure' },
   usage: { icon: 'cpu', title: '用量', cls: 'is-usage' },
   error: { icon: 'alert', title: '错误', cls: 'is-error' },
+  stop_reason: { icon: 'shield', title: '停止原因', cls: 'is-status' },
+  resource_degraded: { icon: 'cpu', title: '自动资源降级', cls: 'is-status' },
   done: { icon: 'checkCircle', title: '结束', cls: 'is-done' },
   user_message: { icon: 'chat', title: '用户消息', cls: 'is-user' },
   heartbeat: { icon: 'dot', title: '心跳', cls: 'is-heartbeat' },
@@ -88,6 +90,10 @@ function payloadSummary(event) {
       return data.total_tokens != null ? `共 ${data.total_tokens} tokens` : '用量更新';
     case 'error':
       return data.message || '运行出错';
+    case 'stop_reason':
+      return `${data.code || ''} · ${data.message || ''}`;
+    case 'resource_degraded':
+      return '接近本轮用量限制，已缩短输出并裁剪工具结果。';
     case 'done':
       return `结束：${runLabel(data.status)}${data.finish_reason ? ` · ${data.finish_reason}` : ''}`;
     case 'user_message':

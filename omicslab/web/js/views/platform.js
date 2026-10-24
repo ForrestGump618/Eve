@@ -1,13 +1,14 @@
 /** Suwen platform: every control talks to a real, scoped service. */
-import { api, errorMessage } from '../api.js?v=2.1.0';
-import { getState, navigate } from '../store.js?v=2.1.0';
-import { esc, escAttr, getPref, setPref } from '../util.js?v=2.1.0';
-import { icon } from '../icons.js?v=2.1.0';
-import { openModal, toastError, toastSuccess, toastWarn, confirmDialog, spinnerHtml } from '../ui.js?v=2.1.0';
-import { applyAppearance } from '../suwen.js?v=2.1.0';
+import { api, errorMessage } from '../api.js?v=2.1.1';
+import { getState, navigate } from '../store.js?v=2.1.1';
+import { esc, escAttr, getPref, setPref } from '../util.js?v=2.1.1';
+import { icon } from '../icons.js?v=2.1.1';
+import { openModal, toastError, toastSuccess, toastWarn, confirmDialog, spinnerHtml } from '../ui.js?v=2.1.1';
+import { applyAppearance } from '../suwen.js?v=2.1.1';
+import { renderChannels } from './channel-setup.js?v=2.1.1';
 
 const GROUPS={
- settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','预算与资源','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']],
+ settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']],
  extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']],
  tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']],
  knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']],
@@ -30,7 +31,7 @@ export async function mount(root){
  const listen=(type,handler)=>root.addEventListener(type,handler,{signal:events.signal});
  const route=GROUPS[getState().route]?getState().route:'settings';
  const groups=GROUPS[route];const [title,subtitle]=TITLES[route];
- let section=groups[0][0],disposed=false,timer=0,bootstrap,items=[],flow={name:'新工作流',nodes:[]};
+ let section=groups[0][0],disposed=false,timer=0,bootstrap,items=[],flow={name:'新工作流',nodes:[]},channelView=null;
  const scope=()=>getState().workspaceId||'ws_main';
  const request=(path,method='GET',body)=>api.request(`/api/platform${path}${path.includes('?')?'&':'?'}scope=${encodeURIComponent(scope())}`,{method,...(body===undefined?{}:{body}),timeout:180000});
  root.innerHTML=`<div class="sw-page"><header class="sw-page-head"><div><div class="sw-eyebrow">SUWEN / YOUR WORKSPACE</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><span class="sw-scope">${icon('folder',{size:14})}${esc(getState().workspace?.name||scope())}</span></header><div class="sw-center"><aside class="sw-secondary"><input class="input" id="sw-search" placeholder="搜索设置与能力…" aria-label="搜索设置与能力"/><nav>${groups.map(([key,label,ico])=>`<button class="sw-section ${key===section?'is-active':''}" data-section="${key}">${icon(ico,{size:16})}<span>${label}</span></button>`).join('')}</nav><div class="sw-local-note">${icon('shield',{size:16})}<span>当前工作区隔离<br/>外部操作由权限控制</span></div></aside><main class="sw-content" id="sw-content">${spinnerHtml('正在连接平台服务…')}</main></div></div>`;
@@ -42,12 +43,14 @@ export async function mount(root){
  async function save(key,value){await request(`/config/${key}`,'PUT',{value});toastSuccess('设置已保存，即时生效');bootstrap=await request('/bootstrap');applyAppearance(bootstrap.settings.appearance.value);}
  async function load(){
   if(disposed)return;
+  channelView?.destroy();channelView=null;
   content.innerHTML=spinnerHtml('正在读取…');
   try{
    if(!bootstrap)bootstrap=await request('/bootstrap');
    if(section==='models')await models();
    else if(['appearance','permissions','budget','vision','memory'].includes(section))await settings(section);
    else if(section==='advanced')await advanced();
+   else if(section==='channel')channelView=await renderChannels(content,{request,scope,reload:load});
    else if(section==='tasks')await tasks();
    else if(section==='debate')await debate();
    else if(section==='knowledge')await knowledge();
@@ -67,7 +70,7 @@ export async function mount(root){
   const c=await config(key);let html='';
   if(key==='appearance')html=`<div class="sw-form-grid">${select('主题','theme',[['system','跟随系统'],['light','浅色'],['dark','深色']],c.theme)}${select('字体','font',[['system','系统字体'],['sans','无衬线'],['mono','等宽']],c.font)}${field('字号','font-size',c.font_size,'','number')}${field('强调色','accent',c.accent,'','color')}${select('界面密度','density',[['comfortable','舒适'],['compact','紧凑']],c.density)}${field('圆角','radius',c.radius,'','number')}${select('工作模式','ui-mode',[['research','科研'],['minimal','极简'],['developer','开发者']],c.mode)}${select('默认首页','home',[['workbench','工作台'],['tasks2','任务中心'],['research','科研证据'],['knowledge','知识与记忆']],c.home)}${field('助手名称','agent-name',c.agent_name)}${field('助手头像（单个字符或 Emoji）','avatar',c.avatar)}${field('命令面板快捷键（Ctrl / ⌘ + 字母）','shortcut-palette',c.shortcuts?.palette||'k')}</div><p class="sw-muted">面板宽度和隐藏状态分别保存到当前工作区，可从工作台“布局”调整。</p>${button('reset-layout','恢复当前工作区布局')}`;
   if(key==='permissions')html=`<div class="sw-notice">权限在工具执行前检查。Python 与 Shell 仍有系统级能力，目录隔离不等于安全沙箱。可通过 sandbox_python 选择断网 Docker 隔离执行；需要可用的 Docker 与指定镜像。</div><div class="sw-form-grid">${Object.entries(c).filter(([k])=>k!=='tools').map(([k,v])=>select({files:'文件系统',shell:'Shell',network:'外部网络',browser:'浏览器',messages:'消息发送',mcp:'MCP',memory:'记忆',skills:'技能',agents:'Agent 协作',python:'Python',system:'环境信息',notebook:'Notebook',jobs:'后台进程'}[k]||k,'permission-'+k,[['deny','禁止使用'],['read_only','只读'],['ask','需确认'],['allow','允许执行']],v)).join('')}</div><details><summary>逐工具权限覆盖</summary>${area('工具名 → 权限','permission-tools',c.tools)}</details>`;
-  if(key==='budget')html=`<div class="sw-form-grid">${field('累计用量硬限制（Token）','budget-tokens',c.max_tokens,'','number')}${field('估算费用硬限制','budget-cost',c.max_cost,'','number')}${field('任务并发数','budget-concurrency',c.concurrency,'','number')}${field('每轮最大工具迭代','budget-iterations',c.max_iterations,'','number')}${field('预警比例','budget-warning',c.warn_ratio,'','number')}</div><p class="sw-muted">只有填写价格表的模型能估算费用；未配置价格显示未知，不将 0 费用当作免费。用量统计按工作区保留。</p><details><summary>自定义价格（每百万输入 / 输出 Token）</summary>${area('模型名 → input / output','budget-prices',c.prices)}</details>`;
+  if(key==='budget')html=`<div class="sw-notice">每轮自动管理步骤、工具调用和 Token 用量。接近限制时缩减输出与工具结果；连续无进展会提前停止。无需填写费用上限、用量额度或迭代次数，停止原因保存在运行记录中。</div><div class="sw-form-grid">${field('任务并发数','budget-concurrency',c.concurrency,'','number')}</div><details><summary>费用统计价格（可选，不影响自动停止策略）</summary>${area('模型名 → 每百万输入 / 输出 Token 价格','budget-prices',c.prices)}</details>`;
   if(key==='vision')html=`<label class="sw-check"><input type="checkbox" id="vision-enabled" ${c.enabled?'checked':''}/>启用独立视觉复核</label><label class="sw-check"><input type="checkbox" id="vision-auto" ${c.auto_review?'checked':''}/>图表生成后自动复核</label><div class="sw-form-grid">${field('视觉模型','vision-model',c.model)}${field('API Base URL','vision-base',c.api_base)}${field('加密凭据引用','vision-ref',c.credential_ref,'例如 vision')}${field('最多修正轮次','vision-repairs',c.max_repairs,'','number')}</div>${button('credential','保存视觉 API Key')}<p class="sw-muted">视觉模型可检查布局与文字；不能仅凭图片确认科学事实。缺少原始数据会标记人工复核。</p>`;
   if(key==='memory')html=`<label class="sw-check"><input type="checkbox" id="memory-enabled" ${c.enabled?'checked':''}/>启用当前工作区记忆</label><label class="sw-check"><input type="checkbox" id="memory-auto" ${c.auto_capture?'checked':''}/>选择性保存较长的任务结论（默认关闭）</label>${select('检索方式','memory-embedding',[['keyword','本地关键词与中文二元词检索'],['api','关键词 + 独立嵌入 API']],c.embedding)}<div class="sw-form-grid">${field('Embedding API Base URL','memory-url',c.embedding_url)}${field('Embedding 模型','memory-model',c.embedding_model)}${field('检索条数','memory-top',c.top_k,'','number')}${field('记忆有效天数','memory-retention',c.retention_days,'','number')}</div>${button('embedding-key','保存 Embedding API Key')}${button('reembed','重新嵌入当前工作区')}<p class="sw-muted">API 嵌入会向指定服务发送文本；敏感凭据会被筛出。默认本地检索不会传出知识正文。</p>`;
   content.innerHTML=`<section class="sw-card"><h2>${esc(groups.find(g=>g[0]===key)?.[1]||key)}</h2>${html}<div class="sw-form-footer">${button('save-'+key,'保存并应用','btn-primary')}${button('reset-config','恢复默认值')}</div></section>`;
@@ -145,7 +148,7 @@ export async function mount(root){
    else if(action==='save-models')await save('models',{sage_verification:checked('sage-verification'),orchestration:checked('sage-orchestration'),strategy:val('model-strategy'),roles:json('model-roles'),capabilities:json('model-caps'),fallbacks:json('model-fallbacks'),context_window:Number(val('model-context'))});
    else if(action==='save-appearance')await save('appearance',{theme:val('theme'),font:val('font'),font_size:Number(val('font-size')),accent:val('accent'),density:val('density'),radius:Number(val('radius')),mode:val('ui-mode'),home:val('home'),agent_name:val('agent-name'),avatar:val('avatar'),shortcuts:{palette:val('shortcut-palette')}});
    else if(action==='save-permissions'){const data={tools:json('permission-tools')};content.querySelectorAll('[id^="permission-"]').forEach(e=>{if(e.id!=='permission-tools')data[e.id.slice(11)]=e.value;});await save('permissions',data);}
-   else if(action==='save-budget')await save('budget',{max_tokens:Number(val('budget-tokens')),max_cost:Number(val('budget-cost')),concurrency:Number(val('budget-concurrency')),max_iterations:Number(val('budget-iterations')),warn_ratio:Number(val('budget-warning')),prices:json('budget-prices')});
+   else if(action==='save-budget')await save('budget',{concurrency:Number(val('budget-concurrency')),prices:json('budget-prices')});
    else if(action==='save-vision')await save('vision',{enabled:checked('vision-enabled'),auto_review:checked('vision-auto'),model:val('vision-model'),api_base:val('vision-base'),credential_ref:val('vision-ref'),max_repairs:Number(val('vision-repairs'))});
    else if(action==='save-memory'){if(val('memory-embedding')==='api'&&!await confirmDialog({title:'启用外部嵌入服务',message:'检索和索引时，会向你配置的 API 发送当前工作区的文本。确认已完成敏感数据检查。',confirmText:'确认启用'}))return;await save('memory',{enabled:checked('memory-enabled'),auto_capture:checked('memory-auto'),embedding:val('memory-embedding'),embedding_url:val('memory-url'),embedding_model:val('memory-model'),top_k:Number(val('memory-top')),retention_days:Number(val('memory-retention'))});}
    else if(action==='reset-config'){if(await confirmDialog({title:'恢复默认设置',message:'将当前分类恢复默认值，修改历史仍会保留。'})){await request('/config/'+section+'/reset','POST');await load();}}
@@ -213,5 +216,5 @@ export async function mount(root){
  listen('pointerup',()=>{if(drag){drag=null;renderCanvas();}});
  await load();
  if(route==='tasks2')timer=setInterval(()=>{if(section==='tasks'&&!document.querySelector('.modal-backdrop')&&!disposed)void load();},8000);
- return {destroy(){disposed=true;events.abort();clearInterval(timer);root.innerHTML='';}};
+ return {destroy(){disposed=true;events.abort();clearInterval(timer);channelView?.destroy();root.innerHTML='';}};
 }

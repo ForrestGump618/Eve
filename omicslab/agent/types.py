@@ -25,6 +25,8 @@ EventType = Literal[
     "usage",
     "error",
     "done",
+    "stop_reason",
+    "resource_degraded",
 ]
 
 

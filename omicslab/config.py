@@ -388,6 +388,8 @@ class Settings:
         """
         if not isinstance(patch, dict):
             raise ConfigError("设置内容必须是 JSON 对象")
+        if "max_iterations" in patch:
+            raise ConfigError("迭代上限由每轮运行时自动管理，无需手动设置")
         allowed: dict[str, Any] = {
             "host": str,
             "port": int,

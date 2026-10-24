@@ -9,7 +9,7 @@ DEFAULTS = {
  'memory': {'enabled':True,'auto_capture':False,'embedding':'keyword','embedding_url':'','embedding_model':'','top_k':5,'retention_days':365},
  'appearance': {'theme':'system','font':'system','font_size':14,'accent':'#47b8a1','density':'comfortable','radius':12,'mode':'research','home':'workbench','onboarded':False,'agent_name':'素问助手','avatar':'','shortcuts':{'palette':'k'}},
  'permissions': {'files':'ask','shell':'ask','network':'ask','browser':'deny','messages':'ask','mcp':'ask','memory':'allow','skills':'allow','agents':'allow','python':'ask','system':'allow','notebook':'ask','jobs':'ask','research':'allow','tools':{}},
- 'budget': {'max_tokens':200000,'max_cost':10.0,'warn_ratio':0.8,'max_iterations':24,'concurrency':2,'prices':{}},
+ 'budget': {'concurrency':2,'prices':{}},
  'vision': {'enabled':False,'auto_review':False,'max_repairs':2,'model':'','api_base':'','credential_ref':''},
 }
 
@@ -28,6 +28,8 @@ class Configuration:
         local=self.store.get('config',section,scope) if scope!='global' else global_record
         if local:
             value.update(local['value'])
+        # Legacy cumulative ceilings remain in historical records, but have no runtime effect.
+        value={k:v for k,v in value.items() if k in DEFAULTS[section]}
         return {'value':value,'revision':local['revision'] if local else 0,'scope':scope,'section':section,'effective':'immediate'}
 
     def update(self,section,patch,scope='global',expected=None,validate_only=False):
@@ -106,4 +108,4 @@ class Configuration:
         old=next((r for r in rows if r['revision']==revision),None)
         if old is None:
             raise ValueError('历史版本不存在')
-        return self.update(section,old['value'],scope)
+        return self.update(section,{k:v for k,v in old['value'].items() if k in DEFAULTS[section]},scope)

@@ -252,6 +252,35 @@ class ToolRegistry:
         name: str,
         arguments: dict[str, Any] | None,
     ) -> ToolResult:
+        """The pre-execute boundary applies to every handler, including SSH/MCP."""
+        from .governance import TurnGuard
+
+        guard = getattr(ctx, "turn_guard", None)
+        if guard is None:
+            guard = ctx.turn_guard = TurnGuard()
+        args = arguments
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except ValueError:
+                args = {"_invalid_json": args}
+        args = args if isinstance(args, dict) else {"_invalid_arguments": args}
+        refused, slot = guard.before(ctx, str(name), args)
+        if refused is not None:
+            return refused
+        try:
+            result = await self._execute_unchecked(ctx, name, arguments)
+            guard.observe(ctx, str(name), args, slot, result)
+            return result
+        finally:
+            guard.inflight.discard(slot)
+
+    async def _execute_unchecked(
+        self,
+        ctx: ToolContext,
+        name: str,
+        arguments: dict[str, Any] | None,
+    ) -> ToolResult:
         """Validate, approve and run one tool call.
 
         This method never raises for tool-level failures; the loop receives a

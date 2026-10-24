@@ -1,10 +1,10 @@
 // SSH 主机管理视图：档案列表、远程命令终端、SFTP 目录浏览与远端信息。
 // 仅使用项目内置 API/UI 工具，无外部依赖；所有动态文本均经 esc() 转义。
 
-import { setWorkspace, navigate } from '../store.js?v=2.1.0';
-import { icon } from '../icons.js?v=2.1.0';
-import { esc, fmtBytes, fmtDuration, relTime, copyText } from '../util.js?v=2.1.0';
-import { api, errorMessage } from '../api.js?v=2.1.0';
+import { setWorkspace, navigate } from '../store.js?v=2.1.1';
+import { icon } from '../icons.js?v=2.1.1';
+import { esc, fmtBytes, fmtDuration, relTime, copyText } from '../util.js?v=2.1.1';
+import { api, errorMessage } from '../api.js?v=2.1.1';
 import {
   toastSuccess,
   toastError,
@@ -13,7 +13,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=2.1.0';
+} from '../ui.js?v=2.1.1';
 
 const AUTH_PASSWORD = 'password';
 const AUTH_KEY = 'key';

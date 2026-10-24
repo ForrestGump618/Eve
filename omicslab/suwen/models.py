@@ -5,6 +5,7 @@ import re
 import ipaddress
 from urllib.parse import urlsplit
 from dataclasses import replace
+from contextlib import aclosing
 
 from ..agent.providers import make_provider, ProviderConfig, LLMError
 from .store import redact
@@ -88,11 +89,8 @@ class ModelGateway:
             api_key_override=self.platform.vault.get(item['credential_ref']) if item.get('credential_ref') else None)
 
     def check_budget(self,scope,task='',agent=''):
-        config=self.platform.config.get('budget',scope)['value']
-        usage=self.usage(scope,task,agent)
-        if usage['tokens']>=config['max_tokens'] or usage['cost']>=config['max_cost']:
-            raise LLMError('已达到用量硬限制；请调整预算后恢复任务',retryable=False)
-        return usage
+        # Accounting is cumulative; enforcement belongs to the AgentLoop's fresh TurnGuard.
+        return self.usage(scope,task,agent)
 
     def usage(self,scope,task='',agent=''):
         query='SELECT coalesce(sum(input+output),0) tokens,coalesce(sum(cost),0) cost,count(*) requests,coalesce(avg(latency),0) latency FROM usage WHERE scope=?'
@@ -119,7 +117,6 @@ class RoutedProvider:
         self.gateway=gateway;self.target=target;self.scope=scope;self.agent=agent;self.config=config;self.task=''
 
     async def stream_chat(self,messages,tools,cfg):
-        self.gateway.check_budget(self.scope,agent=self.agent)
         before_roles=[message.get('role') for message in messages]
         messages=compact_messages(messages,self.config['context_window'],cfg.max_tokens,len(json.dumps(tools or [],ensure_ascii=False)))
         self.gateway.platform.store.audit('model.context',{'roles_before':before_roles,'roles_after':[m.get('role') for m in messages],
@@ -151,11 +148,12 @@ class RoutedProvider:
                 if self.config.get('sage_verification') and 'sage-a1.5' in target.model.lower():
                     extra['chat_template_kwargs']={'verification':True}
                 else:extra.pop('chat_template_kwargs',None)
-                async for event in make_provider(target).stream_chat(messages,tools,replace(cfg,extra=extra)):
-                    emitted=True
-                    if event.get('type')=='usage':
-                        event['cost']=self.gateway.record(self.scope,self.task,self.agent,target.model,event.get('usage',{}),time.perf_counter()-started)
-                    yield event
+                async with aclosing(make_provider(target).stream_chat(messages,tools,replace(cfg,extra=extra))) as stream:
+                    async for event in stream:
+                        emitted=True
+                        if event.get('type')=='usage':
+                            event['cost']=self.gateway.record(self.scope,self.task,self.agent,target.model,event.get('usage',{}),time.perf_counter()-started)
+                        yield event
                 return
             except LLMError as exc:
                 self.gateway.platform.store.audit('model.error',{'model':target.model,'error':redact(exc.message)},self.scope)

@@ -228,8 +228,9 @@ async def test_channels_deduplicate_and_reject_unauthorized_contacts(p):
     task=p.store.get('task',first['task'],'ws_main')
     assert task['workflow']['nodes'][0]['restricted']
     with pytest.raises(PermissionError):await p.channels.send(row['id'],'owner','message',True)
-    assert not p.channels.capabilities('wechat')['qr_login']
-    assert not p.channels.capabilities('wechat')['inbound']
+    assert p.channels.capabilities('wechat')['qr_login']
+    assert p.channels.capabilities('wechat')['inbound']
+    assert not p.channels.capabilities('wecom')['inbound']
 
 
 def test_permission_denial_and_channel_restriction_happen_before_execution(p):
@@ -298,10 +299,106 @@ async def test_streamable_http_mcp_negotiates_session_and_json(p,monkeypatch):
     assert seen[-1][1]['mcp-session-id']=='session1'
 
 
-def test_budget_tracks_workspace_and_fails_closed_at_hard_limit(p):
-    p.config.update('budget',{'max_tokens':1000},'ws_main')
+def test_usage_accounting_does_not_exhaust_future_turns(p):
+    p.store.put('config','budget',{'value':{'max_tokens':1000,'max_cost':0}},'ws_main')
     p.models.record('ws_main','task1','lead','mock',{'prompt_tokens':900,'completion_tokens':101},.1)
-    with pytest.raises(Exception,match='硬限制'):p.models.check_budget('ws_main')
+    assert p.models.check_budget('ws_main')['tokens']==1001
+    assert set(p.config.get('budget','ws_main')['value'])=={'concurrency','prices'}
+    with pytest.raises(ValueError,match='未知设置字段'):
+        p.config.update('budget',{'max_tokens':1000},'ws_main')
+
+
+@pytest.mark.asyncio
+async def test_wechat_qr_binding_is_real_scoped_and_token_never_returned(p,monkeypatch):
+    w=p.channels.wechat;calls=[]
+    original=p.vault.put
+    monkeypatch.setattr(p.vault,'put',lambda key,value,persist=True:original(key,value,persist=False))
+    async def request(base,path,**kwargs):
+        calls.append(path)
+        if path.endswith('get_bot_qrcode'):return {'qrcode':'opaque-login','qrcode_img_content':'https://liteapp.weixin.qq.com/q/test'}
+        return {'status':'confirmed','bot_token':'private-bot-token','ilink_user_id':'owner','ilink_bot_id':'bot-1','baseurl':'https://ilinkai.weixin.qq.com'}
+    monkeypatch.setattr(w,'request',request)
+    login=await w.begin('ws_main',{'allow_send':False})
+    assert login['image'].startswith('data:image/svg+xml;base64,')
+    with pytest.raises(ValueError,match='当前工作区'):await w.status(login['session_id'],'other-scope')
+    result=await w.status(login['session_id'],'ws_main')
+    assert 'private-bot-token' not in json.dumps(result)
+    row=p.store.get('channel',result['channel_id'])
+    assert row['contacts']==['owner'] and row['read_only'] and not row['allow_send']
+    assert p.vault.get(row['credential_ref'])=='private-bot-token'
+    assert await w.status(login['session_id'],'ws_main')=={'status':'confirmed','channel_id':row['id']}
+    assert len(calls)==2
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('status',['wait','scaned','expired','need_verifycode','verify_code_blocked','binded_redirect'])
+async def test_wechat_login_statuses_do_not_create_false_connections(p,monkeypatch,status):
+    w=p.channels.wechat
+    async def request(base,path,**kwargs):
+        return {'qrcode':'id','qrcode_img_content':'login-content'} if path.endswith('get_bot_qrcode') else {'status':status}
+    monkeypatch.setattr(w,'request',request)
+    login=await w.begin('ws_main',{})
+    assert (await w.status(login['session_id'],'ws_main'))['status']==status
+    assert not p.store.list('channel')
+
+
+@pytest.mark.asyncio
+async def test_wechat_login_expiration_cancellation_and_redirect_are_fail_closed(p,monkeypatch):
+    w=p.channels.wechat
+    async def request(base,path,**kwargs):
+        return {'qrcode':'id','qrcode_img_content':'login-content'} if path.endswith('get_bot_qrcode') else {'status':'scaned_but_redirect','redirect_host':'http://127.0.0.1:9999'}
+    monkeypatch.setattr(w,'request',request)
+    login=await w.begin('ws_main',{})
+    with pytest.raises(ValueError,match='不受信任'):await w.status(login['session_id'],'ws_main')
+    w.sessions[login['session_id']]['expires']=0
+    assert (await w.status(login['session_id'],'ws_main'))['status']=='expired'
+    w.cancel(login['session_id'],'ws_main')
+    with pytest.raises(ValueError):await w.status(login['session_id'],'ws_main')
+    assert not p.store.list('channel')
+
+
+@pytest.mark.asyncio
+async def test_wechat_receive_and_reply_are_authorized_deduplicated_and_context_bound(p,monkeypatch):
+    ref='wechat-secret';p.vault.put(ref,'secret',persist=False)
+    row=p.channels.save({'name':'wechat','adapter':'wechat','workspace':'ws_main','bot_id':'bot','credential_ref':ref,
+                         'enabled':True,'contacts':['owner'],'allow_send':True})
+    original=p.vault.put
+    monkeypatch.setattr(p.vault,'put',lambda key,value,persist=True:original(key,value,persist=False))
+    sent=[]
+    async def request(base,path,**kwargs):
+        if path.endswith('sendmessage'):
+            sent.append(kwargs['data']['msg']);return {'ret':0}
+        return {'ret':0,'get_updates_buf':'cursor','msgs':[
+            {'message_id':1,'message_type':1,'from_user_id':'stranger','context_token':'bad','item_list':[{'type':1,'text_item':{'text':'untrusted'}}]},
+            {'message_id':2,'message_type':1,'from_user_id':'owner','context_token':'owner-context','item_list':[{'type':1,'text_item':{'text':'check files'}}]}]}
+    monkeypatch.setattr(p.channels.wechat,'request',request)
+    with pytest.raises(PermissionError):await p.channels.send(row['id'],'stranger','hello',True)
+    with pytest.raises(PermissionError):await p.channels.send(row['id'],'owner','hello',False)
+    with pytest.raises(ValueError,match='先在微信'):await p.channels.send(row['id'],'owner','hello',True)
+    await p.channels.wechat.poll_once(row)
+    tasks=p.store.list('task','ws_main');assert len(tasks)==1
+    assert tasks[0]['workflow']['nodes'][0]['restricted']
+    p.tasks.patch(tasks[0]['id'],'ws_main',status='succeeded',result='Checked.')
+    await p.channels.wechat.poll_once(row)
+    await p.channels.wechat.poll_once(row)
+    assert len(p.store.list('task','ws_main'))==1 and len(sent)==1
+    assert sent[0]['to_user_id']=='owner' and sent[0]['context_token']=='owner-context'
+    assert sent[0]['item_list'][0]['text_item']['text']=='Checked.'
+    assert p.store.get('wechat_reply',tasks[0]['id'])['status']=='sent'
+
+
+@pytest.mark.asyncio
+async def test_wechat_http_errors_do_not_expose_tokens_and_use_official_host(p,monkeypatch):
+    from omicslab.suwen.wechat import trusted_base
+    for url in ['http://ilinkai.weixin.qq.com','https://weixin.qq.com.evil.example','https://user:pass@ilinkai.weixin.qq.com','https://127.0.0.1']:
+        with pytest.raises(ValueError):trusted_base(url)
+    original=httpx.AsyncClient;seen=[]
+    def respond(request):seen.append(request);return httpx.Response(401,json={'ret':1})
+    monkeypatch.setattr('omicslab.suwen.wechat.httpx.AsyncClient',lambda **kwargs:original(transport=httpx.MockTransport(respond),**kwargs))
+    with pytest.raises(ValueError) as exc:await p.channels.wechat.request('https://ilinkai.weixin.qq.com','/ilink/bot/getconfig',token='secret-bot-token',data={})
+    assert 'secret-bot-token' not in str(exc.value)
+    assert seen[0].headers['authorization']=='Bearer secret-bot-token'
+    assert seen[0].headers['authorizationtype']=='ilink_bot_token'
 
 
 def test_context_compaction_keeps_goal_and_completed_tool_pair():

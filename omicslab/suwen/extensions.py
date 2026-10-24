@@ -95,19 +95,28 @@ class SkillRegistry:
 
 
 class Channels:
-    def __init__(self,platform):self.platform=platform;self.store=platform.store
+    def __init__(self,platform):
+        self.platform=platform;self.store=platform.store
+        from .wechat import Wechat
+        self.wechat=Wechat(platform)
 
     def capabilities(self,adapter):
         if adapter=='webchat':return {'inbound':True,'outbound':True,'attachments':False,'groups':False,'qr_login':False,'implementation':'builtin'}
         if adapter=='telegram':return {'inbound':True,'outbound':True,'attachments':False,'groups':False,'qr_login':False,'implementation':'bot-api'}
+        if adapter=='wechat':return {'inbound':True,'outbound':True,'attachments':False,'groups':False,'qr_login':True,'implementation':'weixin-ilink-text'}
         return {'inbound':False,'outbound':False,'attachments':False,'groups':False,'qr_login':False,
           'implementation':'external_adapter_required','reason':'需要平台官方协议或受支持的 OpenClaw 适配器；未内置扫码登录，未假定互通'}
 
     def save(self,data,id=None):
         if data.get('adapter') not in {'webchat','telegram','wechat','wecom','feishu','qq','openclaw'}:raise ValueError('未知消息渠道')
         self.platform.require_workspace(data.get('workspace',''))
-        row={k:v for k,v in data.items() if k in {'name','adapter','enabled','workspace','agent','contacts','credential_ref','webhook_ref','allow_send','read_only'}}
+        row={k:v for k,v in data.items() if k in {'name','adapter','enabled','workspace','agent','contacts','credential_ref','webhook_ref','allow_send','read_only','bot_id','base_url'}}
+        if row['adapter']=='wechat':
+            from .wechat import trusted_base
+            row['base_url']=trusted_base(row.get('base_url') or 'https://ilinkai.weixin.qq.com')
+            if row.get('enabled') and (not row.get('bot_id') or not self.platform.vault.get(row.get('credential_ref'))):raise ValueError('请通过微信扫码建立连接')
         row.setdefault('enabled',False);row.setdefault('contacts',[]);row.setdefault('read_only',True);row.setdefault('allow_send',False)
+        if not isinstance(row['contacts'],list) or len(row['contacts'])>100 or any(not isinstance(v,str) or not v for v in row['contacts']):raise ValueError('授权联系人需要非空 ID 的数组')
         row['capabilities']=self.capabilities(row['adapter'])
         row['status']='disabled' if not row['enabled'] else 'configured' if row['capabilities']['inbound'] else 'external_dependency'
         return self.store.put('channel',id or uid('channel'),row)
@@ -116,6 +125,7 @@ class Channels:
         channel=self.store.get('channel',id)
         if not channel or not channel['enabled']:raise ValueError('渠道不存在或已停用')
         if channel['adapter']=='webchat':return {'ok':True,'method':'local_webchat','capabilities':channel['capabilities']}
+        if channel['adapter']=='wechat':return await self.wechat.test(channel)
         if channel['adapter']!='telegram':raise ValueError(channel['capabilities']['reason'])
         token=self.platform.vault.get(channel.get('credential_ref'))
         if not token:raise ValueError('尚未配置 Telegram Bot Token')
@@ -154,6 +164,7 @@ class Channels:
         if str(contact) not in [str(c) for c in channel['contacts']]:raise PermissionError('接收者未授权')
         if channel['adapter']=='webchat':
             return self.store.put('channel_message',uid(),{'channel':id,'contact':str(contact),'text':text,'direction':'outbound'},channel['workspace'])
+        if channel['adapter']=='wechat':return await self.wechat.send(channel,str(contact),text)
         if channel['adapter']!='telegram':raise ValueError('此适配器尚不支持发送')
         token=self.platform.vault.get(channel.get('credential_ref'))
         if not token:raise ValueError('Bot Token 未配置')

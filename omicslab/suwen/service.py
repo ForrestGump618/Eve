@@ -62,8 +62,11 @@ class Platform:
         self.store.put('migration','v2',{'schema_version':2,'backup':str(folder),'legacy_home_preserved':True,
             'legacy_api_namespace':'/api','python_namespace':'omicslab','config_keys_preserved':True})
 
-    async def start(self):await self.tasks.start()
+    async def start(self):
+        await self.tasks.start()
+        await self.channels.wechat.start()
     async def close(self):
+        await self.channels.wechat.close()
         await self.tasks.close()
         self.store.close()
 
