@@ -1,28 +1,33 @@
 # GitHub MIT publication runbook — SuWen vNext
 
-Status: **BLOCKED_EXTERNAL in this environment — never executed**. Nothing in this file is a claim
-that publishing happened. The repository remote is readable, but the `gh` CLI is absent and no GitHub
-token is present in the session, so no commit/tag/Release/asset upload was attempted.
+Status: **SOURCE PUBLISHED; RELEASE ASSETS NOT PUBLISHED (BLOCKED_EXTERNAL)**. The repository remote
+is writable via the user's existing SSH key; branch `suwen-vnext-durable` and annotated tag
+`suwen-vnext-3.2.0` were pushed (measured 2026-10-25). The two-job Windows CI workflow executes on
+GitHub and is green (run `40142902006`). No GitHub Release, Release asset, branch-protection change
+or repository-settings change was performed: the release decision is **HOLD** (clean-VM lifecycle,
+signing and endurance gates remain unverified; `gh`/token absent). Never read this file as a claim
+that a Release exists.
 
-## 1. Current state (measured 2026-10-25)
+## 1. Current state (measured 2026-10-25, round 4)
 
 | Item | Value |
 | --- | --- |
 | Local workspace | `C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext` |
-| Local branch / HEAD | `suwen-vnext-durable` / `0024e73` ("SuWen 3.1.0: full desktop takeover, durable harness and Windows release") |
-| Remote | `https://github.com/ForrestGump618/suwen.git` |
-| Remote state | reachable; `main` = `8cabac3` (round-2 baseline commit) |
-| Push state | round-2/round-3 work is **uncommitted** in the working tree (many untracked files: `desktop/`, `docs/`, `.github/workflows/suwen-windows.yml`, …) |
+| Local branch / HEAD | `suwen-vnext-durable` / `5ac5bd4` + round-4 working tree (see §3b) |
+| Remote | `https://github.com/ForrestGump618/suwen.git` (public) |
+| Remote state | source branch + tag `suwen-vnext-3.2.0` pushed (SSH over port 443; HTTPS push blocked by host network) |
+| CI | `.github/workflows/suwen-windows.yml` executes: **run 40142902006 SUCCESS on `5ac5bd4`** (Desktop Node job + Python baseline job). Earlier real failures were fixed, not hidden (worker optional-numpy assertion; scoped e2e fixture tokens in the secret scan). |
 | `gh` CLI | not installed (`Get-Command gh` fails / absent) |
-| GitHub auth | no `GITHUB_TOKEN` / `GH_TOKEN` in environment; git credential helper `manager` configured but no remote write performed |
-| MIT licence | `LICENSE` (MIT, desktop), `desktop/LICENSE`, `NOTICE`, `desktop/third-party-licenses/`, SBOM; Python legacy keeps Apache-2.0 and is shipped as compatibility source |
-| Secret scan | `desktop/scripts/security-scan.mjs` → **PASS**, 0 unresolved HIGH / 48 LOW / 14 documented test fixtures, 638 tracked files, 17 commits |
-| CI workflow | `.github/workflows/suwen-windows.yml` authored; **never run** on GitHub |
+| GitHub auth | no `GITHUB_TOKEN`/`GH_TOKEN` in the environment; git credential helper `manager` holds a usable GitHub credential (used through git only; never printed) |
+| MIT licence | `LICENSE` (MIT at repo root for vNext), `desktop/LICENSE`, `NOTICE`, `desktop/third-party-licenses/`, SBOM; legacy Python keeps Apache-2.0 and is shipped as compatibility source |
+| Secret scan | `desktop/scripts/security-scan.mjs` → **PASS**, 0 unresolved HIGH / 48 LOW / 14 documented test fixtures |
+| Release assets | local only: installer 129,447,101 B SHA-256 `4590B7F3…B230B897` (**UNSIGNED**), blockmap, `win-unpacked/SuWen.exe`; mirrored in `docs/release/SHA256SUMS.txt` |
+| Documented-hash check | `node scripts/verify-doc-hashes.mjs` → PASS; wired into CI |
 
 ## 2. Preconditions (all must be true before publishing)
 
 1. All gates in `docs/release/release-gates.md` that are release-blocking are PASS or explicitly
-   accepted by the release owner (G3/G4/G5/G6/G8 are currently open).
+   accepted by the release owner (G6/G8 currently PASS_WITH_LIMITS; clean-VM/signing/endurance open).
 2. Final evidence round completed and `docs/release/final-acceptance-report.md` signature block filled
    (final test numbers, installer path/bytes/SHA256, CI link, clean-VM result).
 3. `security-scan.mjs` PASS on the **final committed tree** (history scan included).
@@ -36,7 +41,7 @@ token is present in the session, so no commit/tag/Release/asset upload was attem
    unless intentionally attached to the Release.
 8. `.gitignore` covers build outputs (`dist*/`, `release/`, `node_modules/`, `*.log`, user state).
 
-## 3. Procedure (run by whoever has credentials; none of this has been run)
+## 3. Procedure (source steps §3a were executed; Release steps 4–5 were NOT executed)
 
 ```powershell
 # 0) from the workspace root
@@ -80,14 +85,23 @@ secret was committed (never publish first and scan later).
 
 ## 3b. What was actually published (2026-10-25)
 
-- Repository remote is readable and writable via the user's existing SSH key over `ssh://git@ssh.github.com:443/ForrestGump618/suwen.git` (HTTPS push to `github.com:443` was blocked by the host network).
-- Source publication **succeeded**: branch `suwen-vnext-durable` and annotated local tag `suwen-vnext-3.2.0` were pushed; final verified commit is `8741d47` (previous commit `8646fd7`).
-- GitHub **Release asset upload was NOT performed**: no `gh` CLI and no `GITHUB_TOKEN`/`GH_TOKEN` in this environment, and the release decision is **HOLD** because G9 (publication readiness) and clean-VM/signing/endurance gates are not satisfied. The installer `SuWen-Setup-3.2.0-win-x64.exe` therefore exists only locally (path/hash above); it is not downloadable from a Release URL.
-- Never claim a Release URL, uploaded asset, green CI, signed installer, or clean-VM-verified release.
+- Source publication **succeeded**: branch `suwen-vnext-durable` and annotated tag `suwen-vnext-3.2.0`
+  were pushed over SSH (`ssh://git@ssh.github.com:443/ForrestGump618/suwen.git`); HTTPS push to
+  `github.com:443` is blocked by this host network.
+- GitHub Actions executes the committed workflow: **run 40142902006 on `5ac5bd4` is green** (Desktop
+  Node job: typecheck, full unit/integration suite, live RPC E2E, UI DOM QA, security scan, NSIS
+  build, SBOM, checksums, artifact upload; Python baseline job: pytest).
+- GitHub **Release asset upload was NOT performed**: `gh` CLI and `GITHUB_TOKEN`/`GH_TOKEN` are
+  absent, and the release decision is **HOLD** because clean-VM lifecycle, signing and endurance
+  gates remain unverified. The installer therefore exists only locally (path/hash in §6); it is not
+  downloadable from a Release URL.
+- Never claim a Release URL, uploaded asset, signed installer, or clean-VM-verified release. A green
+  CI run is a real, verifiable claim (`actions/runs/40142902006`).
 
 ## 4. If credentials remain unavailable
 
-Publishing is genuinely blocked (no `gh`, no token). Required unblock conditions:
+Release-asset publication is genuinely blocked (no `gh`, no token in the environment). Required
+unblock conditions:
 
 - `gh` CLI installed and authenticated (`gh auth status`) with write access to
   `ForrestGump618/suwen`, **or** a HTTPS token with `repo` scope; and
@@ -109,7 +123,8 @@ scan clean, publication **not performed**.
 
 - `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — 129,447,101 B — SHA-256
   `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` — **UNSIGNED**.
-- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B — SHA-256 `283B27E1…1AC2`.
-- `desktop/release/SHA256SUMS` — mirrored at `docs/release/SHA256SUMS.txt`.
-- Publication status: **BLOCKED_EXTERNAL** (no `gh` CLI, no token); CI has **never executed**.
-  Never claim a Release URL, a green CI run, a signed installer, or a clean-VM-verified release.
+- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B — SHA-256 `283B27E19D2A943DD940B8E83F748CEB2627950A87CAD509069EFAE4230CBB72`.
+- `desktop/release/SHA256SUMS` — mirrored at `docs/release/SHA256SUMS.txt` (checked by `scripts/verify-doc-hashes.mjs`).
+- Publication status: source branch/tag pushed; CI green (`40142902006`); **Release assets
+  BLOCKED_EXTERNAL** (no `gh`/token) and **HOLD** (clean-VM/signing/endurance unverified).
+  Never claim a Release URL, a signed installer, or a clean-VM-verified release.

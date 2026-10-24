@@ -20,7 +20,12 @@ versioning.
     (`sk-legacy-e2e-sentinel-…`, `fixture-key-not-a-real-credential`) were classified HIGH.
     Fixed by extending the documented test-fixture allowlist to `desktop/scripts/e2e-*.mjs` plus
     `sentinel|not-a-real|e2e-` fixture tokens (narrowly scoped; findings stay printed and listed).
-  - latest run: re-run in progress after the scanner fix; see `docs/progress.md` for the final status.
+  - **run 40142902006 (`5ac5bd4`, 2026-10-25): SUCCESS** — both jobs green (Desktop Node job and
+    Python baseline). This is the first verified green CI run for the vNext desktop; see
+    `docs/verification/integration-and-e2e.md` §12.
+- Added `desktop/scripts/verify-doc-hashes.mjs` and a CI step: every current artifact hash must be
+  quoted in the release evidence, no stale full hash may remain, and
+  `docs/release/SHA256SUMS.txt` must mirror `desktop/release/SHA256SUMS`. Local run: PASS.
 - Local re-run of the scanner after the fix: **PASS — 0 HIGH / 48 LOW / 14 documented test fixtures**
   (`docs/verification/artifacts/security-scan.json`).
 
@@ -28,8 +33,9 @@ versioning.
 - `desktop/scripts/durability-soak.mjs`: real fault-injection soak harness (actual daemon over the
   authenticated named pipe; repeated durable tasks; `python-worker-kill`, `daemon-kill` and `cancel`
   faults every N cycles; recovery assertions; JSON evidence at
-  `docs/verification/durability-soak.json`). This is an **accelerated soak**, not the 8/24/72 h
-  endurance run, and is labelled as such.
+  `docs/verification/durability-soak.json`). **Executed run (2026-10-25): 25 min / 1500 s,
+  64 cycles / 64 tasks completed, 12 faults / 12 recovered, 0 errors, `result: passed`.**
+  This is an **accelerated soak**, not the 8/24/72 h endurance run, and is labelled as such.
 
 ### Fixed
 - Optional Python dependency assertions in `desktop/test/research-worker.test.ts` no longer assume
@@ -44,11 +50,11 @@ Final build measured in the TARGET workspace; evidence under `docs/verification/
 
 ### Artifacts (unsigned)
 - `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — 129,447,101 B, SHA256
-  `4590B7F3E1B45E163E1CB37AA46BFF58CD0751C4F43914926969F52F6E5C3822`.
+  `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`.
 - `desktop/release/win-unpacked/SuWen.exe` — 249,801,728 B, SHA256
   `8F7EAF76FEB66A61E51D5F8B9B67EEFA375FEDD0018A5566D64C27F0570A22E1`.
 - `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B, SHA256
-  `283B27E17E8E6B44DFEB2B015E9279576C1730A609167C481021FA75EAEE36C6`.
+  `283B27E19D2A943DD940B8E83F748CEB2627950A87CAD509069EFAE4230CBB72`.
 - `desktop/release/SHA256SUMS` == `docs/release/SHA256SUMS.txt` (3 lines).
 
 ### Added

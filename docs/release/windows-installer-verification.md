@@ -54,7 +54,7 @@ in this session). These three hashes are the authoritative values for the delive
 ## 4. Host lifecycle probe on the FINAL 3.2.0 artifact (12/12 PASS — not a clean-VM test)
 
 Artifact: `docs/verification/artifacts/installer-lifecycle.json`
-(`version=3.2.0`, `installerBytes=129,447,101`, `installerSha256=4590B7F3…2199546`; `ok=true`,
+(`version=3.2.0`, `installerBytes=129,447,101`, `installerSha256=4590B7F3…230B897`; `ok=true`,
 `passed=12`, `failed=0`; `note` = "host-level only; no clean VM used"). Steps:
 
 | Step | Status | Detail |

@@ -15,8 +15,12 @@
 3. **8h / 24h / 72h 续航、断电、重启、睡眠、磁盘满、真实网络中断均未执行；本文件第 4 节仍为未执行矩阵。**
    所有混沌均为单 Windows 会话、短时，provider 故障由本地 HTTP fixture 注入（非真实厂商账号）。
    R050 在 TARGET 侧为 `UNVERIFIED`/未达需求级验证。
-4. 若需要对外声明长时稳定，必须按第 5 节方案真实执行并保留日志；在此之前只能写
-   “已实现机制 + 短窗故障注入 12/12 通过”。
+4. 2026-10-25 追加执行了一轮 **加速耐久 soak**（`scripts/durability-soak.mjs`，25 分钟真实 daemon 连续
+   任务循环 + 周期性 SIGKILL/cancel 注入，见第 7 节）：**64/64 任务完成、12/12 故障恢复、0 错误**，
+   证据 `docs/verification/durability-soak.json`。它提高了故障恢复证据密度，但**不等价于 8/24/72 h**，
+   仍不得据此宣称长时稳定。
+5. 若需要对外声明长时稳定，必须按第 5 节方案真实执行并保留日志；在此之前只能写
+   “已实现机制 + 短窗故障注入 12/12 + 25 min 加速 soak 通过”。
 
 ## 2. 实现机制审查（代码证据，TARGET）
 
@@ -105,8 +109,27 @@ Stop-Process -Id <daemonPid> -Force      # SIGKILL 等价
 ## 6. 状态汇总
 
 - 已实现并可审查的可靠性机制：12 项（第 2 节）。
-- 已执行的真实故障注入（TARGET 短窗）：**12/12 场景、52.2 s 通过**（第 3 节，单会话；含 2 次人工审批）。
+- 已执行的真实故障注入（TARGET 短窗）：**12/12 场景、51.4 s 通过**（第 3 节，单会话；含 2 次人工审批）。
+- 已执行的加速耐久 soak：**25 min（1500 s）/ 64 cycles / 12 faults / 12 recovered / 0 errors**
+  （第 7 节，单会话；不是 8/24/72 h）。
 - 未执行：8h/24h/72h、重启、睡眠、断电、磁盘满、真实网络故障、并发压力（第 4 节）→ R050 未达
   需求级验证（master CSV 中 R050=`UNVERIFIED`）。
-- 公开表述建议：只能写“已实现租约/围栏/outbox/检查点机制；短窗故障注入 12/12 与 30 s 后台计时器
-  通过；长时稳定未验证”。
+- 公开表述建议：只能写“已实现租约/围栏/outbox/检查点机制；短窗故障注入 12/12、25 min 加速 soak
+  与 30 s 后台计时器通过；长时稳定未验证”。
+
+## 7. 加速耐久 soak（2026-10-25，真实 daemon；非 8/24/72 h 替代）
+
+- 脚本：`desktop/scripts/durability-soak.mjs`（无外部依赖，Windows host）。
+- 参数：真实构建 `dist/src/daemon.js` + 固定 Python worker；隔离临时 `--home`；每轮创建
+  python `runScript` 任务（写文件工件）或 echo+delay 任务，按序完成；每 ~4 轮注入一次故障
+  （SIGKILL python worker / SIGKILL daemon 并重启 / cancel 传播）。
+- 结果：`docs/verification/durability-soak.json`
+  （`result: passed`，`durationSeconds: 1500`，started `2026-10-24T23:26:37Z`，ended `2026-10-24T23:51:37Z`）：
+  - cycles **64**，faults **12**（python-worker-kill ×4、daemon-kill ×4、cancel ×4），
+    faultsRecovered **12**，tasksTerminal **64**，tasksCompleted **64**，errors **0**。
+  - 每轮校验任务的最终状态与步骤 attempts（已提交步骤不重放），daemon 崩溃后重新启动并恢复，
+    cancel 后无残留工件。
+- 限制（写入 report 的 `limits`）：单 Windows 会话/单机；**不是 8 h、24 h 或 72 h 耐力测试**；
+  无睡眠/休眠、断电、OS 重启、磁盘满注入；provider 未参与（soak 使用 echo/delay/python，
+  模型级故障由 `chaos-smoke.mjs` 的本地 fixture 覆盖）。
+- 结论：**加速 soak PASS**，作为 G6 的补充证据；不改变“8/24/72 h 未验证”的结论。

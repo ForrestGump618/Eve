@@ -185,7 +185,7 @@ REPLACED 1 / BLOCKED_EXTERNAL 1**.
 | 3.2.0 release docs (CHANGELOG/notes/publication runbook) | IMPLEMENTED_PASS | All present; installer measured; publication blocked |
 
 Final measured facts: installer `SuWen-Setup-3.2.0-win-x64.exe` 129,447,101 B SHA-256
-`4590B7F3…2199546` (unsigned), blockmap 135,948 B `283B27E1…`, unpacked 249,801,728 B `8F7EAF76…`,
+`4590B7F3…230B897` (unsigned), blockmap 135,948 B `283B27E1…`, unpacked 249,801,728 B `8F7EAF76…`,
 `SHA256SUMS` present in both locations; tests 182/180/2 (33.4 s); e2e-rpc 42/0 live; packaged smoke
 8/8; UI DOM QA 19/0/12; chaos 12/12 (51.7 s); host lifecycle 12/12 + upgrade from 3.0.0-preview.1.
 Stable release remains unauthorized (`docs/release/release-gates.md`); clean VM, signing, endurance and

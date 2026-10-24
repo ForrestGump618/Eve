@@ -228,3 +228,37 @@ All numbers below were measured on the final 3.2.0 build in the TARGET workspace
 - Master counts now **81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL**
   (98 rows); parity 85 rows = **67 PASS / 6 UNVERIFIED / 9 NOT_STARTED / 1 N/A_PORT / 1 REPLACED /
   1 BLOCKED_EXTERNAL**.
+
+
+### Round 4 (2026-10-25): real GitHub CI, accelerated soak, documented-hash guard
+
+- User asked to continue improving (`请继续完善`). Actual gaps were found by querying GitHub directly
+  (masked stored credential; never printed): the committed workflow **was executing** on GitHub and
+  failing. Both real failures were fixed, not hidden:
+  1. run on `8741d47` failed at the full test step: `research-worker.test.ts` asserted
+     `health.deps.numpy` is a string, but the runner has no numpy/scipy. Test now accepts
+     `null | string` (commit `9132ec1`).
+  2. run on `9132ec1` failed at the security scan: scoped e2e fixture tokens were classified HIGH.
+     Scanner now accepts only the documented fixture allowlist and the evidence artifact was refreshed
+     (0 unresolved HIGH / 48 LOW / 14 documented fixtures; commit `5ac5bd4`).
+  3. **run 40142902006 on `5ac5bd4`: SUCCESS**, both jobs (Desktop: typecheck, tests, live RPC E2E,
+     UI DOM QA, security scan, NSIS build, SBOM, SHA256SUMS, artifacts; Python baseline pytest).
+- Added `desktop/scripts/verify-doc-hashes.mjs` (checks every current artifact hash is quoted and no
+  stale full hash remains in release evidence; also checks SHA256SUMS mirror) and wired it into CI as a
+  step. Local run: PASS.
+- Added `desktop/scripts/durability-soak.mjs` and ran a **25-minute accelerated durability soak**
+  against the real daemon (isolated home, real Python worker, periodic SIGKILL/cancel injection):
+  `docs/verification/durability-soak.json` -> `result: passed`, 1500 s, **64 cycles / 64 tasks
+  completed / 12 faults / 12 recovered / 0 errors**. Limits recorded in the report: single Windows
+  session, **not** an 8/24/72 h run, no sleep/power-loss/reboot/disk-full injection.
+- Refreshed release evidence for the final 3.2.0 artifact (installer 129,447,101 B SHA-256
+  `4590B7F3...B230B897`, blockmap 135,948 B, unpacked 249,801,728 B), GitHub source publication
+  state, CI run link, and the 25-min soak; R100/R119/R121/R138 evidence rows corrected where an older
+  3.1.0 hash/name was still quoted.
+- Environment note: Windows Sandbox cannot be enabled non-interactively here
+  (`Get-WindowsOptionalFeature` requires elevation; `WindowsSandbox.exe` is absent; HypervisorPresent=True),
+  so the clean-Windows-VM lifecycle remains **NOT RUN**.
+- Round-4 machine-readable status is unchanged in shape: 98 requirement rows
+  (81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL); R138 stays
+  BLOCKED_EXTERNAL because Release assets are not uploaded, even though the source branch/tag and CI
+  are now real.

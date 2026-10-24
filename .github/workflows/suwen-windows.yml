@@ -82,6 +82,12 @@ jobs:
           node scripts/ui-dom-qa.mjs 2>&1 | Tee-Object -FilePath release/ui-dom-qa.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Verify documented installer hashes (docs vs SHA256SUMS)
+        shell: pwsh
+        run: |
+          node scripts/verify-doc-hashes.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Security scan (working tree + history)
         shell: pwsh
         run: |

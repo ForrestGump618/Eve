@@ -13,12 +13,12 @@ desktop takeover, durable harness and Windows release") · remote
 
 | Item | Value |
 | --- | --- |
-| Local repo / branch / commit | `desktop-vnext` / `suwen-vnext-durable` / `0024e73` |
-| Upstream state | remote reachable (`git ls-remote` OK); push of this worktree not performed |
+| Local repo / branch / commit | `desktop-vnext` / `suwen-vnext-durable` / `5ac5bd4` + round-4 docs/CI tweaks (tree) |
+| Upstream state | remote reachable; **source branch + tag `suwen-vnext-3.2.0` pushed via SSH**; Release assets not uploaded |
 | MIT status | `desktop/LICENSE` MIT (self-authored desktop); `NOTICE`; third-party licenses + CycloneDX SBOM; Python baseline preserved Apache-2.0 with original NOTICE |
-| CI status | `.github/workflows/suwen-windows.yml` authored (typecheck/build/tests/e2e-rpc/ui-dom-qa/security-scan/SBOM/NSIS+SHA256SUMS); **never executed** |
-| Release tag | **not created** — tag `suwen-vnext-3.2.0` documented in `github-publication.md`, not pushed |
-| Repo / Release URL | none published — G9 **BLOCKED_EXTERNAL** (`gh` absent / no token) |
+| CI status | `.github/workflows/suwen-windows.yml` **executed for real: run 40142902006 SUCCESS** on `5ac5bd4` (both Desktop and Python-baseline jobs; typecheck/tests/live RPC E2E/UI DOM QA/security scan/NSIS build/SBOM/SHA256SUMS/artifacts) |
+| Release tag | `suwen-vnext-3.2.0` **pushed** (annotated); GitHub Release NOT created (gates HOLD; `gh`/token absent) |
+| Repo / Release URL | repo public: `https://github.com/ForrestGump618/suwen`; no Release URL exists — G9 **BLOCKED_EXTERNAL** |
 | Publication scan | `security-scan.mjs` PASS (0 HIGH / 48 LOW / 14 documented test fixtures); no real secret found in tracked tree/history |
 
 ## B. Windows installer
@@ -33,7 +33,7 @@ desktop takeover, durable harness and Windows release") · remote
 | Package layout | `resources/app/{dist,node_modules,package.json,LICENSE,NOTICE,third-party-licenses}`, `resources/worker/research_worker.py`, `resources/legacy/**` (Apache-2.0 sources, optional compatibility mode), `elevate.exe` |
 | Install / lifecycle | **12/12 host steps PASS** on the final artifact (`docs/verification/artifacts/installer-lifecycle.json`): silent install exit 0 (~24 s), installed exe + FileVersion/ProductVersion 3.2.0, HKCU `SuWen 3.2.0`, app running after 12 s, authenticated named-pipe daemon health version 3.2.0 mode `user-background`, daemon survives closing the installed UI, same-version reinstall, silent uninstall exit 0, install dir removed, user data preserved, registry removed; upgrade source installed 3.0.0-preview.1 PASS |
 | Clean Windows VM | **NOT RUN** — host probe only; no VM/snapshot available |
-| Endurance | **NOT RUN** — no 8/24/72 h, sleep/hibernate, power-loss, reboot, disk-full |
+| Endurance | **ACCELERATED SOAK PASS** — `docs/verification/durability-soak.json`: 25 min / 1500 s, 64 cycles, 64 tasks completed, 12 faults / 12 recovered, 0 errors; **8/24/72 h, sleep/hibernate, power-loss, reboot, disk-full still NOT RUN** |
 | Signing / SmartScreen | honest disclosure: unsigned, no certificate, warning expected; no signing claim |
 | Python runtime | installer does **not** ship Python; basic chat/MCP works without it, optional worker needs a user-selected interpreter (R101 NOT_STARTED) |
 
@@ -44,7 +44,7 @@ desktop takeover, durable harness and Windows release") · remote
 | Five workspaces / interactions | `desktop/ui/actions.json` **144 actions**; `docs/verification/ui-action-coverage.csv` 144 rows — 91 WIRED_DAEMON_RPC / 10 WIRED_MAIN_PROCESS / 43 WIRED_UI_ONLY / **0 unknown methods** |
 | UI DOM QA | `node scripts/ui-dom-qa.mjs`: **19 passed / 0 failed / 12 warnings** (warnings = intentional main-process bridge methods); `node --check desktop/ui/app.js` exit 0 |
 | Streaming UI stability (T2) | `docs/verification/ui-e2e.md`: deterministic local-fixture suite **22 cases — 19 pass / 0 fail / 3 skip**, 10.8 s; 100 / 1,000 / 10,000-delta text integrity via exact DOM sha256; composer deviation **0 px**; scroll forced drift **0 px** (follow re-armed only by user intent); two concurrent runs no cross-contamination; 120-message conversation render 249 ms; layouts 1920×1080 (host-clamped), 1366×768, 980×680 × zh/en × five workspaces; dark theme implemented |
-| Streaming defects | D-006 duplicate append and D-007 no-auto-reconnect were found in the T2 interim report and **fixed afterwards** in `desktop/src/main.ts` (bounded backoff 300 ms-12 s) and `desktop/src/conversations.ts` (idempotent append), with `conversations.test.ts`; T2's post-fix SIGKILL/reconnect in-UI re-run is **not yet published** (D-017) -> R130 stays UNVERIFIED |
+| Streaming defects | D-006 duplicate append and D-007 no-auto-reconnect were found in the T2 interim report and **fixed** in `desktop/src/main.ts` (bounded backoff 300 ms-12 s) and `desktop/src/conversations.ts` (idempotent append + assistant merge by `(taskId, role)`), with `conversations.test.ts`; T2's **post-fix SIGKILL/reconnect in-UI re-run PASS 3/3** (offline 72-520 ms, restored 702-779 ms, 0 reloads) -> **R130 IMPLEMENTED_PASS** |
 | Visual acceptance | **PASS (host, deterministic fixture)** - `docs/verification/ui-visual-audit.md` (2026-10-25): 3 audit runs / 180 PNGs; aggregate 144-shot matrix (1920x1080@1x, 1366x768@1x/1.25x/1.5x, 980x680@1x; zh/en; light/dark) -> 0 horizontal/vertical overflow, 0 elements outside viewport, 0 overlaps, 0 page/console errors, dark theme + #defaults-theme verified; layout PASS; one P2 finding (chat-error has no visible error surface) FIXED and T2-verified after the finding (reports ui-visual-audit-20261024-194627/194718/194944.json (zh notice len 106, en len 159, hidden=false; stale-notice guard clears after retry; build ui/app.js 4D8E4AE2…)) -> R136 IMPLEMENTED_PASS; P2 chat-error surface tracked as D-020 |
 | i18n / brand | zh/en labels via DOM QA; brand scan 983 hits / 143 files, **0 requiring text change** (all retained identifiers documented LEGACY-BRAND-COMPAT) |
 
@@ -68,8 +68,9 @@ desktop takeover, durable harness and Windows release") · remote
 
 | Item | Evidence |
 | --- | --- |
-| Chaos (short window) | `docs/verification/chaos-results.json`: **12/12 scenarios, 51.7 s** — worker SIGKILL retry (attempts 2), daemon SIGKILL mid-step recovered from durable lease (same operation id, 1 artifact), committed step not replayed, cancel → 0 artifacts, provider 429→500→200 with 2 human approvals + reconciliation events |
-| Endurance 8/24/72 h, reboot, power-loss, disk-full | **NOT RUN** — must stay NOT_VERIFIED (R050/R116) |
+| Chaos (short window) | `docs/verification/chaos-results.json`: **12/12 scenarios, 51.4 s** — worker SIGKILL retry (attempts 2), daemon SIGKILL mid-step recovered from durable lease (same operation id, 1 artifact), committed step not replayed, cancel → 0 artifacts, provider 429→500→200 with 2 human approvals + reconciliation events |
+| Accelerated soak | `docs/verification/durability-soak.json`: **result passed, 1500 s, 64 cycles, 12 faults / 12 recovered, 64/64 tasks completed, 0 errors** (real daemon; explicit limits: single Windows session, not 8/24/72 h, no sleep/power/reboot/disk-full) |
+| Endurance 8/24/72 h, reboot, power-loss, disk-full | **NOT RUN** — must stay NOT_VERIFIED (R050/R116); the 25-min accelerated soak is supplemental only |
 | DB/context recovery | durable tests + 10-round ~201k-token compaction (round-2 evidence), versions/manual compaction/rollback; semantic losslessness not claimed |
 | Security audit | `docs/verification/security-review.md` + `scripts/security-scan.mjs`: **PASS — 0 HIGH / 48 LOW / 14 documented test fixtures**; `npm audit --omit=dev` 0 vulnerabilities; contextIsolation + sandbox renderer, CSP `connect-src 'none'`, sender/frame-checked IPC, path-confinement guards, safeStorage credentials, named-pipe random token. No OS-level CPU/memory/disk quotas (R144 NOT_STARTED) |
 | Performance | `docs/verification/performance-baseline.md` (daemon ready p50 391 ms, create p50 0.82 ms, events.stream p50 1.49 ms, worker flowSummary 20.9 ms); UI/markdown first-token and endurance not measured |
@@ -79,10 +80,9 @@ desktop takeover, durable harness and Windows release") · remote
 
 1. **Clean-Windows-VM lifecycle** install → start → upgrade → uninstall: NOT RUN (host probe only).
 2. **Code signing / SmartScreen trust**: BLOCKED_EXTERNAL — no certificate; installer UNSIGNED.
-3. **8/24/72 h endurance, reboot, power-loss, disk-full**: NOT RUN (short-window chaos only).
-4. **GitHub MIT publication + Release asset upload**: BLOCKED_EXTERNAL — `gh` absent, no token;
-   tag `suwen-vnext-3.2.0`/commands documented but not executed.
-5. **T2 post-fix SIGKILL/reconnect in-UI re-run** (`ui-visual-audit.md` was published 2026-10-25 with the visual matrix PASS; the SIGKILL/reconnect re-run is still missing) -> R130 remains UNVERIFIED; R136 is now IMPLEMENTED_PASS.
+3. **8/24/72 h endurance, reboot, power-loss, disk-full**: NOT RUN (short-window chaos 12/12 + 25-min accelerated soak only; soak is not a substitute).
+4. **GitHub MIT publication + Release asset upload**: **source published** (branch + tag pushed; CI green run 40142902006); **Release assets BLOCKED_EXTERNAL** because `gh`/token are absent and gates remain HOLD.
+5. **T2 post-fix SIGKILL/reconnect in-UI re-run**: **PASS 3/3** (R130 IMPLEMENTED_PASS); R136 visual acceptance IMPLEMENTED_PASS.
 
 6. **Real external vendor accounts** (model providers, Telegram/Slack/Discord/WeChat): not available;
    local protocol fixtures and blocked-external notes only.
@@ -91,19 +91,20 @@ desktop takeover, durable harness and Windows release") · remote
 8. **Not migrated / not started**: 23 legacy scientific skills in the new registry, Paper2Agent,
    Biomni/ERA/Robin/Kosmos external integrations, SSH/terminal/kernel/workspaces/trajectories/model
    routing/vision, OS-level sandbox quotas.
-9. **CI never executed** — workflow authored, no GitHub Actions run log; do not claim "CI green".
-10. Hygiene: uncommitted worktree and `desktop/dist-lead` leftover (conflict C-11).
+9. **CI executed — run 40142902006 SUCCESS** on `5ac5bd4` (both jobs); an installer built by CI is not downloaded back to this host for a second lifecycle run.
+10. Hygiene: worktree committed/pushed through `5ac5bd4`; `desktop/dist-*` scratch outputs removed/ignored before commits.
 
 ## Signature block (measured values; nothing signed)
 
-- Final test numbers: **150 tests / 148 pass / 0 fail / 2 skipped, 29.5 s, exit 0** (final 3.2.0 build)
-- RPC / smoke / UI: **42/0 ~7 s; 8/8 68 s; 19/0/12**
+- Final test numbers: **183 tests / 181 pass / 0 fail / 2 skipped, 28.6 s, exit 0** (final 3.2.0 build,
+  pre-round-4 test-only/doc edits); CI independently ran the same suite green on `5ac5bd4`.
+- RPC / smoke / UI: **42/0 ~7 s; 8/8; 19/0/12**
 - Final installer: **129,447,101 B**, SHA256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`
   (+ blockmap 135,948 B `283B27E1…`, unpacked 249,801,728 B `8F7EAF76…`; `SHA256SUMS` present)
-- CI run link/status: **NOT RUN**
-- GitHub Release URL/tag: **NOT CREATED** (blocked)
+- CI run link/status: **run 40142902006 (commit 5ac5bd4) SUCCESS — https://github.com/ForrestGump618/suwen/actions/runs/40142902006**
+- GitHub Release URL/tag: **tag pushed; no Release created** (BLOCKED_EXTERNAL + HOLD)
 - Clean-VM machine + steps: **NOT AVAILABLE**
-- Endurance run duration/results: **NOT RUN**
+- Endurance run duration/results: **8/24/72 h NOT RUN**; accelerated soak PASS (25 min, 64 cycles, 12/12 faults, 0 errors)
 
 
 ## Final T2 correction (2026-10-25, Lead-measured, applied after the initial final report)

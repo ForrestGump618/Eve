@@ -249,7 +249,7 @@ repo promise is not yet satisfied online.
 
 The final 3.2.0 build is authoritative: `desktop/release/SuWen-Setup-3.2.0-win-x64.exe`
 **129,447,101 B** SHA-256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`
-(**UNSIGNED**); blockmap 135,948 B SHA-256 `283B27E1…1AC2`; unpacked `win-unpacked/SuWen.exe`
+(**UNSIGNED**); blockmap 135,948 B SHA-256 `283B27E1…0CBB72`; unpacked `win-unpacked/SuWen.exe`
 249,801,728 B SHA-256 `8F7EAF76…22E1`; `SHA256SUMS` present in `desktop/release/` and mirrored at
 `docs/release/SHA256SUMS.txt`. Host lifecycle **12/12** (including installing 3.0.0-preview.1 and
 upgrading to 3.2.0) passed; final `npm test` 182 tests / 180 pass / 2 skipped / 33.4 s; packaged smoke
