@@ -31,7 +31,7 @@ Measured evidence and full caveats: `../docs/release/final-acceptance-report.md`
 | Build / installer artifacts | **Pass** — NSIS x64 installer `release/SuWen-Setup-3.2.0-win-x64.exe`, **129,447,101 B**, SHA-256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`, blockmap 135,948 B, unpacked exe hash verified; **UNSIGNED** |
 | Install/upgrade/uninstall lifecycle | **Host probe PASS** — final-artifact lifecycle **12/12** (install, version metadata, running app, authenticated daemon attach, daemon survives UI close, reinstall, uninstall, user-data preservation) and upgrade source `3.0.0-preview.1` installed PASS; **clean-VM lifecycle NOT verified** |
 | `SHA256SUMS` / Windows CI execution | **`SHA256SUMS` present** (`release/SHA256SUMS`, mirrored `docs/release/SHA256SUMS.txt`); Windows CI workflow exists but was **never executed** |
-| Security | **Pass for implemented layer** — contextIsolation/sandbox renderer, CSP, schema IPC/sender checks, path guards, safeStorage, timing-safe token; scan PASS 0 HIGH/18 LOW/10 test fixtures; npm audit 0; full OS sandbox/quotas NOT implemented |
+| Security | **Pass for implemented layer** — contextIsolation/sandbox renderer, CSP, schema IPC/sender checks, path guards, safeStorage, timing-safe token; scan PASS 0 HIGH/48 LOW/14 test fixtures; npm audit 0; full OS sandbox/quotas NOT implemented |
 | Performance | **Baseline measured** — daemon ready p50 391 ms, create p50 0.82 ms, events.stream p50 1.49 ms, worker flowSummary 20.9 ms; UI/markdown first-token and endurance not measured |
 | 8/24/72 h / reboot / power-loss / disk-full durability | **Not performed** — no endurance claim |
 | Code signing / SmartScreen | **BLOCKED_EXTERNAL** — unsigned; SmartScreen warning expected |

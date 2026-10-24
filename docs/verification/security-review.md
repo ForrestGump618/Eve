@@ -17,18 +17,18 @@ Artefacts:
 | Metric | Value |
 | --- | --- |
 | verdict | **PASS** (0 unresolved HIGH) |
-| tracked files scanned (paths) | 408 |
-| text files scanned | 372 |
-| git history commits scanned | 13 |
+| tracked files scanned (paths) | 638 |
+| text files scanned | 420 |
+| git history commits scanned | 17 |
 | HIGH findings | 0 |
-| LOW findings (documentation/test-adjacent) | 18 |
-| accepted test fixtures (documented below) | 10 |
+| LOW findings (documentation/test-adjacent) | 48 |
+| accepted test fixtures (documented below) | 14 |
 | tracked forbidden files (`.env`, private keys, SSH material) | 0 |
 | `.gitignore` covers `.env` | true |
 | `.gitignore` covers `*.pem`/`*.key`/`id_rsa` | true |
 | `npm audit --omit=dev` | 0 vulnerabilities (0 low/moderate/high/critical) |
 
-The scan covers both the working tree and every added line in the 13 scanned commits. Findings are
+The scan covers both the working tree and every added line in the 17 scanned commits. Findings are
 printed, never suppressed: accepted fixtures are listed in the JSON report under
 `acceptedTestFixtureFindings` and summarised here.
 
@@ -42,6 +42,8 @@ printed, never suppressed: accepted fixtures are listed in the JSON report under
 | password-assignment | `tests/test_ssh.py:490` | `pw-remember` (dummy) |
 | password-assignment | `tests/test_ssh.py:833` | `ui-only-password` (dummy) |
 | password-assignment | `tests/test_suwen_platform.py:421` | `private-pass` (dummy settings fixture) |
+| openai-style-key | `desktop/scripts/e2e-research.mjs:654` | `sk-legacy-e2e-sentinel-…` (deterministic E2E sentinel; tests assert it never leaks into views/logs) |
+| api-key-assignment | `desktop/scripts/e2e-research.mjs:818` | `fixture-key-not-a-real-credential` (local OpenAI-compatible fixture configuration) |
 | (history copies) | same files in git history | same fixture strings |
 
 These values are wired only into local fixtures/tests; they are not account credentials, not used by
@@ -91,7 +93,7 @@ a product defect.
 ## 4. Verdict
 
 - No live credential, token, private key or tracked secret was found in the working tree or history
-  (0 HIGH; 10 documented test fixtures).
+  (0 HIGH; 14 documented test fixtures).
 - The Electron trust boundary uses the required controls (sandboxed renderer, contextIsolation,
   frozen preload, sender-validated IPC, CSP, safeStorage, authenticated named pipe).
 - **Residual risk remains** in the gaps above; this review is not a certification. Gate 7 is PASS for

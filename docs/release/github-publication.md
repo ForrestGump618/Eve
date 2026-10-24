@@ -16,7 +16,7 @@ token is present in the session, so no commit/tag/Release/asset upload was attem
 | `gh` CLI | not installed (`Get-Command gh` fails / absent) |
 | GitHub auth | no `GITHUB_TOKEN` / `GH_TOKEN` in environment; git credential helper `manager` configured but no remote write performed |
 | MIT licence | `LICENSE` (MIT, desktop), `desktop/LICENSE`, `NOTICE`, `desktop/third-party-licenses/`, SBOM; Python legacy keeps Apache-2.0 and is shipped as compatibility source |
-| Secret scan | `desktop/scripts/security-scan.mjs` → **PASS**, 0 unresolved HIGH / 18 LOW / 10 documented test fixtures, 408 tracked files, 13 commits |
+| Secret scan | `desktop/scripts/security-scan.mjs` → **PASS**, 0 unresolved HIGH / 48 LOW / 14 documented test fixtures, 638 tracked files, 17 commits |
 | CI workflow | `.github/workflows/suwen-windows.yml` authored; **never run** on GitHub |
 
 ## 2. Preconditions (all must be true before publishing)

@@ -33,7 +33,7 @@ E_CHAOS = ("docs/verification/artifacts/chaos-results.json: 12/12 scenarios pass
            "(short-window fault injection, one Windows session; no 8/24/72 h, no reboot/power-loss/disk-full)")
 E_DB = ("real calls via e2e-rpc --live: Europe PMC/PubMed 'CRISPR base editing' first PMID 42878939; "
         "UniProt TP53 first Q9Y2B4 (T53G5_HUMAN) release 2026_03")
-E_SEC = "docs/verification/security-review.md + scripts/security-scan.mjs: PASS (0 HIGH / 18 LOW / 10 documented test fixtures)"
+E_SEC = "docs/verification/security-review.md + scripts/security-scan.mjs: PASS (0 HIGH / 48 LOW / 14 documented test fixtures)"
 E_PERF = "docs/verification/performance-baseline.md + scripts/performance-baseline.mjs"
 
 MASTER_UPDATE = {
@@ -499,7 +499,7 @@ sleep/hibernate, power-loss, OS reboot or disk-full.
 daemon survives UI close, same-version reinstall, silent uninstall, data preserved, registry removed);
 upgrade source 3.0.0-preview.1 installed PASS. **Clean Windows VM: NOT RUN.**
 **Brand / security / performance.** Brand scan 983 hits / 143 files, 0 requiring text change; security
-scan PASS (0 HIGH, 18 LOW, 10 documented test fixtures) + npm audit 0 vulnerabilities; performance
+scan PASS (0 HIGH, 48 LOW, 14 documented test fixtures) + npm audit 0 vulnerabilities; performance
 baseline recorded for daemon/worker/event-stream.
 **Release governance.** `docs/release/release-gates.md` (9 gates), `final-acceptance-report.md`,
 `release-notes-v3.2.0.md`, `CHANGELOG.md`, `docs/verification/defect-register.csv` (19 entries),

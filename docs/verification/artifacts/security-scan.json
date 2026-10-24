@@ -1,10 +1,10 @@
 {
   "tool": "suwen-security-scan",
-  "scannedAt": "2026-10-24T18:10:43.536Z",
+  "scannedAt": "2026-10-24T23:27:37.070Z",
   "root": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext",
-  "trackedFiles": 408,
-  "textFilesScanned": 372,
-  "historyCommitsScanned": 13,
+  "trackedFiles": 638,
+  "textFilesScanned": 420,
+  "historyCommitsScanned": 17,
   "rules": [
     {
       "name": "openai-style-key",
@@ -62,6 +62,30 @@
       },
       {
         "source": "worktree",
+        "file": "desktop/scripts/e2e-research.mjs",
+        "line": 654,
+        "rule": "openai-style-key",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "sk-legacy-e2e-sentinel-0123456789",
+        "match": "sk-legacy-e2…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
+        "file": "desktop/scripts/e2e-research.mjs",
+        "line": 818,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-key-not-a-real-credential'",
+        "match": "apiKey: 'fix…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
         "file": "desktop/test/daemon-integration.test.ts",
         "line": 82,
         "rule": "api-key-assignment",
@@ -116,6 +140,216 @@
       },
       {
         "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 60,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-chaos-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 70,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-integration-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 80,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password: 'legacy-ssh-secret'",
+        "match": "password: 'l…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 90,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-enterprise-credential'",
+        "match": "apiKey: 'fix…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 102,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 114,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://username:password@",
+        "match": "https://user…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 160,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password='private-pass'",
+        "match": "password='pr…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 173,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-chaos-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 184,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-integration-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 195,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password: 'legacy-ssh-secret'",
+        "match": "password: 'l…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 206,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-enterprise-credential'",
+        "match": "apiKey: 'fix…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 219,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 232,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://username:password@",
+        "match": "https://user…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 256,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password='private-pass'",
+        "match": "password='pr…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 274,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-enterprise-credential'",
+        "match": "apiKey: 'fix…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 286,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 334,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password='private-pass'",
+        "match": "password='pr…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 347,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-enterprise-credential'",
+        "match": "apiKey: 'fix…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 360,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 386,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password='private-pass'",
+        "match": "password='pr…"
+      },
+      {
+        "source": "worktree",
+        "file": "docs/verification/security-review.md",
+        "line": 40,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "worktree",
         "file": "tests/test_ssh.py",
         "line": 471,
         "rule": "password-assignment",
@@ -161,6 +395,87 @@
         "match": "password='pr…",
         "acceptedFixture": true,
         "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "desktop/scripts/e2e-research.mjs",
+        "line": 655,
+        "rule": "openai-style-key",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "sk-legacy-e2e-sentinel-0123456789",
+        "match": "sk-legacy-e2…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "desktop/scripts/e2e-research.mjs",
+        "line": 819,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-key-not-a-real-credential'",
+        "match": "apiKey: 'fix…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 61,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-chaos-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 81,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password: 'legacy-ssh-secret'",
+        "match": "password: 'l…"
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 103,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "docs/verification/artifacts/security-scan.json",
+        "line": 115,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://username:password@",
+        "match": "https://user…"
+      },
+      {
+        "source": "git-history",
+        "commit": "8646fd7c",
+        "file": "docs/verification/security-review.md",
+        "line": 41,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
       },
       {
         "source": "git-history",
@@ -261,9 +576,33 @@
     ]
   },
   "highCount": 0,
-  "lowCount": 18,
-  "acceptedTestFixtures": 10,
+  "lowCount": 48,
+  "acceptedTestFixtures": 14,
   "acceptedTestFixtureFindings": [
+    {
+      "source": "worktree",
+      "file": "desktop/scripts/e2e-research.mjs",
+      "line": 654,
+      "rule": "openai-style-key",
+      "declaredSeverity": "high",
+      "severity": "low",
+      "sample": "sk-legacy-e2e-sentinel-0123456789",
+      "match": "sk-legacy-e2…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "worktree",
+      "file": "desktop/scripts/e2e-research.mjs",
+      "line": 818,
+      "rule": "api-key-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "apiKey: 'fixture-key-not-a-real-credential'",
+      "match": "apiKey: 'fix…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
     {
       "source": "worktree",
       "file": "desktop/test/providers.test.ts",
@@ -333,6 +672,32 @@
       "severity": "low",
       "sample": "password='private-pass'",
       "match": "password='pr…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "git-history",
+      "commit": "8646fd7c",
+      "file": "desktop/scripts/e2e-research.mjs",
+      "line": 655,
+      "rule": "openai-style-key",
+      "declaredSeverity": "high",
+      "severity": "low",
+      "sample": "sk-legacy-e2e-sentinel-0123456789",
+      "match": "sk-legacy-e2…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "git-history",
+      "commit": "8646fd7c",
+      "file": "desktop/scripts/e2e-research.mjs",
+      "line": 819,
+      "rule": "api-key-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "apiKey: 'fixture-key-not-a-real-credential'",
+      "match": "apiKey: 'fix…",
       "acceptedFixture": true,
       "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
     },

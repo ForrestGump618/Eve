@@ -140,8 +140,8 @@ round-2 status; it never overwrites a previous measurement.
   bridge / 43 UI-only, 0 undeclared methods**. Every row states that runtime click-through is not
   individually recorded yet.
 - **Security review**: `docs/verification/security-review.md` + automated scan artefact
-  `docs/verification/artifacts/security-scan.json` — **PASS, 0 unresolved HIGH**, 18 LOW, 10
-  documented test fixtures; 408 tracked files, 13 commits; `.gitignore` covers `.env`/private keys;
+  `docs/verification/artifacts/security-scan.json` — **PASS, 0 unresolved HIGH**, 48 LOW, 14
+  documented test fixtures; 638 tracked files, 17 commits; `.gitignore` covers `.env`/private keys;
   `npm audit --omit=dev` 0 vulnerabilities. Verified controls include sandboxed renderer,
   contextIsolation, sender-validated IPC, CSP (`connect-src 'none'`), safeStorage secrets, authenticated
   named pipe, path guards.

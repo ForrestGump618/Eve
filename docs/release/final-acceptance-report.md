@@ -19,7 +19,7 @@ desktop takeover, durable harness and Windows release") · remote
 | CI status | `.github/workflows/suwen-windows.yml` authored (typecheck/build/tests/e2e-rpc/ui-dom-qa/security-scan/SBOM/NSIS+SHA256SUMS); **never executed** |
 | Release tag | **not created** — tag `suwen-vnext-3.2.0` documented in `github-publication.md`, not pushed |
 | Repo / Release URL | none published — G9 **BLOCKED_EXTERNAL** (`gh` absent / no token) |
-| Publication scan | `security-scan.mjs` PASS (0 HIGH / 18 LOW / 10 documented test fixtures); no real secret found in tracked tree/history |
+| Publication scan | `security-scan.mjs` PASS (0 HIGH / 48 LOW / 14 documented test fixtures); no real secret found in tracked tree/history |
 
 ## B. Windows installer
 
@@ -71,7 +71,7 @@ desktop takeover, durable harness and Windows release") · remote
 | Chaos (short window) | `docs/verification/chaos-results.json`: **12/12 scenarios, 51.7 s** — worker SIGKILL retry (attempts 2), daemon SIGKILL mid-step recovered from durable lease (same operation id, 1 artifact), committed step not replayed, cancel → 0 artifacts, provider 429→500→200 with 2 human approvals + reconciliation events |
 | Endurance 8/24/72 h, reboot, power-loss, disk-full | **NOT RUN** — must stay NOT_VERIFIED (R050/R116) |
 | DB/context recovery | durable tests + 10-round ~201k-token compaction (round-2 evidence), versions/manual compaction/rollback; semantic losslessness not claimed |
-| Security audit | `docs/verification/security-review.md` + `scripts/security-scan.mjs`: **PASS — 0 HIGH / 18 LOW / 10 documented test fixtures**; `npm audit --omit=dev` 0 vulnerabilities; contextIsolation + sandbox renderer, CSP `connect-src 'none'`, sender/frame-checked IPC, path-confinement guards, safeStorage credentials, named-pipe random token. No OS-level CPU/memory/disk quotas (R144 NOT_STARTED) |
+| Security audit | `docs/verification/security-review.md` + `scripts/security-scan.mjs`: **PASS — 0 HIGH / 48 LOW / 14 documented test fixtures**; `npm audit --omit=dev` 0 vulnerabilities; contextIsolation + sandbox renderer, CSP `connect-src 'none'`, sender/frame-checked IPC, path-confinement guards, safeStorage credentials, named-pipe random token. No OS-level CPU/memory/disk quotas (R144 NOT_STARTED) |
 | Performance | `docs/verification/performance-baseline.md` (daemon ready p50 391 ms, create p50 0.82 ms, events.stream p50 1.49 ms, worker flowSummary 20.9 ms); UI/markdown first-token and endurance not measured |
 | Installer host lifecycle | 12/12 PASS on the final artifact — see §B |
 

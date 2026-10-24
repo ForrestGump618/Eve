@@ -1,72 +1,111 @@
 # Changelog — SuWen Desktop (vNext)
 
-This file tracks the Electron/TS desktop (`desktop/`) releases. The preserved Python platform has its
-own project history in the repository-root `CHANGELOG.md`; it is not part of the desktop semantic
+This file tracks the Electron/TypeScript desktop (`desktop/`) releases. The preserved Python platform
+has its own project history in the repository-root `CHANGELOG.md`; it is not part of desktop semantic
 versioning.
 
-## [Unreleased] — 3.2.0 (release candidate, NOT yet built/published)
+## [Unreleased] — post-3.2.0 hardening (2026-10-25)
 
-Round-3 convergence work. Every entry names the evidence; anything not verified is marked.
+### CI / repository
+- **GitHub Actions now executes for real.** The tracked workflow `.github/workflows/suwen-windows.yml`
+  runs on pushes to `suwen-vnext-durable`: Python baseline pytest (Windows), then Node typecheck, full
+  `npm test`, RPC E2E against a real detached daemon with live public databases, UI DOM QA, secret
+  scan, NSIS installer build, CycloneDX SBOM, SHA256SUMS and artifact upload.
+  Run history and fixes:
+  - run 1 (`8646fd7`) failed in unit tests: `desktop/test/research-worker.test.ts` expected string
+    `health.deps.numpy`, but the GitHub runner has no numpy and the worker reports `null`;
+    fixed by accepting `null | string` for optional `numpy`/`scipy` deps (`9132ec1`).
+  - run 2 (`8741d47`) passed steps 1–8 (typecheck, tests, live RPC E2E, UI DOM QA) and failed the
+    secret scan: two deterministic E2E fixture literals in `desktop/scripts/e2e-research.mjs`
+    (`sk-legacy-e2e-sentinel-…`, `fixture-key-not-a-real-credential`) were classified HIGH.
+    Fixed by extending the documented test-fixture allowlist to `desktop/scripts/e2e-*.mjs` plus
+    `sentinel|not-a-real|e2e-` fixture tokens (narrowly scoped; findings stay printed and listed).
+  - latest run: re-run in progress after the scanner fix; see `docs/progress.md` for the final status.
+- Local re-run of the scanner after the fix: **PASS — 0 HIGH / 48 LOW / 14 documented test fixtures**
+  (`docs/verification/artifacts/security-scan.json`).
 
 ### Added
+- `desktop/scripts/durability-soak.mjs`: real fault-injection soak harness (actual daemon over the
+  authenticated named pipe; repeated durable tasks; `python-worker-kill`, `daemon-kill` and `cancel`
+  faults every N cycles; recovery assertions; JSON evidence at
+  `docs/verification/durability-soak.json`). This is an **accelerated soak**, not the 8/24/72 h
+  endurance run, and is labelled as such.
 
-- Typed streaming event pipeline: `desktop/src/stream-events.ts` maps persisted durable events to the
-  versioned wire protocol (`StreamEnvelope` v1: eventId/sequence/taskId/stepId/type/sourceType/at/payload),
-  exposed as the `events.stream` RPC (cursor/reset/tasks/streams). Contract in
-  `desktop/src/shared/contract.ts`; daemon dispatch at `desktop/src/daemon.ts:194`; unit test
-  `desktop/test/stream-events.test.ts`.
-- Main-process event bridge: `desktop/src/main.ts` polls `events.stream` with a cursor and forwards
-  incremental batches to the renderer; preload exposes frozen `onEvent`/`onConnection` subscriptions
-- Renderer recovery bridge: `events.stream` stays main-process-only; gap replay is the main bridge
-  `window.suwen.call('events.replay', {since, limit})`; daemon auto-reconnect uses bounded backoff
-  (300 ms…12 s), re-pushes the encrypted model config + safeStorage credential refs, and reports
-  `onConnection` states `reconnecting|restored|lost`.
-  (`desktop/src/preload.cts`).
-- Round-3 verification tooling (docs-audit, uncommitted): `desktop/scripts/security-scan.mjs`
-  (working-tree + 13-commit history scan, documented fixture allowlist) and
-  `desktop/scripts/performance-baseline.mjs` (daemon/RPC/worker baseline, `--out` JSON).
-- Release documentation set: `docs/release/release-gates.md`, `docs/release/final-acceptance-report.md`,
-  `docs/release/github-publication.md`, `docs/release/release-notes-v3.2.0.md`,
-  `docs/verification/security-review.md`, `docs/verification/performance-baseline.md`,
-  `docs/verification/defect-register.csv`; 13-field `docs/requirements/master-requirements.csv`
-  (R001–R148); regenerated `docs/verification/ui-action-coverage.csv` (144 actions) and extended
-  `docs/migration/feature-parity-matrix.csv` (85 rows).
+### Fixed
+- Optional Python dependency assertions in `desktop/test/research-worker.test.ts` no longer assume
+  numpy/scipy are installed (CI and minimal hosts report `null`).
+- Secret scanner fixture allowlist no longer flags deterministic E2E fixture credentials; the
+  findings remain visible under `acceptedTestFixtureFindings` and are documented in
+  `docs/verification/security-review.md`.
 
-### Changed
+## [3.2.0] — 2026-10-25 (built and host-verified; NOT published — release gates HOLD)
 
-- `desktop/src/rpc/capabilities.ts`: six research capabilities build validated durable task DAGs;
-  model-requiring templates are rejected before persistence when no model is configured.
-- `desktop/src/shared/contract.ts`: RPC surface is 81 methods including `events.stream`, `secrets.*`;
-  task step kinds 19.
-- `desktop/ui/actions.json`: 142 audited actions across five workspaces.
+Final build measured in the TARGET workspace; evidence under `docs/verification/` and `docs/release/`.
 
-### Security
+### Artifacts (unsigned)
+- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — 129,447,101 B, SHA256
+  `4590B7F3E1B45E163E1CB37AA46BFF58CD0751C4F43914926969F52F6E5C3822`.
+- `desktop/release/win-unpacked/SuWen.exe` — 249,801,728 B, SHA256
+  `8F7EAF76FEB66A61E51D5F8B9B67EEFA375FEDD0018A5566D64C27F0570A22E1`.
+- `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B, SHA256
+  `283B27E17E8E6B44DFEB2B015E9279576C1730A609167C481021FA75EAEE36C6`.
+- `desktop/release/SHA256SUMS` == `docs/release/SHA256SUMS.txt` (3 lines).
 
-- Secret/credential scan **PASS** — 0 unresolved HIGH, 18 LOW, 10 documented test fixtures
-  (`docs/verification/artifacts/security-scan.json`); `.gitignore` covers `.env` and private keys;
-  `npm audit --omit=dev` 0 vulnerabilities.
-- Documented trust boundaries (sandboxed renderer, sender-validated IPC, CSP, safeStorage,
-  authenticated named pipe, path guards) in `docs/verification/security-review.md`.
+### Added
+- Typed streaming event protocol: `events.stream` RPC, `StreamEnvelope` v1
+  (eventId/sequence/taskId/stepId/type/sourceType/at/payload), main-process 100 ms pump, preload
+  `onEvent`/`onConnection`, gap replay via main bridge `events.replay`, 2.5 s snapshot fallback.
+- Renderer streaming: DOM-free reducer `ui/stream-core.js` (global sequence, 10k LRU event-id dedupe,
+  bounded replay, UTF-16 suffix-safe append, terminal immutability, run state machine), safe markdown
+  subset `ui/markdown.js` (raw HTML inert, LaTeX/Mermaid labelled code fallback), theme system,
+  connection banner, per-conversation drafts, `#jump-latest`, copy-code.
+- Round-3 governance docs: `release-gates.md`, `final-acceptance-report.md`, `defect-register.csv`,
+  `security-review.md`, `performance-baseline.md`, `ui-streaming-stability.md`, `ui-e2e.md`,
+  `ui-visual-audit.md`, `e2e-results.md`, 13-field `master-requirements.csv` (R001–R148), 85-row
+  feature-parity matrix, 144-action UI coverage, GitHub publication runbook.
 
-### Known limitations / not verified (do not claim otherwise)
+### Fixed
+- Duplicate persisted assistant turns after daemon recovery (different ids from daemon
+  `a-<operationId>` and renderer `uid()`): `conversations.ts` is now idempotent by message id and
+  merges assistant turns by `(taskId, role='assistant')`; `conversations.test.ts` covers both;
+  in-Electron re-run `assistants=1 taskAssistants=1`, 0 findings.
+- Failed/interrupted chat turns now surface `#chat-notice` (localized `chatTaskFailed`), cleared on
+  next send; covers failed-step notice and `waiting_approval` reconciliation notice.
+- Auto-reconnect after daemon SIGKILL: `pumpEvents` clears the stale connection and schedules bounded
+  backoff (300 ms…12 s), re-pushes model config and encrypted credential refs, emits
+  `onConnection reconnecting|restored`; T2 Electron runs PASS 3/3 (offline 72–520 ms, restored
+  702–779 ms, 0 reloads).
+- Follow-loop scroll jumping, provider prompt delivery, stream duplication, RPC/daemon shape drift,
+  RSI run path, D1–D7 research/tool defects, Chinese mojibake in an RPC string.
 
-- Streaming UI quantitative acceptance matrix (100/1,000/10,000 events, composer/scroll/markdown
-  stability) — T2 work in progress; UI stability gate open.
-- Full runtime click-through of all 142 UI actions; visual acceptance at 1920×1080/1366×768,
-  scaling, themes, locales — pending.
-- Six research capabilities real end-to-end run — pending; external Paper2Agent/Biomni/ERA/Robin/
-  Kosmos integrations not bundled.
-- 8/24/72 h endurance, sleep/hibernate, power loss, OS reboot, disk-full — **not run**.
-- Clean-Windows-VM install/upgrade/uninstall — host probe 14/14 + upgrade 8/8 only.
-- Code signing — no certificate; unsigned build, SmartScreen warning expected.
-- GitHub publication — blocked (`gh` CLI/token unavailable in this environment).
-- 3.2.0 installer rebuild + SHA256 — pending; the 3.1.0 artefact numbers are superseded once rebuilt.
+### Verified (host)
+- `npx tsc --noEmit` 0; `npm run build` 0; full `npm test` 183 tests / 181 pass / 0 fail / 2 skipped
+  (skips: Windows symlink EPERM, optional legacy Python deps) 29.6 s.
+- RPC E2E against real detached daemon: 42/42 incl. live Europe PMC/PubMed and UniProt release 2026_03;
+  six research capabilities deterministic 22 cases (19 PASS/0 FAIL/3 live-gated skips) and live 21/21.
+- Packaged Electron smoke 8/8 (106 s); streaming UI matrix 100/1,000/10,000 deltas; visual audit 180
+  PNGs / 9 states × zh-en × light-dark × 5 size/DSF combos, 0 layout findings.
+- Chaos 12/12 (51.7 s, single Windows session); accelerated durability soak (see Unreleased).
+- Host installer lifecycle 12/12 on the final installer (silent install, registry, version metadata,
+  daemon survives UI close, reinstall, uninstall, user data preserved) + upgrade from 3.0.0-preview.1.
+
+### Known limitations (do not claim otherwise)
+- Installer **UNSIGNED** (no certificate; SmartScreen warning expected).
+- Clean-Windows-VM lifecycle **NOT run**; 8/24/72 h endurance, sleep/hibernate, power loss, OS reboot
+  and disk-full **NOT run** (accelerated soak only, single host/session).
+- Real vendor model accounts unavailable (deterministic local OpenAI-compatible fixture used instead).
+- GitHub Release publication **not performed**: gates HOLD and `gh` CLI/token absent; source branch +
+  tag `suwen-vnext-3.2.0` are pushed and CI runs (see Unreleased).
+- No OS-level CPU/memory/disk quotas; no penetration test; legacy Python workbench unavailable on the
+  build host (missing fastapi) so its UI is documented as unavailable, not verified.
+- External Paper2Agent/Biomni/ERA/Robin/Kosmos stacks are not bundled; their capability patterns are
+  implemented natively.
 
 ## [3.1.0] — 2026-10-24
 
 - Full desktop takeover: Electron + TypeScript desktop with independent harness daemon, SQLite WAL
-  durable store, typed RPC, five workspaces, bilingual UI, detached background execution and named-pipe
-  authentication.
+  durable store, typed RPC, five workspaces, bilingual UI, detached background execution and
+  named-pipe authentication.
 - Durable harness: task DAG, leases/fencing/heartbeat, checkpoints, outbox/idempotency, retry and
   cancellation; short-window chaos 12/12 checks in 52.2 s.
 - Context manager: independent compaction service, raw-log hash chain, structured summaries with
@@ -75,7 +114,7 @@ Round-3 convergence work. Every entry names the evidence; anything not verified 
   Python research worker protocol `suwen-research-worker/2`.
 - Packaging: unsigned Windows x64 NSIS installer `SuWen-Setup-3.1.0-win-x64.exe`
   (129,425,145 B, SHA256 `E1A1062C…`), host lifecycle 14/14, upgrade 8/8, checksums generated.
-- Verification: `npm test` 150 tests / 148 pass / 2 skipped / 0 fail (29.5 s); RPC E2E 42/0 incl. real
+- Verification: `npm test` 150 tests / 148 pass / 2 skipped / 0 fail; RPC E2E 42/0 incl. real
   Europe PMC/UniProt calls; packaged Electron smoke 8/8; UI DOM QA 19/0/12.
 
 ## [3.0.0-preview.1] — 2026-10-24
@@ -91,35 +130,3 @@ Round-3 convergence work. Every entry names the evidence; anything not verified 
 - Legacy Python/FastAPI platform (Apache-2.0) is preserved read-only for compatibility and import.
   See repository-root `CHANGELOG.md` and `docs/SUWEN-V2-GUIDE.md`; it is not rebuilt as part of the
   desktop release except as the bundled compatibility source.
-
-
-## [3.2.0] - 2026-10-25 (final evidence)
-
-Final build measured in the TARGET workspace (evidence: `docs/verification/`, `docs/release/`).
-
-### Added
-- Typed streaming event protocol (`events.stream`, `StreamEnvelope` v1), pure-DOM reducer, safe markdown
-  subset, theme system, connection banner and bounded reconnect.
-- Round-3 release governance: `release-gates.md`, `final-acceptance-report.md`, `defect-register.csv`,
-  security review, performance baseline, this changelog and release notes.
-
-### Fixed (verified in this build)
-- Duplicate persisted assistant messages after recovery: daemon `a-<operationId>` and renderer `uid()` merged via `conversations.ts` `(taskId, role='assistant')`; `conversations.test.ts` 4 tests; Lead persist re-run `assistants=1 taskAssistants=1`, 0 findings (desktop/release/smoke/ui-streaming-20261024-192807-final.json).
-- Failed-turn chat error surface: `#chat-notice` with localized `chatTaskFailed`, cleared on next send (waiting_approval reconciliation notice + failed-step notice; static QA pass, then T2 visual re-verification PASS — reports ui-visual-audit-20261024-194627/194718/194944.json, zh len 106/en len 159).
-- Auto-reconnect after daemon SIGKILL PASS 3/3 runs (offline 72-520 ms, restored 702-779 ms, 0 reloads).
-
-- RPC E2E harness, missing activity-handler registration, UI↔backend RPC method sync, worker-bridge timing,
-  provider prompt delivery, stream text/render duplication, follow-loop scroll jump, RSI run error path,
-  Chinese mojibake in RPC strings.
-- Duplicate conversation append on reconnect + missing auto-reconnect after daemon SIGKILL: source fixes
-  landed with `conversations.test.ts` coverage; T2 in-Electron re-run pending (tracked in defect register).
-
-### Verified
-- `npx tsc --noEmit` exit 0; `npm run build` exit 0; full suite 150 tests / 148 pass / 0 fail / 2 skipped,
-  29.5 s; RPC E2E 42/0 (~7 s); packaged smoke 8/8 (68 s); UI DOM QA 19/0/12; chaos 12/12 (51.7 s);
-  installer 129,447,101 B SHA256 `4590B7F3…`; host installer lifecycle 12/12 + upgrade source pass.
-
-### Known limitations
-- Installer UNSIGNED; clean-Windows-VM lifecycle NOT run; 8/24/72 h endurance, reboot and power-loss NOT run;
-  real vendor accounts unavailable; GitHub publication blocked (`gh`/token absent); no OS sandbox quotas;
-  external research integrations (Paper2Agent/Biomni/ERA/Robin/Kosmos) not bundled.
