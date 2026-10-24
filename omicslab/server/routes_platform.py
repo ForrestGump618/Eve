@@ -45,7 +45,7 @@ def guarded(fn):
 @router.get('/bootstrap')
 async def bootstrap(request:Request,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope)
-    return {'brand':'素问 Suwen','version':'2.0.0','schema_version':2,'scope':scope,
+    return {'brand':'素问 Suwen','version':'2.1.0','schema_version':2,'scope':scope,
         'settings':{key:p.config.get(key,scope) for key in DEFAULTS},
         'sections':list(DEFAULTS),'migration':redact(p.store.get('migration','v2')),
         'scientific':SCIENTIFIC,'capabilities':{'persistent_tasks':True,'mcp':['stdio','http'],'knowledge':['text','markdown','docx','pdf_optional'],
@@ -480,3 +480,38 @@ async def trash_restore(request:Request,id:str,scope:str='ws_main'):
     p.store.put('trash',id,dict(row,restored=True),scope)
     if kind=='agent':p.refresh_agents()
     return result
+
+
+@router.get('/experiments')
+async def experiments_list(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope)
+    return {'items':p.store.list('experiment',scope)}
+
+
+@router.post('/experiments')
+async def experiment_record(request:Request,scope:str='ws_main'):
+    return await platform(request).experiments.record(scope,await body(request))
+
+
+@router.post('/experiments/compare')
+async def experiments_compare(request:Request,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    return guarded(lambda:p.experiments.compare(scope,data.get('ids')))
+
+
+@router.get('/workflows/{id}/export')
+async def workflow_export(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope)
+    flow=p.store.get('workflow',id,scope)
+    if not flow:raise HTTPException(404,'工作流不存在')
+    return {'schema_version':1,'workflow':redact({k:flow[k] for k in ('name','nodes') if k in flow})}
+
+
+@router.post('/workflows/import')
+async def workflow_import(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    if data.get('schema_version')!=1:raise HTTPException(400,'工作流 Schema 必须为 1')
+    flow=data.get('workflow')
+    if not isinstance(flow,dict):raise HTTPException(400,'缺少工作流对象')
+    guarded(lambda:validate_workflow(flow))
+    return p.store.put('workflow',uid('flow'),{k:flow[k] for k in ('name','nodes') if k in flow},scope)

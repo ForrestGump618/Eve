@@ -277,6 +277,7 @@ class AgentLoop:
             memory=scoped_memory,
         )
         ctx.restricted_channel = bool(conv.meta.get("restricted_channel"))
+        ctx.inherited_toolsets = conv.meta.get("inherited_toolsets")
         platform = getattr(self.registry, "platform", None)
         if platform is not None:
             ctx.scoped_skills = dict(self.skills, **platform.skills.load(workspace_id or "ws_main"))
@@ -359,6 +360,8 @@ class AgentLoop:
             selected_toolsets = list(set((agent.toolsets or []) + ["mcp", "research", "network"]))
             system += "\n科研发现任务先用 bio_tool_search 检索工具。每项生物学结论在最终回答前用 bio_record_claim 登记；有实际指标文件时用 bio_verify_claim 做独立检查。文献元数据不等于结论已验证。"
         tools = self.registry.list_specs(selected_toolsets)
+        if platform is not None and not platform.config.get('models',workspace_id)['value'].get('orchestration'):
+            tools=[t for t in tools if t['function']['name']!='spawn_subagent']
         if platform is not None:
             tools = [tool for tool in tools if not tool["function"]["name"].startswith("mcp_") or any(
                 platform.mcp.allowed(server, workspace_id, agent.id) and tool["function"]["name"].startswith(server["id"]+"__")
@@ -730,7 +733,11 @@ class AgentLoop:
                     provider=provider,
                     model=model,
                 )
-                task = await service.wait_child(child)
+                try:
+                    task = await service.wait_child(child)
+                except asyncio.CancelledError:
+                    await service.cancel(child['run']['run_id'],'子任务等待被取消或超时')
+                    raise
                 if task.get("status") != "succeeded":
                     err = task.get("error") or {}
                     message = err.get("message") if isinstance(err, dict) else str(err or "")

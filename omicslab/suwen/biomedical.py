@@ -102,25 +102,15 @@ class Biomedical:
         claim=self.store.get('claim',id,scope)
         if not claim:raise ValueError('结论不存在或不属于此工作区')
         if not rules or len(rules)>30:raise ValueError('需要 1—30 条独立数值规则')
-        backend=await self.platform.backend(scope)
-        raw=await backend.read_text(path,max_bytes=200000)
-        text=raw.get('text',raw.get('content',''))
-        metrics=json.loads(text)
-        if not isinstance(metrics,dict):raise ValueError('指标文件必须为 JSON 对象')
-        checks=[]
-        operations={'lt':lambda a,b:a<b,'le':lambda a,b:a<=b,'gt':lambda a,b:a>b,'ge':lambda a,b:a>=b,'eq':lambda a,b:a==b}
-        for rule in rules:
-            name=rule.get('metric');op=rule.get('op');value=metrics.get(name);threshold=rule.get('threshold')
-            if op not in operations or not isinstance(value,(float,int)) or isinstance(value,bool) or not math.isfinite(value):
-                checks.append({'metric':name,'passed':False,'reason':'指标缺失、非有限数值或操作符无效'});continue
-            if not isinstance(threshold,(float,int)) or isinstance(threshold,bool) or not math.isfinite(threshold):raise ValueError('阈值必须为有限数值')
-            checks.append({'metric':name,'value':value,'op':op,'threshold':threshold,'passed':operations[op](value,threshold)})
+        from .experiments import read_metrics,checks as evaluate
+        metrics,digest=await read_metrics(self.platform,scope,path)
+        checks=evaluate(metrics,rules)
         sources=[self.store.get('bio_source',source,scope) for source in claim['sources']]
         source_ok=bool(sources) and all(s and s.get('source_verified') and not s.get('retracted') for s in sources)
         passed=all(c['passed'] for c in checks)
         status='checks_passed_needs_human' if passed and source_ok else 'insufficient_evidence'
         return self.store.put('claim',id,dict(claim,checks=checks,metrics_path=path,
-            metrics_sha256=hashlib.sha256(text.encode()).hexdigest(),source_check=source_ok,
+            metrics_sha256=digest,source_check=source_ok,
             validation_status=status,reviewer=None,validated_at=time.time(),
             limitations='数值检查不证明因果关系；还需核对样本独立性、混杂、多重检验与原始数据。'),scope)
 

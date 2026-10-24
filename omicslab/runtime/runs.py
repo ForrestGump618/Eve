@@ -763,6 +763,15 @@ class RunService:
             }
         )
         conversation = Conversation(agent=child_agent, title=f"子任务 · {child_agent}")
+        conversation.meta['restricted_channel']=bool(parent_handle.conversation.meta.get('restricted_channel'))
+        inherited=parent_handle.conversation.meta.get('inherited_toolsets')
+        profile=getattr(getattr(self.loop,'registry',None),'platform',None)
+        if profile is not None:
+            parent_agent=profile.store.get('agent',parent_handle.conversation.agent)
+            if parent_agent is not None:
+                allowed=parent_agent.get('toolsets',[])
+                inherited=allowed if inherited is None else list(set(inherited)&set(allowed))
+        if inherited is not None:conversation.meta['inherited_toolsets']=inherited
         conversation.messages.append(ChatMessage(role="user", content=prompt))
         child_handle = RunHandle(
             run=run,

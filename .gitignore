@@ -81,3 +81,8 @@ ssh_known_hosts.json
 # Keep the committed documentation screenshots (real PNGs), ignore scratch captures.
 /docs/screenshots/*
 !/docs/screenshots/*.png
+
+# Machine-local screenshots retained from earlier delivery checks
+/docs/screenshots/studio-1.3-*.png
+/docs/screenshots/suwen-2-ssh.png
+/docs/screenshots/workbench-1.2.0.png

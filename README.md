@@ -9,7 +9,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-2ea44f.svg" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-3776ab.svg" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/version-2.0.0-6f42c1.svg" alt="Version 2.0.0">
+  <img src="https://img.shields.io/badge/version-2.1.0-6f42c1.svg" alt="Version 2.1.0">
   <a href="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml"><img src="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
@@ -17,10 +17,12 @@
 
 服务默认只监听 `127.0.0.1`，没有登录、没有租户、没有遥测；会话、事件、产物与快照都以 SQLite、JSON、Markdown、PNG 的形式落在本机，可以直接查看、复制与备份。模型接入是显式配置的，不配模型也能用 `mock` 离线走通流程。
 
-当前版本 **2.0.0**（2026-10-23）。展示名已改为素问 Suwen，Python 包名（`omicslab`）、旧 API 与数据目录 `.omicslab` 为兼容而保留。24 类 V2 需求逐项状态与尚缺子项见 [实现清单](docs/SUWEN-V2-CHECKLIST.md)：其中只有品牌与多级设置标为“已实现”，其余是“部分实现”或受外部环境限制。
+当前版本 **2.1.0**（2026-10-24）。展示名已改为素问 Suwen，Python 包名（`omicslab`）、旧 API 与数据目录 `.omicslab` 为兼容而保留。24 类 V2 需求逐项状态与尚缺子项见 [实现清单](docs/SUWEN-V2-CHECKLIST.md)：其中只有品牌与多级设置标为“已实现”，其余是“部分实现”或受外部环境限制。
 
 <p align="center"><img src="docs/screenshots/workbench-dark.png" alt="素问工作台（深色主题）" width="1000"></p>
 <p align="center"><sub>工作台：对话、变量、文件、图表与任务共用同一个工作区。</sub></p>
+
+> **2.1 新增**：Sage-A1.5 自检协议、可选并行子任务、独立指标验证节点、实验比较与工作流导入导出。已有文档结构和品牌保持不变；适配方式与实际边界见 [第二轮升级说明](docs/UPGRADE-2.1.md)。
 
 ## 目录
 
@@ -225,12 +227,12 @@ flowchart LR
 | [常见问题](docs/FAQ.md) | 安装、端口、密钥、数据位置等高频问题 |
 | [科研证据设计](docs/BIOMEDICAL-EVIDENCE.md) | 工具实现、证据分级与人工复核门控 |
 | [参考与边界](docs/REFERENCES-V2.md) | 借鉴了什么、没有打包什么、许可证边界 |
-| [更新日志](CHANGELOG.md) | 2.0.0 与历史版本变更 |
+| [更新日志](CHANGELOG.md) | 2.1.0 与历史版本变更 |
 
 ## 项目状态与验证
 
-- 当前版本 **2.0.0**（2026-10-23），采用语义化版本；修复只覆盖最新的 2.0.x。
-- **测试**：`python -m pytest -q` → **439 passed**（Windows + Python 3.12.11，约 35 秒）。该结果已在维护者本机复跑确认；[验证记录](docs/VALIDATION-V2.md) 中的 439 项是项目 2.0.0 的基线记录。不同平台与依赖版本可能略有差异，以本机实际输出为准。
+- 当前版本 **2.1.0**（2026-10-24），采用语义化版本；修复只覆盖最新的 2.0.x。
+- **测试**：`python -m pytest -q` → **446 passed**（Windows + Python 3.12.11，约 35 秒）。该结果已在维护者本机复跑确认；[验证记录](docs/VALIDATION-V2.md) 中的 446 项是项目 2.1.0 的基线记录。不同平台与依赖版本可能略有差异，以本机实际输出为准。
 - CI（[`ci.yml`](.github/workflows/ci.yml)）在 Ubuntu（Python 3.10 / 3.11 / 3.12）与 Windows（3.12）上运行同一套测试；测试完全离线，模型使用 `mock`。
 - 状态用词统一为 **已实现**、**部分实现**、**待实现**、**外部依赖限制**，与 [实现清单](docs/SUWEN-V2-CHECKLIST.md) 保持一致。
 - 尚未完成的外部验收：真实 SSH 端到端、真实付费模型 / 视觉 / 嵌入、Docker 容器、Telegram 与 OAuth 授权、上游科研环境；macOS / Linux 安装脚本已提供，但维护者没有对应主机，尚未实测。
@@ -260,4 +262,4 @@ flowchart LR
 
 ---
 
-素问 Suwen v2.0.0 · Apache-2.0 · 本页与 [README.en.md](README.en.md) 保持结构对应
+素问 Suwen v2.1.0 · Apache-2.0 · 本页与 [README.en.md](README.en.md) 保持结构对应

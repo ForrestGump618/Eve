@@ -61,6 +61,8 @@ class OpenAICompatProvider(BaseProvider):
             if token_parameter not in {'max_tokens', 'max_completion_tokens'}:
                 token_parameter = 'max_tokens'
             payload[token_parameter] = int(cfg.max_tokens)
+        if cfg.extra.get('chat_template_kwargs'):
+            payload['chat_template_kwargs'] = cfg.extra['chat_template_kwargs']
         if tools:
             payload["tools"] = tools
             payload["tool_choice"] = "auto"

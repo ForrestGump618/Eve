@@ -212,6 +212,8 @@ async def test_child_run_limits_and_events(settings: Settings, events: EventStor
     settings.max_child_tasks = 2
     store = ConversationStore(settings)
     conv = store.create(agent="lead", title="t")
+    conv.meta.update(restricted_channel=True,inherited_toolsets=['system'])
+    store.save(conv)
     loop = FakeLoop(delay=0.6)
     service = _service(settings, events, loop)
     result = await service.submit(session_id=conv.id, message="parent")
@@ -219,6 +221,8 @@ async def test_child_run_limits_and_events(settings: Settings, events: EventStor
     assert parent_handle is not None
 
     child_a = await service.submit_child(parent_handle, prompt="child a", agent_id="data-critic")
+    assert child_a['handle'].conversation.meta['restricted_channel'] is True
+    assert child_a['handle'].conversation.meta['inherited_toolsets']==['system']
     child_b = await service.submit_child(parent_handle, prompt="child b")
     with pytest.raises(ValueError, match="\u5b50\u4efb\u52a1"):
         await service.submit_child(parent_handle, prompt="child c")

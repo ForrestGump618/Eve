@@ -6,8 +6,8 @@ type: software
 authors:
   - name: "ForrestGump618"
   - name: "OmicsLab contributors"
-version: "2.0.0"
-date-released: "2026-10-23"
+version: "2.1.0"
+date-released: "2026-10-24"
 license: Apache-2.0
 repository-code: "https://github.com/ForrestGump618/suwen"
 url: "https://github.com/ForrestGump618/suwen"

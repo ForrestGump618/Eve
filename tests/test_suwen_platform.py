@@ -448,3 +448,102 @@ async def test_gateway_fallback_never_replays_partial_output(p,monkeypatch):
     with pytest.raises(LLMError):
         async for _ in routed.stream_chat([{'role':'system','content':'s'},{'role':'user','content':'u'}],None,cfg):pass
     assert calls==['primary']
+
+
+@pytest.mark.asyncio
+async def test_spawn_batch_is_ordered_bounded_and_has_no_parent_transcript(p):
+    from omicslab.suwen.orchestration import spawn
+    p.config.update('models',{'orchestration':True},'ws_main')
+    active=0;peak=0;prompts=[]
+    async def runner(prompt,agent):
+        nonlocal active,peak
+        active+=1;peak=max(active,peak);prompts.append(prompt)
+        await asyncio.sleep(.01)
+        active-=1
+        return json.dumps({'answer':str(len(prompts)),'status':'completed','evidence':[],'unresolved_issues':[]})
+    ctx=SimpleNamespace(backend=SimpleNamespace(workspace=p.require_workspace('ws_main')),agent_id='lead',run_sub=runner,check_cancelled=lambda:None)
+    tasks=[{'task':str(i),'context':'only provided facts','expected_output':'JSON'} for i in range(3)]
+    results=await spawn(p,ctx,{'tasks':tasks})
+    assert len(results)==3 and peak<=2 and all(r['scientific_status']=='unverified' for r in results)
+    assert all('only provided facts' in prompt for prompt in prompts)
+    with pytest.raises(ValueError):await spawn(p,ctx,{'tasks':tasks*2})
+    with pytest.raises(ValueError):await spawn(p,ctx,{'tasks':[{'task':'incomplete'}]})
+
+
+@pytest.mark.asyncio
+async def test_spawn_never_accepts_fabricated_evidence_or_unstructured_success(p):
+    from omicslab.suwen.orchestration import spawn
+    p.config.update('models',{'orchestration':True},'ws_main')
+    ctx=SimpleNamespace(backend=SimpleNamespace(workspace=p.require_workspace('ws_main')),agent_id='lead',check_cancelled=lambda:None,
+        run_sub=AsyncMock(return_value=json.dumps({'answer':'claim','status':'completed','evidence':['fake'],'unresolved_issues':[]})))
+    args={'tasks':[{'task':'t','context':'c','expected_output':'e'}]}
+    assert (await spawn(p,ctx,args))[0]['status']=='insufficient_evidence'
+    ctx.run_sub=AsyncMock(return_value='I am certainly right')
+    assert (await spawn(p,ctx,args))[0]['status']=='unknown'
+    p.config.update('models',{'orchestration':False},'ws_main')
+    with pytest.raises(ValueError):await spawn(p,ctx,args)
+
+
+@pytest.mark.asyncio
+async def test_metric_gate_blocks_dependent_nodes_then_resumes_without_replaying(p):
+    path=p.settings.workspace/'metrics.json';path.write_text('{"score":0.1}')
+    task=p.tasks.create('ws_main',{'workflow':{'nodes':[
+        {'id':'gate','type':'verify','path':'metrics.json','rules':[{'metric':'score','op':'ge','threshold':.8}]},
+        {'id':'deliver','type':'output','depends_on':['gate'],'text':'done'}]}})
+    p.tasks.patch(task['id'],'ws_main',status='running')
+    with pytest.raises(ValueError,match='验证失败'):await p.tasks._workflow(task['id'],'ws_main')
+    row=p.store.get('task',task['id'],'ws_main')
+    assert row['nodes']['gate']['status']=='failed' and 'deliver' not in row['nodes']
+    assert row['nodes']['gate']['checks'][0]['passed'] is False
+    path.write_text('{"score":0.9}')
+    await p.tasks._workflow(task['id'],'ws_main')
+    assert p.store.get('task',task['id'],'ws_main')['status']=='succeeded'
+
+
+@pytest.mark.asyncio
+async def test_experiment_comparison_rejects_cross_protocol_and_scope(p):
+    (p.settings.workspace/'metrics.json').write_text('{"score":0.9}')
+    data={'name':'candidate','dataset':'dataset-v1','protocol':'holdout-v1','metric':'score','path':'metrics.json','direction':'max'}
+    a=await p.experiments.record('ws_main',data)
+    (p.settings.workspace/'metrics.json').write_text('{"score":0.8}')
+    b=await p.experiments.record('ws_main',data)
+    assert p.experiments.compare('ws_main',[a['id'],b['id']])['best']==[a['id']]
+    c=await p.experiments.record('ws_main',dict(data,protocol='other'))
+    with pytest.raises(ValueError):p.experiments.compare('ws_main',[a['id'],c['id']])
+    with pytest.raises(ValueError):p.experiments.compare('ws_main',[a['id'],'missing'])
+    assert a['metrics_sha256']!=b['metrics_sha256']
+
+
+@pytest.mark.asyncio
+async def test_workflow_import_export_is_validated_and_does_not_execute(p,client_app):
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        flow={'schema_version':1,'workflow':{'name':'portable','nodes':[{'id':'a','type':'output','text':'example'}]}}
+        imported=(await client.post('/api/platform/workflows/import',json=flow)).json()
+        assert (await client.get(f'/api/platform/workflows/{imported["id"]}/export')).json()==flow
+        assert p.store.list('task','ws_main')==[]
+        flow['workflow']['nodes'][0]['depends_on']=['a']
+        assert (await client.post('/api/platform/workflows/import',json=flow)).status_code==400
+
+
+def test_child_permission_ceiling_cannot_be_expanded(p):
+    from omicslab.agent.types import ToolError
+    ctx=SimpleNamespace(backend=SimpleNamespace(workspace=p.require_workspace('ws_main')),agent_id='lead',inherited_toolsets=['system'])
+    with pytest.raises(ToolError):p.permissions(ctx,p.state.registry.get('run_python_code'))
+
+
+@pytest.mark.asyncio
+async def test_sage_verification_only_reaches_sage_requests(p,monkeypatch):
+    from omicslab.suwen import models
+    p.config.update('models',{'sage_verification':True})
+    captured=[]
+    class Provider:
+        def __init__(self,target):pass
+        async def stream_chat(self,messages,tools,cfg):
+            captured.append(cfg.extra)
+            yield {'type':'text','delta':'OK'}
+    monkeypatch.setattr(models,'make_provider',Provider)
+    for model in ['InternScience/Sage-A1.5','unrelated-model']:
+        routed,cfg,_=p.models.prepare(p.settings,'mock',model,p.state.agents['lead'],SimpleNamespace(workspace=p.require_workspace('ws_main')))
+        async for _ in routed.stream_chat([{'role':'system','content':'s'},{'role':'user','content':'u'}],None,cfg):pass
+    assert captured[0]['chat_template_kwargs']=={'verification':True}
+    assert 'chat_template_kwargs' not in captured[1]

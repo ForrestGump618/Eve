@@ -1,9 +1,9 @@
 // Shared UI primitives: toasts, busy indicator, modal / confirm / prompt dialogs,
 // lightbox, empty states, theme switching and small DOM helpers.
 
-import { icon } from './icons.js?v=2.0.0';
-import { esc, getPref, setPref, copyText } from './util.js?v=2.0.0';
-import { on, emit } from './bus.js?v=2.0.0';
+import { icon } from './icons.js?v=2.1.0';
+import { esc, getPref, setPref, copyText } from './util.js?v=2.1.0';
+import { on, emit } from './bus.js?v=2.1.0';
 
 /* ------------------------------------------------------------------ */
 /* DOM helpers                                                         */

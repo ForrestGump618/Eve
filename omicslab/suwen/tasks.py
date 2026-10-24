@@ -7,12 +7,14 @@ import time
 
 from .store import uid,redact
 
-NODE_TYPES={'model','tool','condition','approval','output'}
+NODE_TYPES={'model','tool','condition','approval','output','verify'}
 TERMINAL={'succeeded','failed','cancelled'}
 
 
 def validate_workflow(flow):
+    if not isinstance(flow,dict):raise ValueError('工作流必须是对象')
     nodes=flow.get('nodes',[])
+    if not isinstance(nodes,list) or any(not isinstance(n,dict) for n in nodes):raise ValueError('nodes 必须是节点对象数组')
     if not nodes or len(nodes)>50:raise ValueError('工作流需要 1—50 个节点')
     ids=[n.get('id') for n in nodes]
     if any(not isinstance(i,str) or not i for i in ids) or len(ids)!=len(set(ids)):
@@ -20,7 +22,13 @@ def validate_workflow(flow):
     done=set()
     for node in nodes:
         if node.get('type') not in NODE_TYPES:raise ValueError('不支持的节点类型')
-        if set(node.get('depends_on',[]))-set(ids):raise ValueError('依赖了不存在的节点')
+        if node.get('type')=='verify':
+            from .experiments import checks
+            if not isinstance(node.get('path'),str) or not node['path']:raise ValueError('验证节点需要指标文件路径')
+            checks({},node.get('rules'))
+        dependencies=node.get('depends_on',[])
+        if not isinstance(dependencies,list) or any(not isinstance(d,str) for d in dependencies):raise ValueError('依赖需要节点 ID 数组')
+        if set(dependencies)-set(ids):raise ValueError('依赖了不存在的节点')
     for _ in nodes:
         for node in nodes:
             if set(node.get('depends_on',[]))<=done:done.add(node['id'])
@@ -141,7 +149,7 @@ class TaskEngine:
             if not remaining:
                 result='\n\n'.join(str(states[n['id']].get('result','')) for n in nodes if n['type'] in {'model','output'})[-32000:]
                 gates=[self.store.get('evidence_gate',s.get('run_id',''),scope) for s in states.values()]
-                if any(n['type']=='tool' for n in nodes):
+                if any(n['type']=='tool' for n in nodes) or not any(n['type']=='model' for n in nodes):
                     from .biomedical import is_research
                     gates.append(self.platform.biomedical.gate(scope,id,result,is_research(task['title']+' '+task['prompt'])))
                 needs_review=any(g and g['status']=='needs_review' for g in gates)
@@ -181,6 +189,15 @@ class TaskEngine:
             self.node_patch(id,scope,node['id'],status='succeeded',result='人工已批准');return
         self.node_patch(id,scope,node['id'],status='running',started_at=time.time())
         context='\n'.join(str(task['nodes'].get(dep,{}).get('result','')) for dep in node.get('depends_on',[]))[-16000:]
+        if node['type']=='verify':
+            from .experiments import read_metrics,checks
+            import json
+            metrics,digest=await read_metrics(self.platform,scope,node['path'])
+            results=checks(metrics,node['rules'])
+            self.node_patch(id,scope,node['id'],checks=results,metrics_sha256=digest,scientific_status='unverified')
+            if not all(r['passed'] for r in results):raise ValueError('独立指标验证失败；后续依赖节点不会执行，请检查结果并调整研究方案')
+            self.node_patch(id,scope,node['id'],status='succeeded',result=json.dumps(results,ensure_ascii=False),ended_at=time.time())
+            return
         if node['type']=='condition':
             condition=str(node.get('contains','')) in context
             self.node_patch(id,scope,node['id'],status='succeeded',condition=condition,result=str(condition));return

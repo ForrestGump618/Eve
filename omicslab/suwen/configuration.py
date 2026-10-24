@@ -5,7 +5,7 @@ import math
 from urllib.parse import urlsplit
 
 DEFAULTS = {
- 'models': {'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[], 'capabilities':{},'context_window':32000},
+ 'models': {'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[], 'capabilities':{},'context_window':32000,'sage_verification':False,'orchestration':False},
  'memory': {'enabled':True,'auto_capture':False,'embedding':'keyword','embedding_url':'','embedding_model':'','top_k':5,'retention_days':365},
  'appearance': {'theme':'system','font':'system','font_size':14,'accent':'#47b8a1','density':'comfortable','radius':12,'mode':'research','home':'workbench','onboarded':False,'agent_name':'素问助手','avatar':'','shortcuts':{'palette':'k'}},
  'permissions': {'files':'ask','shell':'ask','network':'ask','browser':'deny','messages':'ask','mcp':'ask','memory':'allow','skills':'allow','agents':'allow','python':'ask','system':'allow','notebook':'ask','jobs':'ask','research':'allow','tools':{}},

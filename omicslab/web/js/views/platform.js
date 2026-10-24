@@ -1,17 +1,17 @@
 /** Suwen platform: every control talks to a real, scoped service. */
-import { api, errorMessage } from '../api.js?v=2.0.0';
-import { getState, navigate } from '../store.js?v=2.0.0';
-import { esc, escAttr, getPref, setPref } from '../util.js?v=2.0.0';
-import { icon } from '../icons.js?v=2.0.0';
-import { openModal, toastError, toastSuccess, toastWarn, confirmDialog, spinnerHtml } from '../ui.js?v=2.0.0';
-import { applyAppearance } from '../suwen.js?v=2.0.0';
+import { api, errorMessage } from '../api.js?v=2.1.0';
+import { getState, navigate } from '../store.js?v=2.1.0';
+import { esc, escAttr, getPref, setPref } from '../util.js?v=2.1.0';
+import { icon } from '../icons.js?v=2.1.0';
+import { openModal, toastError, toastSuccess, toastWarn, confirmDialog, spinnerHtml } from '../ui.js?v=2.1.0';
+import { applyAppearance } from '../suwen.js?v=2.1.0';
 
 const GROUPS={
  settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','预算与资源','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']],
  extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']],
  tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']],
  knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']],
- research:[['research','证据与验证','shield'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']],
+ research:[['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']],
  workflow:[['workflow','工作流编排','layers']],artifacts:[['artifact','产物与版本','files']],diagnostics:[['diagnostics','系统诊断','cpu']],
 };
 const TITLES={settings:['设置','默认简单，需要时再深入。'],extensions:['能力中心','连接工具、专业技能与消息入口。'],tasks2:['任务中心','工作持续运行，过程随时可查。'],knowledge:['知识与记忆','只检索当前工作区，保留原始来源。'],research:['科研与证据','结论必须有来源，验证必须可复查。'],workflow:['工作流','把重复工作变成可检查的步骤。'],artifacts:['产物中心','文件、来源和历史版本在一起。'],diagnostics:['系统诊断','真实状态、用量和错误，随时可见。']};
@@ -52,6 +52,7 @@ export async function mount(root){
    else if(section==='debate')await debate();
    else if(section==='knowledge')await knowledge();
    else if(section==='research')await research();
+   else if(section==='experiments')await experiments();
    else if(section==='biomni')await biomni();
    else if(section==='workflow')await workflow();
    else if(section==='diagnostics')await diagnostics();
@@ -60,7 +61,7 @@ export async function mount(root){
  }
  async function models(){
   const c=await config('models');const health=getState().health;
-  content.innerHTML=`<section class="sw-card sw-hero"><div class="sw-kicker">让素问选择合适的处理方式</div><h2>你定目标，素问安排执行。</h2><p>普通使用只需选择思考模式。已有模型连接沿用原配置，可随时修改。</p><div class="sw-mode-grid">${[['fast','快速','日常问答与简单处理'],['balanced','均衡','分析、写作与大多数工作'],['deep','深度','复杂问题与科研推理']].map(([id,label,desc])=>`<button class="sw-mode ${c.mode===id?'is-active':''}" data-action="mode" data-id="${id}">${icon(id==='fast'?'wand':id==='deep'?'brain':'layers',{size:22})}<strong>${label}</strong><span>${desc}</span></button>`).join('')}</div><div class="sw-inline">${button('connections','管理模型连接与 API Key','btn-primary')}${button('model-test','测试当前模型')}<span class="sw-muted">备用模型只在尚未输出内容、且请求可重试时启用。</span></div></section><section class="sw-card"><h3>路由策略</h3>${select('优先考虑','model-strategy',[['quality','质量'],['latency','响应速度'],['cost','经济'],['privacy','本地隐私']],c.strategy)}<p class="sw-muted">隐私策略禁止路由到远程模型。速度与经济策略按已有延迟记录、配置价格和可用模型排序；没有测量或价格时沿用配置顺序。</p><details><summary>高级：角色模型、能力与备用连接</summary>${area('角色模型：text / reasoning / vision / embedding / code','model-roles',c.roles)}${area('模型能力（按模型名；temperature、max_output、token_parameter）','model-caps',c.capabilities)}${area('备用模型列表（provider、model）','model-fallbacks',c.fallbacks,3)}${field('上下文窗口（字符预算采用保守估算）','model-context',c.context_window,'','number')}</details>${button('save-models','保存路由配置','btn-primary')}</section>`;
+  content.innerHTML=`<section class="sw-card sw-hero"><div class="sw-kicker">让素问选择合适的处理方式</div><h2>你定目标，素问安排执行。</h2><p>普通使用只需选择思考模式。已有模型连接沿用原配置，可随时修改。</p><div class="sw-mode-grid">${[['fast','快速','日常问答与简单处理'],['balanced','均衡','分析、写作与大多数工作'],['deep','深度','复杂问题与科研推理']].map(([id,label,desc])=>`<button class="sw-mode ${c.mode===id?'is-active':''}" data-action="mode" data-id="${id}">${icon(id==='fast'?'wand':id==='deep'?'brain':'layers',{size:22})}<strong>${label}</strong><span>${desc}</span></button>`).join('')}</div><div class="sw-inline">${button('connections','管理模型连接与 API Key','btn-primary')}${button('model-test','测试当前模型')}<span class="sw-muted">备用模型只在尚未输出内容、且请求可重试时启用。</span></div></section><section class="sw-card"><h3>路由策略</h3>${select('优先考虑','model-strategy',[['quality','质量'],['latency','响应速度'],['cost','经济'],['privacy','本地隐私']],c.strategy)}<p class="sw-muted">隐私策略禁止路由到远程模型。速度与经济策略按已有延迟记录、配置价格和可用模型排序；没有测量或价格时沿用配置顺序。</p><details><summary>高级：角色模型、能力与备用连接</summary>${area('角色模型：text / reasoning / vision / embedding / code','model-roles',c.roles)}${area('模型能力（按模型名；temperature、max_output、token_parameter）','model-caps',c.capabilities)}${area('备用模型列表（provider、model）','model-fallbacks',c.fallbacks,3)}${field('上下文窗口（字符预算采用保守估算）','model-context',c.context_window,'','number')}</details><label class="sw-check"><input type="checkbox" id="sage-verification" ${c.sage_verification?'checked':''}/>Sage-A1.5 自检（仅该模型，需兼容服务）</label><label class="sw-check"><input type="checkbox" id="sage-orchestration" ${c.orchestration?'checked':''}/>启用并行子任务（受现有权限与预算约束）</label>${button('save-models','保存路由配置','btn-primary')}</section>`;
  }
  async function settings(key){
   const c=await config(key);let html='';
@@ -95,11 +96,14 @@ export async function mount(root){
   const data=await request('/research');items=data.claims;
   content.innerHTML=`<section class="sw-card sw-hero"><div class="sw-kicker">EVIDENCE BEFORE CONCLUSIONS</div><h2>让每一项发现，都能回到证据。</h2><p>文献元数据、代码运行与科学验证是不同层次。执行成功不会自动把生物学结论标为成立。</p><div class="sw-metrics"><div><strong>${data.sources.length}</strong><span>可追溯来源</span></div><div><strong>${data.claims.length}</strong><span>登记结论</span></div><div><strong>${data.gates.filter(g=>g.status==='needs_review').length}</strong><span>待复核运行</span></div></div></section><div class="sw-toolbar">${button('literature','检索文献','btn-primary')}${button('record-claim','登记结论')}${button('reload','刷新')}</div><div class="sw-stack">${data.claims.map(c=>`<article class="sw-card"><header><h3>${esc(c.statement)}</h3>${badge(c.validation_status)}</header><p>类型：${esc(c.kind)} · 来源 ${c.sources.length} 条 · 运行 ${esc(c.run||'未关联')}</p>${code(c.checks)}<p class="sw-muted">${esc(c.limitations)}</p><div class="sw-inline">${button('verify-claim','执行独立指标检查','',c.id)}${button('review-claim','人工复核','',c.id)}</div></article>`).join('')||blank('还没有登记的结论','科研 Agent 可在执行过程中登记结论，系统在任务结束时检查证据状态。')}</div><details class="sw-card"><summary>证据门禁与来源列表</summary>${code(data.gates)}${code(data.sources)}</details>`;
  }
+ async function experiments(){items=(await request('/experiments')).items;
+  content.innerHTML=`<section class="sw-card"><h2>让候选方案接受同一把尺子。</h2><p>读取工作区中实际的 JSON 指标文件。只有数据集、评估协议和目标指标一致，才允许比较；排序不会自动验证科学结论。</p>${button('new-experiment','登记实验','btn-primary')}${button('compare-experiments','比较已登记实验')}<div class="sw-stack">${items.map(item=>`<article class="sw-card"><label class="sw-check"><input type="checkbox" data-exp-id="${escAttr(item.id)}"/>选择实验</label><h3>${esc(item.name)}</h3><p>${esc(item.dataset)} · ${esc(item.protocol)} · ${esc(item.metric)} = ${esc(item.score)}</p><details><summary>来源与指标摘要</summary>${code(item)}</details></article>`).join('')||blank('尚无实验记录','先运行分析，将指标保存为 JSON，再登记比较。')}</div></section>`;
+ }
  async function biomni(){const data=await request('/biomedical');content.innerHTML=`<section class="sw-card"><div class="sw-kicker">BIOMEDICAL TOOLBOX</div><h2>检索规划 + 代码执行 + 证据检查</h2><p>借鉴 Biomni 的工具检索与可执行分析模式。本地轻量实现已接入素问工具链；不会假称安装了完整 Biomni E1 或数据湖。</p>${badge(data.upstream_installed?'upstream_detected':'upstream_not_installed')}<a href="${escAttr(data.source)}" target="_blank" rel="noopener"> Biomni 官方仓库 ↗</a><div class="sw-search-row"><input class="input" id="bio-query" placeholder="例如：DNA 质量检查、蛋白注释、证据验证…"/>${button('bio-search','检索工具')}</div><div id="bio-results">${code(data.tools)}</div><div class="sw-inline">${button('sequence','DNA 序列检查')}${button('protein','UniProt 查询')}${button('literature','文献检索')}</div></section>`;}
  async function diagnostics(){const d=await request('/diagnostics');content.innerHTML=`<div class="sw-toolbar"><div><h2>系统运行中</h2><p>诊断读取真实状态；模型与外部服务测试会独立进行。</p></div>${button('reload','健康检查','btn-primary')}${button('export-diagnostics','导出报告')}</div><div class="sw-metrics">${[['队列',d.tasks.queued||0],['运行任务',d.tasks.running||0],['异常',d.tasks.failed||0],['累计 Token',d.usage.tokens||0]].map(([l,v])=>`<div><strong>${esc(v)}</strong><span>${l}</span></div>`).join('')}</div><section class="sw-card"><h3>组件状态</h3><div class="sw-status-grid"><div>Agent Runtime ${badge(d.runtime)}</div><div>Model Gateway ${badge(d.gateway)}</div><div>模型 ${badge(d.model.provider==='mock'?'mock_test_mode':d.model.configured?'configured':'unconfigured')}</div><div>MCP 服务 ${d.mcp.length}</div><div>消息渠道 ${d.channels.length}</div><div>OS 安全沙箱 ${badge(d.sandbox.binary_available?'docker_daemon_not_probed':'docker_unavailable')}</div></div>${button('model-test','实测当前模型连接')}<details><summary>资源、用量与依赖</summary>${code(d.resources)}${code(d.usage)}${code(d.external_dependencies)}${code(d.sandbox)}</details></section><section class="sw-card"><h3>最近日志与追踪</h3>${d.logs.length?d.logs.map(log=>`<div class="sw-log"><time>${new Date(log.created*1000).toLocaleString()}</time><strong>${esc(log.kind)}</strong>${code(log.data)}</div>`).join(''):blank('暂无异常记录')}</section>`;}
  async function workflow(){
   items=(await request('/registry/workflow')).items;
-  content.innerHTML=`<div class="sw-toolbar"><div><h2>可检查、可恢复的执行步骤</h2><p>依赖关系控制串行与并行；节点拖动调整画布位置。</p></div>${button('new-flow','新建流程','btn-primary')}${button('draft-flow','从目标生成初稿')}</div><div class="sw-flow-editor"><div class="sw-inline">${field('流程名称','flow-name',flow.name||'新工作流')}${button('add-node','添加节点')}${button('save-flow','保存模板','btn-primary')}</div><div class="sw-flow-canvas" id="flow-canvas"></div></div><section class="sw-card"><h3>已保存模板</h3>${items.map(f=>`<div class="sw-list-row"><strong>${esc(f.name||f.id)}</strong><span>${f.nodes.length} 个节点</span>${button('load-flow','编辑','',f.id)}${button('run-flow','创建任务','btn-primary',f.id)}</div>`).join('')||blank('还没有模板','先添加模型、工具、条件、审批或输出节点。')}</section>`;
+  content.innerHTML=`<div class="sw-toolbar"><div><h2>可检查、可恢复的执行步骤</h2><p>依赖关系控制串行与并行；节点拖动调整画布位置。</p></div>${button('new-flow','新建流程','btn-primary')}${button('draft-flow','从目标生成初稿')}${button('import-flow','导入模板')}<input type="file" id="flow-file" accept=".json" hidden/></div><div class="sw-flow-editor"><div class="sw-inline">${field('流程名称','flow-name',flow.name||'新工作流')}${button('add-node','添加节点')}${button('save-flow','保存模板','btn-primary')}</div><div class="sw-flow-canvas" id="flow-canvas"></div></div><section class="sw-card"><h3>已保存模板</h3>${items.map(f=>`<div class="sw-list-row"><strong>${esc(f.name||f.id)}</strong><span>${f.nodes.length} 个节点</span>${button('load-flow','编辑','',f.id)}${button('run-flow','创建任务','btn-primary',f.id)}${button('export-flow','导出','',f.id)}</div>`).join('')||blank('还没有模板','先添加模型、工具、条件、审批或输出节点。')}</section>`;
   renderCanvas();
  }
  function renderCanvas(){const canvas=content.querySelector('#flow-canvas');if(!canvas)return;
@@ -124,7 +128,7 @@ export async function mount(root){
   });
  }
  function editNode(node={id:'step'+(flow.nodes.length+1),type:'model',prompt:'',depends_on:[]}){
-  modalForm('工作流节点',field('节点 ID','node-id',node.id)+select('类型','node-type',[['model','模型 / Agent'],['tool','工具'],['condition','条件判断'],['approval','人工审批'],['output','结果输出']],node.type)+area('依赖节点 ID 数组','node-deps',node.depends_on||[],2)+area('配置（prompt / agent / tool / arguments / contains / text / when）','node-data',Object.fromEntries(Object.entries(node).filter(([k])=>!['id','type','depends_on','position'].includes(k))),5),async body=>{
+  modalForm('工作流节点',field('节点 ID','node-id',node.id)+select('类型','node-type',[['model','模型 / Agent'],['tool','工具'],['condition','条件判断'],['verify','独立指标验证'],['approval','人工审批'],['output','结果输出']],node.type)+area('依赖节点 ID 数组','node-deps',node.depends_on||[],2)+area('配置（prompt / agent / tool / arguments / contains / text / when）','node-data',Object.fromEntries(Object.entries(node).filter(([k])=>!['id','type','depends_on','position'].includes(k))),5),async body=>{
     const next={...modalJSON(body,'node-data'),id:modalValue(body,'node-id'),type:modalValue(body,'node-type'),depends_on:modalJSON(body,'node-deps'),position:node.position};
     const index=flow.nodes.findIndex(n=>n.id===node.id);if(index<0)flow.nodes.push(next);else flow.nodes[index]=next;renderCanvas();
   });
@@ -138,7 +142,7 @@ export async function mount(root){
    if(action==='reload')await load();
    else if(action==='connections')navigate('connections');
    else if(action==='mode'){await save('models',{mode:id});await models();}
-   else if(action==='save-models')await save('models',{strategy:val('model-strategy'),roles:json('model-roles'),capabilities:json('model-caps'),fallbacks:json('model-fallbacks'),context_window:Number(val('model-context'))});
+   else if(action==='save-models')await save('models',{sage_verification:checked('sage-verification'),orchestration:checked('sage-orchestration'),strategy:val('model-strategy'),roles:json('model-roles'),capabilities:json('model-caps'),fallbacks:json('model-fallbacks'),context_window:Number(val('model-context'))});
    else if(action==='save-appearance')await save('appearance',{theme:val('theme'),font:val('font'),font_size:Number(val('font-size')),accent:val('accent'),density:val('density'),radius:Number(val('radius')),mode:val('ui-mode'),home:val('home'),agent_name:val('agent-name'),avatar:val('avatar'),shortcuts:{palette:val('shortcut-palette')}});
    else if(action==='save-permissions'){const data={tools:json('permission-tools')};content.querySelectorAll('[id^="permission-"]').forEach(e=>{if(e.id!=='permission-tools')data[e.id.slice(11)]=e.value;});await save('permissions',data);}
    else if(action==='save-budget')await save('budget',{max_tokens:Number(val('budget-tokens')),max_cost:Number(val('budget-cost')),concurrency:Number(val('budget-concurrency')),max_iterations:Number(val('budget-iterations')),warn_ratio:Number(val('budget-warning')),prices:json('budget-prices')});
@@ -178,6 +182,10 @@ export async function mount(root){
    else if(action==='record-claim')modalForm('登记科研结论',area('结论','claim-statement','',4)+select('类型','claim-kind',[['hypothesis','待验证假设'],['inference','推断'],['evidence','证据支持的判断']],'hypothesis')+area('本工作区来源 ID 数组','claim-sources',[],2)+field('关联运行 ID','claim-run'),async body=>{await request('/research/claims','POST',{statement:modalValue(body,'claim-statement'),kind:modalValue(body,'claim-kind'),sources:modalJSON(body,'claim-sources'),run:modalValue(body,'claim-run')});await load();});
    else if(action==='verify-claim')modalForm('独立指标检查',field('当前工作区的 JSON 指标文件','metrics-path','','results/metrics.json')+area('检查规则','metrics-rules',[{metric:'adjusted_p_value',op:'lt',threshold:0.05}],5),async body=>{await request(`/research/claims/${id}/verify`,'POST',{path:modalValue(body,'metrics-path'),rules:modalJSON(body,'metrics-rules')});await load();},'执行检查');
    else if(action==='review-claim')modalForm('人工科学复核',field('复核人','claim-reviewer')+area('复核理由、原始数据核查与局限','claim-review-notes','',5)+'<p class="sw-error">请核对原始数据、引文支持关系与统计方法。此签署不会把模型意见变成科学事实。</p>',async body=>{await request(`/research/claims/${id}/review`,'POST',{reviewer:modalValue(body,'claim-reviewer'),notes:modalValue(body,'claim-review-notes'),confirmed:true});await load();},'确认已人工复核');
+   else if(action==='new-experiment')modalForm('登记实际计算指标',field('实验名称','exp-name')+field('数据集版本 / 摘要','exp-dataset')+field('评估协议版本','exp-protocol')+field('JSON 文件路径','exp-path')+field('目标指标','exp-metric')+select('优化方向','exp-direction',[['max','越大越好'],['min','越小越好']],'max'),async body=>{const data={};for(const k of ['name','dataset','protocol','path','metric','direction'])data[k]=modalValue(body,'exp-'+k);await request('/experiments','POST',data);await load();});
+   else if(action==='compare-experiments'){const result=await request('/experiments/compare','POST',{ids:Array.from(content.querySelectorAll('[data-exp-id]:checked')).map(e=>e.dataset.expId)});openModal({title:'同协议实验比较',size:'lg',html:`<p>${esc(result.note)}</p><table class="data-table"><thead><tr><th>实验</th><th>指标</th><th>数值</th><th>结果</th></tr></thead><tbody>${result.ranking.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.metric)}</td><td>${esc(r.score)}</td><td>${result.best.includes(r.id)?'当前指标最优':'比较项'} · 科学结论未复核</td></tr>`).join('')}</tbody></table>`,actions:[{label:'关闭'}]});}
+   else if(action==='import-flow')content.querySelector('#flow-file').click();
+   else if(action==='export-flow')download('suwen-workflow.json',await request(`/workflows/${id}/export`));
    else if(action==='new-flow'){flow={name:'新工作流',nodes:[]};await workflow();}
    else if(action==='add-node')editNode();
    else if(action==='edit-node')editNode(flow.nodes.find(n=>n.id===id));
@@ -194,6 +202,7 @@ export async function mount(root){
   }catch(err){toastError(errorMessage(err));}finally{if(target.isConnected)target.disabled=false;}
  });
  listen('change',async event=>{try{
+  if(event.target.id==='flow-file'&&event.target.files[0]){const value=JSON.parse(await event.target.files[0].text());await request('/workflows/import','POST',value);toastSuccess('模板已校验并导入，尚未执行');await load();}
   if(event.target.id==='source-file'&&event.target.files[0]){const form=new FormData();form.append('file',event.target.files[0]);await request('/knowledge/upload','POST',form);toastSuccess('文档已解析并建立索引');await load();}
   if(event.target.id==='config-file'&&event.target.files[0]){const value=JSON.parse(await event.target.files[0].text());await request('/configuration/import','POST',value);toastSuccess('配置已校验并导入');await load();}
  }catch(err){toastError(errorMessage(err));}});

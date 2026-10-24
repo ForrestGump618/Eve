@@ -40,6 +40,10 @@ class Platform:
         self.state.registry.platform=self
         self.refresh_agents()
         self.biomedical.register()
+        from .orchestration import register
+        register(self)
+        from .experiments import Experiments
+        self.experiments=Experiments(self)
         self.sandbox.register()
         for server in self.store.list('mcp'):
             discovered=self.store.get('mcp_status',server['id'])
@@ -75,6 +79,8 @@ class Platform:
         scope=getattr(workspace,'workspace_id','ws_main')
         config=self.config.get('permissions',scope)['value']
         category=spec.toolset
+        inherited=getattr(ctx,'inherited_toolsets',None)
+        if inherited is not None and category not in inherited:raise ToolError('子任务不能扩大父任务工具权限')
         if category=='memory' and not self.config.get('memory',scope)['value']['enabled']:
             raise ToolError('当前工作区记忆已暂停')
         profile=self.store.get('agent',ctx.agent_id)

@@ -147,7 +147,11 @@ class RoutedProvider:
             emitted=False
             try:
                 require_private_endpoint(self.config['strategy'],target.api_base,target.provider)
-                async for event in make_provider(target).stream_chat(messages,tools,cfg):
+                extra=dict(cfg.extra)
+                if self.config.get('sage_verification') and 'sage-a1.5' in target.model.lower():
+                    extra['chat_template_kwargs']={'verification':True}
+                else:extra.pop('chat_template_kwargs',None)
+                async for event in make_provider(target).stream_chat(messages,tools,replace(cfg,extra=extra)):
                     emitted=True
                     if event.get('type')=='usage':
                         event['cost']=self.gateway.record(self.scope,self.task,self.agent,target.model,event.get('usage',{}),time.perf_counter()-started)

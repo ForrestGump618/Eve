@@ -9,7 +9,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-2ea44f.svg" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-3776ab.svg" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/version-2.0.0-6f42c1.svg" alt="Version 2.0.0">
+  <img src="https://img.shields.io/badge/version-2.1.0-6f42c1.svg" alt="Version 2.1.0">
   <a href="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml"><img src="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
@@ -17,10 +17,12 @@ Suwen is a **local-first** AI agent workspace. You open a workbench in the brows
 
 The server listens on `127.0.0.1` by default. There is no login, no tenancy, and no telemetry. Conversations, events, artifacts, and snapshots live on your disk as SQLite, JSON, Markdown, and PNG files that you can inspect, copy, and back up. Model providers are configured explicitly; with no provider configured, you can still walk through the flow offline with the `mock` provider.
 
-This is version **2.0.0** (2026-10-23). The product is now named Suwen (素问), while the Python package name (`omicslab`), legacy APIs, and the `.omicslab` data directory are kept for compatibility. Per-item status for the 24 V2 requirements is tracked in the [implementation checklist](docs/SUWEN-V2-CHECKLIST.md): only branding and multi-level settings are marked "implemented"; the rest are partially implemented or limited by external environments.
+This is version **2.1.0** (2026-10-24). The product is now named Suwen (素问), while the Python package name (`omicslab`), legacy APIs, and the `.omicslab` data directory are kept for compatibility. Per-item status for the 24 V2 requirements is tracked in the [implementation checklist](docs/SUWEN-V2-CHECKLIST.md): only branding and multi-level settings are marked "implemented"; the rest are partially implemented or limited by external environments.
 
 <p align="center"><img src="docs/screenshots/workbench-dark.png" alt="Suwen workbench (dark theme)" width="1000"></p>
 <p align="center"><sub>The workbench: chat, variables, files, figures, and jobs share one workspace.</sub></p>
+
+> **New in 2.1:** opt-in Sage-A1.5 verification, isolated parallel task batches, independent metric gates, experiment comparison, and portable workflows. See the [2.1 upgrade guide](docs/UPGRADE-2.1.md) for configuration and limitations. No model weights or benchmark results are bundled.
 
 ## Contents
 
@@ -225,12 +227,12 @@ A full description, including a reviewable metrics-file example, is in [Research
 | [FAQ](docs/FAQ.md) | Installation, ports, keys, data locations, and other common questions |
 | [Research evidence](docs/BIOMEDICAL-EVIDENCE.md) | Tool implementation, evidence levels, human review gates |
 | [References](docs/REFERENCES-V2.md) | What was referenced, what is not bundled, license boundaries |
-| [Changelog](CHANGELOG.md) | 2.0.0 and earlier releases |
+| [Changelog](CHANGELOG.md) | 2.1.0 and earlier releases |
 
 ## Status and validation
 
-- Current version **2.0.0** (2026-10-23), semantic versioning; only the latest 2.0.x receives fixes.
-- **Tests**: `python -m pytest -q` → **439 passed** in about 35 seconds (Windows, Python 3.12.11). The result was re-run and confirmed locally, and the 439-test run recorded in the [validation record](docs/VALIDATION-V2.md) is the project's 2.0.0 baseline. Results can differ slightly by platform and dependency versions, so treat your local output as authoritative.
+- Current version **2.1.0** (2026-10-24), semantic versioning; only the latest 2.0.x receives fixes.
+- **Tests**: `python -m pytest -q` → **446 passed** in about 35 seconds (Windows, Python 3.12.11). The result was re-run and confirmed locally, and the 446-test run recorded in the [validation record](docs/VALIDATION-V2.md) is the project's 2.1.0 baseline. Results can differ slightly by platform and dependency versions, so treat your local output as authoritative.
 - CI ([`ci.yml`](.github/workflows/ci.yml)) runs the same suite on Ubuntu (Python 3.10/3.11/3.12) and Windows (3.12). Tests are fully offline and use the `mock` provider.
 - Status language is consistent everywhere: **implemented**, **partially implemented**, **not implemented**, **limited by external environments**, matching the [implementation checklist](docs/SUWEN-V2-CHECKLIST.md).
 - Not yet externally validated: end-to-end SSH, real paid models/vision/embeddings, real Docker containers, Telegram and OAuth flows, and upstream research environments. macOS/Linux install scripts are provided but the maintainers have no matching hosts and have not tested them.
@@ -260,4 +262,4 @@ The complete list and boundary statements are in [References and licenses](docs/
 
 ---
 
-Suwen v2.0.0 · Apache-2.0 · This page mirrors [README.md](README.md) in structure
+Suwen v2.1.0 · Apache-2.0 · This page mirrors [README.md](README.md) in structure
