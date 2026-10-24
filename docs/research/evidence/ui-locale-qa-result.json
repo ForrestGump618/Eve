@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "all static translation nodes, nav titles, options and placeholders switch to English",
+    "language toggle preserves unsaved settings and translates diagnostics",
+    "duplicate Enter and submit create exactly one task; user content preserved; model retries remain sideEffect=true with maxAttempts=3",
+    "welcome reappears after a populated conversation",
+    "locale survives reload",
+    "summary details expand; cancelled restore does not call RPC; confirmed restore and manual compaction invoke the expected RPCs",
+    "exhausted approval retry is disabled and unset budgets, reserved tokens and provider usage are distinguished",
+    "compatibility workbench disclosures are bilingual; database submission works without a configured model"
+  ],
+  "result": "passed"
+}

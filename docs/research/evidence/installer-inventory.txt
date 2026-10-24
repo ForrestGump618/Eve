@@ -1,0 +1,109 @@
+
+7-Zip 26.02 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-06-25
+
+Scanning the drive for archives:
+1 file, 260716184 bytes (249 MiB)
+
+Listing archive: C:\Users\Qingyuan Zhuang\Downloads\Agent KongMing-2.3.3-win-x64.exe
+
+--
+Path = C:\Users\Qingyuan Zhuang\Downloads\Agent KongMing-2.3.3-win-x64.exe
+Type = Nsis
+Physical Size = 260716184
+Method = Deflate
+Solid = -
+Headers Size = 202386
+Embedded Stub Size = 90624
+SubType = NSIS-3 Unicode
+
+----------
+Path = $PLUGINSDIR\UAC.dll
+Size = 
+Packed Size = 8018
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 0
+
+Path = $PLUGINSDIR\System.dll
+Size = 
+Packed Size = 6931
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 8022
+
+Path = $PLUGINSDIR\StdUtils.dll
+Size = 
+Packed Size = 45608
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 14957
+
+Path = $PLUGINSDIR\nsDialogs.dll
+Size = 
+Packed Size = 4684
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 60569
+
+Path = $PLUGINSDIR\modern-wizard.bmp
+Size = 
+Packed Size = 1899
+Modified = 2019-06-18 03:21:30.0000000
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 65257
+
+Path = $PLUGINSDIR\nsExec.dll
+Size = 
+Packed Size = 3299
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 67160
+
+Path = $PLUGINSDIR\app-64.7z
+Size = 260091135
+Packed Size = 260091135
+Modified = 2026-10-23 12:07:48.0000000
+Attributes = 
+Method = Copy
+Solid = -
+Offset = 70463
+
+Path = $PLUGINSDIR\nsis7z.dll
+Size = 
+Packed Size = 242382
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 260161602
+
+Path = $R0\Uninstall AgentKongMing.exe
+Size = 
+Packed Size = 174293
+Modified = 2026-10-23 12:07:52.0000000
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 260403988
+
+Path = $PLUGINSDIR\WinShell.dll
+Size = 
+Packed Size = 1080
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 260578285
+

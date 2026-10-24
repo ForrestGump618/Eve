@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>素问 · SuWen</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<nav class="rail" data-i18n-aria="navigation">
+  <div class="brand" title="SuWen">素</div>
+  <button data-page="chat" class="active" data-i18n-title="chat" title="对话">◉</button>
+  <button data-page="projects" data-i18n-title="projects" title="科研项目">▦</button>
+  <button data-page="tasks" data-i18n-title="tasks" title="任务执行">☷</button>
+  <button data-page="tools" data-i18n-title="tools" title="工具 / 技能">⌘</button>
+  <div class="grow"></div>
+  <button data-page="settings" data-i18n-title="settings" title="设置 / 诊断">⚙</button>
+</nav>
+<aside class="sidebar">
+  <div class="wordmark">素问 <span>SuWen</span></div>
+  <button id="new-chat" class="primary" data-i18n="newChat">＋ 新建对话</button>
+  <div class="section-label" data-i18n="recent">最近会话 / 任务</div>
+  <label class="sr-only" for="session-project" data-i18n="sessionsFilter">按项目筛选会话</label>
+  <select id="session-project" class="session-project"><option value="" data-i18n="sessionProjectAll">全部项目</option></select>
+  <div id="sessions" class="sessions"></div>
+  <div class="grow"></div>
+  <div id="health" class="health" role="status" data-i18n="connecting">连接后台…</div>
+  <div class="version" data-i18n="version">3.0 · 开发预览版</div>
+</aside>
+<main>
+<header><h1 id="page-title">对话</h1><div class="grow"></div><button id="language" class="quiet" data-i18n-title="switchLanguage">English</button><button id="toggle-evidence" class="quiet" data-i18n="showTrace">执行记录 ↗</button></header>
+<div id="error" role="alert" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<section id="chat" class="page">
+  <div id="timeline" class="timeline"><div id="welcome" class="welcome"><div class="eyebrow" data-i18n="eyebrow">SUWEN 科研工作空间</div><h2 data-i18n="welcomeTitle">从一个问题开始。</h2><p data-i18n="welcomeBody">梳理思路、检索证据，或提交一个可恢复的任务。</p><div class="suggestions"><button id="research-example" data-example="researchExample" data-i18n="explore">探索科研问题 ↗</button><button id="demo" data-i18n="demoWelcome">运行后台恢复演示 ↗</button></div></div></div>
+  <div id="chat-notice" class="notice" role="status" hidden></div>
+  <form id="composer">
+    <div id="mode-radios" class="modes" role="radiogroup" data-i18n-aria="executionMode" aria-label="执行模式">
+      <button type="button" class="mode-option active" data-mode="auto" role="radio" aria-checked="true" data-i18n="modeAuto">自动路由</button>
+      <button type="button" class="mode-option" data-mode="chat" role="radio" aria-checked="false" data-i18n="modeChat">Chat · 对话</button>
+      <button type="button" class="mode-option" data-mode="research" role="radio" aria-checked="false" data-i18n="modeResearch">Research · 科研检索</button>
+      <button type="button" class="mode-option" data-mode="debate" role="radio" aria-checked="false" data-i18n="modeDebate">Debate · 提案与批判</button>
+      <button type="button" class="mode-option" data-mode="autonomy" role="radio" aria-checked="false" data-i18n="modeAutonomy">Autonomy · 自主计划</button>
+    </div>
+    <label class="sr-only" for="mode" data-i18n="executionMode">执行模式</label>
+    <select id="mode" class="mode-compat" tabindex="-1" aria-hidden="true">
+      <option value="auto" data-i18n="modeAuto">自动路由</option>
+      <option value="chat" data-i18n="modeChat">Chat · 对话</option>
+      <option value="research" data-i18n="modeResearch">Research · 科研检索</option>
+      <option value="debate" data-i18n="modeDebate">Debate · 提案与批判</option>
+      <option value="autonomy" data-i18n="modeAutonomy">Autonomy · 自主计划</option>
+    </select>
+    <textarea id="prompt" rows="2" data-i18n-placeholder="promptPlaceholder" data-i18n-aria="promptLabel" placeholder="输入问题，Shift + Enter 换行" required maxlength="100000"></textarea>
+    <button id="send" class="primary" type="submit" data-i18n="send">发送 ↑</button>
+  </form>
+  <div class="composer-note" data-i18n="composerNote">模型需自行配置。任务持久化到本机；睡眠或断电期间等待恢复。</div>
+</section>
+
+<section id="projects" class="page pad" hidden>
+  <h2 data-i18n="projects">科研项目</h2>
+  <p class="muted" data-i18n="projectsHelp">项目保存为本机记录，可关联对话、证据、假设、实验与研究图。</p>
+  <form id="project-form" class="card">
+    <h3 id="project-form-title" data-i18n="newProject">新建项目</h3>
+    <input id="project-id" type="hidden">
+    <label><span data-i18n="projectName">项目名称</span><input id="project-name" required maxlength="100"></label>
+    <label><span data-i18n="projectNotes">目标、约束与证据来源</span><textarea id="project-notes" rows="4" required></textarea></label>
+    <div class="actions"><button class="primary" type="submit" data-i18n="saveProject">保存项目</button><button type="button" id="project-cancel" hidden data-i18n="cancelEdit">取消编辑</button></div>
+  </form>
+  <div id="project-list"></div>
+  <article id="project-detail" class="card" hidden>
+    <div class="row"><h3 data-i18n="projectDetail">项目详情</h3><div class="grow"></div><button id="close-project-detail" class="quiet" data-i18n="close">关闭</button></div>
+    <div id="project-detail-tabs" class="tabs" role="tablist"></div>
+    <div id="project-detail-content" class="muted"></div>
+  </article>
+  <article class="card" id="import-wizard">
+    <h3 data-i18n="importTitle">旧数据导入（兼容迁移）</h3>
+    <p class="muted small" data-i18n="importHelp">只读扫描旧数据目录，先备份并记录清单哈希，再按类别显式导入；可试运行、查看任务并回滚。</p>
+    <div class="actions">
+      <button id="import-inspect" data-i18n="importInspect">检查旧数据</button>
+      <button id="import-dry-run" disabled data-i18n="importDryRun">试运行（不改动数据）</button>
+      <button id="import-apply" class="primary" disabled data-i18n="importApply">确认导入</button>
+      <button id="import-jobs-refresh" data-i18n="importJobs">查看导入任务</button>
+    </div>
+    <div id="import-status" role="status" class="small muted" data-i18n="importStatusIdle">尚未检查。</div>
+    <div id="import-kinds" class="checks"></div>
+    <div id="import-summary"></div>
+    <div id="import-items" class="import-items"></div>
+    <div id="import-jobs" class="import-jobs"></div>
+  </article>
+</section>
+
+<section id="tasks" class="page pad" hidden>
+  <div class="row"><h2 data-i18n="tasks">任务执行</h2><div class="grow"></div><button id="task-demo" data-i18n="demo30">30 秒后台演示</button></div>
+  <p class="muted" data-i18n="tasksHelp">关闭窗口后由独立后台进程继续。审批等待、暂停和恢复状态如实显示。</p>
+  <div class="filters">
+    <label class="sr-only" for="task-filter-status" data-i18n="taskFilterStatus">按状态筛选</label>
+    <select id="task-filter-status">
+      <option value="" data-i18n="filterAll">全部状态</option>
+      <option value="queued" data-i18n="queued">排队</option>
+      <option value="running" data-i18n="running">运行中</option>
+      <option value="waiting_external" data-i18n="waiting_external">等待计时 / 外部结果</option>
+      <option value="waiting_approval" data-i18n="waiting_approval">等待核查 / 审批</option>
+      <option value="retry_scheduled" data-i18n="retry_scheduled">等待重试</option>
+      <option value="paused" data-i18n="paused">已暂停</option>
+      <option value="failed" data-i18n="failed">失败</option>
+      <option value="completed" data-i18n="completed">已完成</option>
+      <option value="cancelled" data-i18n="cancelled">已取消</option>
+    </select>
+    <label class="sr-only" for="task-filter-kind" data-i18n="taskFilterKind">按步骤类型筛选</label>
+    <select id="task-filter-kind">
+      <option value="" data-i18n="filterAllKinds">全部步骤类型</option>
+      <option value="echo" data-i18n="echo">笔记 / 输出</option>
+      <option value="delay" data-i18n="delay">持久计时</option>
+      <option value="approval" data-i18n="approval">人工审批</option>
+      <option value="model" data-i18n="model">模型请求</option>
+      <option value="pubmed" data-i18n="pubmed">文献检索</option>
+      <option value="uniprot" data-i18n="uniprot">蛋白检索</option>
+      <option value="python" data-i18n="python">Python 计算</option>
+      <option value="knowledge" data-i18n="knowledge">知识整合</option>
+      <option value="hypothesis" data-i18n="hypothesis">假设生成</option>
+      <option value="debate" data-i18n="debate">辩论</option>
+      <option value="methods" data-i18n="methods">方法脚手架</option>
+      <option value="analysis" data-i18n="analysis">数据分析</option>
+      <option value="discovery" data-i18n="discovery">发现分析</option>
+      <option value="autonomy" data-i18n="autonomy">自主计划</option>
+    </select>
+    <input id="task-filter-text" type="search" data-i18n-placeholder="taskFilterText" data-i18n-aria="taskFilterText" placeholder="按任务名称筛选">
+  </div>
+  <div id="task-list"></div>
+  <article id="task-detail" class="card" hidden>
+    <div class="row"><h3 data-i18n="taskDetail">任务详情</h3><div class="grow"></div><button id="close-task-detail" class="quiet" data-i18n="close">关闭</button></div>
+    <div id="task-detail-content"></div>
+  </article>
+  <article class="card" id="research-launchers">
+    <h3 data-i18n="researchLaunchers">研究启动器</h3>
+    <p class="muted small" data-i18n="researchLaunchersHelp">提交后会创建可恢复的后台任务；结果写入证据、假设与实验记录，而不是在本界面直接编造。</p>
+    <div class="row"><label class="grow"><span data-i18n="researchQuestion">问题 / 目标</span><textarea id="task-objective" rows="2" data-i18n-placeholder="researchQuestionPlaceholder" placeholder="输入要研究的问题或目标"></textarea></label><label><span data-i18n="project">项目</span><select id="task-project"><option value="" data-i18n="optionalProject">不关联项目</option></select></label></div>
+    <div class="launchers">
+      <button id="launch-knowledge" data-i18n="launcherKnowledge">知识整合</button>
+      <button id="launch-hypothesis" data-i18n="launcherHypothesis">假设生成</button>
+      <button id="launch-debate" data-i18n="launcherDebate">辩论</button>
+      <button id="launch-methods" data-i18n="launcherMethods">方法脚手架</button>
+      <button id="launch-analysis" data-i18n="launcherAnalysis">数据分析</button>
+      <button id="launch-discovery" data-i18n="launcherDiscovery">发现分析</button>
+      <button id="launch-autonomy" data-i18n="launcherAutonomy">自主计划</button>
+    </div>
+    <div id="launch-status" class="small muted" role="status"></div>
+  </article>
+</section>
+
+<section id="tools" class="page pad" hidden>
+  <h2 data-i18n="tools">工具 / 技能</h2>
+  <div class="tabs" role="tablist">
+    <button data-tooltab="mcp" class="active" role="tab" data-i18n="tabMcp">MCP 服务</button>
+    <button data-tooltab="skills" role="tab" data-i18n="tabSkills">Skills</button>
+    <button data-tooltab="channels" role="tab" data-i18n="tabChannels">频道</button>
+    <button data-tooltab="rsi" role="tab" data-i18n="tabRsi">RSI 自我改进</button>
+  </div>
+  <div id="tools-mcp" class="tab-panel">
+    <p class="muted small" data-i18n="mcpHelp">只读或显式授权的 MCP 服务；健康检查带超时，工具列表来自服务端声明。</p>
+    <div id="mcp-list"></div>
+    <form id="mcp-form" class="card">
+      <h3 data-i18n="mcpTitle">添加 MCP 服务</h3>
+      <div class="row"><label><span data-i18n="mcpName">名称</span><input id="mcp-name" required maxlength="100"></label><label><span data-i18n="mcpTransport">传输方式</span><select id="mcp-transport"><option value="stdio">stdio</option><option value="http">http</option></select></label></div>
+      <div class="row"><label class="grow"><span data-i18n="mcpCommand">命令</span><input id="mcp-command" placeholder="node"></label><label class="grow"><span data-i18n="mcpArgs">参数（空格分隔）</span><input id="mcp-args" placeholder="server.js --read-only"></label></div>
+      <label><span data-i18n="mcpUrl">URL（http 传输）</span><input id="mcp-url" type="url" placeholder="https://"></label>
+      <label class="check"><input id="mcp-readonly" type="checkbox" checked><span data-i18n="mcpReadonly">只读服务</span></label>
+      <button class="primary" type="submit" data-i18n="mcpAdd">添加 MCP 服务</button>
+    </form>
+  </div>
+  <div id="tools-skills" class="tab-panel" hidden>
+    <p class="muted small" data-i18n="skillHelp">安装前做静态检查并需显式确认；测试结果区分通过、失败与未运行。</p>
+    <div id="skill-list"></div>
+    <form id="skill-form" class="card">
+      <h3 data-i18n="skillTitle">安装 Skill</h3>
+      <label><span data-i18n="skillSource">本地路径或 URL</span><input id="skill-source" required maxlength="2000"></label>
+      <button class="primary" type="submit" data-i18n="skillInstall">安装 Skill</button>
+    </form>
+  </div>
+  <div id="tools-channels" class="tab-panel" hidden>
+    <p class="muted small" data-i18n="channelHelp">密钥只保存引用，不保存明文；测试与收件箱来自真实配置。</p>
+    <div id="channel-list"></div>
+    <form id="channel-form" class="card">
+      <h3 data-i18n="channelFormTitle">新增 / 编辑频道</h3>
+      <input id="channel-id" type="hidden">
+      <div class="row"><label><span data-i18n="channelName">名称</span><input id="channel-name" required maxlength="100"></label><label><span data-i18n="channelType">类型</span><select id="channel-type"><option value="telegram">telegram</option><option value="slack">slack</option><option value="discord">discord</option><option value="email">email</option><option value="webhook">webhook</option><option value="wechat-official">wechat-official</option></select></label></div>
+      <label class="check"><input id="channel-readonly" type="checkbox"><span data-i18n="channelReadonly">只读（禁止发送）</span></label>
+      <label class="check"><input id="channel-enabled" type="checkbox" checked><span data-i18n="channelEnabled">启用</span></label>
+      <label><span data-i18n="channelSecretRef">密钥引用（不保存明文）</span><input id="channel-secretref" maxlength="200"><span class="muted small" id="channel-secret-hint"></span></label>
+      <label><span data-i18n="channelCredValue">凭据值（写入系统加密存储，不回显）</span><input id="channel-cred-value" type="password" autocomplete="off" maxlength="8192"></label>
+      <div class="row"><button id="channel-cred-save" type="button" data-i18n="channelCredSave">写入系统凭据</button><button id="channel-cred-refresh" type="button" data-i18n="channelCredRefresh">刷新凭据列表</button><span id="channel-cred-status" class="muted small"></span></div>
+      <label><span data-i18n="channelConfig">配置 JSON</span><textarea id="channel-config" rows="3" placeholder="{}"></textarea></label>
+      <button class="primary" type="submit" data-i18n="channelSave">保存频道</button>
+    </form>
+    <article class="card">
+      <h3 data-i18n="channelSendTitle">发送与收件箱</h3>
+      <div class="row"><label class="grow"><span data-i18n="channelSendTo">目标频道</span><select id="channel-send-id"></select></label><label class="grow"><span data-i18n="channelSendText">消息</span><input id="channel-send-text" maxlength="4000"></label><button id="channel-send-btn" data-i18n="channelSend">发送</button></div>
+      <div class="row"><h4 data-i18n="channelInbox">收件箱</h4><div class="grow"></div><button id="channel-inbox-refresh" data-i18n="channelInboxLoad">加载收件箱</button></div>
+      <div id="channel-inbox-list"></div>
+    </article>
+  </div>
+  <div id="tools-rsi" class="tab-panel" hidden>
+    <p class="muted small" data-i18n="rsiHelp">RSI 在受限用例上同步比较候选策略；晋升需要显式确认，可回滚到上一策略。</p>
+    <div id="rsi-active" class="small"></div>
+    <form id="rsi-form" class="row">
+      <label><span data-i18n="rsiKind">改进类型</span><select id="rsi-kind"><option value="routing">routing</option><option value="prompt">prompt</option><option value="skill">skill</option><option value="tool-selection">tool-selection</option><option value="test-coverage">test-coverage</option></select></label>
+      <label class="grow"><span data-i18n="rsiNote">备注</span><input id="rsi-note" maxlength="500"></label>
+      <button class="primary" type="submit" id="rsi-run" data-i18n="rsiRun">运行 RSI</button>
+    </form>
+    <div id="rsi-status" class="small muted" role="status"></div>
+    <div id="rsi-list"></div>
+  </div>
+  <pre id="tool-results" class="tool-output" aria-live="polite"></pre>
+</section>
+
+<section id="settings" class="page pad" hidden>
+  <h2 data-i18n="settings">设置 / 诊断</h2>
+  <div class="cards">
+    <form id="settings-form" class="card">
+      <h3 data-i18n="modelConnection">模型连接</h3>
+      <label><span data-i18n="protocol">协议</span><select id="provider"><option value="openai" data-i18n="protocolOpenai">OpenAI 兼容协议</option><option value="anthropic" data-i18n="protocolAnthropic">Anthropic Messages</option></select></label>
+      <label><span data-i18n="apiAddress">API 地址</span><input id="baseUrl" type="url" required></label>
+      <label><span data-i18n="modelName">模型名称</span><input id="model" required></label>
+      <label><span data-i18n="apiKey">API Key</span><input id="apiKey" type="password" autocomplete="off" placeholder="留空保留已保存密钥"></label>
+      <div class="row"><label><span data-i18n="contextWindow">上下文窗口</span><input id="contextWindow" type="number" min="4096" max="2000000" required></label><label><span data-i18n="maxOutput">最大输出</span><input id="maxOutput" type="number" min="128" max="32768" required></label></div>
+      <p class="muted small" data-i18n="modelHelp">密钥由系统加密保存，不传回界面。不会自动切换供应商。已知模型采用 tokenizer；其余模型明确使用保守字节预算。</p>
+      <button class="primary" data-i18n="saveUnlock">保存并解锁</button><span id="saved" role="status"></span>
+    </form>
+    <form id="defaults-form" class="card">
+      <h3 data-i18n="defaultsTitle">默认预算与压缩阈值</h3>
+      <p class="muted small" data-i18n="defaultsHelp">仅保存实际配置的限制；未设置不代表预算无限。</p>
+      <div class="row"><label><span data-i18n="defaultMaxTokens">默认最多 tokens</span><input id="default-maxTokens" type="number" min="1" max="10000000"></label><label><span data-i18n="defaultBudgetCalls">默认调用次数上限</span><input id="default-budgetCalls" type="number" min="1" max="100000"></label></div>
+      <div class="row"><label><span data-i18n="defaultBudgetCost">默认费用上限</span><input id="default-budgetCost" type="number" min="0" step="0.0001"></label><label><span data-i18n="defaultConcurrency">并发数</span><input id="default-concurrency" type="number" min="1" max="16"></label></div>
+      <div class="row"><label><span data-i18n="defaultCompactionWarn">建议压缩阈值（0-1）</span><input id="default-compactionWarn" type="number" min="0" max="1" step="0.01"></label><label><span data-i18n="defaultCompactionForce">强制压缩阈值（0-1）</span><input id="default-compactionForce" type="number" min="0" max="1" step="0.01"></label></div>
+      <button class="primary" data-i18n="saveDefaults">保存默认值</button><span id="defaults-saved" role="status"></span>
+    </form>
+    <article class="card">
+      <h3 data-i18n="backgroundDiagnostics">后台与诊断</h3>
+      <pre id="diagnostics"></pre>
+      <div class="actions"><button id="doctor-run" data-i18n="doctorRun">运行检查</button><button id="worker-refresh" data-i18n="workerRefresh">刷新工作进程</button></div>
+      <div id="doctor-results"></div>
+      <pre id="worker-health"></pre>
+      <label class="check"><input id="launch-login" type="checkbox"><span data-i18n="launchLogin">登录 Windows 时恢复后台（用户级）</span></label>
+      <div class="actions"><button id="reconnect" data-i18n="reconnect">重连 / 恢复后台</button><button id="pick-python" data-i18n="pickPython">选择 Python</button><button id="support" data-i18n="support">导出脱敏诊断</button><button id="shutdown" class="danger" data-i18n="shutdown">暂停并完全退出后台</button></div>
+      <p class="small muted" data-i18n="backgroundHelp">未安装 Windows Service；无人登录、系统睡眠或关机时不能继续本机计算。Python 子进程并非系统安全沙箱；当前只支持固定统计操作。</p>
+    </article>
+    <article class="card">
+      <h3 data-i18n="dataDirs">数据目录</h3>
+      <p class="muted small" data-i18n="dataDirsHelp">仅展示后台报告的本机路径；不可用时明确显示未知。</p>
+      <pre id="directories"></pre>
+    </article>
+  </div>
+</section>
+</main>
+<aside id="evidence" hidden>
+  <div class="row"><h3 data-i18n="trace">执行记录</h3><div class="grow"></div><button id="close-evidence" class="quiet" data-i18n-title="close" data-i18n-aria="close">×</button></div>
+  <div id="evidence-tabs" class="tabs small-tabs" role="tablist"></div>
+  <div id="evidence-content" class="muted" data-i18n="selectTask">选择任务查看事件与检查点。</div>
+</aside>
+<dialog id="confirm-dialog" class="dialog"><h3 id="confirm-title" data-i18n="confirmTitle">确认操作</h3><p id="confirm-text"></p><div class="actions"><button id="confirm-ok" class="danger" data-i18n="confirmOk">确认</button><button id="confirm-cancel" data-i18n="confirmCancel">取消</button></div></dialog>
+<script src="app.js"></script></body></html>

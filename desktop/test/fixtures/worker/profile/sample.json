@@ -1,0 +1,5 @@
+[
+  {"gene": "A", "S1": 3, "ratio": 0.5, "group": "ctl"},
+  {"gene": "B", "S1": 5, "ratio": 1.5, "group": "trt"},
+  {"gene": "C", "S1": null, "ratio": 2.5}
+]

@@ -86,7 +86,7 @@ def test_help_exits_zero_and_lists_subcommands() -> None:
     output = _combined(proc)
     assert output, "`--help` produced no output"
     lowered = output.lower()
-    assert "omicslab" in lowered, f"`--help` output does not mention the app name:\n{output}"
+    assert "suwen" in lowered, f"`--help` output does not mention the app name:\n{output}"
     for subcommand in EXPECTED_SUBCOMMANDS:
         assert subcommand in lowered, (
             f"`--help` output does not list the '{subcommand}' subcommand:\n{output}"

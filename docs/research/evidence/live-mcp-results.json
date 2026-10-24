@@ -1,0 +1,105 @@
+[
+  {
+    "kind": "pubmed",
+    "elapsedMs": 1427,
+    "status": "passed",
+    "result": {
+      "database": "Europe PMC / PubMed",
+      "query": "TP53 cancer",
+      "retrievedAt": "2026-10-24T15:14:57.125Z",
+      "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+      "results": [
+        {
+          "id": "PPR1340521",
+          "source": "PPR",
+          "title": "Pan-Cancer Proteomic Profiling Reveals Context-Dependent Dysregulation of TP53 Across Tumor Types and Oncogenic Pathways",
+          "doi": "10.21203/rs.3.rs-11149736/v1",
+          "year": "2026",
+          "url": "https://europepmc.org/article/PPR/PPR1340521"
+        },
+        {
+          "id": "42901386",
+          "source": "MED",
+          "pmid": "42901386",
+          "title": "Brief Report: Characterization of the Potentially Actionable TP53 Y220C Mutation in Non-Small Cell Lung Cancer. A Multicenter, European Thoracic Oncology Platform Study.",
+          "doi": "10.1016/j.jtho.2026.106162",
+          "year": "2026",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/42901386/"
+        },
+        {
+          "id": "42891904",
+          "source": "MED",
+          "pmid": "42891904",
+          "title": "Association of TP53 Truncating Mutations with Time to Treatment Failure after First-Line Chemoimmunotherapy in HER2-Mutant Non-Small Cell Lung Cancer.",
+          "doi": "10.1007/s11523-026-01263-8",
+          "year": "2026",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/42891904/"
+        },
+        {
+          "id": "42814862",
+          "source": "MED",
+          "pmid": "42814862",
+          "title": "Interpreting TP53 pathogenic variants in germline testing and cancer genomics: pathogenicity, origin, and clinical actionability.",
+          "doi": "10.1093/jjco/hyag158",
+          "year": "2026",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/42814862/"
+        },
+        {
+          "id": "PMC13663948",
+          "source": "PMC",
+          "title": "Prognostic Significance of p53 Immunohistochemical Expression and Molecular Characterization of TP53 Variants in Triple-Negative Breast Cancer After Neoadjuvant Chemotherapy",
+          "year": "2026",
+          "url": "https://europepmc.org/article/PMC/PMC13663948"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "uniprot",
+    "elapsedMs": 1241,
+    "status": "passed",
+    "result": {
+      "database": "UniProt",
+      "query": "gene:TP53 AND organism_id:9606",
+      "retrievedAt": "2026-10-24T15:14:58.562Z",
+      "release": "2026_03",
+      "results": [
+        {
+          "id": "P04637",
+          "name": "P53_HUMAN",
+          "protein": "Cellular tumor antigen p53",
+          "organism": "Homo sapiens",
+          "url": "https://www.uniprot.org/uniprotkb/P04637"
+        },
+        {
+          "id": "K7PPA8",
+          "name": "K7PPA8_HUMAN",
+          "protein": "Cellular tumor antigen p53",
+          "organism": "Homo sapiens",
+          "url": "https://www.uniprot.org/uniprotkb/K7PPA8"
+        },
+        {
+          "id": "E9PFT5",
+          "name": "E9PFT5_HUMAN",
+          "protein": "Cellular tumor antigen p53",
+          "organism": "Homo sapiens",
+          "url": "https://www.uniprot.org/uniprotkb/E9PFT5"
+        },
+        {
+          "id": "S4R334",
+          "name": "S4R334_HUMAN",
+          "protein": "Cellular tumor antigen p53",
+          "organism": "Homo sapiens",
+          "url": "https://www.uniprot.org/uniprotkb/S4R334"
+        },
+        {
+          "id": "H2EHT1",
+          "name": "H2EHT1_HUMAN",
+          "protein": "Cellular tumor antigen p53",
+          "organism": "Homo sapiens",
+          "url": "https://www.uniprot.org/uniprotkb/H2EHT1"
+        }
+      ]
+    }
+  }
+]

@@ -1,6 +1,8 @@
-<p align="center"><img src="docs/assets/banner.svg" alt="Suwen" width="880"></p>
+<p align="center"><img src="docs/assets/banner.svg" alt="SuWen" width="880"></p>
 
-<h1 align="center">Suwen (素问)</h1>
+> **Windows desktop preview 3.0.0-preview.1:** the new Electron client and durable daemon are under [desktop/](desktop/README.md). The existing Python workbench remains compatible. See [actual acceptance status](docs/progress.md); the full vNext requirements have not all passed.
+
+<h1 align="center">SuWen (素问)</h1>
 
 <p align="center"><strong>A local-first AI agent workspace for everyday work and research.</strong></p>
 
@@ -13,13 +15,13 @@
   <a href="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml"><img src="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
-Suwen is a **local-first** AI agent workspace. You open a workbench in the browser and let agents write code, run Python, work with files, queue long-running jobs, and record research conclusions in an auditable evidence chain — inside a local directory or a remote directory on an SSH host.
+SuWen is a **local-first** AI agent workspace. You open a workbench in the browser and let agents write code, run Python, work with files, queue long-running jobs, and record research conclusions in an auditable evidence chain — inside a local directory or a remote directory on an SSH host.
 
 The server listens on `127.0.0.1` by default. There is no login, no tenancy, and no telemetry. Conversations, events, artifacts, and snapshots live on your disk as SQLite, JSON, Markdown, and PNG files that you can inspect, copy, and back up. Model providers are configured explicitly; with no provider configured, you can still walk through the flow offline with the `mock` provider.
 
-This is version **2.1.1** (2026-10-24). The product is now named Suwen (素问), while the Python package name (`omicslab`), legacy APIs, and the `.omicslab` data directory are kept for compatibility. Per-item status for the 24 V2 requirements is tracked in the [implementation checklist](docs/SUWEN-V2-CHECKLIST.md): only branding and multi-level settings are marked "implemented"; the rest are partially implemented or limited by external environments.
+This is version **2.1.1** (2026-10-24). The product is now named SuWen (素问), while the Python package name (`omicslab`), legacy APIs, and the `.omicslab` data directory are kept for compatibility. Per-item status for the 24 V2 requirements is tracked in the [implementation checklist](docs/SUWEN-V2-CHECKLIST.md): only branding and multi-level settings are marked "implemented"; the rest are partially implemented or limited by external environments.
 
-<p align="center"><img src="docs/screenshots/workbench-dark.png" alt="Suwen workbench (dark theme)" width="1000"></p>
+<p align="center"><img src="docs/screenshots/workbench-dark.png" alt="SuWen workbench (dark theme)" width="1000"></p>
 <p align="center"><sub>The workbench: chat, variables, files, figures, and jobs share one workspace.</sub></p>
 
 > **New in 2.1:** opt-in Sage-A1.5 verification, isolated parallel task batches, independent metric gates, experiment comparison, and portable workflows. See the [2.1 upgrade guide](docs/UPGRADE-2.1.md) for configuration and limitations. No model weights or benchmark results are bundled.
@@ -28,7 +30,7 @@ This update: [turn governance and streaming fixes](docs/TURN-GOVERNANCE.md), and
 
 ## Contents
 
-- [Why Suwen](#why-suwen)
+- [Why SuWen](#why-suwen)
 - [Features](#features)
 - [Quick start](#quick-start)
 - [Screenshots](#screenshots)
@@ -40,9 +42,9 @@ This update: [turn governance and streaming fixes](docs/TURN-GOVERNANCE.md), and
 - [License and citation](#license-and-citation)
 - [References and acknowledgements](#references-and-acknowledgements)
 
-## Why Suwen
+## Why SuWen
 
-Most AI chat tools stop at one question and one answer. Suwen is built for work that has to keep going: it puts the conversation inside a real workspace and makes every execution recoverable and traceable.
+Most AI chat tools stop at one question and one answer. SuWen is built for work that has to keep going: it puts the conversation inside a real workspace and makes every execution recoverable and traceable.
 
 - **Your data stays local by default.** The server binds to loopback only, ships no telemetry and no CDN dependencies, and does not call out at startup. Outbound requests only happen for the model providers, MCP servers, SSH hosts, and webhooks you configure.
 - **It is a runtime, not just a chat box.** Every turn is a run whose events are written to SQLite before they are broadcast. Disconnected streams resume, and after a process restart unfinished runs are reconciled as `interrupted` rather than being presented as successes.
@@ -50,7 +52,7 @@ Most AI chat tools stop at one question and one answer. Suwen is built for work 
 - **Research conclusions take a separate path.** A successful script only proves the computation ran. A conclusion must pass source registration, numeric checks, and human review before it can be recorded as reviewed.
 - **Models and services are replaceable.** There are 14 providers, including local Ollama and an offline `mock`. Tools, execution backends, skills, and agents all have explicit extension points.
 
-Suwen is aimed at individual researchers, students, and small teams who repeatedly analyze data on a laptop or a remote server, and at developers who want their documents, data, and execution records to stay in one workspace.
+SuWen is aimed at individual researchers, students, and small teams who repeatedly analyze data on a laptop or a remote server, and at developers who want their documents, data, and execution records to stay in one workspace.
 
 ## Features
 
@@ -192,7 +194,7 @@ Component details, the request lifecycle, concurrency and cancellation, and erro
 
 ## Research and evidence gates
 
-What sets Suwen apart is that a research conclusion is not considered done just because the code ran. This release ships a small set of independently written research tools organized after Biomni's ideas of tool retrieval and evidence gating: `bio_literature_search` and `bio_protein_lookup` make real Europe PMC and UniProt requests and store source metadata, `bio_sequence_check` performs deterministic local sequence checks, `bio_record_claim` separates evidence from inference and hypothesis, and `bio_verify_claim` compares actual metric files in the workspace against numeric rules.
+What sets SuWen apart is that a research conclusion is not considered done just because the code ran. This release ships a small set of independently written research tools organized after Biomni's ideas of tool retrieval and evidence gating: `bio_literature_search` and `bio_protein_lookup` make real Europe PMC and UniProt requests and store source metadata, `bio_sequence_check` performs deterministic local sequence checks, `bio_record_claim` separates evidence from inference and hypothesis, and `bio_verify_claim` compares actual metric files in the workspace against numeric rules.
 
 ```mermaid
 flowchart LR
@@ -238,7 +240,7 @@ A full description, including a reviewable metrics-file example, is in [Research
 - CI ([`ci.yml`](.github/workflows/ci.yml)) runs the same suite on Ubuntu (Python 3.10/3.11/3.12) and Windows (3.12). Tests are fully offline and use the `mock` provider.
 - Status language is consistent everywhere: **implemented**, **partially implemented**, **not implemented**, **limited by external environments**, matching the [implementation checklist](docs/SUWEN-V2-CHECKLIST.md).
 - Not yet externally validated: end-to-end SSH, real paid models/vision/embeddings, real Docker containers, Telegram and OAuth flows, and upstream research environments. macOS/Linux install scripts are provided but the maintainers have no matching hosts and have not tested them.
-- Suwen targets a single user on a single machine and is **not** suitable as a public multi-tenant service.
+- SuWen targets a single user on a single machine and is **not** suitable as a public multi-tenant service.
 
 ## Contributing
 
@@ -254,14 +256,14 @@ Contributions are not limited to code: bug reports, documentation fixes, real-en
 
 Released under the [Apache-2.0](LICENSE) license.
 
-If you use Suwen in research or in a product, please cite it as described in [`CITATION.cff`](CITATION.cff). Upstream projects referenced here keep their own licenses; referencing them does not make them dependencies of this package.
+If you use SuWen in research or in a product, please cite it as described in [`CITATION.cff`](CITATION.cff). Upstream projects referenced here keep their own licenses; referencing them does not make them dependencies of this package.
 
 ## References and acknowledgements
 
-Suwen's design was informed by the following public work (reading and design reference only; no third-party code, prompts, or branding was copied): [Biomni](https://github.com/snap-stanford/Biomni) for tool retrieval and evidence gating, [Paper2Agent](https://github.com/jmiao24/Paper2Agent), [AI Co-Scientist](https://arxiv.org/abs/2502.18864), [Robin](https://github.com/Future-House/robin), and [Empirical Research Assistance](https://arxiv.org/abs/2509.06503). Interface and workflow organization drew on [Dify](https://github.com/langgenius/dify), [Open WebUI](https://github.com/open-webui/open-webui), [OpenHands](https://github.com/OpenHands/OpenHands), [VS Code Remote SSH](https://code.visualstudio.com/docs/remote/ssh), and [MCP transports](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports). Real data sources include [Europe PMC](https://europepmc.org/RestfulWebService) and [UniProt](https://www.uniprot.org/help/api).
+SuWen's design was informed by the following public work (reading and design reference only; no third-party code, prompts, or branding was copied): [Biomni](https://github.com/snap-stanford/Biomni) for tool retrieval and evidence gating, [Paper2Agent](https://github.com/jmiao24/Paper2Agent), [AI Co-Scientist](https://arxiv.org/abs/2502.18864), [Robin](https://github.com/Future-House/robin), and [Empirical Research Assistance](https://arxiv.org/abs/2509.06503). Interface and workflow organization drew on [Dify](https://github.com/langgenius/dify), [Open WebUI](https://github.com/open-webui/open-webui), [OpenHands](https://github.com/OpenHands/OpenHands), [VS Code Remote SSH](https://code.visualstudio.com/docs/remote/ssh), and [MCP transports](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports). Real data sources include [Europe PMC](https://europepmc.org/RestfulWebService) and [UniProt](https://www.uniprot.org/help/api).
 
 The complete list and boundary statements are in [References and licenses](docs/REFERENCES-V2.md).
 
 ---
 
-Suwen v2.1.1 · Apache-2.0 · This page mirrors [README.md](README.md) in structure
+SuWen v2.1.1 · Apache-2.0 · This page mirrors [README.md](README.md) in structure

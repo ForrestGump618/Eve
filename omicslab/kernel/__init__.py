@@ -1,4 +1,4 @@
-"""Shared Jupyter kernel management for OmicsLab.
+"""Shared Jupyter kernel management for SuWen.
 
 A single long-lived kernel is used per server workspace so that every agent turn,
 notebook cell and variable inspection shares the same live Python state.

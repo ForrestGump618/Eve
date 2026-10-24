@@ -43,7 +43,7 @@ class ProjectNotFound(KeyError):
 
 
 class ProjectStore:
-    """Read/write the discovery ledger for one OmicsLab home directory."""
+    """Read/write the discovery ledger for one SuWen home directory."""
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings

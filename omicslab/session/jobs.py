@@ -219,20 +219,13 @@ class JobManager:
 
     def _effective_status(self, job: Job) -> str:
         with job.lock:
-            status = job.status
-            proc = job.proc
-            cancelled = job.cancelled
-        if status == STATUS_RUNNING and proc is not None:
-            code = _process_returncode(proc)
-            if code is not None:
-                if cancelled:
-                    return STATUS_CANCELLED
-                return STATUS_DONE if code == 0 else STATUS_FAILED
-        return status
+            # Process exit alone is not a committed job result: the worker still
+            # has to close its output handle and publish all final metadata.
+            return job.status
 
     def _snapshot(self, job: Job) -> dict[str, Any]:
-        status = self._effective_status(job)
         with job.lock:
+            status = job.status
             ended_at = job.ended_at
             exit_code = job.exit_code
         log_bytes = 0

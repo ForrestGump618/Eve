@@ -1,0 +1,37 @@
+[
+  {
+    "name": "js-tiktoken",
+    "version": "1.0.21",
+    "declaredLicense": "MIT",
+    "licenseFiles": [],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "base64-js",
+    "version": "1.5.1",
+    "declaredLicense": "MIT",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "Electron",
+    "version": "45.0.0",
+    "declaredLicense": "MIT plus bundled Chromium/Node dependency licenses",
+    "licenseFiles": [
+      "LICENSE",
+      "LICENSES.chromium.html"
+    ],
+    "scope": "bundled runtime; full upstream notices shipped by Electron distribution, not re-licensed"
+  },
+  {
+    "name": "SuWen Python compatibility source",
+    "version": "2.1.1",
+    "declaredLicense": "Apache-2.0",
+    "licenseFiles": [
+      "resources/legacy/LICENSE"
+    ],
+    "scope": "existing source, no Python interpreter/dependency wheels bundled"
+  }
+]

@@ -1,0 +1,15 @@
+SuWen desktop 3.0.0-preview.1
+New desktop/ code is MIT licensed. The existing Python implementation in the
+parent repository retains its original Apache-2.0 license and notices.
+No KongMing code, assets, skills or binaries are distributed with this program.
+No DeepSeek Harness code is bundled in this preview.
+Electron includes Chromium/Node.js and separate third-party notices distributed
+in its runtime. js-tiktoken is MIT licensed; its tokenizer vocabulary is derived
+from tiktoken (MIT). See release dependency/SBOM reports for resolved versions.
+
+
+The optional compatibility workbench is bundled as original Apache-2.0 Python
+source under resources/legacy. Its original LICENSE is included. Python itself
+and its package dependencies are not bundled; users supply an interpreter with
+those dependencies. The new fixed workers and bridge adapter remain MIT.
+Resolved Node runtime license texts are under third-party-licenses/.

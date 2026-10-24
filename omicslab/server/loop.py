@@ -3,7 +3,7 @@
 uvicorn's default ``auto`` factory forces ``ProactorEventLoop`` on Windows when
 running without a subprocess.  The Proactor loop cannot provide ``add_reader``,
 which the ZMQ kernel client relies on (it falls back to a slower tornado
-selector thread and logs a warning).  OmicsLab always talks to a Jupyter kernel,
+selector thread and logs a warning).  SuWen always talks to a Jupyter kernel,
 so the server prefers the selector loop on Windows.
 
 A custom uvicorn ``--loop`` target is used verbatim as the loop factory passed to

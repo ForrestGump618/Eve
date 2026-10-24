@@ -1,0 +1,4 @@
+name,score,active,note
+alpha,10,true,first
+beta,20,false,
+gamma,,true,third

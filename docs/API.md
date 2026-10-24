@@ -767,7 +767,7 @@ curl -s http://127.0.0.1:5077/api/agents
     {
       "id": "lead",
       "name": "首席分析师",
-      "description": "OmicsLab 默认入口：负责需求拆解、任务规划、计算执行与最终交付，必要时把子任务分派给领域专家智能体。",
+      "description": "SuWen 默认入口：负责需求拆解、任务规划、计算执行与最终交付，必要时把子任务分派给领域专家智能体。",
       "category": "general",
       "source": "bundled",
       "toolsets": ["python", "files", "shell", "memory", "skills", "agents", "jobs", "notebook", "system"],

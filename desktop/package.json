@@ -1,0 +1,90 @@
+{
+  "name": "suwen-desktop",
+  "version": "3.1.0",
+  "private": true,
+  "description": "SuWen local research workspace with durable task execution",
+  "main": "dist/main.js",
+  "type": "module",
+  "author": "SuWen contributors",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.mjs",
+    "start": "electron .",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "dist:win": "npm run build && electron-builder --win nsis --x64",
+    "pack": "npm run build && electron-builder --dir",
+    "sbom": "npm sbom --sbom-format cyclonedx > release/sbom.cdx.json",
+    "smoke": "node scripts/electron-smoke.mjs"
+  },
+  "dependencies": {
+    "js-tiktoken": "1.0.21"
+  },
+  "devDependencies": {
+    "@types/node": "24.12.0",
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0",
+    "playwright-core": "1.64.1",
+    "typescript": "7.0.2"
+  },
+  "build": {
+    "appId": "org.suwen.desktop",
+    "productName": "SuWen",
+    "asar": false,
+    "directories": {
+      "output": "release"
+    },
+    "artifactName": "SuWen-Setup-${version}-win-${arch}.${ext}",
+    "files": [
+      "dist/main.js",
+      "dist/src/**/*",
+      "dist/ui/**/*",
+      "package.json",
+      "LICENSE",
+      "NOTICE",
+      "third-party-licenses/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "worker",
+        "to": "worker",
+        "filter": [
+          "*.py"
+        ]
+      },
+      {
+        "from": "..",
+        "to": "legacy",
+        "filter": [
+          "omicslab/**/*.py",
+          "omicslab/web/**/*",
+          "omicslab/skills/**/*",
+          "omicslab/agents/**/*",
+          "omicslab/data/**/*",
+          "LICENSE",
+          "!**/__pycache__/**",
+          "!**/*.pyc"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signExecutable": false,
+      "icon": "assets/suwen.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "shortcutName": "SuWen",
+      "uninstallDisplayName": "SuWen"
+    }
+  }
+}

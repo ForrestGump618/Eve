@@ -1,0 +1,74 @@
+{
+  "home": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-chaos-Uf0f0X",
+  "startedAt": "2026-10-24T17:33:43.614Z",
+  "scenarios": [
+    {
+      "name": "daemon starts from durable state",
+      "ok": true,
+      "detail": "pid 42800"
+    },
+    {
+      "name": "python worker SIGKILL is retried and recovers",
+      "ok": true,
+      "detail": "attempts 2, 15173 ms"
+    },
+    {
+      "name": "recovered python step wrote exactly one artifact",
+      "ok": true,
+      "detail": "1 artifacts"
+    },
+    {
+      "name": "daemon still answers after worker restart",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "daemon SIGKILL mid-step recovers from durable lease",
+      "ok": true,
+      "detail": "completed, attempts 2, 26508 ms after restart"
+    },
+    {
+      "name": "recovery kept the same operation id and one artifact",
+      "ok": true,
+      "detail": "1 artifacts"
+    },
+    {
+      "name": "committed step is not replayed after daemon SIGKILL",
+      "ok": true,
+      "detail": "before attempts 1, timer attempts 1"
+    },
+    {
+      "name": "cancel propagates to sandboxed worker step",
+      "ok": true,
+      "detail": "cancelled"
+    },
+    {
+      "name": "cancelled step commits no artifact",
+      "ok": true,
+      "detail": "0 artifacts"
+    },
+    {
+      "name": "daemon remains responsive after cancellation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "provider 429/500 faults are retried then completed",
+      "ok": true,
+      "detail": "3 requests, 2 human approvals, completed"
+    },
+    {
+      "name": "billing-unknown 429/500 needed explicit approval, visible in the durable event log",
+      "ok": true,
+      "detail": "step.reconciliation_required,approval.resolved,step.claimed,step.reconciliation_required,approval.resolved,step.claimed,step.completed,task.completed"
+    }
+  ],
+  "limits": [
+    "Short-window fault injection in one Windows session only.",
+    "No 8h/24h/72h soak, no sleep/hibernate, no power loss, no OS reboot, no disk-full test.",
+    "Model-provider faults are injected by a local HTTP fixture, not a real vendor account."
+  ],
+  "durationMs": 52206,
+  "result": "passed",
+  "finishedAt": "2026-10-24T17:34:35.821Z"
+}

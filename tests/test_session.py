@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -282,6 +283,42 @@ def test_python_job_success_and_log_offsets(settings: Settings) -> None:
         assert log_file.is_file()
         assert log_file.stat().st_size == final["log_bytes"]
     finally:
+        jobs.shutdown()
+
+
+@pytest.mark.parametrize('exit_code', [0, 3])
+def test_process_exit_waits_for_committed_job_result(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch, exit_code: int
+) -> None:
+    jobs = JobManager(settings)
+    finish_reached = threading.Event()
+    release_finish = threading.Event()
+    original_finish = jobs._finish
+
+    def delayed_finish(job, status, code):
+        finish_reached.set()
+        release_finish.wait(timeout=10)
+        original_finish(job, status, code)
+
+    monkeypatch.setattr(jobs, '_finish', delayed_finish)
+    try:
+        submitted = jobs.submit('python', f'import sys; sys.exit({exit_code})')
+        assert finish_reached.wait(timeout=10)
+        # The OS child has exited, but the worker has not published its result.
+        pending = jobs.get(submitted['id'])
+        assert pending['status'] == STATUS_RUNNING
+        assert pending['exit_code'] is None
+        assert pending['ended_at'] is None
+        assert jobs.log(submitted['id'])['eof'] is False
+
+        release_finish.set()
+        completed = wait_job(jobs, submitted['id'])
+        assert completed['status'] == (STATUS_DONE if exit_code == 0 else STATUS_FAILED)
+        assert completed['exit_code'] == exit_code
+        assert completed['ended_at'] is not None
+        assert jobs.log(submitted['id'])['eof'] is True
+    finally:
+        release_finish.set()
         jobs.shutdown()
 
 

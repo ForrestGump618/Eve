@@ -1,0 +1,50 @@
+﻿{
+    "at":  "2026-10-24T17:46:42.8310654Z",
+    "from":  "3.0.0-preview.1",
+    "to":  "3.1.0",
+    "oldInstaller":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\2026-10-23\\c-users-qingyuan-zhuang-documents-deepseek-2\\outputs\\omicslab\\desktop\\release\\SuWen-Setup-3.0.0-preview.1-win-x64.exe",
+    "newInstaller":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.1.0-win-x64.exe",
+    "steps":  [
+                  {
+                      "step":  "old 3.0.0-preview.1 install exit 0",
+                      "ok":  true,
+                      "detail":  "exit=0 registry=3.0.0-preview.1 FileVersion=3.0.0-preview.1"
+                  },
+                  {
+                      "step":  "upgrade install exit 0",
+                      "ok":  true,
+                      "detail":  "exit=0"
+                  },
+                  {
+                      "step":  "registry shows 3.1.0 after upgrade",
+                      "ok":  true,
+                      "detail":  "SuWen 3.1.0"
+                  },
+                  {
+                      "step":  "exe is 3.1.0 after upgrade",
+                      "ok":  true,
+                      "detail":  "FileVersion=3.1.0"
+                  },
+                  {
+                      "step":  "upgraded app running and daemon ready",
+                      "ok":  true,
+                      "detail":  "pid=48116 exited=False"
+                  },
+                  {
+                      "step":  "upgraded daemon health version 3.1.0",
+                      "ok":  true,
+                      "detail":  "version=3.1.0 mode=user-background"
+                  },
+                  {
+                      "step":  "upgraded app uninstall exit 0",
+                      "ok":  true,
+                      "detail":  "exit=0"
+                  },
+                  {
+                      "step":  "install dir removed after upgrade test",
+                      "ok":  true,
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen"
+                  }
+              ],
+    "summary":  "8/8 steps passed"
+}

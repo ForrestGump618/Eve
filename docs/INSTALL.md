@@ -163,14 +163,14 @@ python -m omicslab serve --port 5077
 
 ## 4. Jupyter 内核解释器
 
-OmicsLab 的「共享内核」是一个独立的 Python 进程。它**不一定**是 Web 服务进程本身，以下规则决定用哪个解释器：
+SuWen 的「共享内核」是一个独立的 Python 进程。它**不一定**是 Web 服务进程本身，以下规则决定用哪个解释器：
 
 ### 4.1 解析顺序
 
 ```text
 1. settings.json 的 kernel_python            （Web 设置页 / PATCH /api/settings）
 2. 环境变量 OMICSLAB_KERNEL_PYTHON
-3. 启动 OmicsLab 的进程解释器（sys.executable）
+3. 启动 SuWen 的进程解释器（sys.executable）
 4. <workspace>/.venv/... 或 <cwd>/.venv/... 下的 python
 ```
 
@@ -204,7 +204,7 @@ export OMICSLAB_KERNEL_PYTHON="$HOME/miniconda3/envs/bio/bin/python"
 内核用的解释器必须装有对应依赖。两种做法：
 
 ```powershell
-# A. 装进 OmicsLab 自己的 venv（推荐）
+# A. 装进 SuWen 自己的 venv（推荐）
 .venv\Scripts\python.exe -m pip install -e ".[bio]"
 
 # B. 若内核指向 conda 环境，在 conda 环境里装
@@ -264,7 +264,7 @@ python -m venv .venv
 
 ### 5.3 完全离线运行
 
-OmicsLab 本身无 CDN、无遥测。要连 LLM 也离线，使用本机 Ollama：
+SuWen 本身无 CDN、无遥测。要连 LLM 也离线，使用本机 Ollama：
 
 ```powershell
 ollama pull qwen2.5:7b

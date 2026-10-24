@@ -1,0 +1,146 @@
+name: SuWen Windows CI
+
+# Real Windows CI for the vNext desktop app + preserved Python baseline.
+# Replaces the earlier draft workflow. It builds, tests, packages an unsigned
+# NSIS installer, generates an SBOM and SHA256SUMS, and uploads verifiable
+# artifacts. It does NOT sign and does NOT claim a clean-VM install; those
+# remain explicit external gates (see docs/release/windows-installer-verification.md).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [suwen-vnext-durable]
+    paths:
+      - 'desktop/**'
+      - 'omicslab/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - '.github/workflows/suwen-windows.yml'
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - 'omicslab/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - '.github/workflows/suwen-windows.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: suwen-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop-windows:
+    name: Desktop build + test + installer (Windows x64)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.0'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install dependencies (lockfile exact)
+        run: npm ci
+
+      - name: Compile TypeScript and run unit/integration tests
+        run: npm test
+
+      - name: Build NSIS installer (unsigned; x64)
+        run: npm run dist:win
+
+      - name: Generate runtime SBOM (CycloneDX via npm)
+        shell: pwsh
+        run: |
+          npm sbom --omit=dev --sbom-format=cyclonedx > release/sbom.cdx.json
+          if (-not (Test-Path release/sbom.cdx.json)) { throw 'SBOM was not generated' }
+          Get-Content release/sbom.cdx.json -TotalCount 1 | Out-Null
+
+      - name: Verify installer and publish SHA256SUMS
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem release -Filter 'SuWen-Setup-*-win-x64.exe' | Select-Object -First 1
+          if (-not $exe) { throw 'Installer .exe was not produced' }
+          if ($exe.Length -le 0) { throw 'Installer is empty' }
+          $blockmap = Get-ChildItem release -Filter '*.blockmap' | Select-Object -First 1
+          $lines = @()
+          foreach ($f in @($exe) + @($blockmap) + @(Get-Item release/sbom.cdx.json)) {
+            $h = (Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLower()
+            $lines += "$h  $($f.Name)"
+          }
+          $lines | Set-Content release/SHA256SUMS -Encoding ascii
+          Get-Content release/SHA256SUMS
+          "installer=$($exe.FullName) bytes=$($exe.Length) sha256=$((Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower())" |
+            Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "NOTE: build is UNSIGNED; SmartScreen warning is expected and not suppressed." |
+            Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+
+      - name: Smoke-check compiled daemon entry and fixed Python worker scripts
+        shell: pwsh
+        run: |
+          foreach ($p in 'dist/main.js','dist/src/daemon.js','dist/ui/index.html') {
+            if (-not (Test-Path $p)) { throw "missing build output: $p" }
+          }
+          foreach ($p in 'worker/legacy_server.py','worker/research_worker.py') {
+            if (-not (Test-Path $p)) { throw "missing worker script: $p" }
+          }
+
+      - name: Upload installer, checksums, SBOM and test log
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuWen-windows-x64-preview
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            desktop/release/*.exe
+            desktop/release/*.blockmap
+            desktop/release/SHA256SUMS
+            desktop/release/sbom.cdx.json
+
+  python-baseline:
+    name: Python baseline regression (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install package + dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run baseline pytest (offline, mock provider, isolated home)
+        shell: pwsh
+        env:
+          OMICSLAB_PROVIDER: mock
+          OMICSLAB_HOME: ${{ runner.temp }}\omicslab-ci-home
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:OMICSLAB_HOME | Out-Null
+          python -m pytest -q -p no:cacheprovider tests 2>&1 | Tee-Object -FilePath pytest-desktop.json.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload pytest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: suwen-python-pytest-log
+          if-no-files-found: warn
+          retention-days: 7
+          path: pytest-desktop.json.log

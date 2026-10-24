@@ -1,6 +1,6 @@
 # 内置技能库（SKILLS）
 
-技能（Skill）是 OmicsLab 的「按需操作手册」。默认只把技能目录（`name + description + when_to_use`）注入模型上下文；当模型判断需要时，才用 `skill_view` 读取完整正文与附带脚本。因此技能可以写得很详细，而不会挤占日常对话的上下文。
+技能（Skill）是 SuWen 的「按需操作手册」。默认只把技能目录（`name + description + when_to_use`）注入模型上下文；当模型判断需要时，才用 `skill_view` 读取完整正文与附带脚本。因此技能可以写得很详细，而不会挤占日常对话的上下文。
 
 > **状态说明**：`omicslab/skills/` 当前共 **23 个内置技能**，本页全部收录。每个技能对应 `omicslab/skills/<name>/SKILL.md`；用途描述已与技能的 frontmatter（`name` / `description` / `when_to_use`）核对，若后续正文调整，请以各 `SKILL.md` 为最终事实来源。
 

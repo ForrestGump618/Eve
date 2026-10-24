@@ -1,4 +1,4 @@
-"""素问 Suwen command line entry point.
+"""素问 SuWen command line entry point.
 
 Subcommands
 -----------
@@ -71,7 +71,7 @@ def _paint(console: Any, text: str, style: str = "") -> None:
 # ---------------------------------------------------------------------------
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="omicslab",
+        prog="suwen",
         description=f"{__app_name__} {__version__} - 本地优先的生物医学分析智能体工作台",
     )
     parser.add_argument("--version", action="version", version=f"{__app_name__} {__version__}")
@@ -169,7 +169,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--workspace", default=None, help="工作区目录（默认当前目录）")
-    parser.add_argument("--home", default=None, help="素问 Suwen 用户数据目录（默认 ~/.omicslab）")
+    parser.add_argument("--home", default=None, help="素问 SuWen 用户数据目录（默认 ~/.omicslab）")
 
 
 # ---------------------------------------------------------------------------
@@ -230,7 +230,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     url = f"http://{'127.0.0.1' if host in ('0.0.0.0', '::') else host}:{port}"
     console = _console()
 
-    model_line = "未配置模型（可用 mock 演示模式，或运行 omicslab config set-key deepseek <KEY>）"
+    model_line = "未配置模型（可用 mock 演示模式，或运行 suwen config set-key deepseek <KEY>）"
     try:
         target = settings.resolve_llm()
         configured = bool(target.api_key) or target.family == "mock"
@@ -276,7 +276,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         return int(getattr(exc, "code", 0) or 0)
     except OSError as exc:  # pragma: no cover - port conflict
         _paint(console, f"启动失败：{exc}", "red")
-        console.print(f"提示：端口 {port} 可能已被占用，可尝试 `omicslab serve --port {port + 1}`。")
+        console.print(f"提示：端口 {port} 可能已被占用，可尝试 `suwen serve --port {port + 1}`。")
         return 2
     return 0
 
@@ -560,7 +560,7 @@ def cmd_skills(args: argparse.Namespace) -> int:
         return 0
     for name, skill in sorted(skills.items()):
         console.print(f"  {name:<28} {_short(skill.description or skill.when_to_use or '', 70)}")
-    console.print("\n使用 `omicslab skills <name>` 查看完整内容。")
+    console.print("\n使用 `suwen skills <name>` 查看完整内容。")
     return 0
 
 
@@ -772,7 +772,7 @@ def cmd_discovery(args: argparse.Namespace) -> int:
         if not projects:
             _paint(
                 console,
-                '尚无发现项目。用 `omicslab discovery create "研究目标" --hints data.csv` 创建。',
+                '尚无发现项目。用 `suwen discovery create "研究目标" --hints data.csv` 创建。',
                 "yellow",
             )
             return 0
@@ -796,7 +796,7 @@ def cmd_discovery(args: argparse.Namespace) -> int:
             budget_minutes=int(getattr(args, "budget", 30) or 30),
         )
         _paint(console, f"已创建发现项目 {project.id}：{project.title}", "green")
-        console.print(f"运行：omicslab discovery run {project.id}")
+        console.print(f"运行：suwen discovery run {project.id}")
         return 0
 
     project_id = str(getattr(args, "project_id", "") or "")

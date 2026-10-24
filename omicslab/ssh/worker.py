@@ -1,4 +1,4 @@
-"""OmicsLab 远端 Python worker（JSON-lines over stdin/stdout）。
+"""SuWen 远端 Python worker（JSON-lines over stdin/stdout）。
 
 由 :class:`omicslab.execution.ssh_backend.SSHExecutionBackend` 上传到远端工作区并
 以 ``python -u worker.py`` 启动。它**不监听任何端口**，只通过 stdin/stdout 与 SSH

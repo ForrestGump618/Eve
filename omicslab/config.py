@@ -1,4 +1,4 @@
-"""Configuration, paths and LLM provider resolution for OmicsLab.
+"""Configuration, paths and LLM provider resolution for SuWen.
 
 Design goals:
 - zero-config startup: if a known API key exists in the environment or in

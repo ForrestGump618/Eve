@@ -1,0 +1,156 @@
+# Python baseline → SuWen desktop feature parity matrix (3.1.0 evidence revision)
+
+Updated 2026-10-25 after the Lead measured SuWen desktop **3.1.0** evidence on this machine
+(`C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`, branch `suwen-vnext-durable`).
+Machine-readable rows: [`feature-parity-matrix.csv`](./feature-parity-matrix.csv) (70 rows).
+The Python-old column is unchanged from the 3.0.0-preview.1 audit (see
+[`python-feature-inventory.md`](./python-feature-inventory.md)); only the vNext column was upgraded
+where the Lead's evidence proves it.
+
+Status vocabulary: `IMPLEMENTED_PASS` (evidence proves the capability in the new desktop),
+`UNVERIFIED` (code exists or evidence is partial/not from TARGET), `NOT_STARTED`, `N/A_PORT`,
+`REPLACED` (old implementation intentionally superseded).
+
+## 1. Current counts
+
+| Status | Rows | Share |
+|---|---:|---:|
+| IMPLEMENTED_PASS | 56 | 80% |
+| UNVERIFIED | 2 | 3% |
+| NOT_STARTED | 10 | 14% |
+| N/A_PORT | 1 | 1% |
+| REPLACED | 1 | 1% |
+| **Total** | **70** | **100%** |
+
+Upgrades since the 3.0.0-preview.1 audit (14 PASS / 42 UNVERIFIED / 9 NOT_STARTED / 1 N/A / 1 REPLACED):
+42 rows moved to `IMPLEMENTED_PASS`, one row (`23 preinstalled scientific skills`) moved from
+UNVERIFIED to NOT_STARTED after inspecting `desktop/src/domain/tools.ts` (registry only, no builtin
+catalog), and three evidence rows were added (RPC E2E harness, UI DOM QA harness, context versions +
+manual compaction/rollback). A machine-readable diff is reproducible with
+`docs/research/repro/update-310-parity.py`.
+
+## 2. What is now proven in the new desktop (PASS groups)
+
+- **Shell/UI (6 rows):** five workspaces; streamed chat + markdown; incremental timeline rendering;
+  zh/en labels; session/conversation persistence; project/discovery projects; files/figures/artifacts.
+  Evidence: `npm test` 150/148/0 fail/2 skips; `scripts/e2e-rpc.mjs --live` 42/0;
+  packaged `electron-smoke.mjs` 8/8; `scripts/ui-dom-qa.mjs` 19/0/10 (10 warnings are the five
+  main-process bridge methods); `desktop/ui/actions.json` 142 actions all bound.
+- **Durability/runtime (10 rows):** SQLite v3 WAL/FULL/foreign keys/busy_timeout + pre-migration
+  backup; persisted task DAG; lease/fencing/heartbeat/reclaim; durable timer and waiting_approval;
+  outbox + idempotent operation ids; checkpoints + artifact SHA-256; token/cost/call budgets;
+  observability/doctor (11 checks) + support export; raw event immutability + crash reconcile;
+  approvals. Evidence: `npm test` durable/daemon suites; `scripts/chaos-smoke.mjs` short-window real
+  fault injection: **12/12 scenarios passed, 52.2 s** (`docs/verification/chaos-results.json`,
+  finished 2026-10-24T17:34:35.821Z) — worker SIGKILL retry, daemon SIGKILL lease recovery with the
+  same operation id, committed steps not replayed, cancellation, provider 429/500 retries with
+  approvals, billing-unknown reconciliation; packaged smoke 30 s timer after UI exit;
+  8/24/72 h NOT run.
+- **Context (7 rows):** independent ContextManager + token accounting; two-level compaction;
+  structured/validated summaries; memory tiers + project facts + archive retrieval; tool-output
+  artifactization; versions + manual compaction/rollback; 10-round ~201 k-token compaction test.
+  Evidence: `npm test` context suites; `e2e-rpc` context history/restore/compact; not claimed
+  semantically lossless.
+- **Research/extensions (14 rows):** Python research worker v2.0.0 (`suwen-research-worker/2`, pure
+  stdlib, sandboxed `runScript` returning file digests, real demo.fcs metrics); discovery engine;
+  evidence ledger; hypothesis generation/selection; multi-agent debate; autonomy graph; six research
+  capabilities as durable DAG workflows with typed records; RSI constrained loop; Biomni-style
+  analysis sandbox; MCP registry; Skill registry (static scan + isolated test + atomic install);
+  channels adapter framework; read-only remote channel policy.
+  Evidence: worker 22 tests / 21 pass / 1 skip; `e2e-rpc` research rows + real PubMed/UniProt calls;
+  unit tests for tools/channels/rsi/domain-research. External platforms (Biomni/Paper2Agent/ERA/
+  Robin/Kosmos, real Telegram/Slack/Discord/WeChat accounts) are **not bundled/connected**.
+- **Legacy/import/release (5 rows):** import-service read-only scan of the real legacy home (9
+  item groups), backup-first/idempotent apply, rollback tests 5/5; NSIS x64 installer built from
+  frozen final code (`release/SuWen-Setup-3.1.0-win-x64.exe`, 129,425,145 bytes, SHA-256
+  `e1a1062cbacaf978f6b60f2a825d2e2e769c231048a65983113e8e434ba07ac4`, UNSIGNED) and unpacked
+  layout inspected; **final-artifact host lifecycle probe 14/14 steps passed**
+  (`docs/verification/artifacts/installer-lifecycle.json`: install 18 s, exe version 3.1.0, running
+  app, authenticated daemon attach `mode user-background`, daemon survives UI close, reinstall 24 s,
+  uninstall 11 s, user-data preservation) and **cross-version upgrade 3.0.0-preview.1 → 3.1.0
+  8/8 passed** (`upgrade-path.json`); packaging metadata; brand cleanup; desktop unit/integration
+  tests. `SHA256SUMS`, clean-VM lifecycle and code signing remain pending.
+
+## 3. Remaining non-PASS rows (14)
+
+| Row | Status | Gap |
+|---|---|---|
+| Windows login recovery / background mode | UNVERIFIED | detached daemon + close-UI survival proven in packaged smoke; login-item recovery and reboot not exercised |
+| CI for desktop + installer | UNVERIFIED | `.github/workflows/suwen-windows.yml` exists; no GitHub Actions run was observed in this session |
+| Model routing / auto config / fallback | NOT_STARTED | single configured provider per task; no automatic routing/fallback |
+| Vision verification loop | NOT_STARTED | legacy Python vision tools preserved in compatibility mode only |
+| Workspaces (local roots) | NOT_STARTED | project workspaces exist, but arbitrary local root folders/bindings are not implemented |
+| SSH remote workspaces/exec | NOT_STARTED | legacy Python SSH stack preserved, not bridged to new desktop |
+| Trajectories/audit trail | NOT_STARTED | durable records exist; no user-facing trajectory browser |
+| Jupyter kernel manager | NOT_STARTED | legacy kernel manager preserved in compatibility mode only |
+| Terminal/shell | NOT_STARTED | no integrated terminal in new desktop |
+| Paper2Agent pipeline | NOT_STARTED | external Paper2Agent installation/construction not bundled or exercised |
+| 23 preinstalled scientific skills | NOT_STARTED | no builtin catalog in `desktop/src/domain/tools.ts`; 23 SKILL.md dirs live only in bundled `resources/legacy` |
+| Clean-VM install/upgrade/uninstall | NOT_STARTED | final-artifact **host lifecycle 14/14 + cross-version upgrade 8/8 passed** (`installer-lifecycle.json`, `upgrade-path.json`); clean-VM install/start/upgrade/uninstall still PENDING_LEAD; `SHA256SUMS` is now present (`desktop/release/SHA256SUMS`, `docs/release/SHA256SUMS.txt`) |
+| CLI entrypoints (18 subcommands) | N/A_PORT | Python CLI is intentionally preserved; the new desktop is GUI/RPC-only |
+| In-memory jobs + threads | REPLACED | replaced by durable DAG engine; not ported |
+
+`docs/requirements/master-requirements.csv` is the requirement-level view of the same evidence
+(60 IMPLEMENTED_PASS / 8 UNVERIFIED / 3 NOT_STARTED over 71 requirement rows).
+
+## 4. Reuse strategy (unchanged)
+
+Mature Python engines were **wrapped, not ported**: discovery engine (66 KB), evidence ledger
+(25.8 KB), SSH manager (83.8 KB), runtime event log (40.9 KB), MCP manager, knowledge/memory,
+23 skills, 13 agent role prompts. They stay reachable through the optional authenticated legacy
+Python workbench (separate process, isolated home, new mock provider, no credential copying).
+The new desktop re-implements durability, context/compaction, UI shell and security as MIT code,
+because the Python baseline lacks leases/fencing/outbox/durable timers and has UI-coupled state.
+
+## 5. Data migration / compatibility
+
+- New desktop state: `<Electron userData>/SuWen/runtime/harness.sqlite` (v3).
+- Legacy data stays in `%LOCALAPPDATA%/OmicsLab` / `~/.omicslab` (read-only for import inspect);
+  identifiers/data dirs/API names in the Python package are intentionally retained
+  (LEGACY-BRAND-COMPAT, see `docs/research/branding-exceptions.md`).
+- Explicit backup-first import (`import.inspect/apply/jobs/rollback`); no automatic migration and
+  no silent overwrite; the user's real legacy home was not modified by this audit.
+- 23 legacy skills, agent prompts and web UI remain in `resources/legacy` for the optional
+  compatibility window, not in the new registry.
+
+## 6. Test / evidence cross-reference
+
+| Evidence | Result |
+|---|---|
+| `npx tsc -p tsconfig.json --noEmit` | exit 0 |
+| `npm run build` | exit 0 |
+| `npm test` | tests 150, pass 148, fail 0, skipped 2, 28.3 s, exit 0 |
+| `node scripts/e2e-rpc.mjs --dist dist --live` | 42 passed / 0 failed, ~7 s; real Europe PMC PMID 42878939 + UniProt Q9Y2B4, artifacts with sha256 |
+| `SUWEN_SMOKE_PACKAGED=1 node scripts/electron-smoke.mjs` | 8/8 checks, exit 0, 106 s on the final build; artifacts `release/smoke/work/electron-e2e-result.json`, two screenshots |
+| `node scripts/ui-dom-qa.mjs` | 19 passed / 0 failed / 10 warnings |
+| `node --check desktop/ui/app.js` | exit 0 |
+| Python research worker tests | 22 tests / 21 pass / 1 skip (Windows symlink EPERM) |
+| Installer | 129,425,145 B, SHA-256 `e1a1062c…7ac4`, blockmap 135,934 B, UNSIGNED |
+| Installer lifecycle (final artifact) | 14/14 steps passed (`docs/verification/artifacts/installer-lifecycle.json`) — host probe only |
+| Cross-version upgrade | 8/8 steps passed, `3.0.0-preview.1 → 3.1.0` (`docs/verification/artifacts/upgrade-path.json`) — host probe only |
+
+Skipped/unproven: 2 unit skips (Windows symlink EPERM; optional legacy Python workbench deps),
+legacy workbench unavailable in packaged smoke (Python lacks fastapi), live MCP gated behind
+`SUWEN_SMOKE_LIVE=1` (covered by item 3 e2e instead), clean-VM lifecycle + `SHA256SUMS`, 8/24/72 h
+endurance, real external model accounts, code signing.
+
+## 7. Known gaps and priorities
+
+- **P0:** clean-VM installer lifecycle (`SHA256SUMS`; host lifecycle 14/14 + upgrade 8/8 already
+  passed on the final artifact); Windows CI execution; real external model accounts;
+  wire every main-process bridge method into UI QA coverage (currently 5 intentional warnings).
+- **P1:** 8/24/72 h + reboot/power-loss/disk-full endurance; legacy skill migration into the new
+  registry; OS-level sandbox/quotas; code signing.
+- **P2:** Paper2Agent/Biomni/ERA/Robin/Kosmos integrations; SSH/terminal/kernel/workspaces in the new
+  desktop; trajectories UI; model routing.
+- **P3:** marketplace/update channel for skills, remote/Temporal workers.
+
+## 8. Related documents
+
+- [`master-requirements.csv`](../requirements/master-requirements.csv) — requirement-level status.
+- [`integration-and-e2e.md`](../verification/integration-and-e2e.md) — commands/results/artifacts.
+- [`windows-installer-verification.md`](../release/windows-installer-verification.md) — installer facts.
+- [`durability-chaos-tests.md`](../verification/durability-chaos-tests.md) — short-window fault injection.
+- [`ui-action-coverage.csv`](../verification/ui-action-coverage.csv) — 142 UI actions with RPC bridge
+  classification.
+- [`python-feature-inventory.md`](./python-feature-inventory.md) — Python baseline inventory.

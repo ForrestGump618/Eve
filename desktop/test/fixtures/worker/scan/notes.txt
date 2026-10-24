@@ -1,0 +1,2 @@
+notes file used by discoveryScan tests
+it is not a dataset, so no row count is inferred

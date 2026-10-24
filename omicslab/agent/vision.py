@@ -1,6 +1,6 @@
 """Vision-model client: describe charts, microscopy images and screenshots.
 
-OmicsLab keeps the *chat* model optional/multimodal-agnostic: when a user
+SuWen keeps the *chat* model optional/multimodal-agnostic: when a user
 attaches an image, the agent loop can call this client to turn the image into
 text once, then feed that text to any text-only LLM.  The same client powers the
 ``analyze_image`` tool for follow-up questions on a specific figure.

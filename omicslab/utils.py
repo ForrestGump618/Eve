@@ -1,4 +1,4 @@
-"""Shared low-level helpers used across OmicsLab modules.
+"""Shared low-level helpers used across SuWen modules.
 
 This module intentionally depends on the standard library only (PyYAML is
 imported lazily and degrades to a tiny built-in parser when unavailable):

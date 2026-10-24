@@ -1,6 +1,8 @@
-<p align="center"><img src="docs/assets/banner.svg" alt="素问 Suwen" width="880"></p>
+<p align="center"><img src="docs/assets/banner.svg" alt="素问 SuWen" width="880"></p>
 
-<h1 align="center">素问 Suwen</h1>
+> **Windows 桌面预览版 3.0.0-preview.1：** 新增 Electron 客户端与独立持久后台，见 [desktop/](desktop/README.md)。原 Python 科研工作台继续保留，可从兼容入口打开；[实际验收状态](docs/progress.md)明确记录未完成项。
+
+<h1 align="center">素问 SuWen</h1>
 
 <p align="center"><strong>本地优先的 AI Agent 工作室，面向日常工作与科研。</strong></p>
 
@@ -13,11 +15,11 @@
   <a href="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml"><img src="https://github.com/ForrestGump618/suwen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
-素问 Suwen 是一个**本地优先**的 AI Agent 工作室：在浏览器里打开一个工作台，让智能体在你的本机目录或 SSH 主机的远端目录里写代码、跑 Python、读写文件、提交长任务，并把科研结论纳入一条可审查的证据链。
+素问 SuWen 是一个**本地优先**的 AI Agent 工作室：在浏览器里打开一个工作台，让智能体在你的本机目录或 SSH 主机的远端目录里写代码、跑 Python、读写文件、提交长任务，并把科研结论纳入一条可审查的证据链。
 
 服务默认只监听 `127.0.0.1`，没有登录、没有租户、没有遥测；会话、事件、产物与快照都以 SQLite、JSON、Markdown、PNG 的形式落在本机，可以直接查看、复制与备份。模型接入是显式配置的，不配模型也能用 `mock` 离线走通流程。
 
-当前版本 **2.1.1**（2026-10-24）。展示名已改为素问 Suwen，Python 包名（`omicslab`）、旧 API 与数据目录 `.omicslab` 为兼容而保留。24 类 V2 需求逐项状态与尚缺子项见 [实现清单](docs/SUWEN-V2-CHECKLIST.md)：其中只有品牌与多级设置标为“已实现”，其余是“部分实现”或受外部环境限制。
+当前版本 **2.1.1**（2026-10-24）。展示名已改为素问 SuWen，Python 包名（`omicslab`）、旧 API 与数据目录 `.omicslab` 为兼容而保留。24 类 V2 需求逐项状态与尚缺子项见 [实现清单](docs/SUWEN-V2-CHECKLIST.md)：其中只有品牌与多级设置标为“已实现”，其余是“部分实现”或受外部环境限制。
 
 <p align="center"><img src="docs/screenshots/workbench-dark.png" alt="素问工作台（深色主题）" width="1000"></p>
 <p align="center"><sub>工作台：对话、变量、文件、图表与任务共用同一个工作区。</sub></p>
@@ -266,4 +268,4 @@ flowchart LR
 
 ---
 
-素问 Suwen v2.1.1 · Apache-2.0 · 本页与 [README.en.md](README.en.md) 保持结构对应
+素问 SuWen v2.1.1 · Apache-2.0 · 本页与 [README.en.md](README.en.md) 保持结构对应

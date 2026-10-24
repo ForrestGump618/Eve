@@ -1,0 +1,24 @@
+{
+  "modelProtocol": "local HTTP fixture only; no external model account",
+  "checks": [
+    "Electron main + detached runAsNode daemon + named pipe ready",
+    "renderer has no Node require; contextBridge present",
+    "safeStorage encrypted model configuration",
+    "chat fixture streamed and committed",
+    "closing actual Electron UI does not kill detached daemon",
+    "30-second persisted timer completed after UI exit; committed start step executed once",
+    "reopen attaches to same daemon and restores task history",
+    "packaged daemon inherited system proxy and completed two live readonly MCP public database searches",
+    "packaged fixed Python sample worker returned a reproducible mean and hash",
+    "packaged optional Python workbench opens isolated authenticated window; unauthorized HTTP rejected"
+  ],
+  "daemonPid": 20700,
+  "timerTask": "08f89316-9c5b-4e65-b0e3-44599113173c",
+  "runtimeVersions": {
+    "node": "24.22.0",
+    "electron": "45.0.0",
+    "sqlite": "3.53.4"
+  },
+  "packaged": true,
+  "result": "passed"
+}

@@ -1,0 +1,11 @@
+{
+  "count": 5,
+  "mean": 5,
+  "median": 4,
+  "min": 2,
+  "max": 9,
+  "sample_stdev": 2.6457513110645907,
+  "data_sha256": "7ddb348f009a4df254254ed1d8a71fd7102b2d5710751444d441d26065e02982",
+  "python": "3.12.11",
+  "method": "Python stdlib statistics; no biological inference"
+}

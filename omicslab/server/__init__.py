@@ -1,4 +1,4 @@
-"""HTTP/WebSocket server package for OmicsLab.
+"""HTTP/WebSocket server package for SuWen.
 
 The public entry point is :func:`create_app`.  Importing this package stays
 light so submodules (``omicslab.server.state`` etc.) can be imported directly in

@@ -1,0 +1,160 @@
+{
+  "generatedAt": "2026-10-25",
+  "pattern": "omicslab|omiclab (case-insensitive)",
+  "scope": "text files under TARGET, exclusions: .git node_modules release dist dist-lead __pycache__ .pytest_cache build .omicslab and binary/font/image assets",
+  "total": {
+    "hits": 1017,
+    "files": 146
+  },
+  "newAuditDocs": {
+    "hits": 138,
+    "files": 12
+  },
+  "excludingNewAuditDocs": {
+    "hits": 879,
+    "files": 134
+  },
+  "byClass": {
+    "LEGACY-DOC-HISTORY": {
+      "hits": 189,
+      "files": 8
+    },
+    "ATTRIBUTION-LEGAL": {
+      "hits": 1,
+      "files": 1
+    },
+    "COMPAT-DOCS-ACTIVE": {
+      "hits": 207,
+      "files": 14
+    },
+    "OTHER": {
+      "hits": 25,
+      "files": 8
+    },
+    "LEGACY-DESKTOP-BRIDGE": {
+      "hits": 34,
+      "files": 14
+    },
+    "AUDIT-DOCS": {
+      "hits": 160,
+      "files": 16
+    },
+    "LEGACY-PACKAGE-NAMESPACE": {
+      "hits": 201,
+      "files": 58
+    },
+    "LEGACY-SCRIPTS": {
+      "hits": 44,
+      "files": 10
+    },
+    "LEGACY-TESTS": {
+      "hits": 156,
+      "files": 17
+    }
+  },
+  "topFiles": [
+    [
+      "docs/archive/LEGACY-README.md",
+      66,
+      "LEGACY-DOC-HISTORY"
+    ],
+    [
+      "docs/EXTENDING.md",
+      44,
+      "COMPAT-DOCS-ACTIVE"
+    ],
+    [
+      "docs/archive/CONTRACTS.md",
+      43,
+      "LEGACY-DOC-HISTORY"
+    ],
+    [
+      "docs/research/repro/finalize-docs.py",
+      36,
+      "AUDIT-DOCS"
+    ],
+    [
+      "docs/ARCHITECTURE.md",
+      34,
+      "COMPAT-DOCS-ACTIVE"
+    ],
+    [
+      "docs/migration/python-feature-inventory.md",
+      34,
+      "AUDIT-DOCS"
+    ],
+    [
+      "docs/archive/CONTRACTS-2.md",
+      33,
+      "LEGACY-DOC-HISTORY"
+    ],
+    [
+      "docs/API.md",
+      31,
+      "COMPAT-DOCS-ACTIVE"
+    ],
+    [
+      "omicslab/kernel/manager.py",
+      31,
+      "LEGACY-PACKAGE-NAMESPACE"
+    ],
+    [
+      "tests/test_suwen_platform.py",
+      28,
+      "LEGACY-TESTS"
+    ],
+    [
+      "docs/INSTALL.md",
+      23,
+      "COMPAT-DOCS-ACTIVE"
+    ],
+    [
+      "docs/research/branding-exceptions.md",
+      23,
+      "AUDIT-DOCS"
+    ],
+    [
+      "omicslab/config.py",
+      21,
+      "LEGACY-PACKAGE-NAMESPACE"
+    ],
+    [
+      "docs/archive/CONTRACTS-3.md",
+      20,
+      "LEGACY-DOC-HISTORY"
+    ],
+    [
+      "omicslab/agent/tools.py",
+      19,
+      "LEGACY-PACKAGE-NAMESPACE"
+    ],
+    [
+      "docs/architecture/current.md",
+      18,
+      "AUDIT-DOCS"
+    ],
+    [
+      "scripts/check_dist.py",
+      18,
+      "LEGACY-SCRIPTS"
+    ],
+    [
+      "CHANGELOG.md",
+      16,
+      "LEGACY-DOC-HISTORY"
+    ],
+    [
+      "tests/test_remote_workspace.py",
+      16,
+      "LEGACY-TESTS"
+    ],
+    [
+      "README.en.md",
+      15,
+      "COMPAT-DOCS-ACTIVE"
+    ]
+  ],
+  "fixRequiredBrandText": [],
+  "fixRequiredNonBrand": [],
+  "fixRequiredNonBrandResolution": "resolved 2026-10-25 02:20: desktop/src/rpc/core.ts Chinese literals fixed by the Lead; verification scan of 39 desktop/src + desktop/ui TS/JS/HTML files found 0 mojibake sequences and 0 U+FFFD characters"
+}

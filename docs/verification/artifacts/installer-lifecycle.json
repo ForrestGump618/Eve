@@ -1,0 +1,82 @@
+﻿{
+    "at":  "2026-10-24T17:45:22.6351701Z",
+    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.1.0-win-x64.exe",
+    "installerBytes":  129425145,
+    "installerSha256":  "E1A1062CBACAF978F6B60F2A825D2E2E769C231048A65983113E8E434BA07AC4",
+    "installDir":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen",
+    "testHome":  "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-lifecycle-final",
+    "envNote":  "ELECTRON_RUN_AS_NODE was removed from the launching shell only; the shipped application was not modified.",
+    "steps":  [
+                  {
+                      "step":  "silent install exit 0",
+                      "ok":  true,
+                      "detail":  "exit=0 elapsed=18s"
+                  },
+                  {
+                      "step":  "installed exe present",
+                      "ok":  true,
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen\\SuWen.exe bytes=249801728"
+                  },
+                  {
+                      "step":  "uninstaller present",
+                      "ok":  true,
+                      "detail":  "Uninstall SuWen.exe"
+                  },
+                  {
+                      "step":  "registry uninstall entry 3.1.0",
+                      "ok":  true,
+                      "detail":  "SuWen 3.1.0"
+                  },
+                  {
+                      "step":  "exe version metadata 3.1.0",
+                      "ok":  true,
+                      "detail":  "FileVersion=3.1.0 ProductVersion=3.1.0.0 ProductName=SuWen"
+                  },
+                  {
+                      "step":  "installed app still running after 12s",
+                      "ok":  true,
+                      "detail":  "pid=6928 exited=False"
+                  },
+                  {
+                      "step":  "installed app daemon health (authenticated pipe)",
+                      "ok":  true,
+                      "detail":  "version=3.1.0 mode=user-background pid=46604"
+                  },
+                  {
+                      "step":  "daemon survives closing the installed UI",
+                      "ok":  true,
+                      "detail":  "pid=46604 uptime=13.6s"
+                  },
+                  {
+                      "step":  "same-version reinstall exit 0",
+                      "ok":  true,
+                      "detail":  "exit=0 elapsed=24s"
+                  },
+                  {
+                      "step":  "exe survives reinstall",
+                      "ok":  true,
+                      "detail":  "bytes=249801728"
+                  },
+                  {
+                      "step":  "silent uninstall exit 0",
+                      "ok":  true,
+                      "detail":  "exit=0 elapsed=11s"
+                  },
+                  {
+                      "step":  "install directory removed",
+                      "ok":  true,
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen"
+                  },
+                  {
+                      "step":  "user data preserved after uninstall",
+                      "ok":  true,
+                      "detail":  "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-lifecycle-final"
+                  },
+                  {
+                      "step":  "registry entry removed",
+                      "ok":  true,
+                      "detail":  "remaining="
+                  }
+              ],
+    "summary":  "14/14 steps passed"
+}

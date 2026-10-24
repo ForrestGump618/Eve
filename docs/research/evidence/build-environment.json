@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "hostWindows": "Windows-11-10.0.26200-SP0",
+  "buildNode": "24.14.0",
+  "npm": "11.9.0",
+  "typescript": "7.0.2",
+  "electronBuilder": "26.18.0",
+  "python": "3.12.11",
+  "packagedRuntime": {
+    "node": "24.22.0",
+    "electron": "45.0.0",
+    "sqlite": "3.53.4"
+  },
+  "version": "3.0.0-preview.1",
+  "signed": false,
+  "installerBytes": 129363809,
+  "installerSha256": "f263af7bb412ccbb2fb3a8f1798d35d2a7210997954e68669ed110b62a55514c",
+  "sourceBaseline": "8cabac3",
+  "branch": "suwen-vnext-durable",
+  "cleanVmInstallerLifecycle": "not performed",
+  "elapsed72hTest": "not performed"
+}

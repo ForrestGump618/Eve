@@ -1,0 +1,109 @@
+
+7-Zip 26.02 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-06-25
+
+Scanning the drive for archives:
+1 file, 129363809 bytes (124 MiB)
+
+Listing archive: C:\Users\Qingyuan Zhuang\Documents\Codex\2026-10-23\c-users-qingyuan-zhuang-documents-deepseek-2\outputs\omicslab\desktop\release\SuWen-Setup-3.0.0-preview.1-win-x64.exe
+
+--
+Path = C:\Users\Qingyuan Zhuang\Documents\Codex\2026-10-23\c-users-qingyuan-zhuang-documents-deepseek-2\outputs\omicslab\desktop\release\SuWen-Setup-3.0.0-preview.1-win-x64.exe
+Type = Nsis
+Physical Size = 129363809
+Method = Deflate
+Solid = -
+Headers Size = 213478
+Embedded Stub Size = 87040
+SubType = NSIS-3 Unicode
+
+----------
+Path = $PLUGINSDIR\System.dll
+Size = 
+Packed Size = 6931
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 0
+
+Path = $PLUGINSDIR\UAC.dll
+Size = 
+Packed Size = 8018
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 6935
+
+Path = $PLUGINSDIR\StdUtils.dll
+Size = 
+Packed Size = 45608
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 14957
+
+Path = $PLUGINSDIR\nsDialogs.dll
+Size = 
+Packed Size = 4684
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 60569
+
+Path = $PLUGINSDIR\modern-wizard.bmp
+Size = 
+Packed Size = 1899
+Modified = 2019-06-18 03:21:30.0000000
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 65257
+
+Path = $PLUGINSDIR\nsExec.dll
+Size = 
+Packed Size = 3299
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 67160
+
+Path = $PLUGINSDIR\app-64.7z
+Size = 128736919
+Packed Size = 128736919
+Modified = 2026-10-24 23:33:10.0000000
+Attributes = 
+Method = Copy
+Solid = -
+Offset = 70463
+
+Path = $PLUGINSDIR\nsis7z.dll
+Size = 
+Packed Size = 242382
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 128807386
+
+Path = $R0\Uninstall SuWen.exe
+Size = 
+Packed Size = 177807
+Modified = 2026-10-24 23:33:14.0000000
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 129049772
+
+Path = $PLUGINSDIR\WinShell.dll
+Size = 
+Packed Size = 1080
+Modified = 
+Attributes = 
+Method = Deflate
+Solid = -
+Offset = 129227583
+

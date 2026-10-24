@@ -1,4 +1,4 @@
-# OmicsLab publication style (matplotlib >= 3.6)
+# SuWen publication style (matplotlib >= 3.6)
 # Usage:  plt.style.use("skills/figure-style/assets/omicslab.mplstyle")
 # Target: 85 mm single-column canvas, 6-8 pt text, colour-blind safe defaults.
 

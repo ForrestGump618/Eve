@@ -1,0 +1,93 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:ea46ce2c-29ca-4f7f-9dac-e97a09490759",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-10-24T15:17:46.274Z",
+    "lifecycles": [
+      {
+        "phase": "build"
+      }
+    ],
+    "tools": [
+      {
+        "vendor": "npm",
+        "name": "cli",
+        "version": "11.9.0"
+      }
+    ],
+    "component": {
+      "bom-ref": "suwen-desktop@3.0.0-preview.1",
+      "type": "library",
+      "name": "desktop",
+      "version": "3.0.0-preview.1",
+      "scope": "required",
+      "author": "SuWen contributors",
+      "description": "SuWen local research workspace with durable task execution",
+      "purl": "pkg:npm/suwen-desktop@3.0.0-preview.1",
+      "properties": [
+        {
+          "name": "cdx:npm:package:private",
+          "value": "true"
+        }
+      ],
+      "externalReferences": [],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "js-tiktoken@1.0.21",
+      "type": "library",
+      "name": "js-tiktoken",
+      "version": "1.0.21",
+      "scope": "required",
+      "description": "JavaScript port of tiktoken",
+      "purl": "pkg:npm/js-tiktoken@1.0.21",
+      "properties": [],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/js-tiktoken/-/js-tiktoken-1.0.21.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/dqbd/tiktoken"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "6e23a3ffa339a9d831e532a30e7153d72992a4ce6d6dddf29700edad0bc5412bb467b6c1624a36745f96fda5245d43ee93a215a51c64ff7436b073b31a54b7ea"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "suwen-desktop@3.0.0-preview.1",
+      "dependsOn": [
+        "js-tiktoken@1.0.21"
+      ]
+    },
+    {
+      "ref": "js-tiktoken@1.0.21",
+      "dependsOn": []
+    }
+  ]
+}
