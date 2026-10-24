@@ -78,6 +78,13 @@ Verify the uploaded installer hash equals the locally tested hash before announc
 published, delete the Release/tag, rotate any exposed credential, and clean history only if a real
 secret was committed (never publish first and scan later).
 
+## 3b. What was actually published (2026-10-25)
+
+- Repository remote is readable and writable via the user's existing SSH key over `ssh://git@ssh.github.com:443/ForrestGump618/suwen.git` (HTTPS push to `github.com:443` was blocked by the host network).
+- Source publication **succeeded**: branch `suwen-vnext-durable` and annotated local tag `suwen-vnext-3.2.0` were pushed; final verified commit is `8741d47` (previous commit `8646fd7`).
+- GitHub **Release asset upload was NOT performed**: no `gh` CLI and no `GITHUB_TOKEN`/`GH_TOKEN` in this environment, and the release decision is **HOLD** because G9 (publication readiness) and clean-VM/signing/endurance gates are not satisfied. The installer `SuWen-Setup-3.2.0-win-x64.exe` therefore exists only locally (path/hash above); it is not downloadable from a Release URL.
+- Never claim a Release URL, uploaded asset, green CI, signed installer, or clean-VM-verified release.
+
 ## 4. If credentials remain unavailable
 
 Publishing is genuinely blocked (no `gh`, no token). Required unblock conditions:
