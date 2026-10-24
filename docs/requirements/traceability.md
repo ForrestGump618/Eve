@@ -41,9 +41,9 @@
 | R021 | Stable chat: throttled streaming, virtualization/incremental rendering, persistent scroll, error recovery, no input j… | desktop/ui/app.js; desktop/src/daemon.ts stream path | streaming render code in new app.js; daemon snapshot/stream unchanged；npm test: 150 tests / 148 pass / 0 fail / 2 skipped, 28.3 s, exit 0 (tsc build then node --test dist/test/*.test.js); 2 skips = Windows s… | **IMPLEMENTED_PASS** | long-history behavior measured only up to compaction fixtures; no hours-long soak |
 | R022 | Unified Agent entry Chat/Act/Research/Debate/Autonomous with auto routing + manual override; stop/pause/resume/retry | desktop/ui/index.html (mode radios); desktop/src/domain/research.ts | auto/chat/research/debate/autonomy mode radios; research task templates；none in TARGET | **UNVERIFIED** | auto routing/override/stop/pause/resume not executed |
 | R023 | Tool calls collapsible, logs expandable, high-risk actions approved step-by-step | desktop/ui/index.html; desktop/src/harness/store.ts approval step | collapsible log markup; durable approval step kind；npm test: 150 tests / 148 pass / 0 fail / 2 skipped, 28.3 s, exit 0 (tsc build then node --test dist/test/*.test.js); 2 skips = Windows symlink EPERM in res… | **IMPLEMENTED_PASS** | approval UI proven for implemented tools; remote/high-risk tool set limited |
-| R024 | Chinese/English bilingual with all new copy covered; new brand only SuWen/素问 | desktop/ui/index.html (data-i18n); desktop/ui/app.js | bilingual markup + new SuWen/素问 copy；node scripts/ui-dom-qa.mjs: 19 passed / 0 failed / 10 warnings; node --check desktop/ui/app.js exit 0; ui/actions.json 142 actions; contract RPC_METHODS 79; zh/en labels … | **IMPLEMENTED_PASS** | new-copy coverage checked for implemented screens; future copy must keep parity |
+| R024 | Chinese/English bilingual with all new copy covered; new brand only SuWen/素问 | desktop/ui/index.html (data-i18n); desktop/ui/app.js | bilingual markup + new SuWen/素问 copy；node scripts/ui-dom-qa.mjs: 19 passed / 0 failed / 10 warnings; node --check desktop/ui/app.js exit 0; ui/actions.json 144 actions; contract RPC_METHODS 79; zh/en labels … | **IMPLEMENTED_PASS** | new-copy coverage checked for implemented screens; future copy must keep parity |
 | R025 | Task execution panel: DAG/events/checkpoints/cost/tokens/recovery/approval/diagnostics | desktop/ui/index.html task panel; desktop/src/rpc/core.ts | task/DAG detail markup; core task APIs in rpc/core.ts；node scripts/e2e-rpc.mjs --dist dist --live: 42 passed / 0 failed / ~7 s against real detached daemon over authenticated named pipe (snapshot/task/checkp… | **IMPLEMENTED_PASS** | cost/token panels show recorded usage; exact prepaid money accounting not implemented |
-| R026 | Right evidence/file/artifact/task-progress panel, closable, not covering the composer | desktop/ui/index.html evidence panel; desktop/src/rpc/core.ts evidence.list | right evidence/artifact/task-progress panel markup；node scripts/ui-dom-qa.mjs: 19 passed / 0 failed / 10 warnings; node --check desktop/ui/app.js exit 0; ui/actions.json 142 actions; contract RPC_METHODS 79 | **IMPLEMENTED_PASS** | artifact preview types limited (text/normalized); binary/plot viewers not complete |
+| R026 | Right evidence/file/artifact/task-progress panel, closable, not covering the composer | desktop/ui/index.html evidence panel; desktop/src/rpc/core.ts evidence.list | right evidence/artifact/task-progress panel markup；node scripts/ui-dom-qa.mjs: 19 passed / 0 failed / 10 warnings; node --check desktop/ui/app.js exit 0; ui/actions.json 144 actions; contract RPC_METHODS 79 | **IMPLEMENTED_PASS** | artifact preview types limited (text/normalized); binary/plot viewers not complete |
 | R030 | Electron security: contextIsolation, sandbox, nodeIntegration=false, CSP, IPC schema+sender validation, path whitelis… | desktop/src/main.ts (BrowserWindow options, CSP via meta, sender check, permission handler); desktop/src/security.ts; desktop/src/preload.cts; desktop/test/security.te… | prototype: renderer cannot require Node, unauthorized named-pipe mutation rejected, contextBridge only；npm test: 150 tests / 148 pass / 0 fail / 2 skipped, 28.3 s, exit 0 (tsc build then node --test dist/tes… | **IMPLEMENTED_PASS** | No OS-level penetration test; path confinement is app-level. New UI must keep CSP connect-src 'none'. |
 | R031 | Independent Harness Daemon (not renderer-bound) + current-user-authenticated localhost named-pipe IPC | desktop/src/daemon.ts (detached spawn via ELECTRON_RUN_AS_NODE, pipe token); desktop/src/main.ts; daemon-integration/durable tests | prototype E2E: detached daemon + named pipe ready; closing UI does not kill daemon；npm test: 150 tests / 148 pass / 0 fail / 2 skipped, 28.3 s, exit 0 (tsc build then node --test dist/test/*.test.js); 2 skip… | **IMPLEMENTED_PASS** | Re-verify packaged build in TARGET; no Windows service/reboot durability claims. |
 | R032 | Windows user-level background/login recovery; OS service only optional with explicit authorization; UI shows true mode | desktop/src/main.ts (login IPC, --background arg); UI shows mode user-background; daemon health mode user-background/serviceInstalled false | code paths exist; no OS login-item registration/removal test, no real reboot/logout recovery run；none | **UNVERIFIED** | Implement + test launch-at-login toggle, recovery after logon; surface mode honestly. |
@@ -116,7 +116,7 @@
 
 ## 5. 追溯性缺口（必须由 Lead 补齐/决策）
 
-1. **干净 Windows VM** install → start → upgrade → uninstall（R119/R121）。主机生命周期 14/14 与升级 8/8 已过，但不是干净机。
+1. **干净 Windows VM** install → start → upgrade → uninstall（R119/R121）。最终 3.2.0 主机生命周期 12/12 通过（升级源 3.0.0-preview.1 已安装），但不是干净机。
 2. `SHA256SUMS` 已生成并发布（`desktop/release/SHA256SUMS` 与 `docs/release/SHA256SUMS.txt` 各 3 行）；Windows CI（`.github/workflows/suwen-windows.yml`）仍未实际运行一次。
 3. 代码签名证书（BLOCKED_EXTERNAL）；SmartScreen 风险已如实披露。
 4. 8/24/72h、重启、睡眠/断电、磁盘满长跑（R050）——当前仅短窗混沌 12/12。
@@ -132,26 +132,26 @@
 | 文档 | 字节 | SHA-256 | 用途 |
 |---|---:|---|---|
 | `docs/requirements/master-requirements-source.md` | 10206 | `CE71CADC2ED40F2C0100A126B1CA740186F26ED97944E56881F64C39CDA37F4C` | 71 条 R 需求原文与允许状态（Lead 唯一需求源） |
-| `docs/requirements/master-requirements.csv` | 54106 | `C3CE135DF894D48FFCF757DA1CB7BF91417C5EF353B79EA55E2D1CF031658310` | 机器可读需求表：代码路径/证据/状态/缺口 |
-| `docs/requirements/conflicts.md` | 15994 | `B56F71E40C98EED026D5B56A1F9016A2233B9A4459643FCCF02E6794A69DE28C` | 证据冲突与 Lead 决策项 C-01…C-16 |
+| `docs/requirements/master-requirements.csv` | 85054 | `db74961ef1c11457013e9a3e08ea6e4753905d926094e39c2629860a5f9ccc25` | 机器可读需求表：代码路径/证据/状态/缺口 |
+| `docs/requirements/conflicts.md` | 18545 | `2c7bbc485a062146dd93171afc9b577cb271a1f366d41df8eb72496248751b0e` | 证据冲突与 Lead 决策项 C-01…C-16 |
 | `docs/migration/python-feature-inventory.md` | 20912 | `DADF18C39DBE2A5972E769C5099685ED49EC98153C2A5F7C18A7FB181F6A1C0E` | Python 基线审计（R010） |
-| `docs/migration/feature-parity-matrix.csv` | 22811 | `A94BF3E0941F7F4AFB28E8FB54592857B0284E626834A84C7CB0496143F109E3` | 能力对照矩阵（R011，70 行） |
+| `docs/migration/feature-parity-matrix.csv` | 28034 | `a72aa088eb2a23c4bb39c302167f9843e9d11c386ed7b543076a9e3e9c788819` | 能力对照矩阵（R011，70 行） |
 | `docs/migration/source-inventory.md` | 6597 | `C986FBD5321B546ACE0698B9227C14AEF285F5FEEAF59046B76BFDA4A81DF083` | 复制来源清单（R001-R003） |
 | `docs/migration/copy-verification.md` | 5498 | `0F4D8E6E10CB772155B29F04DECC96DE8C5DD81A8E7AF2CEB1D73C2EE7901B07` | 复制哈希与 git 一致性验证（R001-R003） |
 | `docs/verification/third-party-dependencies.md` | 13425 | `13D007B3052ECD66AD2B60702FFB87C326BE018E262F7ACEC716ED93ADE20104` | 依赖/许可证/SBOM/上游审计（R092/R094/R120） |
-| `docs/verification/integration-and-e2e.md` | 13198 | `316FBDB978667732A5FE794B9EBBF89E5F0DCB4EA633C6637446B7C5A9837DD0` | TARGET 集成/E2E/安装/混沌证据（R110-R120） |
+| `docs/verification/integration-and-e2e.md` | 13198 | `316fbdb978667732a5fe794b9ebbf89e5f0dcb4ea633c6637446b7c5a9837dd0` | TARGET 集成/E2E/安装/混沌证据（R110-R120） |
 | `docs/verification/durability-chaos-tests.md` | 9106 | `4A31B88DE79510FDF2B5DF9464E863BFB0D350FDD7BB433EE5E99DF5337CD579` | 短时故障注入与未执行长跑清单（R050/R116） |
-| `docs/verification/ui-action-coverage.csv` | 44323 | `61CE9EDDFE5B9567342127BA3E02926090D6BA6082CEDDC5736AB83A18774720` | 142 个 UI 动作绑定与 RPC 桥接（R024/R120） |
+| `docs/verification/ui-action-coverage.csv` | 74550 | `dc66a836c2871bca91af6389f327ceeda5f44bacefe3acf31efde4e940c26f38` | 142 个 UI 动作绑定与 RPC 桥接（R024/R120） |
 | `docs/verification/artifacts/installer-lifecycle.json` | 3675 | `58B2D9EA4CC881611B8B051D19F2A82DA0FF7F3D3A42D2F07CB0320D398D953B` | 最终交付安装包主机生命周期 14/14（R100/R102/R119） |
 | `docs/verification/artifacts/upgrade-path.json` | 2210 | `A1534592322D3816B2BAE87E4E966B5DB5CD90536B043DB6A488A18D8B60BF88` | 跨版本升级 3.0.0-preview.1→3.1.0 8/8（R102/R119） |
-| `docs/verification/chaos-results.json` | 2230 | `C59BCD6D7996F4F24D050935384440C5F38D44E5AEAEF1D040576DE7AB79441A` | 短窗混沌 12/12，52.2 s（R050/R116） |
-| `docs/release/windows-installer-verification.md` | 8808 | `09D6DA4035537152A465108253BCD1C84837CE14D9B8D050B9C0185F83BCB8BD` | 安装包/哈希/生命周期/未验证项（R100-R103/R119/R120） |
+| `docs/verification/chaos-results.json` | 2230 | `5c2fa8060866d82fec493a7ee5c085a5e6a170d92ac4fa287099a8f28e4cc501` | 短窗混沌 12/12，52.2 s（R050/R116） |
+| `docs/release/windows-installer-verification.md` | 8322 | `fc9fa85f77cd8fe23ffc35349563c8687f4c87c6bae154e2f01ca4d010e07685` | 安装包/哈希/生命周期/未验证项（R100-R103/R119/R120） |
 | `docs/research/branding-exceptions.md` | 6366 | `BA9D3D82F4CC32C8E5D4C5821713098305E4DC236A29C967C272397D41589B6B` | 品牌残留分类与 LEGACY-BRAND-COMPAT（R090/R091） |
 | `docs/research/branding-scan.csv` | 154904 | `949DE60EA4F2816E7F63E368F87BE54282600C4301625CE0BD501232F503967C` | 品牌扫描机器记录（R091） |
-| `desktop/acceptance-matrix.md` | 4271 | `011B8DD0CB0EC3AB4685F4D7E49BAE2FBEA4F85FEFDBA251CBB8122C6C9AF8FE` | 验收矩阵 3.1.0 状态 |
-| `desktop/README.md` | 5416 | `2890AD65B2F2F7455AC9D03C189E59CA9D4F62DE3F35A17AD9CA789086E99940` | 桌面 3.1.0 使用/验证/未完成项说明 |
-| `docs/progress.md` | 13018 | `59BF3888E35E225D455936176AF46559392FCF00796C6F42F68791CE44D5ABE3` | Lead 维护的总进度（Lead-owned） |
-| `docs/release/SHA256SUMS.txt` | 320 | `EC8BA0115AF33325A98B3C6481FBC92ADBC9102543C83666A7119CBB3208E6D9` | 最终安装包 SHA-256/字节数清单（R100/R119/R121） |
+| `desktop/acceptance-matrix.md` | 6695 | `e7925fc7f9586c8342bee665551b56320eea08209901637f5ea2ac2beed0b98d` | 验收矩阵 3.1.0 状态 |
+| `desktop/README.md` | 6496 | `c9b7be4d10e3ae9c282439e4784640fc9217925f461a6513b862074c1971de6a` | 桌面 3.1.0 使用/验证/未完成项说明 |
+| `docs/progress.md` | 26089 | `7737e19e4452d4c7084d53cc189b9c816f71eabda4085f266638875c7460fd17` | Lead 维护的总进度（Lead-owned） |
+| `docs/release/SHA256SUMS.txt` | 290 | `b3745ff25726714867e179f7c514dd81f5f6e7446bbad2ee59c9722fbda631bd` | 最终安装包 SHA-256/字节数清单（R100/R119/R121） |
 
 ## 7. 2026-10-25 TARGET 3.1.0 证据修订（替代原型证据）
 
@@ -160,7 +160,7 @@ Lead 在 TARGET 实测并记录（见 `docs/verification/integration-and-e2e.md`
 1. `npx tsc --noEmit` exit 0；`npm run build` exit 0；`npm test` 150 tests / 148 pass / 0 fail / 2 skip / 28.3 s / exit 0。
 2. `node scripts/e2e-rpc.mjs --dist dist --live` → 42/0，真实 detached daemon + named pipe；真实 PubMed/Europe PMC（PMID 42878939）与 UniProt（Q9Y2B4，release 2026_03）调用，响应存为 sha256 artifact。
 3. 打包 smoke（final build）8/8、106 s；legacy Python workbench 本机不可用（缺 fastapi，不计通过）；liveMcp 由 RPC E2E 覆盖。
-4. UI QA：`ui-dom-qa.mjs` 19/0/10 warnings；`node --check desktop/ui/app.js` exit 0；`ui/actions.json` 142 actions 全部绑定（94 daemon-RPC / 5 main-bridge / 43 UI-only）。
+4. UI QA：`ui-dom-qa.mjs` 19/0/12 warnings；`node --check desktop/ui/app.js` exit 0；`ui/actions.json` 144 actions 全部绑定（94 daemon-RPC / 5 main-bridge / 43 UI-only）。
 5. 最终安装包：`SuWen-Setup-3.1.0-win-x64.exe` 129,425,145 B SHA256 `E1A1062C…`（17:41:52Z，UNSIGNED）；blockmap 135,934 B SHA256 `72DD2D54…`；unpacked exe 249,801,728 B SHA256 `CFE87F2D…`；`desktop/release/SHA256SUMS` 与 `docs/release/SHA256SUMS.txt` 已生成（3 行：exe/blockmap/unpacked）。
 6. 最终安装包主机生命周期 14/14（`installer-lifecycle.json`，17:45:22Z）与跨版本升级 8/8（`upgrade-path.json`，17:46:42Z，仅 3.0.0-preview.1→3.1.0）。
 7. 短窗混沌 12/12、52.2 s（`chaos-results.json`，17:34:35Z）：worker/daemon SIGKILL 恢复、同 operationId、不重放已提交步骤、取消 0 artifacts、429→500→200 + 2 次人工审批；限制为单 Windows 会话、短时、fixture 注入。
@@ -170,3 +170,72 @@ Lead 在 TARGET 实测并记录（见 `docs/verification/integration-and-e2e.md`
 
 **替代关系**：此前的原型证据（48 tests、10 项 E2E、67 行 parity、137 controls、82779B90 预最终安装包）
 仅作历史记录，不得再作为交付结论；最终构建为 `E1A1062C…`。
+
+## 8. Round-3 main-process bridge and streaming protocol (Lead clarification, 2026-10-25)
+
+Lead-supplied protocol facts incorporated after the first coherent pass (statuses in §3 unchanged):
+
+1. **`events.stream` is main-process-only** (`desktop/src/main.ts` `MAIN_ONLY` set; renderer cannot call it).
+2. **Renderer gap replay** goes through the main bridge:
+   `window.suwen.call('events.replay', {since, limit})` — same response shape as `events.stream`.
+3. **Daemon auto-reconnect**: the main process reconnects the daemon on crash with bounded backoff
+   **300 ms…12 s**, re-pushes the encrypted model config + safeStorage credential refs, and emits
+   `window.suwen.onConnection({state:'reconnecting'|'restored'|'lost'})`.
+4. Protocol contract: `docs/architecture/streaming-events.md` (main-process-only rule at :10,
+   polling/backoff at :27-31, replay bridge at :36-37 and gap rule at :103-104).
+
+Requirement mapping: **R122** (typed protocol; IPC/RPC + Backend Handler columns now name the
+main bridge), **R123** (ordering/dedupe/reset/gap replay) and **R130**
+("Cancel/timeout/reconnect really verified (streaming, tool, python worker, provider 429/5xx, UI close/reopen, rapid clicks)") — auto-reconnect/`onConnection` evidence is code-level only and remains
+T1/T2 runtime evidence landed (see §9): R122–R126/R129/R132/R136 are IMPLEMENTED_PASS; R127/R128/R131 remain UNVERIFIED (R130 is PASS after the T2 final re-run).
+G3 in `docs/release/release-gates.md` is now **PASS_WITH_LIMITS** (T2 suite + visual audit; post-fix SIGKILL/reconnect re-run still missing -> R130).
+Package version confirmed as **3.2.0**; final installer built 2026-10-24T19:16:10Z — 129,446,526 B SHA256 `7B0DDE7B…2199546`, `SHA256SUMS` present.
+
+
+## 9. Final round-3 update (SuWen desktop 3.2.0)
+
+This section supersedes the per-requirement status fields in §3 for the rows listed below.
+The CSV is authoritative: **98 requirement rows — 81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL**.
+
+Round-3 rows changed to IMPLEMENTED_PASS: R122 R123 R124 R125 R126 R129 R132 R133 R134 R135 R139 R140
+R141 R145 R148; R136 updated to IMPLEMENTED_PASS after T2's visual audit; R119 updated to the final 3.2.0 artifact evidence (host lifecycle 12/12 + upgrade-source
+pass, clean VM still NOT run -> UNVERIFIED); R121 updated to the final delivered installer
+`SuWen-Setup-3.2.0-win-x64.exe` 129,446,526 B SHA256 `7B0DDE7B…` and SHA256SUMS
+(`desktop/release/SHA256SUMS`, `docs/release/SHA256SUMS.txt`); R100/R102/R116/R050 evidence refreshed
+with the final build, chaos and lifecycle artifacts.
+
+Still non-PASS: R101 R113 R144 (NOT_STARTED); R138 (BLOCKED_EXTERNAL - GitHub publication, gh/token
+absent); R050 R102 R116 R119 R127 R128 R130 R131 R137 (UNVERIFIED - endurance, reboot, legacy
+workbench, clean VM, markdown-during-stream, reasoning separation, post-fix reconnect re-run, renderer
+boundary; R136 visual acceptance is IMPLEMENTED_PASS per ui-visual-audit.md with the P2 chat-error finding D-020).
+
+## 10. Final document hash snapshot (2026-10-25, updated after the T2 final correction)
+
+| Path | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `docs/requirements/master-requirements.csv` | 85367 | `bd7cb5cbff4e6d4865f8241ad9ae209e187e45761b5d473069a7734671b654fb` |
+| `docs/requirements/traceability.md` | 56354 | `6f618c18ef6080a7d4753a1266aff7961bb0de0ce1df685d07df08e7389464b5` |
+| `docs/requirements/conflicts.md` | 19623 | `81dd9e0a8ce37095c75560e565c381315dbb7f3d1748e324f2ed3c3bab228d33` |
+| `docs/migration/feature-parity-matrix.csv` | 28053 | `19c9fea01fd053409291f4fa034e75ee88ffbb8ebe8c1d2a08608d4f8cd8032a` |
+| `docs/migration/feature-parity-matrix.md` | 15575 | `ebbea6c4ff458454b77693eed6ac0288257510b9bdf1009a5f23ba3926560b1c` |
+| `docs/verification/ui-action-coverage.csv` | 80127 | `6c3fbe388049cb4a157039d7a14d0220220ef4a3502da605094c2c5f670eee3d` |
+| `docs/verification/integration-and-e2e.md` | 13241 | `5dc8501bd90b68cb6d52c75f35030a6a4b16c15c7745133e4cd227109eb8f998` |
+| `docs/verification/durability-chaos-tests.md` | 9106 | `4a31b88de79510fdf2b5df9464e863bfb0d350fdd7bb433ee5e99df5337cd579` |
+| `docs/verification/third-party-dependencies.md` | 13478 | `1081416fda6bcb392a343ab425e8e42dc82887638d01c18840482580b4816c26` |
+| `docs/verification/security-review.md` | 7217 | `9a6e2e8690eec0ce029b2837310d7984d93cfe023c4e13018b05a89079be6f4e` |
+| `docs/verification/performance-baseline.md` | 4538 | `489d24e136625c9f343907708b9139ab30ee3f7b77778e574df89975aa50546f` |
+| `docs/verification/defect-register.csv` | 6764 | `59722eb125a792fe13e4b960d3968ab9c18f76b3783cb24b9781964c2652ef53` |
+| `docs/verification/ui-streaming-stability.md` | 19315 | `a96d779311b58e770ee455d13824823033db44906aeb3db643548292e0331dce` |
+| `docs/verification/ui-e2e.md` | 17931 | `c0effe5abef8d781bc1e9a01156816fef1aba5bb1917c14ca138b346d8f05685` |
+| `docs/verification/ui-visual-audit.md` | 10392 | `699a469f16650af90b0fd81e46de6971c43a9bf7518802e6c97934fb53dec109` |
+| `docs/verification/e2e-results.md` | 21271 | `c480407b5aafbb16572efe7379da0d23d160e857319f9377a104cb0e66dc11a9` |
+| `docs/release/release-gates.md` | 8590 | `477a2490d1cbaa1ae8116fcabdd5df14003d2b4ebe58795647b65d233a655dd1` |
+| `docs/release/final-acceptance-report.md` | 13582 | `1b729f3a7d48c9b661c4ebe47dcfd5e6ee1289d304c21ec2057081875d472c4d` |
+| `docs/release/CHANGELOG.md` | 7504 | `d70ac4bd1243a20b2856883f0f40c834fc800f955e6e8364de01c4603ab4e47b` |
+| `docs/release/release-notes-v3.2.0.md` | 8425 | `cdc905a0d0ca7e069782d5f70539a563a5faaf3bd5dc5a9500cca23a0b4102a5` |
+| `docs/release/windows-installer-verification.md` | 8312 | `e6e06620afc2b877c1b6a04486bfbccb6de7e740ed6fd07a7cbd75f026e98d02` |
+| `docs/release/github-publication.md` | 6067 | `023e0e42f8c320e681be95ed4b0dd5bd92f1e3f511601038b34a67b3c90c2e8f` |
+| `docs/release/SHA256SUMS.txt` | 290 | `b3745ff25726714867e179f7c514dd81f5f6e7446bbad2ee59c9722fbda631bd` |
+| `docs/progress.md` | 22074 | `3a1138ab84aeb16cbfa81b6a9328a7211cb9051cfe46a717eb4498470b467587` |
+| `desktop/README.md` | 6545 | `0e1286c315d582ad1e75966d8d41262a012c10c03bc19fa5135eba3c1ecf064b` |
+| `desktop/acceptance-matrix.md` | 6742 | `5989be63731b2d761b749f8dabb1dde3420c777de6d94245f990602aec5078da` |

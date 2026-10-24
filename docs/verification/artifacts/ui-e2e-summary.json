@@ -1,0 +1,182 @@
+{
+  "schema": "suwen-ui-e2e-summary/v1",
+  "label": "deterministic local fixture (no real vendor API calls)",
+  "owner": "T2 (ui-e2e)",
+  "generatedAt": "2026-10-25T03:51:00+08:00",
+  "fullReportPath": "desktop/release/smoke/ui-streaming-20261024-185128-baseline.json",
+  "fullReportNote": "push-mode full run on pre-Lead-fix build (ui/app.js 54DB16F7...); filename mode label 'baseline' is a CLI syntax artifact (--mode final vs --mode=final); FALLBACK=false. Lead fixes touched reconnect bookkeeping / transcript append / failure-notice UI only, not the streaming render path.",
+  "postFixVerificationReports": [
+    "desktop/release/smoke/ui-streaming-20261024-191616-final.json",
+    "desktop/release/smoke/ui-streaming-20261024-192024-final.json",
+    "desktop/release/smoke/ui-streaming-20261024-192112-final.json",
+    "desktop/release/smoke/ui-streaming-20261024-192946-final.json"
+  ],
+  "uiBuild": {
+    "uiAppJsSha256": "4D8E4AE2B22B7B4142F0F6B256232B1269600D91E9CD76770DC9012E6681188D",
+    "uiAppJsSha256Note": "rebuilt after Lead's final P2 paint + stale-notice lifecycle-guard fix (both notice branches call renderChatNotice() immediately; guard clears review notice when task leaves waiting_approval); earlier builds: A8D5574B6F206583AA87CAA2E0ACE2CDCC41814102637049DD77136613B43502 (waiting_approval branch, no paint), 6276F496FC9560399311E964EE5BC25242B7DE8BCA307E1BE834FA5EC077546D, full-matrix label-before-fix 54DB16F7345ACA7CF5934065B111A38853488DA0B4442BD1B6FFE570B5595F53",
+    "uiIndexHtmlSha256": "19A09EE7338561CE2B8EDA31AB3123AA3D3004871E6C9351370107170442B411",
+    "distRebuiltAfterLeadFixes": "2026-10-25T03:45+08:00",
+    "distHashesAfterFix": {
+      "mainJs": "EDDF37B2374797654288D5F811369002EEF444416D2D37CF2F8614E6A8CD2C07",
+      "conversationsJs": "42029490F99AF415AA7FA0E21B889DDCABF542203352ED7218CD5BC6BFBD1DCA",
+      "modelJs": "8BEE0AF2274150AE8D1A7600CE664238D956A90AB187FF60862AC01754D289FD"
+    }
+  },
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200",
+    "cpu": "Intel Core i7-14700HX (20C/28T)",
+    "ramGiB": 31.8,
+    "hostNode": "v24.14.0",
+    "playwrightCore": "1.64.1",
+    "electron": "45.0.0",
+    "inAppChrome": "156.0.8078.48",
+    "inAppNode": "24.22.0",
+    "displayScaleFactor": 1.5,
+    "hostDpr": 1.5
+  },
+  "deltaStreams": {
+    "100": [
+      { "run": 1, "sha256Match": true, "renderedLen": 708, "firstTextMs": 150, "renderLagP50Ms": 43, "renderLagP95Ms": 89, "renderLagMaxMs": 268, "completionLagMs": 268, "domUpdates": 30, "wallMs": 3594 },
+      { "run": 2, "sha256Match": true, "renderedLen": 708, "firstTextMs": 164, "renderLagP50Ms": 41, "renderLagP95Ms": 78, "renderLagMaxMs": 270, "completionLagMs": 270, "domUpdates": 29, "wallMs": 3470 }
+    ],
+    "1000": [
+      { "run": 1, "sha256Match": true, "renderedLen": 7008, "firstTextMs": 160, "renderLagP50Ms": 32, "renderLagP95Ms": 54, "renderLagMaxMs": 64, "completionLagMs": null, "domUpdates": 143, "wallMs": 15999, "note": "completion lag not sampled; sha verified" },
+      { "run": 2, "sha256Match": true, "renderedLen": 7008, "firstTextMs": 168, "renderLagP50Ms": 33, "renderLagP95Ms": 61, "renderLagMaxMs": 184, "completionLagMs": 184, "domUpdates": 150, "wallMs": 16083 }
+    ],
+    "10000": [
+      { "run": 1, "sha256Match": true, "renderedLen": 70010, "firstTextMs": 169, "renderLagP50Ms": 32, "renderLagP95Ms": 56, "renderLagMaxMs": 250, "completionLagMs": 250, "domUpdates": 1417, "wallMs": 152385, "paintAvgMs": 5.0 },
+      { "run": 2, "sha256Match": true, "renderedLen": 70010, "firstTextMs": 167, "renderLagP50Ms": 32, "renderLagP95Ms": 57, "renderLagMaxMs": 97, "completionLagMs": 33, "domUpdates": 1415, "wallMs": 152018, "paintAvgMs": 4.94 }
+    ],
+    "throughput": "push batches ~9.1-9.3/s end-to-end (~50 deltas/s for 10k; fixture emits up to 500/s); renderer paints ~9.3/s, paintAvg 4.9-5.0ms @10k; debug attribution 'renderer keeping up with arrival cadence' => upstream/pump cadence limited on this host, not a UI defect"
+  },
+  "composer": { "maxBboxDeltaPx": 0, "draftPreserved": true, "draftText": "E2E 草稿仍在输入框中（不要发送）", "providerRequestPromptVerified": true },
+  "scroll": { "followGapMaxPx": 0, "scrollUpDriftMaxPx": 0, "jumpLatestObservations": 0, "pass": true, "note": "build A pre-fix had followGapMax 14556px => fixed in current build" },
+  "concurrent": { "bothFinalTextsExact": true, "crossContamination": false, "duplicates": false, "bothVisibleTogetherSamples": 2313, "pass": true },
+  "longSession": { "messageCount": 120, "openMs": 249, "startsAtTop": true, "bottomGapPx": 11772, "noHorizontalOverflow": true },
+  "layouts": { "requestedSizes": ["1920x1080", "1366x768", "980x680"], "locales": ["zh", "en"], "combinations": 6, "findings": 0, "note": "1920x1080 request clamped to actual 1693x956 DIP on this 150% host" },
+  "darkTheme": { "implemented": true, "control": "#defaults-theme", "values": ["system", "light", "dark"], "htmlAttrs": ["data-theme", "data-theme-mode"] },
+  "persistenceDuplicate": {
+    "status": "FIXED & RE-VERIFIED by measurement after Lead task-scoped single-writer merge (conversations.ts merges assistant turns by taskId+role in addition to by-id idempotency)",
+    "fixedReport": "desktop/release/smoke/ui-streaming-20261024-192946-final.json",
+    "singleTaskAssistantMessages": 1,
+    "conversation": { "id": "7a0bfefb-da46-4bc2-b0fb-cd2583b6e36b", "messageCount": 2, "assistantCount": 1, "assistantMessagesWithTaskId": 1, "assistantMessageId": "a-da3cc7ac08c4a178043d70bfe500671472ca151b21a4220c6e4fe15b8a20837d", "taskId": "c37b23dd-2f42-48d6-ae62-0a6c87a79f7e", "textLen": 430 },
+    "historyFailingEvidence": {
+      "report": "desktop/release/smoke/ui-streaming-20261024-192024-final.json",
+      "assistantCount": 2,
+      "taskAssistants": 2,
+      "messageIds": [
+        "a-5ba5db9e49a9f3e7133ac74bcd9adea7085e9478062786e020c2aecb0b38fc4c (daemon src/activities/model.ts, deterministic operationId id)",
+        "5552b766-a631-406f-a18c-7e064c7f09cf (renderer ui/app.js maybeAppendAssistant, uid())"
+      ],
+      "rootCause": "two writers with different ids; by-id idempotency could not dedupe"
+    }
+  },
+  "killReconnect": {
+    "status": "FIXED & VERIFIED 4/4 runs after Lead Fix 1 (main.ts pump clears stale connection + scheduleReconnect backoff 300ms-12s)",
+    "runs": [
+      { "report": "ui-streaming-20261024-191616-final.json", "offlineShown": "health text", "offlineAfterMs": 520, "autoRestored": true, "autoRestoreLatencyMs": null, "connectionEvents": ["reconnecting", "restored"], "manualReconnectMs": 57, "pageReloads": 0, "textRecoveredOnce": false, "note": "duplicate copies from the then-open persistence P1" },
+      { "report": "ui-streaming-20261024-192024-final.json", "offlineShown": "#stream-banner reconnecting", "offlineAfterMs": 259, "autoRestored": true, "autoRestoreLatencyMs": 779, "connectionEvents": ["reconnecting", "restored"], "manualReconnectMs": 49, "pageReloads": 0, "textRecoveredOnce": false },
+      { "report": "ui-streaming-20261024-192112-final.json", "offlineShown": "#stream-banner reconnecting", "offlineAfterMs": 72, "autoRestored": true, "autoRestoreLatencyMs": 702, "connectionEvents": ["reconnecting", "restored"], "manualReconnectMs": 56, "pageReloads": 0, "textRecoveredOnce": false },
+      { "report": "ui-streaming-20261024-192946-final.json", "offlineShown": "#stream-banner reconnecting", "offlineAfterMs": 257, "autoRestored": true, "autoRestoreLatencyMs": 927, "connectionEvents": ["reconnecting", "restored"], "manualReconnectMs": 55, "pageReloads": 0, "textRecoveredOnce": true, "domCopies": 1, "persistedTaskAssistants": 1, "duplicateFinalCopiesAfterSettle": 1, "recoveredTextSha256": "325e4dd5096fd958f1a803a8c7685f1be3922ecda50c2ec6769147ca7fc3855e", "recoveredTextLen": 2107, "recoveryWallMs": 19748 }
+    ],
+    "interruptedTaskStatus": "waiting_approval",
+    "interruptedTaskError": "External result unknown: Lease expired; worker lost",
+    "reconciliation": "approval retry (same RPC as evidence UI Retry) ok, recovered exact text exactly once in the final run"
+  },
+  "p2NoticeFixVerification": {
+    "status": "FIXED & VERIFIED — Lead added immediate renderChatNotice() paint in both notice branches plus a stale-review-notice lifecycle guard; #chat-notice is now visible with the deterministic provider-HTTP-500 fixture and clears after a successful retry",
+    "fixedReports": [
+      "desktop/release/smoke/ui-visual-audit-20261024-194627.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194718.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194944.json"
+    ],
+    "preFixReports": [
+      "desktop/release/smoke/ui-visual-audit-20261024-194040.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194220.json"
+    ],
+    "screenshot": "docs/verification/screenshots/round3/chat-error_light_zh_1366x768_dsf1x.png",
+    "screenshotEn": "docs/verification/screenshots/round3/chat-error_light_en_1366x768_dsf1x.png",
+    "fixture": "deterministic local provider HTTP 500 (OpenAI-SSE fixture error plan)",
+    "verifiedDom": {
+      "chatNoticeHidden": false,
+      "chatNoticeTextLengthZh": 106,
+      "chatNoticeTextLengthEn": 159,
+      "chatNoticeTextPrefixZh": "需要人工核查：External result unknown: 模型 API HTTP 500;",
+      "chatNoticeTextPrefixEn": "Needs human review: External result unknown: 模型 API HTTP 500",
+      "errorBannerHidden": true,
+      "selectedTaskStatus": "waiting_approval",
+      "failedTask": null,
+      "lifecycleGuard": { "approvalRetryWithSuccessPlan": true, "statusAfter": "completed", "noticeCleared": true, "chatNoticeHiddenAfter": true }
+    },
+    "preFixDom": {
+      "chatNoticeHidden": true,
+      "chatNoticeTextLength": 0,
+      "selectedTaskStatus": "waiting_approval",
+      "failedTask": null,
+      "stateThatWasSet": {
+        "S.chatNotice": "需要人工核查：External result unknown: 模型 API HTTP 500; provider=openai。请求可能已计费，请检查服务端记录后重试。 请在下方展开任务详情，核对后重试或拒绝。",
+        "S.reviewNoticeTask": "b7b570d5-a28e-4503-a2cd-9ea4d9f8b91f",
+        "waitingStep": { "id": "reply", "kind": "model", "status": "waiting_approval", "error": "External result unknown: 模型 API HTTP 500; provider=openai。请求可能已计费，请检查服务端记录后重试。" }
+      }
+    },
+    "preFixRootCause": "poll() -> renderAll() never called renderChatNotice(); renderChat() only rebuilds #timeline.",
+    "ownerFix": "ui/app.js syncChatFailureNotice(): renderChatNotice() after setting S.chatNotice in both branches; guard clears stale review notice when the same task leaves waiting_approval"
+  },
+  "findings": [
+    { "severity": "P1", "area": "conversation-persistence", "detail": "one model task persisted two identical assistant messages (daemon a-<operationId> + renderer uid()); Lead task-scoped single-writer merge fixes it", "status": "FIXED & re-verified (1 assistant row; report ui-streaming-20261024-192946-final.json)", "evidence": "desktop/release/smoke/ui-streaming-20261024-192946-final.json scenarios.persistence" },
+    { "severity": "P1", "area": "kill-recovery", "detail": "recovered text duplicated (DOM+persistence) due to double append", "status": "FIXED & re-verified (domCopies=1, persistedTaskAssistants=1, duplicateFinalCopiesAfterSettle=1)", "evidence": "desktop/release/smoke/ui-streaming-20261024-192946-final.json scenarios.kill" },
+    { "severity": "P1", "area": "reconnect", "detail": "no auto-reconnect after daemon SIGKILL within 35s", "status": "FIXED & verified 4/4 (final run: banner reconnecting after 257ms, restored 927ms; onConnection reconnecting->restored; 0 reloads)", "evidence": "desktop/release/smoke/ui-streaming-20261024-192946-final.json scenarios.kill" },
+    { "severity": "P2", "area": "kill-recovery", "detail": "side-effect model step interrupts to waiting_approval requiring explicit reconciliation", "status": "by design" },
+    { "severity": "P2", "area": "long-conversation", "detail": "120-message conversation opens at top (11,772px from bottom), no auto scroll-to-latest", "status": "product note" },
+    { "severity": "P2", "area": "error-state", "detail": "provider HTTP 500 chat turn ends waiting_approval (store.ts:321 side-effect reconciliation), not failed. Lead added a waiting_approval branch to syncChatFailureNotice(), then an immediate renderChatNotice() paint + stale-notice lifecycle guard", "status": "FIXED & verified (zh textLen 106, en textLen 159, hidden=false, selectedTask.status=waiting_approval; retry with success plan -> completed and notice cleared)", "evidence": "desktop/release/smoke/ui-visual-audit-20261024-194627.json, …-194718.json, …-194944.json; pre-fix instrumented proof …-194220.json; screenshot docs/verification/screenshots/round3/chat-error_light_zh_1366x768_dsf1x.png" },
+    { "severity": "FIXED", "area": "provider-prompt", "detail": "P0 prompt-delivery defect (system-only request) fixed; composer scenario provider request = system + exact typed user text; full expected body rendered", "status": "FIXED & re-verified" }
+  ],
+  "visualAudit": {
+    "screenshots": 180,
+    "runs": 3,
+    "targetedRuns": 8,
+    "reports": [
+      "desktop/release/smoke/ui-visual-audit-20261024-190507.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-191042.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-192156.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-193051.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-193313.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-193545.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194040.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194220.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194627.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194718.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194944.json"
+    ],
+    "matrix": "1920x1080@1x, 1366x768@1x/1.25x/1.5x, 980x680@1x; zh/en; light/dark; 9 states (chat-empty, workspace-projects/tasks/tools/settings, chat-loading, chat-error, evidence-panel, chat-workspace)",
+    "layoutFindings": 0,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "visualFindings": [ { "severity": "P2", "area": "error-state", "detail": "selected chat task ends waiting_approval (provider HTTP 500 fixture), not failed; review notice now painted: #chat-notice hidden=false, textLen 106 zh / 159 en, stale notice cleared after successful retry; #error hidden", "status": "FIXED & verified (ui/app.js 4D8E4AE2…)", "evidence": "desktop/release/smoke/ui-visual-audit-20261024-194627.json, …-194718.json, …-194944.json" } ],
+    "screenshotDir": "docs/verification/screenshots/round3/"
+  },
+  "artifacts": {
+    "fullReport": "desktop/release/smoke/ui-streaming-20261024-185128-baseline.json",
+    "postFixReports": [
+      "desktop/release/smoke/ui-streaming-20261024-191616-final.json",
+      "desktop/release/smoke/ui-streaming-20261024-192024-final.json",
+      "desktop/release/smoke/ui-streaming-20261024-192112-final.json",
+      "desktop/release/smoke/ui-streaming-20261024-192946-final.json"
+    ],
+    "probes": [
+      "desktop/release/smoke/ui-streaming-20261024-182349-baseline-probe.json",
+      "desktop/release/smoke/ui-streaming-20261024-183205-baseline-probe.json",
+      "desktop/release/smoke/ui-streaming-20261024-183224-baseline-probe.json"
+    ],
+    "sizesOnly": "desktop/release/smoke/ui-streaming-20261024-183543-final.json",
+    "visualAudit": "docs/verification/screenshots/round3/ + desktop/release/smoke/ui-visual-audit-20261024-19*.json",
+    "errorStateEvidence": [
+      "desktop/release/smoke/ui-visual-audit-20261024-194627.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194718.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194944.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194220.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-194040.json",
+      "desktop/release/smoke/ui-visual-audit-20261024-193545.json"
+    ]
+  }
+}

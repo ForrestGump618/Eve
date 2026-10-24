@@ -1,0 +1,404 @@
+{
+  "tool": "suwen-security-scan",
+  "scannedAt": "2026-10-24T18:10:43.536Z",
+  "root": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext",
+  "trackedFiles": 408,
+  "textFilesScanned": 372,
+  "historyCommitsScanned": 13,
+  "rules": [
+    {
+      "name": "openai-style-key",
+      "declaredSeverity": "high"
+    },
+    {
+      "name": "github-token",
+      "declaredSeverity": "high"
+    },
+    {
+      "name": "aws-access-key",
+      "declaredSeverity": "high"
+    },
+    {
+      "name": "google-api-key",
+      "declaredSeverity": "high"
+    },
+    {
+      "name": "slack-token",
+      "declaredSeverity": "high"
+    },
+    {
+      "name": "private-key-block",
+      "declaredSeverity": "high"
+    },
+    {
+      "name": "bearer-token-literal",
+      "declaredSeverity": "medium"
+    },
+    {
+      "name": "password-assignment",
+      "declaredSeverity": "medium"
+    },
+    {
+      "name": "api-key-assignment",
+      "declaredSeverity": "medium"
+    },
+    {
+      "name": "credential-url",
+      "declaredSeverity": "high"
+    }
+  ],
+  "findings": {
+    "high": [],
+    "low": [
+      {
+        "source": "worktree",
+        "file": "desktop/scripts/chaos-smoke.mjs",
+        "line": 227,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-chaos-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "worktree",
+        "file": "desktop/test/daemon-integration.test.ts",
+        "line": 82,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-integration-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "worktree",
+        "file": "desktop/test/import-service.test.ts",
+        "line": 34,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password: 'legacy-ssh-secret'",
+        "match": "password: 'l…"
+      },
+      {
+        "source": "worktree",
+        "file": "desktop/test/providers.test.ts",
+        "line": 27,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-enterprise-credential'",
+        "match": "apiKey: 'fix…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
+        "file": "desktop/test/providers.test.ts",
+        "line": 34,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
+        "file": "desktop/test/providers.test.ts",
+        "line": 115,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://username:password@",
+        "match": "https://user…"
+      },
+      {
+        "source": "worktree",
+        "file": "tests/test_ssh.py",
+        "line": 471,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password=\"p@ssw0rd\"",
+        "match": "password=\"p@…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
+        "file": "tests/test_ssh.py",
+        "line": 490,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password=\"pw-remember\"",
+        "match": "password=\"pw…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
+        "file": "tests/test_ssh.py",
+        "line": 833,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password=\"ui-only-password\"",
+        "match": "password=\"ui…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "worktree",
+        "file": "tests/test_suwen_platform.py",
+        "line": 421,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password='private-pass'",
+        "match": "password='pr…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "0024e73b",
+        "file": "desktop/scripts/chaos-smoke.mjs",
+        "line": 228,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-chaos-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "git-history",
+        "commit": "0024e73b",
+        "file": "desktop/test/daemon-integration.test.ts",
+        "line": 83,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-integration-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "git-history",
+        "commit": "0024e73b",
+        "file": "desktop/test/import-service.test.ts",
+        "line": 35,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password: 'legacy-ssh-secret'",
+        "match": "password: 'l…"
+      },
+      {
+        "source": "git-history",
+        "commit": "0024e73b",
+        "file": "desktop/test/providers.test.ts",
+        "line": 28,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'fixture-enterprise-credential'",
+        "match": "apiKey: 'fix…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "0024e73b",
+        "file": "desktop/test/providers.test.ts",
+        "line": 35,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "0024e73b",
+        "file": "desktop/test/providers.test.ts",
+        "line": 116,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://username:password@",
+        "match": "https://user…"
+      },
+      {
+        "source": "git-history",
+        "commit": "e920f130",
+        "file": "tests/test_ssh.py",
+        "line": 472,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password=\"p@ssw0rd\"",
+        "match": "password=\"p@…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "e920f130",
+        "file": "tests/test_suwen_platform.py",
+        "line": 325,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password='private-pass'",
+        "match": "password='pr…",
+        "acceptedFixture": true,
+        "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      }
+    ]
+  },
+  "highCount": 0,
+  "lowCount": 18,
+  "acceptedTestFixtures": 10,
+  "acceptedTestFixtureFindings": [
+    {
+      "source": "worktree",
+      "file": "desktop/test/providers.test.ts",
+      "line": 27,
+      "rule": "api-key-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "apiKey: 'fixture-enterprise-credential'",
+      "match": "apiKey: 'fix…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "worktree",
+      "file": "desktop/test/providers.test.ts",
+      "line": 34,
+      "rule": "bearer-token-literal",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "Bearer fixture-enterprise-credential",
+      "match": "Bearer fixtu…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "worktree",
+      "file": "tests/test_ssh.py",
+      "line": 471,
+      "rule": "password-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "password=\"p@ssw0rd\"",
+      "match": "password=\"p@…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "worktree",
+      "file": "tests/test_ssh.py",
+      "line": 490,
+      "rule": "password-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "password=\"pw-remember\"",
+      "match": "password=\"pw…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "worktree",
+      "file": "tests/test_ssh.py",
+      "line": 833,
+      "rule": "password-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "password=\"ui-only-password\"",
+      "match": "password=\"ui…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "worktree",
+      "file": "tests/test_suwen_platform.py",
+      "line": 421,
+      "rule": "password-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "password='private-pass'",
+      "match": "password='pr…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "git-history",
+      "commit": "0024e73b",
+      "file": "desktop/test/providers.test.ts",
+      "line": 28,
+      "rule": "api-key-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "apiKey: 'fixture-enterprise-credential'",
+      "match": "apiKey: 'fix…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "git-history",
+      "commit": "0024e73b",
+      "file": "desktop/test/providers.test.ts",
+      "line": 35,
+      "rule": "bearer-token-literal",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "Bearer fixture-enterprise-credential",
+      "match": "Bearer fixtu…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "git-history",
+      "commit": "e920f130",
+      "file": "tests/test_ssh.py",
+      "line": 472,
+      "rule": "password-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "password=\"p@ssw0rd\"",
+      "match": "password=\"p@…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    },
+    {
+      "source": "git-history",
+      "commit": "e920f130",
+      "file": "tests/test_suwen_platform.py",
+      "line": 325,
+      "rule": "password-assignment",
+      "declaredSeverity": "medium",
+      "severity": "low",
+      "sample": "password='private-pass'",
+      "match": "password='pr…",
+      "acceptedFixture": true,
+      "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+    }
+  ],
+  "forbiddenTrackedFiles": [],
+  "gitignoreCovers": {
+    "env": true,
+    "privateKeys": true
+  },
+  "verdict": "PASS",
+  "limitations": [
+    "Static pattern scan only; no pentest, no dependency CVE resolution beyond npm audit, no code signing check.",
+    "docs/** matches are classified LOW because documentation may quote example patterns.",
+    "Credential-shaped literals in test paths that match known fixture tokens are accepted as non-secrets and listed separately.",
+    "Binary files, node_modules, dist and release artifacts are not scanned."
+  ]
+}

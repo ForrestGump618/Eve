@@ -45,7 +45,8 @@ export function normalizeConversation(data: Json): ConversationView {
     title: typeof value.title === 'string' && value.title.trim() ? value.title.slice(0, 300) : '新会话',
     mode: typeof value.mode === 'string' ? value.mode.slice(0, 32) : 'chat',
     messages,
-    updatedAt: typeof value.updatedAt === 'number' ? value.updatedAt : 0
+    updatedAt: typeof value.updatedAt === 'number' ? value.updatedAt : 0,
+    ...(value.legacy === undefined ? {} : { legacy: value.legacy })
   };
 }
 
@@ -75,6 +76,17 @@ export function appendConversationMessage(store: RecordStore, conversationId: st
     if (!current) throw new ValidationError(`Unknown conversation: ${conversationId}`);
     if (current.kind !== 'conversation') throw new ValidationError(`Record ${conversationId} is not a conversation`);
     const view = normalizeConversation(current.data);
+    // Idempotent by message id: a retried durable step may append the same assistant turn
+    // again (same operationId-derived id); never duplicate the transcript entry in that case.
+    const existingIndex = view.messages.findIndex(entry => entry.id === normalized.id);
+    if (existingIndex >= 0) return { record: current, index: existingIndex };
+    // Single assistant turn per task: the daemon appends the model answer, but the renderer may
+    // also append its own copy under a different client id when it observes completion first.
+    // Merge by (taskId, role) so a recovered/retried task never duplicates the transcript.
+    if (normalized.role === 'assistant' && normalized.taskId) {
+      const taskIndex = view.messages.findIndex(entry => entry.role === 'assistant' && entry.taskId === normalized.taskId);
+      if (taskIndex >= 0) return { record: current, index: taskIndex };
+    }
     const messages = [...view.messages, normalized].slice(-MAX_MESSAGES);
     try {
       const record = store.putRecord('conversation', {

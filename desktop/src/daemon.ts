@@ -26,8 +26,10 @@ import { createToolServices } from './activities/tools.js';
 import { createAllActivities } from './activities/index.js';
 import { createCoreHandlers } from './rpc/core.js';
 import { createCapabilityHandlers } from './rpc/capabilities.js';
-import type { ActivityServices, DatabaseQuery, WorkerClient, WorkerHealth } from './shared/contract.js';
+import { collectStreamEvents } from './stream-events.js';
+import type { ActivityServices, DatabaseQuery, ModelMessage, StreamBuffer, WorkerClient, WorkerHealth } from './shared/contract.js';
 import type { SecretResolver } from './domain/tools.js';
+import type { EvalRunner } from './domain/rsi.js';
 
 const homeArg = process.argv.indexOf('--home');
 if (homeArg < 0 || !process.argv[homeArg + 1]) throw new Error('Explicit --home required');
@@ -75,7 +77,7 @@ const workerScript = workerIndex >= 0 ? resolve(process.argv[workerIndex + 1]) :
 const modelRuntime = new ModelRuntime();
 /** Step kinds whose activity calls the configured model; gated until the user unlocks credentials. */
 const MODEL_KINDS = new Set(['model', 'hypothesis', 'debate', 'research', 'knowledge', 'methods', 'analysis', 'discovery', 'autonomy']);
-const streams = new Map<string, { text: string; updatedAt: number }>();
+const streams = new Map<string, StreamBuffer>();
 
 /**
  * A WorkerClient whose Python interpreter can be repointed from the settings
@@ -101,7 +103,65 @@ const worker = new ManagedWorker(() => pythonPath, workerScript);
 
 const secretMap: Record<string, string> = {};
 const secrets: SecretResolver = (reference: string) => secretMap[reference];
-const toolServices = createToolServices({ store, home, clock: () => Date.now(), worker, secrets });
+
+/** Normalize model answers for deterministic RSI eval-case comparison. */
+function normalizeEvalValue(value: unknown): unknown {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    try { return JSON.parse(trimmed); } catch { return trimmed; }
+  }
+  return value;
+}
+function evalAnswerMatches(answer: unknown, expect: Json): boolean {
+  const normalized = normalizeEvalValue(answer);
+  if (expect === null || typeof expect !== 'object' || Array.isArray(expect)) {
+    return JSON.stringify(normalized) === JSON.stringify(expect);
+  }
+  const spec = expect as Record<string, Json>;
+  const text = typeof normalized === 'string' ? normalized : JSON.stringify(normalized);
+  if (typeof spec.equals === 'string') return text === spec.equals.trim();
+  if (typeof spec.contains === 'string') return text.includes(spec.contains);
+  if (Array.isArray(spec.oneOf)) return spec.oneOf.some(entry => typeof entry === 'string' && text.includes(entry));
+  if (spec.answer !== undefined) {
+    const wanted = normalizeEvalValue(spec.answer);
+    return JSON.stringify(normalized) === JSON.stringify(wanted) || text.includes(String(spec.answer));
+  }
+  return JSON.stringify(normalized) === JSON.stringify(spec);
+}
+/**
+ * Default RSI evaluator for local runs: one bounded model call per eval case,
+ * answered as JSON and compared against the persisted expectation. Failures are
+ * recorded as a failed case, never silently promoted.
+ */
+const rsiRunner: EvalRunner = async (args) => {
+  const started = Date.now();
+  const messages: ModelMessage[] = [
+    { role: 'system', content: 'You are the SuWen RSI evaluator. Answer the evaluation case. Reply with one compact JSON object and no prose.' },
+    { role: 'user', content: JSON.stringify({ kind: args.evalCase.kind, input: args.evalCase.input }) },
+  ];
+  try {
+    const reply = await modelRuntime.call(messages, args.signal ?? new AbortController().signal);
+    let answer: unknown = reply.text;
+    try { answer = JSON.parse(reply.text); } catch { /* keep raw text */ }
+    if (answer && typeof answer === 'object' && !Array.isArray(answer) && 'answer' in (answer as Record<string, unknown>)) {
+      answer = (answer as Record<string, unknown>).answer;
+    }
+    const success = evalAnswerMatches(answer, args.evalCase.expect);
+    return {
+      caseId: args.evalCase.id,
+      success,
+      evidenceScore: success ? 1 : 0,
+      toolFailure: false,
+      cost: Math.max(0, reply.tokens) * 0.000001,
+      latencyMs: Date.now() - started,
+      reproducible: true,
+    };
+  } catch {
+    return { caseId: args.evalCase.id, success: false, evidenceScore: 0, toolFailure: true, latencyMs: Date.now() - started, reproducible: false };
+  }
+};
+
+const toolServices = createToolServices({ store, home, clock: () => Date.now(), worker, secrets }, { runner: rsiRunner });
 
 const databases: DatabaseQuery = {
   query: (kind, query, signal) => queryViaMcp(kind, query, signal) as Promise<Json>,
@@ -190,6 +250,7 @@ handlers['snapshot'] = () => ({
     stream: streams.get(task.id) ?? null,
   })),
 }) as unknown as Json;
+handlers['events.stream'] = params => collectStreamEvents(store, streams, params) as unknown as Json;
 handlers['configure'] = params => {
   const config = modelRuntime.configure(params);
   if (!modelRuntime.configured) throw new ValidationError('模型配置无效');

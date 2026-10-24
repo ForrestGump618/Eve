@@ -14,10 +14,10 @@ Anything not executed is listed as **NOT RUN** and must not be counted as passed
 |---|---|---|---|---|
 | 1 | `npx tsc -p tsconfig.json --noEmit` | typecheck clean | — | 0 |
 | 2 | `npm run build` (`tsc` + `scripts/copy-assets.mjs`) | build clean | — | 0 |
-| 3 | `npm test` (build + `node --test dist/test/*.test.js`) | **tests 150, pass 148, fail 0, skipped 2** | 28.3 s | 0 |
+| 3 | `npm test` (build + `node --test dist/test/*.test.js`) | **tests 150, pass 148, fail 0, skipped 2** | 29.5 s | 0 |
 | 4 | `node scripts/e2e-rpc.mjs --dist dist --live` | **42 passed / 0 failed**, real detached daemon over authenticated named pipe | ~7 s | 0 |
-| 5 | `SUWEN_SMOKE_PACKAGED=1 node scripts/electron-smoke.mjs` | **8/8 checks**, exit 0, final packaged `release/win-unpacked/SuWen.exe` | 106 s | 0 |
-| 6 | `node scripts/ui-dom-qa.mjs` | **19 passed / 0 failed / 10 warnings** | — | 0 |
+| 5 | `SUWEN_SMOKE_PACKAGED=1 node scripts/electron-smoke.mjs` | **8/8 checks**, exit 0, final packaged `release/win-unpacked/SuWen.exe` | 68 s | 0 |
+| 6 | `node scripts/ui-dom-qa.mjs` | **19 passed / 0 failed / 12 warnings** | — | 0 |
 | 7 | `node --check desktop/ui/app.js` | syntax OK | — | 0 |
 | 8 | Python research-worker tests (`node --test` research-worker suite) | **22 tests / 21 pass / 1 skip** | — | 0 |
 | 9 | `node scripts/chaos-smoke.mjs` (short-window real fault injection) | **12/12 scenarios passed** (`result: passed`), incl. injected provider 429/500 retried with human approvals and billing-unknown reconciliation | 52.2 s | 0 |
@@ -30,7 +30,7 @@ Command: `npx tsc -p tsconfig.json --noEmit` → exit 0; `npm run build` → exi
 
 `npm test` runs the compiled test suite from `dist/test/`:
 
-- 150 tests total, 148 passed, 0 failed, **2 skipped**, wall time **28.3 s**, exit 0.
+- 150 tests total, 148 passed, 0 failed, **2 skipped**, wall time **29.5 s**, exit 0.
 - Skip 1: Windows symlink creation `EPERM` in one research-worker test (`fs.symlink` on Windows
   without developer mode).
 - Skip 2: optional legacy Python workbench dependencies are not installed on this machine.
@@ -59,7 +59,7 @@ connects over its authenticated current-user named pipe, and drives **42 checks 
 ## 4. Packaged Electron smoke (real installer-unpacked app)
 
 Command: `$env:SUWEN_SMOKE_PACKAGED=1; node scripts/electron-smoke.mjs` against
-`release/win-unpacked/SuWen.exe` → exit 0, **8/8 checks**, **106 s** on the final build:
+`release/win-unpacked/SuWen.exe` → exit 0, **8/8 checks**, **68 s** on the final build:
 
 1. Electron main process spawns the detached `ELECTRON_RUN_AS_NODE` daemon and the authenticated
    named pipe becomes ready.
@@ -90,7 +90,7 @@ Explicit non-passes recorded by the smoke run:
 
 ## 5. UI QA
 
-- `node scripts/ui-dom-qa.mjs` → **19 passed / 0 failed / 10 warnings**. Warnings are exactly the
+- `node scripts/ui-dom-qa.mjs` → **19 passed / 0 failed / 12 warnings**. Warnings are exactly the
   5 main-process bridge methods (`settings`, `login`, `reconnect`, `pythonPicker`, `support`) that
   are intentionally **not** daemon RPC methods.
 - `node --check desktop/ui/app.js` → exit 0.
@@ -159,8 +159,8 @@ HTTP fixture, not a real vendor account. No endurance claim is made.
 ## 9. NOT RUN / unproven (must remain explicit)
 
 1. 8 / 24 / 72-hour endurance, reboot, sleep/hibernate, power loss, disk-full.
-2. Clean-Windows-VM install/upgrade/uninstall lifecycle: host lifecycle 14/14 + upgrade 8/8 passed
-   on the final artifact, but **no clean-VM run** exists (PENDING_LEAD).
+2. Clean-Windows-VM install/upgrade/uninstall lifecycle: host lifecycle 12/12 passed
+   on the final 3.2.0 artifact (including installing 3.0.0-preview.1 and upgrading), but **no clean-VM run** exists (PENDING_LEAD).
 3. Real external model accounts (OpenAI-compatible/Anthropic protocols proven against local HTTP
    fixtures only; no paid vendor account success claimed).
 4. Code signing / SmartScreen trust (installer unsigned).

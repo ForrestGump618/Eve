@@ -50,7 +50,7 @@ if (rpcBlock) {
 if (!rpcMethods.length) fail('contract', `RPC_METHODS not found in ${path.relative(desktopDir, contractPath)}`);
 else ok('contract', `${rpcMethods.length} RPC methods`);
 const rpcSet = new Set(rpcMethods);
-const BRIDGE_METHODS = ['settings', 'login', 'reconnect', 'pythonPicker', 'support'];
+const BRIDGE_METHODS = ['settings', 'login', 'reconnect', 'pythonPicker', 'support', 'events.replay'];
 
 /* ---------- actions.json ---------- */
 const actionsPath = path.join(uiDir, 'actions.json');

@@ -314,6 +314,8 @@ Object.assign(copy, {
   conversationAppendFailed: ['会话记录写入失败，消息仍保存在任务中。', 'Could not append to the session record; the message is kept in the task.'],
   taskStream: ['实时输出', 'Live output'],
   replyPending: ['等待模型响应…', 'Waiting for the model…'],
+  chatTaskFailed: ['任务失败：{detail}', 'Task failed: {detail}'],
+  chatTaskNeedsReview: ['需要人工核查：{detail} 请在下方展开任务详情，核对后重试或拒绝。', 'Needs human review: {detail} Open the task details below to verify, then retry or reject.'],
   noticeAutoMode: ['已自动选择模式：{mode}', 'Auto-selected mode: {mode}'],
   sendFailed: ['提交失败，可修改后重试。', 'Submit failed; edit and retry.'],
   userInputRequired: ['请输入内容。', 'Enter something first.'],
@@ -660,6 +662,8 @@ const S = {
   conversation: null,
   conversationDerived: false,
   chatNotice: null,
+  failedNoticeTask: null,
+  reviewNoticeTask: null,
   selectedTaskId: null,
   evidenceOpen: false,
   evidenceTab: 'exec',
@@ -689,6 +693,24 @@ const S = {
   polling: false,
   sending: false,
   welcomeNode: null,
+  drafts: new Map(),
+  theme: { mode: 'system', resolved: 'light' },
+  stream: {
+    store: null,
+    subscribed: false,
+    disabled: false,
+    paintRaf: 0,
+    replayBusy: false,
+    replayFailed: false,
+    batches: 0,
+    nodes: new Map(),
+    scrollPinned: true,
+    userIntent: null,
+    programmaticUntil: 0,
+    debug: null,
+    unsubscribeEvent: null,
+    unsubscribeConnection: null,
+  },
 };
 function tasks() {
   const list = S.snapshot && Array.isArray(S.snapshot.tasks) ? S.snapshot.tasks : [];
@@ -1001,6 +1023,7 @@ async function openConversation(id) {
   S.conversationId = id;
   S.conversation = null;
   S.chatNotice = null;
+  restoreDraft();
   const known = S.conversations.find(conversation => conversation.id === id);
   if (known) S.conversation = known.messages.length ? known : null;
   scheduleChatRender();
@@ -1014,6 +1037,7 @@ function newConversation() {
   S.conversation = null;
   S.chatNotice = null;
   S.selectedTaskId = null;
+  restoreDraft();
   renderChatNotice();
   scheduleChatRender();
   renderSessions();
@@ -1027,12 +1051,14 @@ async function ensureConversation(title, mode) {
     const id = conversation?.id ?? dataOf(result?.record ?? result).id;
     if (!id) return null;
     S.conversationId = id;
+    moveDraft('__new__', id);
     S.conversation = conversation || null;
     S.conversations.unshift(conversation || { id, title: String(title).slice(0, 80), projectId: null, mode, messages: [], updatedAt: Date.now(), derived: false });
     renderSessions();
     return id;
   } catch (error) {
     S.conversationId = uid();
+    moveDraft('__new__', S.conversationId);
     S.conversationDerived = true;
     S.chatNotice = t('conversationCreateFailed');
     renderChatNotice();
@@ -1080,10 +1106,55 @@ function pick(zh, en) { return locale === 'en' ? en : zh; }
 function nearBottom(node) {
   return node.scrollHeight - node.scrollTop - node.clientHeight < 120;
 }
+/* Composer draft: kept per conversation in memory, never cleared by an unrelated render.
+   Streaming, theme changes and navigation do not touch the textarea content. */
+function draftKey() { return S.conversationId || '__new__'; }
+function saveDraft(value) { S.drafts.set(draftKey(), String(value || '')); }
+function moveDraft(fromKey, toKey) {
+  if (fromKey === toKey) return;
+  if (!S.drafts.has(fromKey)) return;
+  const value = S.drafts.get(fromKey);
+  S.drafts.delete(fromKey);
+  if (value) S.drafts.set(toKey, value);
+}
+function restoreDraft() {
+  const prompt = $('prompt');
+  if (!prompt) return;
+  const draft = S.drafts.get(draftKey());
+  prompt.value = typeof draft === 'string' ? draft : '';
+}
+function copyText(text) {
+  const value = String(text == null ? '' : text);
+  if (!value) return Promise.resolve(false);
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      return navigator.clipboard.writeText(value).then(() => true).catch(() => false);
+    }
+  } catch { /* clipboard API unavailable */ }
+  try {
+    const helper = el('textarea', { class: 'sr-only', attrs: { readonly: 'readonly' } });
+    helper.value = value;
+    document.body.appendChild(helper);
+    helper.select();
+    const ok = document.execCommand('copy');
+    helper.remove();
+    return Promise.resolve(Boolean(ok));
+  } catch { return Promise.resolve(false); }
+}
+/* Smart scroll affordance: shown only while a run is streaming and the reader has scrolled up. */
+function updateJumpLatest() {
+  const button = $('jump-latest');
+  if (!button) return;
+  const active = chatTaskList().some(task => !FINAL_STATUS.has(statusFor(task)));
+  button.hidden = !(active && !followScroll());
+}
 function chatSignature() {
   const messageSignature = (S.conversation?.messages || []).map(message => `${message.id || ''}:${(message.text || '').length}`).join('.');
+  /* Structural signature only: streamed text changes are patched into stable DOM nodes by
+     applyStreamTextPatches(); text length is deliberately absent so a token burst never
+     rebuilds (and scroll-jumps) the timeline. Status/step changes still rebuild once. */
   const taskSignature = conversationTaskList(S.conversationId)
-    .map(task => `${task.id}:${task.status}:${task.version || ''}:${(task.stream?.text || '').length}:${(task.steps || []).length}`)
+    .map(task => `${task.id}:${statusFor(task)}:${task.version || ''}:${(task.steps || []).length}`)
     .join('|');
   return `${locale}|${S.conversationId}|${S.conversationDerived}|${messageSignature}|${taskSignature}|${(S.chatNotice || '').length}`;
 }
@@ -1099,19 +1170,34 @@ function messageBubble(role, text, options = {}) {
   article.append(el('div', { class: 'label', text: role === 'user' ? t('messageUser') : t('messageAssistant') }));
   let body = text;
   if (!body && options.streaming) body = t('replyPending');
-  article.append(el('div', { class: 'body', text: body || '' }));
+  const bodyNode = el('div', { class: `body${options.markdown ? ' markdown' : ''}` });
+  const markdown = options.markdown && typeof window !== 'undefined' ? window.SuwenMarkdown : null;
+  if (markdown && body) {
+    try {
+      bodyNode.append(markdown.render(document, body, {
+        copyLabel: t('copyCode'),
+        copiedLabel: t('copied'),
+        onCopy: copyText,
+      }));
+    } catch { bodyNode.textContent = body; }
+  } else {
+    bodyNode.textContent = body || '';
+  }
+  article.append(bodyNode);
   if (options.meta) article.append(el('div', { class: 'meta', text: options.meta }));
   if (options.actions && options.actions.length) article.append(el('div', { class: 'message-actions' }, ...options.actions));
+  if (options.task) registerStreamNode(options.task, article);
   return article;
 }
 function taskActionButtons(task, { compact = false } = {}) {
   const buttons = [];
-  if (task.status === 'paused' || task.status === 'failed') {
+  const status = statusFor(task);
+  if (status === 'paused' || status === 'failed') {
     buttons.push(textButton(t('resumeTask') || t('resume'), () => taskControl(task, 'resume')));
-  } else if (task.status === 'queued' || task.status === 'running' || task.status === 'waiting_external' || task.status === 'retry_scheduled') {
+  } else if (status === 'queued' || status === 'running' || status === 'waiting_external' || status === 'retry_scheduled') {
     buttons.push(textButton(t('pause'), () => taskControl(task, 'pause')));
     buttons.push(textButton(t('stop'), () => taskControl(task, 'cancel')));
-  } else if (task.status === 'waiting_approval') {
+  } else if (status === 'waiting_approval') {
     buttons.push(textButton(t('inspect'), () => { S.selectedTaskId = task.id; openEvidence(); }));
   }
   if (!compact) {
@@ -1119,13 +1205,33 @@ function taskActionButtons(task, { compact = false } = {}) {
   }
   return buttons;
 }
+function toolActivity(task) {
+  const steps = Array.isArray(task?.steps) ? task.steps : [];
+  if (!steps.length) return null;
+  const details = el('details', { class: 'tool-activity' });
+  details.append(el('summary', { text: t('toolActivity', { count: steps.length }) }));
+  for (const step of steps.slice(-8)) {
+    /* Display-only projection: step kind/status/id. Model or tool parameters are never copied
+       into the chat transcript (they stay in the evidence panel). */
+    const line = `${statusName(step.status)} · ${step.kind || 'step'} · ${step.id || ''}`.replace(/\s+·\s*$/, '');
+    details.append(el('div', { class: 'tool-row', text: line }));
+  }
+  return details;
+}
 function renderStreamingBubble(task, actions) {
-  const streamText = task.stream && typeof task.stream.text === 'string' ? task.stream.text : '';
-  return messageBubble('assistant', streamText, {
+  const node = messageBubble('assistant', streamTextFor(task), {
     streaming: true,
-    meta: `${statusName(task.status)} · ${t('stepCount', { count: (task.steps || []).length })}`,
+    meta: `${t('taskStream')} · ${statusName(statusFor(task))} · ${t('stepCount', { count: (task.steps || []).length })}`,
     actions,
+    task,
   });
+  const activity = toolActivity(task);
+  if (activity) {
+    const meta = node.querySelector('.meta');
+    if (meta) node.insertBefore(activity, meta);
+    else node.append(activity);
+  }
+  return node;
 }
 function deriveTasksForChat() {
   return conversationTaskList(S.conversationId);
@@ -1134,29 +1240,38 @@ function renderChat() {
   const timeline = $('timeline');
   if (!timeline) return;
   const signature = chatSignature();
-  if (signature === S.chatSignature) return;
+  if (signature === S.chatSignature) { applyStreamTextPatches(); return; }
   S.chatSignature = signature;
-  const wasNearBottom = nearBottom(timeline);
+  S.stream.nodes.clear();
+  /* Rebuilding replaces every node and clamps scrollTop to the top, which would silently
+     disable auto-follow. Capture the intent (and the reading position) before mutating DOM. */
+  const previousFollow = followScroll();
+  const previousTop = timeline.scrollTop;
   const conversationMessages = Array.isArray(S.conversation?.messages) ? S.conversation.messages : [];
   const derivedTasks = deriveTasksForChat();
-  const activeTask = derivedTasks.filter(task => !FINAL_STATUS.has(task.status)).slice(-1)[0] || null;
+  const activeTask = derivedTasks.filter(task => !FINAL_STATUS.has(statusFor(task))).slice(-1)[0] || null;
   const nodes = [];
   if (!conversationMessages.length && !derivedTasks.length) {
     if (S.welcomeNode) nodes.push(S.welcomeNode);
     timeline.replaceChildren(...nodes);
+    updateJumpLatest();
     return;
   }
   if (conversationMessages.length) {
     for (const message of conversationMessages) {
       const role = message.role === 'user' ? 'user' : 'assistant';
       const task = message.taskId ? taskById(message.taskId) : null;
-      const actions = role === 'assistant' && task && !FINAL_STATUS.has(task.status) ? taskActionButtons(task) : null;
-      const taskMeta = task ? statusName(task.status) : '';
+      const status = task ? statusFor(task) : '';
+      const live = Boolean(task && !FINAL_STATUS.has(status) && !taskText(task));
+      const actions = role === 'assistant' && task && !FINAL_STATUS.has(status) ? taskActionButtons(task) : null;
+      const taskMeta = task ? statusName(status) : '';
       const timeMeta = message.at ? fmtClock(message.at) : '';
       nodes.push(messageBubble(role, message.text, {
         meta: [taskMeta, timeMeta].filter(Boolean).join(' · '),
-        streaming: Boolean(task && !FINAL_STATUS.has(task.status) && !taskText(task)),
+        streaming: live,
+        markdown: role === 'assistant' && !live,
         actions,
+        task: role === 'assistant' && !live ? null : task,
       }));
     }
     if (activeTask) {
@@ -1166,19 +1281,24 @@ function renderChat() {
     for (const task of derivedTasks) {
       const prompt = firstPrompt(task);
       nodes.push(messageBubble('user', prompt, { meta: fmtClock(task.createdAt) }));
-      const final = FINAL_STATUS.has(task.status);
-      const text = final ? taskText(task) : (task.stream?.text || '');
-      const meta = `${statusName(task.status)} · ${t('stepCount', { count: (task.steps || []).length })}`;
+      const status = statusFor(task);
+      const final = FINAL_STATUS.has(status);
+      const text = final ? taskText(task) : streamTextFor(task);
+      const meta = `${statusName(status)} · ${t('stepCount', { count: (task.steps || []).length })}`;
       const actions = final ? [textButton(t('inspect'), () => { S.selectedTaskId = task.id; openEvidence(); })] : taskActionButtons(task);
       nodes.push(messageBubble('assistant', text, {
         streaming: !final,
+        markdown: final,
         meta,
         actions,
+        task: final ? null : task,
       }));
     }
   }
   timeline.replaceChildren(...nodes);
-  if (wasNearBottom) timeline.scrollTop = timeline.scrollHeight;
+  if (previousFollow) scrollTimelineToBottom();
+  else restoreTimelineScroll(previousTop);
+  updateJumpLatest();
 }
 function renderChatNotice() {
   const notice = $('chat-notice');
@@ -1189,31 +1309,37 @@ function renderChatNotice() {
 }
 function chatSteps(prompt, mode, messages) {
   const conversationId = S.conversationId;
-  const modelInput = { prompt, messages, conversationId, mode };
-  const modelStep = (id, extra = {}, dependsOn = []) => ({
-    id,
-    kind: 'model',
-    input: { ...modelInput, ...extra },
-    dependsOn,
-    sideEffect: true,
-    maxAttempts: 3,
-    timeoutMs: 180000,
-  });
+  /* model.ts uses input.messages verbatim when it is an array and ignores input.prompt
+     (and skips conversation-history loading), so every model step must carry its actual
+     instruction as the final user turn - otherwise the provider never sees the typed prompt. */
+  const turn = instruction => [...messages, { role: 'user', content: String(instruction) }];
+  const modelStep = (id, extra = {}, dependsOn = []) => {
+    const instruction = typeof extra.prompt === 'string' ? extra.prompt : prompt;
+    return {
+      id,
+      kind: 'model',
+      input: { prompt: instruction, conversationId, mode, ...extra, messages: turn(instruction) },
+      dependsOn,
+      sideEffect: true,
+      maxAttempts: 3,
+      timeoutMs: 180000,
+    };
+  };
   if (mode === 'research') {
     const search = { id: 'literature', kind: 'pubmed', input: { query: prompt.slice(0, 1000), projectId: null }, sideEffect: true, maxAttempts: 2, timeoutMs: 30000 };
-    return [search, modelStep('synthesis', { prompt: t('synthesisPrompt', { question: prompt }), messages }, ['literature'])];
+    return [search, modelStep('synthesis', { prompt: t('synthesisPrompt', { question: prompt }) }, ['literature'])];
   }
   if (mode === 'debate') {
     return [
-      modelStep('proposal', { prompt: t('proposalPrompt', { question: prompt }), messages }),
-      modelStep('critique', { prompt: t('critiquePrompt', { question: prompt }), messages }, ['proposal']),
-      modelStep('revision', { prompt: t('revisionPrompt', { question: prompt }), messages }, ['critique']),
+      modelStep('proposal', { prompt: t('proposalPrompt', { question: prompt }) }),
+      modelStep('critique', { prompt: t('critiquePrompt', { question: prompt }) }, ['proposal']),
+      modelStep('revision', { prompt: t('revisionPrompt', { question: prompt }) }, ['critique']),
     ];
   }
   if (mode === 'autonomy') {
     return [
       { id: 'plan', kind: 'autonomy', input: { op: 'plan', objective: prompt, conversationId }, sideEffect: false, maxAttempts: 2, timeoutMs: 120000 },
-      modelStep('summary', { prompt: t('autonomyPrompt', { question: prompt }), messages }, ['plan']),
+      modelStep('summary', { prompt: t('autonomyPrompt', { question: prompt }) }, ['plan']),
     ];
   }
   return [modelStep('reply', {})];
@@ -1222,14 +1348,18 @@ function buildHistory(conversationId) {
   const completed = conversationTaskList(conversationId)
     .filter(task => task.status === 'completed')
     .sort((left, right) => Number(left.createdAt || 0) - Number(right.createdAt || 0));
-  const messages = [{ role: 'system', text: t('systemPrompt') }];
+  /* The provider payload accepts {role, content}; content is also what model.ts reads first.
+     Keep the system turn pinned and bound each transcript entry the same way the daemon does
+     when it loads a conversation record on its own. */
+  const clip = value => (value.length > 6000 ? `${value.slice(0, 6000)}…[truncated for context; full text in conversation record]` : value);
+  const messages = [{ role: 'system', content: t('systemPrompt') }];
   for (const task of completed) {
     const prompt = firstPrompt(task);
     const reply = taskText(task);
-    if (prompt) messages.push({ role: 'user', text: prompt });
-    if (reply) messages.push({ role: 'assistant', text: reply });
+    if (prompt) messages.push({ role: 'user', content: clip(prompt) });
+    if (reply) messages.push({ role: 'assistant', content: clip(reply) });
   }
-  return messages.slice(-16);
+  return messages.length > 16 ? [messages[0], ...messages.slice(-15)] : messages;
 }
 async function appendConversationMessage(conversationId, messages) {
   if (!conversationId) return false;
@@ -1253,11 +1383,16 @@ async function sendMessage(event) {
   let mode = requestedMode;
   if (mode === 'auto') mode = /检索|文献|引用|证据|literature|pubmed|citation|evidence/i.test(text) ? 'research' : 'chat';
   S.sending = true;
+  S.failedNoticeTask = null;
+  S.reviewNoticeTask = null;
+  S.chatNotice = null;
+  renderChatNotice();
   setButtonBusy(sendButton, true);
   if (sendButton) sendButton.textContent = t('sending');
   try {
     const conversationId = await ensureConversation(text, mode);
     promptInput.value = '';
+    saveDraft('');
     const userMessage = { id: uid(), role: 'user', text, at: Date.now(), mode };
     const appended = await appendConversationMessage(conversationId, [userMessage]);
     if (appended && S.conversation) S.conversation.messages.push(userMessage);
@@ -2917,7 +3052,39 @@ async function poll() {
   }
   if (!S.conversationsLoaded) await loadConversations();
   maybeAppendAssistant();
+  reconcileStreamSnapshot();
+  syncChatFailureNotice();
   renderAll();
+}
+function syncChatFailureNotice() {
+  if (!S.selectedTaskId || !S.conversationId) return;
+  const task = (Array.isArray(S.snapshot?.tasks) ? S.snapshot.tasks : []).find(item => item && item.id === S.selectedTaskId);
+  if (!task) return;
+  const steps = Array.isArray(task.steps) ? task.steps : [];
+  if (S.reviewNoticeTask === task.id && task.status !== 'waiting_approval') {
+    S.reviewNoticeTask = null;
+    if (S.chatNotice && /需要人工核查|Needs human review/.test(S.chatNotice)) {
+      S.chatNotice = null;
+      renderChatNotice();
+    }
+  }
+  if (task.status === 'failed' && S.failedNoticeTask !== task.id) {
+    const failedStep = steps.find(step => step && step.status === 'failed');
+    const raw = failedStep?.error || failedStep?.kind || '';
+    const detail = String(raw).replace(/\s+/g, ' ').slice(0, 240) || '—';
+    S.failedNoticeTask = task.id;
+    S.chatNotice = t('chatTaskFailed', { detail });
+    renderChatNotice();
+    return;
+  }
+  if (task.status === 'waiting_approval' && S.reviewNoticeTask !== task.id) {
+    const reviewStep = steps.find(step => step && step.status === 'waiting_approval' && step.error);
+    if (!reviewStep) return;
+    const detail = String(reviewStep.error).replace(/\s+/g, ' ').slice(0, 240) || '—';
+    S.reviewNoticeTask = task.id;
+    S.chatNotice = t('chatTaskNeedsReview', { detail });
+    renderChatNotice();
+  }
 }
 function maybeAppendAssistant() {
   if (!S.conversation || !Array.isArray(S.conversation.messages)) return;
@@ -2939,7 +3106,10 @@ function maybeAppendAssistant() {
 }
 function startPolling() {
   if (S.pollTimer) return;
-  S.pollTimer = setInterval(() => { void poll(); }, 800);
+  /* Push events are the primary transport (window.suwen.onEvent). Snapshot polling is the
+     slow reconciliation fallback only; it must stay slow (>= 2000 ms) so it can never race
+     or duplicate the push stream. */
+  S.pollTimer = setInterval(() => { void poll(); }, 2500);
   void poll();
 }
 /* ---------- settings: model configuration, defaults, doctor, worker, dirs, bridges ---------- */
@@ -3004,6 +3174,7 @@ function fillDefaultsForm() {
   setValue('default-compactionWarn', defaults.compactionWarn ?? '');
   setValue('default-compactionForce', defaults.compactionForce ?? '');
   setValue('default-concurrency', defaults.concurrency ?? '');
+  setValue('defaults-theme', THEME_MODES.includes(defaults.theme) ? defaults.theme : S.theme.mode);
 }
 function renderSettingsPage() {
   const saved = $('saved');
@@ -3134,6 +3305,7 @@ async function saveSettingsForm(event) {
 }
 async function saveDefaultsForm(event) {
   if (event) event.preventDefault();
+  const themeValue = $('defaults-theme')?.value;
   const params = {
     maxTokens: numberOrUndefined($('default-maxTokens')?.value),
     budgetCalls: numberOrUndefined($('default-budgetCalls')?.value),
@@ -3141,6 +3313,7 @@ async function saveDefaultsForm(event) {
     compactionWarn: numberOrUndefined($('default-compactionWarn')?.value),
     compactionForce: numberOrUndefined($('default-compactionForce')?.value),
     concurrency: numberOrUndefined($('default-concurrency')?.value),
+    ...(THEME_MODES.includes(themeValue) ? { theme: themeValue } : {}),
   };
   const warn = params.compactionWarn ?? 0.7;
   const force = params.compactionForce ?? 0.82;
@@ -3153,6 +3326,7 @@ async function saveDefaultsForm(event) {
   await run(submit, async () => {
     await call('defaults.set', params);
     S.defaults = { ...(S.defaults || {}), ...params, updatedAt: Date.now() };
+    if (params.theme) { S.theme.mode = params.theme; S.theme.resolved = resolveTheme(params.theme); applyTheme(params.theme); }
     const saved = $('defaults-saved');
     if (saved) saved.textContent = t('defaultsSaved');
     toast('defaultsSaved');
@@ -3201,6 +3375,383 @@ async function shutdownBackground(button) {
     renderAll();
   });
 }
+/* ---------- theme: system / light / dark ---------- */
+/* The palette lives in style.css custom properties; JS only resolves the user preference to a
+   concrete data-theme value. Theme changes never rebuild the DOM (no layout shift) and the
+   stored value is mirrored to localStorage so the next launch can apply it synchronously. */
+const THEME_MODES = ['system', 'light', 'dark'];
+function storedThemeMode() {
+  try {
+    const saved = localStorage.getItem('suwen.theme');
+    if (THEME_MODES.includes(saved)) return saved;
+  } catch { /* storage may be unavailable in hardened renderer contexts */ }
+  return 'system';
+}
+function resolveTheme(mode) {
+  if (mode === 'dark') return 'dark';
+  if (mode === 'light') return 'light';
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+  } catch { /* matchMedia is optional */ }
+  return 'light';
+}
+function applyTheme(mode) {
+  const target = THEME_MODES.includes(mode) ? mode : 'system';
+  S.theme.mode = target;
+  S.theme.resolved = resolveTheme(target);
+  const root = document.documentElement;
+  if (root) {
+    root.setAttribute('data-theme', S.theme.resolved);
+    root.setAttribute('data-theme-mode', target);
+  }
+  try { localStorage.setItem('suwen.theme', target); } catch { /* storage optional */ }
+  const select = $('defaults-theme');
+  if (select && select.value !== target) select.value = target;
+}
+function initTheme() {
+  applyTheme(storedThemeMode());
+  if (!window.matchMedia) return;
+  try {
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => { if (S.theme.mode === 'system') applyTheme('system'); };
+    if (typeof query.addEventListener === 'function') query.addEventListener('change', onChange);
+    else if (typeof query.addListener === 'function') query.addListener(onChange);
+  } catch { /* matchMedia listener optional */ }
+}
+async function selectTheme(mode) {
+  applyTheme(mode);
+  try {
+    await call('defaults.set', { theme: S.theme.mode });
+    S.defaults = { ...(S.defaults || {}), theme: S.theme.mode };
+    toast('themeSaved');
+  } catch (error) {
+    showError(error);
+  }
+}
+async function loadThemePreference() {
+  try {
+    const defaults = await call('defaults.get', {});
+    if (defaults && typeof defaults === 'object') {
+      S.defaults = { ...(S.defaults || {}), ...defaults };
+      if (THEME_MODES.includes(defaults.theme)) applyTheme(defaults.theme);
+    }
+  } catch { /* theming degrades to locale storage; defaults.get is optional here */ }
+}
+
+/* ---------- push streaming (frozen protocol v1) ----------
+   Transport: window.suwen.onEvent(batch) batches from the main process (daemon events.stream is
+   main-only). All ordering, de-duplication, gap detection and stream-buffer rule enforcement
+   lives in the pure/DOM-free ui/stream-core.js; this file only paints its result.
+   Gaps are repaired with window.suwen.call('events.replay', { since, limit }) - never with a
+   renderer-side events.stream call, which the main process rejects. */
+const STREAM_STATE_KEYS = {
+  preparing: 'streamPreparing',
+  tool_running: 'streamToolRunning',
+  waiting_approval: 'streamWaitingApproval',
+  compacting: 'streamCompacting',
+  paused: 'streamPaused',
+  cancelling: 'streamCancelling',
+  reconnecting: 'streamReconnecting',
+  lost: 'streamLost',
+};
+function streamCoreApi() {
+  return typeof window !== 'undefined' && window.SuwenStreamCore ? window.SuwenStreamCore : null;
+}
+function streamView(taskId) {
+  const core = streamCoreApi();
+  const store = S.stream.store;
+  if (!core || !store || !taskId) return null;
+  try { return core.taskView(store, taskId); } catch { return null; }
+}
+function statusFor(task) {
+  const view = streamView(task && task.id);
+  if (view && typeof view.status === 'string' && view.status !== 'unknown' && view.status !== '') return view.status;
+  return task && task.status ? task.status : 'unknown';
+}
+function streamTextFor(task) {
+  const view = streamView(task && task.id);
+  const live = view && typeof view.text === 'string' ? view.text : '';
+  const snapshot = task && task.stream && typeof task.stream.text === 'string' ? task.stream.text : '';
+  /* Whichever source has observed more text wins: the push stream is authoritative, but the
+     slow snapshot keeps the text usable when the push transport is unavailable. */
+  if (live && live.length >= snapshot.length) return live;
+  return snapshot || live;
+}
+function chatTaskList() {
+  return conversationTaskList(S.conversationId);
+}
+function bannerTask() {
+  const list = chatTaskList();
+  if (!list.length) return null;
+  const active = list.filter(task => !FINAL_STATUS.has(statusFor(task)));
+  return active.length ? active[active.length - 1] : list[list.length - 1];
+}
+function followScroll() {
+  const timeline = $('timeline');
+  const core = streamCoreApi();
+  if (!timeline || !core) return false;
+  try {
+    return core.shouldFollowScroll({ userIntent: S.stream.userIntent, pinned: S.stream.scrollPinned, nearBottom: nearBottom(timeline) });
+  } catch {
+    return nearBottom(timeline);
+  }
+}
+function monotonicNow() {
+  return typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : Date.now();
+}
+/* Any scroll we cause ourselves is tagged so the scroll listener cannot mistake content
+   clamping (innerHTML replacement / appended text) for a user scroll-up intent. */
+function markProgrammaticScroll() {
+  S.stream.programmaticUntil = monotonicNow() + 400;
+}
+function scrollTimelineToBottom() {
+  const timeline = $('timeline');
+  if (!timeline) return;
+  markProgrammaticScroll();
+  timeline.scrollTop = timeline.scrollHeight;
+}
+function restoreTimelineScroll(top) {
+  const timeline = $('timeline');
+  if (!timeline) return;
+  markProgrammaticScroll();
+  const value = Number(top);
+  timeline.scrollTop = Math.max(0, Math.min(Number.isFinite(value) ? value : 0, timeline.scrollHeight));
+}
+function updateStreamBanner() {
+  const banner = $('stream-banner');
+  if (!banner) return;
+  const core = streamCoreApi();
+  let key = null;
+  let lost = false;
+  if (core && S.stream.store && !S.stream.disabled) {
+    const task = bannerTask();
+    const connection = S.stream.store.connection && S.stream.store.connection.state ? S.stream.store.connection.state : '';
+    let state = 'idle';
+    try { state = core.runState(S.stream.store, task ? task.id : null); } catch { state = 'idle'; }
+    if (connection === 'lost') { key = 'streamLost'; lost = true; }
+    else if (S.stream.replayFailed) { key = 'streamReplayFailed'; }
+    else key = STREAM_STATE_KEYS[state] || null;
+  }
+  if (key) {
+    banner.textContent = t(key);
+    banner.hidden = false;
+    banner.classList.toggle('lost', lost);
+  } else {
+    banner.hidden = true;
+    banner.textContent = '';
+    banner.classList.remove('lost');
+  }
+  const send = $('send');
+  /* Reconnecting keeps the composer usable (draft preserved, nothing cleared); a definitively
+     lost background disables send until the connection is restored. */
+  if (send && !S.sending) send.disabled = lost;
+}
+function registerStreamNode(task, node) {
+  if (!task || !task.id || !node || typeof node.querySelector !== 'function') return;
+  const body = node.querySelector('.body');
+  if (!body) return;
+  S.stream.nodes.set(task.id, { body, meta: node.querySelector('.meta'), painted: body.textContent || '' });
+}
+function applyStreamTextPatches() {
+  const timeline = $('timeline');
+  if (!timeline) return;
+  let changed = false;
+  for (const task of chatTaskList()) {
+    const ref = S.stream.nodes.get(task.id);
+    if (!ref) continue;
+    const status = statusFor(task);
+    if (FINAL_STATUS.has(status)) continue;
+    const text = streamTextFor(task);
+    if (!text || text === ref.painted) continue;
+    if (ref.painted && text.indexOf(ref.painted) === 0) {
+      ref.body.append(document.createTextNode(text.slice(ref.painted.length)));
+    } else {
+      ref.body.textContent = text;
+    }
+    ref.painted = text;
+    changed = true;
+  }
+  if (changed && followScroll()) scrollTimelineToBottom();
+}
+function scheduleStreamPaint() {
+  if (S.stream.paintRaf) return;
+  S.stream.paintRaf = requestAnimationFrame(() => {
+    S.stream.paintRaf = 0;
+    paintStream();
+  });
+}
+function paintStream() {
+  const startedAt = monotonicNow();
+  updateStreamBanner();
+  if (chatSignature() !== S.chatSignature) { scheduleChatRender(); return; }
+  applyStreamTextPatches();
+  const debug = S.stream.debug;
+  if (debug) {
+    debug.paints += 1;
+    debug.lastPaintAt = monotonicNow();
+    debug.paintTotalMs += debug.lastPaintAt - startedAt;
+  }
+}
+function resetChatView() {
+  S.chatSignature = '';
+  S.stream.nodes.clear();
+}
+async function runGapReplay(since) {
+  if (S.stream.replayBusy) return;
+  S.stream.replayBusy = true;
+  const core = streamCoreApi();
+  const store = S.stream.store;
+  try {
+    if (!core || !store) return;
+    const batch = await call('events.replay', { since: Math.max(0, Number(since) || 0), limit: 2000 });
+    if (!batch || typeof batch !== 'object') throw new Error('events.replay returned no batch');
+    const result = core.applyBatch(store, batch, { fromReplay: true });
+    if (result.reset) { resetChatView(); void poll(); }
+    if (result.replayFailed) { S.stream.replayFailed = true; void poll(); }
+    if (result.changed.length || result.reset) scheduleStreamPaint();
+    updateStreamBanner();
+  } catch (error) {
+    S.stream.replayFailed = true;
+    showError(error);
+    void poll();
+  } finally {
+    S.stream.replayBusy = false;
+  }
+}
+function handleStreamBatch(batch) {
+  const core = streamCoreApi();
+  const store = S.stream.store;
+  if (!core || !store || !batch || typeof batch !== 'object') return;
+  S.stream.batches += 1;
+  if (S.stream.debug) {
+    /* Timestamped counters exposed through window.__suwenStreamDebug so E2E harnesses can
+       attribute latency between IPC batches and painted text without changing behaviour. */
+    S.stream.debug.batches += 1;
+    S.stream.debug.lastBatchAt = monotonicNow();
+  }
+  let result;
+  try { result = core.applyBatch(store, batch); } catch (error) { showError(error); return; }
+  if (result.reset) { resetChatView(); void poll(); }
+  if (result.replay) void runGapReplay(result.replay.since);
+  if (result.replayFailed) { S.stream.replayFailed = true; void poll(); }
+  if (result.changed.length) {
+    const terminal = result.changed.some(taskId => {
+      const view = streamView(taskId);
+      return Boolean(view && view.terminal);
+    });
+    if (terminal) void poll();
+    scheduleStreamPaint();
+  } else if (result.reset) {
+    scheduleStreamPaint();
+  }
+  updateStreamBanner();
+}
+function handleConnectionState(payload) {
+  const core = streamCoreApi();
+  const store = S.stream.store;
+  if (!core || !store) return null;
+  let result = null;
+  try { result = core.applyConnection(store, payload); } catch { result = null; }
+  const state = payload && typeof payload === 'object' ? payload.state : '';
+  if (state === 'restored') {
+    S.stream.replayFailed = false;
+    toast('streamRestored');
+    void poll();
+  } else if (state === 'lost') {
+    void poll();
+  }
+  updateStreamBanner();
+  scheduleStreamPaint();
+  return result;
+}
+function startStreaming() {
+  const core = streamCoreApi();
+  const bridge = typeof window !== 'undefined' ? window.suwen : null;
+  if (!core) return;
+  try { S.stream.store = core.createStore(); } catch { S.stream.store = null; return; }
+  S.stream.debug = { startedAt: monotonicNow(), batches: 0, paints: 0, paintTotalMs: 0, lastBatchAt: 0, lastPaintAt: 0 };
+  if (!bridge || typeof bridge.onEvent !== 'function') {
+    /* No push transport: the 2.5s snapshot poll still fills the text fallback path above. */
+    S.stream.disabled = true;
+    updateStreamBanner();
+    return;
+  }
+  S.stream.unsubscribeEvent = bridge.onEvent(batch => handleStreamBatch(batch));
+  if (typeof bridge.onConnection === 'function') {
+    S.stream.unsubscribeConnection = bridge.onConnection(payload => handleConnectionState(payload));
+  }
+  S.stream.subscribed = true;
+  try {
+    /* Debug-only introspection for E2E attribution (batch cadence vs paint cadence vs
+       painted characters). It never mutates state and is not used by the UI itself. */
+    window.__suwenStreamDebug = function () {
+      const store = S.stream.store;
+      const debug = S.stream.debug || {};
+      const messages = chatTaskList().map(task => ({
+        taskId: task.id,
+        status: statusFor(task),
+        chars: streamTextFor(task).length,
+        stepId: (streamView(task.id) || {}).stepId || null,
+      }));
+      return {
+        batches: debug.batches || 0,
+        paints: debug.paints || 0,
+        paintTotalMs: Math.round((debug.paintTotalMs || 0) * 10) / 10,
+        lastBatchAt: debug.lastBatchAt || 0,
+        lastPaintAt: debug.lastPaintAt || 0,
+        startedAt: debug.startedAt || 0,
+        messages,
+        connection: store && store.connection ? store.connection.state : null,
+        stats: store && typeof core.stats === 'function' ? core.stats(store) : null,
+      };
+    };
+  } catch { /* debug hook is optional */ }
+}
+function reconcileStreamSnapshot() {
+  const core = streamCoreApi();
+  const store = S.stream.store;
+  if (!core || !store || S.stream.disabled) return;
+  /* Feed every snapshot stream into the reducer with reconcile mode: it never shrinks live
+     text for the same step, fills a reset or a failed replay, and writes nothing when the text
+     already matches. The push stream stays authoritative because only longer prefixes append. */
+  const streams = [];
+  for (const task of tasks()) {
+    const stream = task && task.stream;
+    const text = stream && typeof stream.text === 'string' ? stream.text : '';
+    if (!text) continue;
+    let updatedAt = 0;
+    try { updatedAt = new Date(stream.updatedAt).getTime(); } catch { updatedAt = 0; }
+    streams.push({ taskId: task.id, stepId: stream.stepId, text, updatedAt: Number.isFinite(updatedAt) ? updatedAt : Date.now() });
+  }
+  if (!streams.length) return;
+  try {
+    const result = core.applyBatch(store, { schemaVersion: 1, cursor: 0, tasks: [], events: [], streams }, { reconcile: true });
+    if (result.changed.length) scheduleStreamPaint();
+  } catch { /* reconciliation is best effort; push events remain authoritative */ }
+}
+
+Object.assign(copy, {
+  version: ['3.2.0 · 开发预览版', '3.2.0 · dev preview'],
+  themeLabel: ['界面主题', 'Interface theme'],
+  themeSystem: ['跟随系统', 'Follow system'],
+  themeLight: ['浅色', 'Light'],
+  themeDark: ['深色', 'Dark'],
+  themeSaved: ['主题已保存', 'Theme saved'],
+  jumpLatest: ['跳到最新 ↓', 'Jump to latest ↓'],
+  copyCode: ['复制', 'Copy'],
+  copied: ['已复制', 'Copied'],
+  toolActivity: ['步骤活动（{count}）', 'Step activity ({count})'],
+  streamPreparing: ['准备中…', 'Preparing…'],
+  streamToolRunning: ['执行工具中…', 'Running a tool…'],
+  streamWaitingApproval: ['等待核查 / 审批', 'Waiting for review or approval'],
+  streamCompacting: ['压缩上下文中…', 'Compacting context…'],
+  streamPaused: ['已暂停', 'Paused'],
+  streamCancelling: ['正在取消…', 'Cancelling…'],
+  streamReconnecting: ['后台重连中；消息、草稿和滚动位置会保留，缺口事件将在恢复后重放。', 'Background reconnecting; messages, draft and scroll position are kept and gaps replay after recovery.'],
+  streamLost: ['后台连接已断开；消息与草稿仍保留在本地。请在设置中重连后台。', 'Background connection lost; messages and draft stay local. Reconnect the background in Settings.'],
+  streamRestored: ['后台已恢复，正在校准事件。', 'Background restored; reconciling events.'],
+  streamReplayFailed: ['事件重放未完成，已用快照校准；若仍有缺口请重连后台。', 'Event replay did not complete; a snapshot reconciliation ran. Reconnect the background if gaps persist.'],
+});
 /* ---------- boot ---------- */
 function bindEvents() {
   for (const button of $$('.rail [data-page]')) {
@@ -3224,8 +3775,17 @@ function bindEvents() {
   on('demo', 'click', event => { void runDemo(event.currentTarget); });
   on('task-demo', 'click', event => { void runDemo(event.currentTarget); });
   on('composer', 'submit', event => { event.preventDefault(); void sendMessage(); });
+  on('prompt', 'input', event => { saveDraft(event.currentTarget.value); });
   on('prompt', 'keydown', event => {
+    /* IME composition must not submit: Enter while the candidate list is open belongs to the IME. */
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void sendMessage(); }
+  });
+  on('jump-latest', 'click', () => {
+    S.stream.scrollPinned = true;
+    S.stream.userIntent = 'down';
+    scrollTimelineToBottom();
+    updateJumpLatest();
   });
   for (const button of $$('#mode-radios [data-mode]')) {
     button.addEventListener('click', () => setMode(button.dataset.mode));
@@ -3269,11 +3829,35 @@ function bindEvents() {
   on('pick-python', 'click', event => { void pickPython(event.currentTarget); });
   on('support', 'click', event => { void exportSupport(event.currentTarget); });
   on('shutdown', 'click', event => { void shutdownBackground(event.currentTarget); });
+  on('defaults-theme', 'change', event => { void selectTheme(event.currentTarget.value); });
+  const timeline = $('timeline');
+  if (timeline) {
+    /* Scroll intent: a real user scroll-up always wins over streaming auto-follow, and
+       scrolling back to the bottom re-arms it. Scrolls caused by our own painting are ignored:
+       replacing nodes clamps scrollTop to 0 and used to be mistaken for a scroll-up intent,
+       which silently stopped auto-follow on very long streams. */
+    timeline.addEventListener('scroll', () => {
+      if (S.stream.programmaticUntil && monotonicNow() < S.stream.programmaticUntil) {
+        updateJumpLatest();
+        return;
+      }
+      const pinned = nearBottom(timeline);
+      S.stream.scrollPinned = pinned;
+      S.stream.userIntent = pinned ? 'down' : 'up';
+      updateJumpLatest();
+    });
+  }
 }
 async function boot() {
   try {
+    window.addEventListener('unhandledrejection', event => {
+      /* Async UI failures (draft, theme, replay, adapter paths) surface instead of silent losses. */
+      showError(event.reason);
+    });
     S.welcomeNode = $('welcome');
     S.modelSettings = null;
+    initTheme();
+    startStreaming();
     bindEvents();
     setMode(S.mode || 'auto');
     localize();
@@ -3281,6 +3865,7 @@ async function boot() {
     startPolling();
     void loadConversations();
     void loadProjects();
+    void loadThemePreference();
   } catch (error) {
     showError(error);
   }

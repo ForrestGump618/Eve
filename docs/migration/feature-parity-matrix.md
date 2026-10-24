@@ -1,8 +1,8 @@
-# Python baseline → SuWen desktop feature parity matrix (3.1.0 evidence revision)
+# Python baseline → SuWen desktop feature parity matrix (final 3.2.0 evidence revision)
 
-Updated 2026-10-25 after the Lead measured SuWen desktop **3.1.0** evidence on this machine
+Updated 2026-10-25 after the Lead measured SuWen desktop **3.2.0** final evidence on this machine
 (`C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`, branch `suwen-vnext-durable`).
-Machine-readable rows: [`feature-parity-matrix.csv`](./feature-parity-matrix.csv) (70 rows).
+Machine-readable rows: [`feature-parity-matrix.csv`](./feature-parity-matrix.csv) (85 rows).
 The Python-old column is unchanged from the 3.0.0-preview.1 audit (see
 [`python-feature-inventory.md`](./python-feature-inventory.md)); only the vNext column was upgraded
 where the Lead's evidence proves it.
@@ -15,27 +15,23 @@ Status vocabulary: `IMPLEMENTED_PASS` (evidence proves the capability in the new
 
 | Status | Rows | Share |
 |---|---:|---:|
-| IMPLEMENTED_PASS | 56 | 80% |
-| UNVERIFIED | 2 | 3% |
-| NOT_STARTED | 10 | 14% |
+| IMPLEMENTED_PASS | 67 | 79% |
+| UNVERIFIED | 6 | 7% |
+| NOT_STARTED | 9 | 11% |
 | N/A_PORT | 1 | 1% |
 | REPLACED | 1 | 1% |
-| **Total** | **70** | **100%** |
+| BLOCKED_EXTERNAL | 1 | 1% |
+| **Total** | **85** | **100%** |
 
-Upgrades since the 3.0.0-preview.1 audit (14 PASS / 42 UNVERIFIED / 9 NOT_STARTED / 1 N/A / 1 REPLACED):
-42 rows moved to `IMPLEMENTED_PASS`, one row (`23 preinstalled scientific skills`) moved from
-UNVERIFIED to NOT_STARTED after inspecting `desktop/src/domain/tools.ts` (registry only, no builtin
-catalog), and three evidence rows were added (RPC E2E harness, UI DOM QA harness, context versions +
-manual compaction/rollback). A machine-readable diff is reproducible with
-`docs/research/repro/update-310-parity.py`.
+Upgrades since the 3.0.0-preview.1 audit (14 PASS / 42 UNVERIFIED / 9 NOT_STARTED / 1 N/A / 1 REPLACED, 67 rows): the 3.1.0 evidence round moved 42 rows to IMPLEMENTED_PASS and the final 3.2.0 round moved 10 round-3 rows to IMPLEMENTED_PASS, for **66 / 85** rows. Eighteen round-3 capability rows were appended (85 rows total) and one row (`23 preinstalled scientific skills`) is NOT_STARTED. Machine-readable: `docs/research/repro/round3/round3-data.py`.
 
 ## 2. What is now proven in the new desktop (PASS groups)
 
 - **Shell/UI (6 rows):** five workspaces; streamed chat + markdown; incremental timeline rendering;
   zh/en labels; session/conversation persistence; project/discovery projects; files/figures/artifacts.
-  Evidence: `npm test` 150/148/0 fail/2 skips; `scripts/e2e-rpc.mjs --live` 42/0;
-  packaged `electron-smoke.mjs` 8/8; `scripts/ui-dom-qa.mjs` 19/0/10 (10 warnings are the five
-  main-process bridge methods); `desktop/ui/actions.json` 142 actions all bound.
+  Evidence: `npm test` 182/180 pass/0 fail/2 skips; `scripts/e2e-rpc.mjs --live` 42/0;
+  packaged `electron-smoke.mjs` 8/8; `scripts/ui-dom-qa.mjs` 19/0/12 (12 warnings are the five
+  main-process bridge methods); `desktop/ui/actions.json` 144 actions all bound.
 - **Durability/runtime (10 rows):** SQLite v3 WAL/FULL/foreign keys/busy_timeout + pre-migration
   backup; persisted task DAG; lease/fencing/heartbeat/reclaim; durable timer and waiting_approval;
   outbox + idempotent operation ids; checkpoints + artifact SHA-256; token/cost/call budgets;
@@ -62,14 +58,14 @@ manual compaction/rollback). A machine-readable diff is reproducible with
   Robin/Kosmos, real Telegram/Slack/Discord/WeChat accounts) are **not bundled/connected**.
 - **Legacy/import/release (5 rows):** import-service read-only scan of the real legacy home (9
   item groups), backup-first/idempotent apply, rollback tests 5/5; NSIS x64 installer built from
-  frozen final code (`release/SuWen-Setup-3.1.0-win-x64.exe`, 129,425,145 bytes, SHA-256
-  `e1a1062cbacaf978f6b60f2a825d2e2e769c231048a65983113e8e434ba07ac4`, UNSIGNED) and unpacked
-  layout inspected; **final-artifact host lifecycle probe 14/14 steps passed**
-  (`docs/verification/artifacts/installer-lifecycle.json`: install 18 s, exe version 3.1.0, running
+  frozen final code (`release/SuWen-Setup-3.2.0-win-x64.exe`, 129,446,526 bytes, SHA-256
+  `7b0dde7b9e12e403e620e16651d969cd21c874cf16598d409d6a7b2fa2199546`, UNSIGNED) and unpacked
+  layout inspected; **final-artifact host lifecycle probe 12/12 steps passed**
+  (`docs/verification/artifacts/installer-lifecycle.json`: install ~24 s, exe version 3.2.0, running
   app, authenticated daemon attach `mode user-background`, daemon survives UI close, reinstall 24 s,
   uninstall 11 s, user-data preservation) and **cross-version upgrade 3.0.0-preview.1 → 3.1.0
   8/8 passed** (`upgrade-path.json`); packaging metadata; brand cleanup; desktop unit/integration
-  tests. `SHA256SUMS`, clean-VM lifecycle and code signing remain pending.
+  tests. clean-VM lifecycle and code signing remain pending; `SHA256SUMS` is present.
 
 ## 3. Remaining non-PASS rows (14)
 
@@ -86,12 +82,12 @@ manual compaction/rollback). A machine-readable diff is reproducible with
 | Terminal/shell | NOT_STARTED | no integrated terminal in new desktop |
 | Paper2Agent pipeline | NOT_STARTED | external Paper2Agent installation/construction not bundled or exercised |
 | 23 preinstalled scientific skills | NOT_STARTED | no builtin catalog in `desktop/src/domain/tools.ts`; 23 SKILL.md dirs live only in bundled `resources/legacy` |
-| Clean-VM install/upgrade/uninstall | NOT_STARTED | final-artifact **host lifecycle 14/14 + cross-version upgrade 8/8 passed** (`installer-lifecycle.json`, `upgrade-path.json`); clean-VM install/start/upgrade/uninstall still PENDING_LEAD; `SHA256SUMS` is now present (`desktop/release/SHA256SUMS`, `docs/release/SHA256SUMS.txt`) |
+| Clean-VM install/upgrade/uninstall | UNVERIFIED | host lifecycle **12/12** on the final 3.2.0 artifact, including installing 3.0.0-preview.1 and upgrading (`installer-lifecycle.json`); clean-VM install/start/upgrade/uninstall still PENDING_LEAD; `SHA256SUMS` is now present (`desktop/release/SHA256SUMS`, `docs/release/SHA256SUMS.txt`) |
 | CLI entrypoints (18 subcommands) | N/A_PORT | Python CLI is intentionally preserved; the new desktop is GUI/RPC-only |
 | In-memory jobs + threads | REPLACED | replaced by durable DAG engine; not ported |
 
 `docs/requirements/master-requirements.csv` is the requirement-level view of the same evidence
-(60 IMPLEMENTED_PASS / 8 UNVERIFIED / 3 NOT_STARTED over 71 requirement rows).
+(81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL over 98 requirement rows)
 
 ## 4. Reuse strategy (unchanged)
 
@@ -119,25 +115,24 @@ because the Python baseline lacks leases/fencing/outbox/durable timers and has U
 |---|---|
 | `npx tsc -p tsconfig.json --noEmit` | exit 0 |
 | `npm run build` | exit 0 |
-| `npm test` | tests 150, pass 148, fail 0, skipped 2, 28.3 s, exit 0 |
+| `npm test` | tests 182, pass 180, fail 0, skipped 2, 33.4 s, exit 0 |
 | `node scripts/e2e-rpc.mjs --dist dist --live` | 42 passed / 0 failed, ~7 s; real Europe PMC PMID 42878939 + UniProt Q9Y2B4, artifacts with sha256 |
 | `SUWEN_SMOKE_PACKAGED=1 node scripts/electron-smoke.mjs` | 8/8 checks, exit 0, 106 s on the final build; artifacts `release/smoke/work/electron-e2e-result.json`, two screenshots |
-| `node scripts/ui-dom-qa.mjs` | 19 passed / 0 failed / 10 warnings |
+| `node scripts/ui-dom-qa.mjs` | 19 passed / 0 failed / 12 warnings |
 | `node --check desktop/ui/app.js` | exit 0 |
 | Python research worker tests | 22 tests / 21 pass / 1 skip (Windows symlink EPERM) |
-| Installer | 129,425,145 B, SHA-256 `e1a1062c…7ac4`, blockmap 135,934 B, UNSIGNED |
-| Installer lifecycle (final artifact) | 14/14 steps passed (`docs/verification/artifacts/installer-lifecycle.json`) — host probe only |
-| Cross-version upgrade | 8/8 steps passed, `3.0.0-preview.1 → 3.1.0` (`docs/verification/artifacts/upgrade-path.json`) — host probe only |
+| Installer | `SuWen-Setup-3.2.0-win-x64.exe` 129,446,526 B, SHA-256 `7b0dde7b…9546`, blockmap 135,974 B, UNSIGNED; `SHA256SUMS` present |
+| Installer host lifecycle (final 3.2.0 artifact) | 12/12 steps passed (`docs/verification/artifacts/installer-lifecycle.json`), incl. installing 3.0.0-preview.1 and upgrading to 3.2.0 — host probe only |
+| Cross-version upgrade | 3.0.0-preview.1 → 3.2.0 pass recorded in the lifecycle report — host probe only |
 
 Skipped/unproven: 2 unit skips (Windows symlink EPERM; optional legacy Python workbench deps),
 legacy workbench unavailable in packaged smoke (Python lacks fastapi), live MCP gated behind
-`SUWEN_SMOKE_LIVE=1` (covered by item 3 e2e instead), clean-VM lifecycle + `SHA256SUMS`, 8/24/72 h
+`SUWEN_SMOKE_LIVE=1` (covered by item 3 e2e instead), clean-VM lifecycle, 8/24/72 h
 endurance, real external model accounts, code signing.
 
 ## 7. Known gaps and priorities
 
-- **P0:** clean-VM installer lifecycle (`SHA256SUMS`; host lifecycle 14/14 + upgrade 8/8 already
-  passed on the final artifact); Windows CI execution; real external model accounts;
+- **P0:** clean-VM installer lifecycle (`SHA256SUMS`; host lifecycle 12/12 already passed on the final 3.2.0 artifact); Windows CI execution; real external model accounts;
   wire every main-process bridge method into UI QA coverage (currently 5 intentional warnings).
 - **P1:** 8/24/72 h + reboot/power-loss/disk-full endurance; legacy skill migration into the new
   registry; OS-level sandbox/quotas; code signing.
@@ -151,6 +146,47 @@ endurance, real external model accounts, code signing.
 - [`integration-and-e2e.md`](../verification/integration-and-e2e.md) — commands/results/artifacts.
 - [`windows-installer-verification.md`](../release/windows-installer-verification.md) — installer facts.
 - [`durability-chaos-tests.md`](../verification/durability-chaos-tests.md) — short-window fault injection.
-- [`ui-action-coverage.csv`](../verification/ui-action-coverage.csv) — 142 UI actions with RPC bridge
+- [`ui-action-coverage.csv`](../verification/ui-action-coverage.csv) — 144 UI actions with RPC bridge
   classification.
 - [`python-feature-inventory.md`](./python-feature-inventory.md) — Python baseline inventory.
+
+## 9. Final round-3 evidence (3.2.0 build, 2026-10-25)
+
+Round-3 rows were appended for the P0/P1 targets in `docs/requirements/round-3-release-master-prompt.md`.
+The CSV is now **85 rows**: **IMPLEMENTED_PASS 67 / UNVERIFIED 6 / NOT_STARTED 9 / N/A_PORT 1 /
+REPLACED 1 / BLOCKED_EXTERNAL 1**.
+
+| Round-3 capability | vNext status | Evidence / gap |
+| --- | --- | --- |
+| Typed streaming event protocol (`events.stream`, `StreamEnvelope` v1) | IMPLEMENTED_PASS | `desktop/src/stream-events.ts`, `shared/contract.ts`, `test/stream-events.test.ts`; daemon dispatch `daemon.ts:194`; T1 `ui-streaming-stability.md` |
+| Incremental render / batched updates | IMPLEMENTED_PASS | `ui/app.js`, `ui/stream-core.js`; T2 100/1k/10k exact sha256 (`ui-e2e-summary.json`) |
+| Composer stability | IMPLEMENTED_PASS | T2 composer deviation 0 px; draft preserved |
+| Scroll intent / anchor preservation | IMPLEMENTED_PASS | T2 forced drift 0 px after T1 fix (pre-fix 14,556 px gap) |
+| Markdown/complex content streaming safety | UNVERIFIED | Safe subset + `textContent` rendering (`ui/markdown.js`); no streaming complex-content matrix |
+| Reasoning/tool/answer separation | UNVERIFIED | Not separately asserted in T2 beyond tool-trace rendering |
+| Run state machine (single source of truth) | IMPLEMENTED_PASS | `stream-core.test.ts` 23/23; T1 state walk |
+| Cancel/timeout/reconnect real E2E | UNVERIFIED | Cancel: e2e-rpc 42/0 + chaos 12/12; auto-reconnect fix + unit tests; T2 post-fix SIGKILL re-run not published (D-017) |
+| Renderer error isolation | UNVERIFIED | Async rejections surfaced (`#error`); no crash-injection test |
+| Quantitative streaming matrix (100/1k/10k) | IMPLEMENTED_PASS | `ui-e2e-summary.json`: exact sha256, lag p95, 10k render 152 s, paint ~5 ms |
+| Visual auto-acceptance matrix | IMPLEMENTED_PASS | `ui-visual-audit.md`: 180 PNGs / 144-shot matrix, 0 layout defects, dark theme verified; P2 chat-error surface open |
+| Known-defect fixes (T2 stream/recovery set) | IMPLEMENTED_PASS | `defect-register.csv` D-013..D-017; `desktop/test/conversations.test.ts` |
+| Durable re-verification after UI/streaming changes | IMPLEMENTED_PASS | chaos 12/12 in 51.4 s on the final tree; 8/24/72 h **not run** (R050) |
+| Full UI action runtime coverage | IMPLEMENTED_PASS | 144 actions mapped (0 unknown), DOM QA 19/0/12; no per-action click-through matrix |
+| Clean-Windows-VM install/upgrade/uninstall | UNVERIFIED | Host lifecycle 12/12 on the final 3.2.0 artifact; no clean VM |
+| GitHub MIT publication + Release upload | BLOCKED_EXTERNAL | Remote readable; `gh` CLI/token absent |
+| Six research capabilities real E2E + debate rules | IMPLEMENTED_PASS | T3 `e2e-results.md`: deterministic 19 PASS / 0 FAIL / 3 SKIP; live 21/21; debate case 7 |
+| MCP / skills / providers / channels / RSI checks | IMPLEMENTED_PASS | T3 cases; provider protocols local fixtures only; external accounts not used |
+| Performance baseline | IMPLEMENTED_PASS | `performance-baseline.md` + JSON |
+| Security review + automated scan | IMPLEMENTED_PASS | `security-review.md`; scan PASS 0 HIGH; no OS sandbox |
+| OS-level sandbox / quotas | NOT_STARTED | Electron sandbox only |
+| Diagnostics centre | IMPLEMENTED_PASS | `doctor.run` 11 checks; T3 boot case |
+| Mandatory machine-readable reports | IMPLEMENTED_PASS | CSV/parity/UI coverage/verification docs |
+| Release gates + defect register | IMPLEMENTED_PASS | `release-gates.md`, `defect-register.csv` (20 defects) |
+| 3.2.0 release docs (CHANGELOG/notes/publication runbook) | IMPLEMENTED_PASS | All present; installer measured; publication blocked |
+
+Final measured facts: installer `SuWen-Setup-3.2.0-win-x64.exe` 129,446,526 B SHA-256
+`7B0DDE7B…2199546` (unsigned), blockmap 135,974 B `BCD62E14…`, unpacked 249,801,728 B `8F7EAF76…`,
+`SHA256SUMS` present in both locations; tests 182/180/2 (33.4 s); e2e-rpc 42/0 live; packaged smoke
+8/8; UI DOM QA 19/0/12; chaos 12/12 (51.4 s); host lifecycle 12/12 + upgrade from 3.0.0-preview.1.
+Stable release remains unauthorized (`docs/release/release-gates.md`); clean VM, signing, endurance and
+publication stay open.

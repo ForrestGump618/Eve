@@ -19,16 +19,18 @@
   <div id="sessions" class="sessions"></div>
   <div class="grow"></div>
   <div id="health" class="health" role="status" data-i18n="connecting">连接后台…</div>
-  <div class="version" data-i18n="version">3.0 · 开发预览版</div>
+  <div class="version" data-i18n="version">3.2.0 · 开发预览版</div>
 </aside>
 <main>
 <header><h1 id="page-title">对话</h1><div class="grow"></div><button id="language" class="quiet" data-i18n-title="switchLanguage">English</button><button id="toggle-evidence" class="quiet" data-i18n="showTrace">执行记录 ↗</button></header>
 <div id="error" role="alert" hidden></div>
+<div id="stream-banner" class="stream-banner" role="status" hidden></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
 <section id="chat" class="page">
   <div id="timeline" class="timeline"><div id="welcome" class="welcome"><div class="eyebrow" data-i18n="eyebrow">SUWEN 科研工作空间</div><h2 data-i18n="welcomeTitle">从一个问题开始。</h2><p data-i18n="welcomeBody">梳理思路、检索证据，或提交一个可恢复的任务。</p><div class="suggestions"><button id="research-example" data-example="researchExample" data-i18n="explore">探索科研问题 ↗</button><button id="demo" data-i18n="demoWelcome">运行后台恢复演示 ↗</button></div></div></div>
   <div id="chat-notice" class="notice" role="status" hidden></div>
+  <button id="jump-latest" class="jump-latest" type="button" data-i18n="jumpLatest" hidden>跳到最新 ↓</button>
   <form id="composer">
     <div id="mode-radios" class="modes" role="radiogroup" data-i18n-aria="executionMode" aria-label="执行模式">
       <button type="button" class="mode-option active" data-mode="auto" role="radio" aria-checked="true" data-i18n="modeAuto">自动路由</button>
@@ -227,6 +229,7 @@
       <div class="row"><label><span data-i18n="defaultMaxTokens">默认最多 tokens</span><input id="default-maxTokens" type="number" min="1" max="10000000"></label><label><span data-i18n="defaultBudgetCalls">默认调用次数上限</span><input id="default-budgetCalls" type="number" min="1" max="100000"></label></div>
       <div class="row"><label><span data-i18n="defaultBudgetCost">默认费用上限</span><input id="default-budgetCost" type="number" min="0" step="0.0001"></label><label><span data-i18n="defaultConcurrency">并发数</span><input id="default-concurrency" type="number" min="1" max="16"></label></div>
       <div class="row"><label><span data-i18n="defaultCompactionWarn">建议压缩阈值（0-1）</span><input id="default-compactionWarn" type="number" min="0" max="1" step="0.01"></label><label><span data-i18n="defaultCompactionForce">强制压缩阈值（0-1）</span><input id="default-compactionForce" type="number" min="0" max="1" step="0.01"></label></div>
+      <div class="row"><label><span data-i18n="themeLabel">界面主题</span><select id="defaults-theme"><option value="system" data-i18n="themeSystem">跟随系统</option><option value="light" data-i18n="themeLight">浅色</option><option value="dark" data-i18n="themeDark">深色</option></select></label></div>
       <button class="primary" data-i18n="saveDefaults">保存默认值</button><span id="defaults-saved" role="status"></span>
     </form>
     <article class="card">
@@ -253,4 +256,4 @@
   <div id="evidence-content" class="muted" data-i18n="selectTask">选择任务查看事件与检查点。</div>
 </aside>
 <dialog id="confirm-dialog" class="dialog"><h3 id="confirm-title" data-i18n="confirmTitle">确认操作</h3><p id="confirm-text"></p><div class="actions"><button id="confirm-ok" class="danger" data-i18n="confirmOk">确认</button><button id="confirm-cancel" data-i18n="confirmCancel">取消</button></div></dialog>
-<script src="app.js"></script></body></html>
+<script src="stream-core.js"></script><script src="markdown.js"></script><script src="app.js"></script></body></html>

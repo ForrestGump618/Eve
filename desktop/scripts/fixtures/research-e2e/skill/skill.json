@@ -1,0 +1,14 @@
+{
+  "name": "e2e-fixture-skill",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "description": "Deterministic local fixture skill used by the research end-to-end harness.",
+  "permissions": [],
+  "test": {
+    "language": "python",
+    "script": "test_skill.py",
+    "args": [],
+    "timeoutMs": 15000
+  }
+}

@@ -318,10 +318,15 @@ function validateScriptResult(value: unknown): ScriptResult {
 }
 
 async function executeScript(services: ActivityServices, ctx: ActivityContext, input: ScriptInput): Promise<ScriptResult> {
+  // The worker requires an explicit absolute sandbox root; the durable home is the only
+  // writable location shared with the daemon, so scripts always run under <home>/sandbox.
+  const sandboxRoot = join(services.home, 'sandbox');
+  await mkdir(sandboxRoot, { recursive: true });
   const payload: Record<string, unknown> = {
     language: input.language,
     source: input.source,
     timeoutMs: input.timeoutMs ?? DEFAULT_SCRIPT_TIMEOUT_MS,
+    sandboxRoot,
   };
   if (input.args !== undefined) payload.args = input.args;
   if (input.files !== undefined) payload.files = input.files;
@@ -1219,6 +1224,7 @@ async function runMethodsScaffold(services: ActivityServices, ctx: ActivityConte
     entry: 'entry.py',
     permissions: generated.permissions,
     tests: ['test_sample.py'],
+    test: { language: 'python', script: 'test_sample.py', timeoutMs: 120_000 },
     generatedAt,
     paperSha256: paperText !== undefined ? sha256Hex(paperText) : null,
     repoPath: repoPath ?? null,
@@ -1242,6 +1248,9 @@ async function runMethodsScaffold(services: ActivityServices, ctx: ActivityConte
     test: { status: 'not_run', at: null },
     installedAt: services.clock(),
     dir,
+    // SkillRegistry resolves the on-disk directory from `installedPath`; without it the RPC
+    // tool surface would scan <home>/skills/<recordId> (a path that was never written).
+    installedPath: dir,
     sourceSha8,
     files: written,
     generatedAt,
@@ -1385,13 +1394,11 @@ function parseMetricOutput(stdout: string, metric: string): number {
 async function runAnalysisProfile(services: ActivityServices, ctx: ActivityContext, raw: Record<string, unknown>): Promise<ActivityResult> {
   const datasetPath = raw.datasetPath === undefined ? undefined : validateDatasetPath(raw.datasetPath, 'analysis input.datasetPath');
   const source = optionalString(raw.source, 'analysis input.source', 1, 2_000_000);
-  if (datasetPath === undefined && source === undefined) {
-    throw new ValidationError('analysis profile requires datasetPath or source');
+  if (datasetPath === undefined) {
+    throw new ValidationError('analysis profile requires datasetPath (the worker datasetProfile op profiles a real data file; source is only used by the run step)');
   }
   const projectId = optionalProjectId(raw);
-  const workerInput: Record<string, unknown> = {};
-  if (datasetPath !== undefined) workerInput.datasetPath = datasetPath;
-  if (source !== undefined) workerInput.source = source;
+  const workerInput: Record<string, unknown> = { path: datasetPath };
   const result = await services.worker.call('datasetProfile', toJson(workerInput), ctx.signal);
   const profile = requireObject(result, 'research worker datasetProfile result');
   return {

@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import {
   lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync,
 } from 'node:fs';
-import { basename, dirname, isAbsolute, join, relative } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { McpClientSession } from '../mcp-client.js';
 import { ConflictError, ValidationError, type Json } from '../harness/types.js';
 import { safeError } from '../security.js';
@@ -788,6 +788,7 @@ export class SkillRegistry {
   private readonly clock: () => number;
   private readonly worker?: WorkerClient;
   private readonly installRoot: string;
+  private readonly sandboxRoot: string;
   private readonly maxFiles: number;
 
   constructor(deps: ToolDeps, options: SkillRegistryOptions = {}) {
@@ -795,6 +796,7 @@ export class SkillRegistry {
     this.clock = deps.clock ?? Date.now;
     this.worker = deps.worker;
     this.installRoot = options.installRoot ?? join(deps.home, 'skills');
+    this.sandboxRoot = join(deps.home, 'sandbox');
     this.maxFiles = options.maxFiles ?? MAX_SKILL_FILES;
   }
 
@@ -828,7 +830,14 @@ export class SkillRegistry {
 
   installedPath(id: string): string {
     const data = recordData(this.row(id));
-    return typeof data.installedPath === 'string' ? data.installedPath : join(this.installRoot, id);
+    const candidate = typeof data.installedPath === 'string' ? data.installedPath : join(this.installRoot, id);
+    // Defense in depth: a record-supplied path must stay inside the managed skills root.
+    // Records are normally written by trusted activities, but this closes a traversal hole if
+    // a malformed/forged record ever points at an arbitrary directory.
+    const resolved = resolve(candidate);
+    const root = resolve(this.installRoot);
+    if (resolved !== root && !resolved.startsWith(`${root}${sep}`)) throw new ValidationError(`Skill ${id} installation path is outside the skills root`);
+    return resolved;
   }
 
   private installedFiles(id: string): SkillSourceFile[] {
@@ -985,11 +994,13 @@ export class SkillRegistry {
     const script = files.find(file => file.path === manifest.test!.script);
     if (!script || script.text === null) throw new ValidationError(`Skill test script ${manifest.test.script} is missing or not text`);
     const signal = options.signal ?? AbortSignal.timeout(120_000);
+    mkdirSync(this.sandboxRoot, { recursive: true });
     const input = {
       language: manifest.test.language,
       source: script.text,
       args: manifest.test.args ?? [],
       timeoutMs: manifest.test.timeoutMs ?? 60_000,
+      sandboxRoot: this.sandboxRoot,
       files: files.filter(file => file.text !== null).map(file => ({ name: file.path, text: file.text })),
     } as unknown as Json;
     const at = this.clock();

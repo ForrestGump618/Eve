@@ -14,6 +14,8 @@ app.setName('SuWen');
 if(process.env.SUWEN_TEST_HOME)app.setPath('userData',resolve(process.env.SUWEN_TEST_HOME));
 if(!app.requestSingleInstanceLock())app.quit();
 let win:BrowserWindow|null=null,connection:Connection|null=null;
+let streamCursor=0,pumpTimer:NodeJS.Timeout|null=null,pumpBusy=false;
+let reconnectTimer:NodeJS.Timeout|null=null,reconnecting=false;
 const home=join(app.getPath('userData'),'runtime');
 const uiFile=resolve(here,'../ui/index.html');
 async function connectDaemon():Promise<void>{
@@ -31,6 +33,63 @@ async function connectDaemon():Promise<void>{
  for(let i=0;i<80;i++){await new Promise(r=>setTimeout(r,150));const c=readConnection(home);if(c){try{await rpc(c,'health');connection=c;return;}catch{}}}
  throw new Error('后台未启动，请在诊断中重试。');
 }
+/** Push incremental daemon events to the renderer; see docs/architecture/streaming-events.md. */
+async function pumpEvents():Promise<void>{
+ if(pumpBusy||!win||win.isDestroyed())return;
+ if(!connection){scheduleReconnect();return;}
+ pumpBusy=true;
+ try{
+  const batch:any=await rpc(connection,'events.stream',{since:streamCursor,limit:500});
+  if(typeof batch?.cursor==='number')streamCursor=batch.cursor;
+  const hasPayload=batch?.reset===true||(Array.isArray(batch?.events)&&batch.events.length>0)||(Array.isArray(batch?.streams)&&batch.streams.length>0)||(Array.isArray(batch?.tasks)&&batch.tasks.length>0);
+  if(hasPayload&&win&&!win.isDestroyed())win.webContents.send('suwen:events',batch);
+ }catch{
+  // A killed/restarted daemon leaves a stale connection object behind; without clearing it the
+  // pump would retry the dead pipe forever instead of rescheduling. Clear it and reconnect.
+  connection=null;
+  scheduleReconnect();
+ }
+ finally{pumpBusy=false;}
+}
+function startEventPump():void{
+ if(pumpTimer)return;
+ pumpTimer=setInterval(()=>{void pumpEvents();},100);
+ pumpTimer.unref?.();
+}
+/** Renderer-facing connection state for streaming UI recovery. */
+function notifyConnection(state:'reconnecting'|'restored'|'lost'):void{
+ try{if(win&&!win.isDestroyed())win.webContents.send('suwen:connection',{state,at:Date.now()});}catch{/* window teardown */}
+}
+/** Re-establish the detached daemon without losing the renderer; bounded exponential backoff. */
+function scheduleReconnect():void{
+ if(reconnecting||reconnectTimer)return;
+ reconnecting=true;
+ notifyConnection('reconnecting');
+ let attempt=0;
+ const delays=[300,800,1500,3000,5000,8000,12000];
+ const attemptConnect=async()=>{
+  reconnectTimer=null;
+  try{
+   await connectDaemon();
+   const cfg=readConfig();if(cfg&&connection)await rpc(connection,'configure',cfg);
+   await pushSecrets();
+   reconnecting=false;
+   notifyConnection('restored');
+  }catch{
+   if(attempt<delays.length){const delay=delays[Math.min(attempt,delays.length-1)];attempt++;reconnectTimer=setTimeout(()=>{void attemptConnect();},delay);reconnectTimer.unref?.();}
+   else{reconnecting=false;notifyConnection('lost');}
+  }
+ };
+ void attemptConnect();
+}
+/** Fast path for renderer calls made while the daemon is restarting. */
+async function ensureConnected():Promise<void>{
+ if(connection)return;
+ if(reconnecting)throw new Error('后台正在恢复连接，请稍候重试');
+ await connectDaemon();
+ const cfg=readConfig();if(cfg&&connection)await rpc(connection,'configure',cfg);
+ await pushSecrets();
+}
 function secureConfigPath():string{return join(home,'model-config.enc');}
 function readConfig():any {if(!existsSync(secureConfigPath()))return null;if(!safeStorage.isEncryptionAvailable())throw new Error('系统凭据加密不可用');return JSON.parse(safeStorage.decryptString(readFileSync(secureConfigPath())));}
 const secretsPath=join(home,'secrets.enc');
@@ -45,9 +104,9 @@ function writeSecrets(map:Record<string,string>):void{
  const encrypted=safeStorage.encryptString(JSON.stringify(map));const tmp=secretsPath+'.tmp';writeFileSync(tmp,encrypted,{mode:0o600});renameSync(tmp,secretsPath);
 }
 async function pushSecrets():Promise<void>{if(!connection)return;try{await rpc(connection,'secrets.set',{refs:readSecrets()});}catch{/* daemon may still be starting */}}
-const MAIN_ONLY=new Set(['settings','configure','login','reconnect','pythonPicker','legacyOpen','shutdown','support','secrets.status','secret.put','secret.remove','secrets.set']);
+const MAIN_ONLY=new Set(['settings','configure','login','reconnect','pythonPicker','legacyOpen','shutdown','support','secrets.status','secret.put','secret.remove','secrets.set','events.stream']);
 /** Main-process handlers that the sandboxed renderer may invoke directly (no daemon passthrough). */
-const UI_MAIN_METHODS=['secrets.status','secret.put','secret.remove'];
+const UI_MAIN_METHODS=['secrets.status','secret.put','secret.remove','events.replay'];
 const exposed=new Set<string>([...RPC_METHODS.filter(method=>!MAIN_ONLY.has(method)),...UI_MAIN_METHODS]);
 app.whenReady().then(async()=>{
  ensureHome(home);let startupError='';try{await connectDaemon();const c=readConfig();if(c&&connection)await rpc(connection,'configure',c);if(connection)await pushSecrets();}catch(err){startupError=safeError(err);}
@@ -83,6 +142,13 @@ app.whenReady().then(async()=>{
     legacyWindow.on('closed',()=>isolated.webRequest.onBeforeSendHeaders(null));
     await legacyWindow.loadURL(origin);return {ok:true};
    }
+   if(method==='events.replay') {
+    // Renderer-initiated gap replay: same frozen daemon protocol, bounded window.
+    await ensureConnected();if(!connection)throw new Error('后台未连接，请在设置中重连');
+    const since=Number(params?.since);
+    const limit=Number(params?.limit);
+    return await rpc(connection,'events.stream',{since:Number.isFinite(since)&&since>=0?Math.floor(since):0,limit:Number.isFinite(limit)?Math.max(1,Math.min(2000,Math.floor(limit))):2000});
+   }
    if(method==='shutdown'){if(connection)await rpc(connection,'shutdown');connection=null;return {ok:true};}
    if(method==='secrets.status'){let refs:string[]=[];let available=safeStorage.isEncryptionAvailable();try{refs=Object.keys(readSecrets());}catch{}return {available,refs};}
    if(method==='secret.put') {
@@ -95,10 +161,11 @@ app.whenReady().then(async()=>{
     const map=readSecrets();delete map[ref];writeSecrets(map);await pushSecrets();return {ok:true,count:Object.keys(map).length};
    }
    if(method==='support') {if(!connection)throw new Error('后台未连接');const snapshot=await rpc(connection,'snapshot');let doctor:any=null;let worker:any=null;try{doctor=await rpc(connection,'doctor.run');}catch{}try{worker=await rpc(connection,'worker.health');}catch{}const result=await dialog.showSaveDialog(win,{defaultPath:'SuWen-diagnostics.json',filters:[{name:'JSON',extensions:['json']}]});if(result.canceled||!result.filePath)return {cancelled:true};const redacted={version:app.getVersion(),generatedAt:new Date().toISOString(),health:snapshot.health,doctor,worker,tasks:snapshot.tasks.map((t:any)=>({id:t.id,status:t.status,version:t.version,steps:t.steps.map((s:any)=>({id:s.id,status:s.status,attempts:s.attempts,operationId:s.operationId})),eventCount:t.events.length}))};writeFileSync(result.filePath,JSON.stringify(redacted,null,2));return {ok:true};}
-   if(!exposed.has(method))throw new Error('Unsupported method');if(!connection)throw new Error('后台未连接，请在设置中重连');return await rpc(connection,method,params??{});
+   if(!exposed.has(method))throw new Error('Unsupported method');await ensureConnected();if(!connection)throw new Error('后台未连接，请在设置中重连');return await rpc(connection,method,params??{});
   }catch(err){throw new Error(safeError(err));}
  });
  await win.loadFile(uiFile);
+ startEventPump();
  if(process.argv.includes('--background'))win.hide();
  app.on('second-instance',()=>{const target=win&&!win.isDestroyed()?win:BrowserWindow.getAllWindows()[0];target?.show();target?.focus();});
 });

@@ -1,82 +1,92 @@
-﻿{
-    "at":  "2026-10-24T17:45:22.6351701Z",
-    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.1.0-win-x64.exe",
-    "installerBytes":  129425145,
-    "installerSha256":  "E1A1062CBACAF978F6B60F2A825D2E2E769C231048A65983113E8E434BA07AC4",
-    "installDir":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen",
-    "testHome":  "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-lifecycle-final",
-    "envNote":  "ELECTRON_RUN_AS_NODE was removed from the launching shell only; the shipped application was not modified.",
+{
+    "at":  "2026-10-24T19:17:21.9736801Z",
+    "version":  "3.2.0",
+    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.2.0-win-x64.exe",
+    "installerBytes":  129446526,
+    "installerSha256":  "7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546",
+    "upgradeFrom":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\2026-10-23\\c-users-qingyuan-zhuang-documents-deepseek-2\\outputs\\omicslab\\desktop\\release\\SuWen-Setup-3.0.0-preview.1-win-x64.exe",
     "steps":  [
                   {
-                      "step":  "silent install exit 0",
-                      "ok":  true,
-                      "detail":  "exit=0 elapsed=18s"
+                      "name":  "upgrade_source",
+                      "status":  "INFO",
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\2026-10-23\\c-users-qingyuan-zhuang-documents-deepseek-2\\outputs\\omicslab\\desktop\\release\\SuWen-Setup-3.0.0-preview.1-win-x64.exe sha256=F263AF7BB412CCBB2FB3A8F1798D35D2A7210997954E68669ED110B62A55514C",
+                      "at":  "2026-10-24T19:15:19.6178057Z"
                   },
                   {
-                      "step":  "installed exe present",
-                      "ok":  true,
-                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen\\SuWen.exe bytes=249801728"
+                      "name":  "upgrade_install_old",
+                      "status":  "PASS",
+                      "detail":  "DisplayVersion=3.0.0-preview.1 expected=3.0.0-preview.1",
+                      "at":  "2026-10-24T19:15:41.0655324Z"
                   },
                   {
-                      "step":  "uninstaller present",
-                      "ok":  true,
-                      "detail":  "Uninstall SuWen.exe"
+                      "name":  "upgrade_old_exe",
+                      "status":  "PASS",
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen\\SuWen.exe bytes=249801728 version=3.0.0-preview.1",
+                      "at":  "2026-10-24T19:15:41.0745319Z"
                   },
                   {
-                      "step":  "registry uninstall entry 3.1.0",
-                      "ok":  true,
-                      "detail":  "SuWen 3.1.0"
+                      "name":  "install",
+                      "status":  "PASS",
+                      "detail":  "exit=0 installerBytes=129446526 sha256=7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546 duration=~24s",
+                      "at":  "2026-10-24T19:16:10.7283138Z"
                   },
                   {
-                      "step":  "exe version metadata 3.1.0",
-                      "ok":  true,
-                      "detail":  "FileVersion=3.1.0 ProductVersion=3.1.0.0 ProductName=SuWen"
+                      "name":  "files",
+                      "status":  "PASS",
+                      "detail":  "SuWen.exe bytes=249801728 FileVersion=3.2.0 ProductVersion=3.2.0.0",
+                      "at":  "2026-10-24T19:16:10.7390976Z"
                   },
                   {
-                      "step":  "installed app still running after 12s",
-                      "ok":  true,
-                      "detail":  "pid=6928 exited=False"
+                      "name":  "registry",
+                      "status":  "PASS",
+                      "detail":  "DisplayName=SuWen DisplayVersion=3.2.0",
+                      "at":  "2026-10-24T19:16:10.7825511Z"
                   },
                   {
-                      "step":  "installed app daemon health (authenticated pipe)",
-                      "ok":  true,
-                      "detail":  "version=3.1.0 mode=user-background pid=46604"
+                      "name":  "app_launch",
+                      "status":  "PASS",
+                      "detail":  "pid=16692 alive after 12s",
+                      "at":  "2026-10-24T19:16:31.7463136Z"
                   },
                   {
-                      "step":  "daemon survives closing the installed UI",
-                      "ok":  true,
-                      "detail":  "pid=46604 uptime=13.6s"
+                      "name":  "daemon_health",
+                      "status":  "PASS",
+                      "detail":  "version=3.2.0 mode=user-background pid=51088",
+                      "at":  "2026-10-24T19:16:31.9193867Z"
                   },
                   {
-                      "step":  "same-version reinstall exit 0",
-                      "ok":  true,
-                      "detail":  "exit=0 elapsed=24s"
+                      "name":  "daemon_survives_ui_close",
+                      "status":  "PASS",
+                      "detail":  "version=3.2.0 pid=51088",
+                      "at":  "2026-10-24T19:16:35.0682197Z"
                   },
                   {
-                      "step":  "exe survives reinstall",
-                      "ok":  true,
-                      "detail":  "bytes=249801728"
+                      "name":  "reinstall",
+                      "status":  "PASS",
+                      "detail":  "same-version reinstall kept the app executable",
+                      "at":  "2026-10-24T19:17:03.4752088Z"
                   },
                   {
-                      "step":  "silent uninstall exit 0",
-                      "ok":  true,
-                      "detail":  "exit=0 elapsed=11s"
+                      "name":  "uninstall",
+                      "status":  "PASS",
+                      "detail":  "exit=0 install directory removed",
+                      "at":  "2026-10-24T19:17:21.8913875Z"
                   },
                   {
-                      "step":  "install directory removed",
-                      "ok":  true,
-                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen"
+                      "name":  "user_data_preserved",
+                      "status":  "PASS",
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Roaming\\SuWen",
+                      "at":  "2026-10-24T19:17:21.8923851Z"
                   },
                   {
-                      "step":  "user data preserved after uninstall",
-                      "ok":  true,
-                      "detail":  "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-lifecycle-final"
-                  },
-                  {
-                      "step":  "registry entry removed",
-                      "ok":  true,
-                      "detail":  "remaining="
+                      "name":  "registry_removed",
+                      "status":  "PASS",
+                      "detail":  "HKCU uninstall entry removed",
+                      "at":  "2026-10-24T19:17:21.9581726Z"
                   }
               ],
-    "summary":  "14/14 steps passed"
+    "passed":  12,
+    "failed":  0,
+    "ok":  true,
+    "note":  "Host-level lifecycle only. Not a clean Windows VM, no code signature, no cross-major upgrade matrix."
 }

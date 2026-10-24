@@ -56,7 +56,7 @@ reproduce commands: `docs/verification/integration-and-e2e.md`,
   packaged live-MCP step skipped by its `SUWEN_SMOKE_LIVE` gate (live DB coverage comes from RPC E2E).
 - UI QA `node scripts/ui-dom-qa.mjs`: **19 passed / 0 failed / 10 warnings** (warnings = the five
   intentional main-process bridge methods); `node --check desktop/ui/app.js` exit 0;
-  `ui/actions.json` **142 actions**, contract **79 RPC methods**, five workspaces and research/MCP/
+  `ui/actions.json` **144 actions**, contract **79 RPC methods**, five workspaces and research/MCP/
   Skill/Channel/RSI panels present.
 - Python research worker **v2.0.0** (`suwen-research-worker/2`, pure stdlib): tests **22 / 21 pass /
   1 skip**; real demo.fcs metrics (FSC-A mean 50357.318211, SSC-A 30390.826209, FL1-A 734.915157,
@@ -113,3 +113,118 @@ reproduce commands: `docs/verification/integration-and-e2e.md`,
 Status vocabulary and requirement-level mapping: `docs/requirements/master-requirements.csv`
 (current: 60 IMPLEMENTED_PASS / 8 UNVERIFIED / 3 NOT_STARTED over 71 rows). Nothing in this section
 changes the rule that only an `IMPLEMENTED_PASS` row with TARGET evidence counts as complete.
+
+## Round 3 — release convergence (2026-10-25, first coherent pass)
+
+Authoritative checklist: `docs/requirements/round-3-release-master-prompt.md`. Round-3 work appends to
+round-2 status; it never overwrites a previous measurement.
+
+### Completed in this pass (measurable)
+
+- **Requirements matrix upgraded to the round-3 13-field schema**: `docs/requirements/master-requirements.csv`
+  now has 98 rows (R001–R148) with columns Requirement ID, Feature, Priority, Source, Implementation
+  Module, UI Entry, IPC/RPC, Backend Handler, Persistence, Test ID, Evidence, Status, Blocker.
+  Current statuses: **64 IMPLEMENTED_PASS / 27 UNVERIFIED / 6 NOT_STARTED / 1 BLOCKED_EXTERNAL**.
+  Round-3 rows R122–R148 cover the streaming protocol/render/composer/scroll/markdown targets, run
+  state machine, cancel/reconnect, error isolation, quantitative matrix, known defects, durability
+  re-verification, UI action coverage, visual acceptance, clean-VM lifecycle, GitHub publication, six
+  research capabilities, debate rules, MCP/Skill/provider/channel/RSI checks, performance, security,
+  OS sandbox/quotas, diagnostics, mandatory reports, release gates and 3.2.0 release docs.
+- **Parity matrix extended**: `docs/migration/feature-parity-matrix.csv` 85 rows —
+  **59 IMPLEMENTED_PASS / 11 UNVERIFIED / 12 NOT_STARTED / 1 BLOCKED_EXTERNAL / 1 N/A_PORT / 1 REPLACED**;
+  15 round-3 rows appended (typed protocol, incremental render, composer, scroll, markdown safety, run
+  state machine, cancel/reconnect E2E, error isolation, streaming matrix, visual acceptance, clean VM,
+  GitHub, security review, performance baseline, defect/gate governance).
+- **UI action coverage**: `docs/verification/ui-action-coverage.csv` regenerated from
+  `desktop/ui/actions.json` (144 actions) and the 81-method contract: **90 daemon RPC / 9 main-process
+  bridge / 43 UI-only, 0 undeclared methods**. Every row states that runtime click-through is not
+  individually recorded yet.
+- **Security review**: `docs/verification/security-review.md` + automated scan artefact
+  `docs/verification/artifacts/security-scan.json` — **PASS, 0 unresolved HIGH**, 18 LOW, 10
+  documented test fixtures; 408 tracked files, 13 commits; `.gitignore` covers `.env`/private keys;
+  `npm audit --omit=dev` 0 vulnerabilities. Verified controls include sandboxed renderer,
+  contextIsolation, sender-validated IPC, CSP (`connect-src 'none'`), safeStorage secrets, authenticated
+  named pipe, path guards.
+- **Performance baseline**: `docs/verification/performance-baseline.md` + artefact
+  `docs/verification/artifacts/performance-baseline.json` — daemon start-to-ready p50 391 ms (cold,
+  n=3) / 374 ms (warm); durable `create` p50 0.82 ms (n=60); `events.stream` p50 1.49 ms for 90 events /
+  26,467 B; snapshot 6.38 ms; WAL 3.27 MB after burst; daemon RSS 79,872 KB; Python worker
+  `flowSummary` 20.9 ms on demo.fcs (6,000 events). UI launch/markdown CPU/first-token/endurance not
+  measured.
+- **Release governance docs**: `docs/release/release-gates.md` (G1–G9 with statuses/evidence/blockers;
+  stable release **NOT authorized**, gates G3/G4/G5/G6/G8/G9 open or blocked),
+  `docs/verification/defect-register.csv` (D-001…D-012), `docs/release/final-acceptance-report.md`
+  (A–F skeleton with `PENDING_LEAD` slots), `docs/release/CHANGELOG.md`,
+  `docs/release/release-notes-v3.2.0.md` (draft, installer hash pending),
+  `docs/release/github-publication.md` (blocked: no `gh`/token; publication never attempted).
+- **CI workflow strengthened** (`.github/workflows/suwen-windows.yml`, authored, **never executed**):
+  typecheck + build + tests + RPC E2E + UI DOM QA + security scan + SBOM + unsigned NSIS build +
+  SHA256SUMS + artefact upload, plus the Python baseline pytest job.
+- **Main-process bridge facts (Lead, 2026-10-25; code-level, runtime unverified)**: `events.stream` is
+  main-process-only; renderer gap replay uses `window.suwen.call('events.replay', {since, limit})`;
+  the main process auto-reconnects the daemon with bounded backoff **300 ms…12 s**, re-pushes the
+  encrypted model config + safeStorage credential refs, and emits
+  `window.suwen.onConnection({state:'reconnecting'|'restored'|'lost'})`. Protocol contract:
+  `docs/architecture/streaming-events.md`. G3 remains UNVERIFIED until T2 runtime evidence.
+- **Source inspection for this pass (read-only)**: `desktop/src/stream-events.ts`,
+  `src/shared/contract.ts` (80 RPC methods incl. `events.stream`), `src/preload.cts` (frozen
+  `call`/`onEvent`/`onConnection`), `src/main.ts` (MAIN_ONLY set; events.stream polling; sender
+  validation at :112-113; sandbox at :108), `src/daemon.ts` (core+capabilities merged at :180,
+  `events.stream` dispatched at :194), `src/rpc/capabilities.ts` (six capability DAG builders),
+  `desktop/ui/actions.json` (144 actions), contract step kinds (19).
+
+### Still open (honest blockers after the final round-3 evidence)
+
+1. **Endurance (G6):** 8/24/72 h, sleep/hibernate, power loss, OS reboot and disk-full were **not run**;
+   only short-window chaos 12/12 in 51.4 s is evidenced.
+2. **Clean-Windows-VM lifecycle (G8):** not run. Host lifecycle is 12/12 on the final 3.2.0 artifact
+   (including installing 3.0.0-preview.1 and upgrading), but that is **not** a clean-machine test.
+3. **Code signing:** BLOCKED_EXTERNAL — no certificate; installer UNSIGNED (SmartScreen risk disclosed).
+4. **GitHub MIT publication (G9):** BLOCKED_EXTERNAL — no `gh` CLI/token; remote is readable but no
+   commit/tag/Release/asset upload was performed. Runbook in `docs/release/github-publication.md`.
+5. **Windows CI:** workflow authored but **never executed** (local host evidence only).
+6. **Real external model/provider accounts:** not used; provider protocols proven with local HTTP fixtures.
+7. **Optional legacy Python workbench:** unavailable on this host (missing `fastapi`); two unit tests
+   remain skipped (Windows symlink privilege; optional legacy Python deps).
+8. **Not bundled / NOT_STARTED:** Paper2Agent/Biomni/ERA/Robin/Kosmos integrations, OS-level
+   sandbox/quotas, model routing/vision, 23 legacy-skill migration into the new registry.
+9. **Streaming reconnect re-run:** T2's SIGKILL/reconnect duplicate-message scenario was fixed in source
+   and unit tests but the post-fix in-Electron re-run was not published, so R130/D-017 stays UNVERIFIED.
+
+No row may be marked IMPLEMENTED_PASS without executed evidence; the CSV remains authoritative.
+
+
+## Round 3 final evidence (SuWen desktop 3.2.0, 2026-10-25, Lead-measured)
+
+All numbers below were measured on the final 3.2.0 build in the TARGET workspace
+(`C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`).
+
+- Final installer: `desktop/release/SuWen-Setup-3.2.0-win-x64.exe` — **129,446,526 bytes** — SHA-256
+  `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` — **UNSIGNED**. Blockmap 135,974 B; unpacked `win-unpacked/SuWen.exe` 249,801,728 B;
+  `SHA256SUMS` written to `desktop/release/SHA256SUMS` and mirrored at `docs/release/SHA256SUMS.txt`.
+- Final tests: `npm test` 182 tests / 180 pass / 0 fail / 2 skipped / 33.4 s / exit 0;
+  `e2e-rpc --live` 42/0 (real Europe PMC PMID 42878939 + UniProt Q9Y2B4); packaged smoke 8/8;
+  UI DOM QA 19/0/12; T1 stream-core 23/23; T2 visual audit 144-shot matrix / 0 layout defects;
+  T3 deterministic 19 PASS / 0 FAIL / 3 live-gated SKIP + live 21/21; chaos 12/12 in 51.4 s;
+  host installer lifecycle 12/12 including installing 3.0.0-preview.1 and upgrading to 3.2.0.
+- Machine-readable state: `master-requirements.csv` 98 rows — **81 IMPLEMENTED_PASS / 12 UNVERIFIED /
+  4 NOT_STARTED / 1 BLOCKED_EXTERNAL**; `feature-parity-matrix.csv` 85 rows (67/6/9/1/1/1);
+  `ui-action-coverage.csv` 144 actions / 0 unknown; `defect-register.csv` 20 rows.
+- Historical 3.1.0 numbers recorded earlier in this file (129,425,145 B / E1A1062C…) are superseded by
+  the final 3.2.0 artifact above. Clean-Windows-VM lifecycle, code signing, endurance (8/24/72 h,
+  reboot, power loss), real external accounts and GitHub publication remain open/blocked.
+
+
+### Final T2 correction (Lead-measured, 2026-10-25)
+
+- Duplicate persisted assistant messages (P1) — **RESOLVED**: `desktop/src/conversations.ts` merges
+  assistant turns by `(taskId, role='assistant')`; regression `desktop/test/conversations.test.ts`
+  (4 tests); Lead re-ran the T2 persist case -> `assistants=1 taskAssistants=1`, 0 findings
+  (`desktop/release/smoke/ui-streaming-20261024-192807-final.json`). R130 (cancel/timeout/reconnect)
+  is now IMPLEMENTED_PASS on this evidence.
+- Auto-reconnect after daemon SIGKILL PASS 3/3 (offline 72-520 ms, restored 702-779 ms, 0 reloads).
+- P2 failed-turn chat error surface fixed in `desktop/ui/app.js` (`#chat-notice` + localized
+  `chatTaskFailed`); static QA passes; T2 visual confirmation pending (D-020).
+- Master counts now **81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL**
+  (98 rows); parity 85 rows = **67 PASS / 6 UNVERIFIED / 9 NOT_STARTED / 1 N/A_PORT / 1 REPLACED /
+  1 BLOCKED_EXTERNAL**.

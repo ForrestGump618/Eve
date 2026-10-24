@@ -129,9 +129,9 @@ Resolution status of the earlier conflicts/actions:
   E1A1062C...) exists and was rebuilt from frozen final code at `2026-10-24T17:41:52Z`;
   final-artifact host lifecycle **14/14** and cross-version upgrade **8/8** passed (C-14).
   `SHA256SUMS` is now generated; clean-VM lifecycle and code signing remain pending.
-- **Action 6 / C-06 (UI actions): resolved.** `desktop/ui/actions.json` now exists with 142 actions;
+- **Action 6 / C-06 (UI actions): resolved.** `desktop/ui/actions.json` now exists with 144 actions;
   `docs/verification/ui-action-coverage.csv` regenerated (94 daemon-RPC, 5 main-process bridge,
-  43 UI-only; `ui-dom-qa.mjs` 19/0/10).
+  43 UI-only; `ui-dom-qa.mjs` 19/0/12).
 - **C-12 (importer not implemented): resolved.** `import-service` is wired and tested (5/5);
   real legacy-home read-only scan found 9 item groups; rollback verified.
 
@@ -199,8 +199,61 @@ numbers: `desktop/release/SuWen-Setup-3.1.0-win-x64.exe`, **129,425,145 bytes**,
 (`82779B90...`, 129,424,645 B) is **superseded and must not appear as the delivered artifact** in
 any report. Final `npm test`: 150 tests / 148 pass / 0 fail / 2 skipped / 28.3 s / exit 0;
 packaged smoke 8/8 on the final build; `e2e-rpc --live` 42/0 (real Europe PMC + UniProt calls).
-Final-artifact host lifecycle 14/14 and cross-version upgrade 8/8 are now recorded (C-14), and
+Final-artifact host lifecycle 14/14 and cross-version upgrade 8/8 were recorded for 3.1.0 (C-14; superseded by C-17), and
 `SHA256SUMS` is generated (`desktop/release/SHA256SUMS`, `docs/release/SHA256SUMS.txt`). Still
 unverified and left explicit: clean-VM install/upgrade/uninstall, code signing, 8/24/72 h
 endurance, real external model accounts, and the legacy Python workbench runtime on this machine
 (its optional Python env lacks fastapi).
+
+
+## C-17. 3.1.0 hashes in earlier sections are superseded by the final 3.2.0 build
+
+Any earlier reference to `SuWen-Setup-3.1.0-win-x64.exe` 129,425,145 B SHA256 `E1A1062C…` (and any
+`82779B90…` pre-final 3.1.0 hash) is historical only. The delivered artifact is
+`SuWen-Setup-3.2.0-win-x64.exe` **129,446,526 B** SHA256
+`7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546` (UNSIGNED), with blockmap
+135,974 B SHA256 `BCD62E14…` and `win-unpacked/SuWen.exe` 249,801,728 B SHA256 `8F7EAF76…`;
+`desktop/release/SHA256SUMS` + `docs/release/SHA256SUMS.txt`. Resolution: release notes, installer
+report, acceptance report and progress were updated; 3.1.0 rows in historical sections are marked
+superseded there.
+
+## C-18. T2 post-fix SIGKILL/reconnect re-run and visual matrix are not published
+
+T2's deterministic streaming report (`docs/verification/ui-e2e.md`, build before the auto-reconnect /
+duplicate-append fix) records FAIL for auto-reconnect, kill-recovery duplication and marks the defects
+OPEN. The fixes landed afterwards in `desktop/src/main.ts` and `desktop/src/conversations.ts` with
+`conversations.test.ts` coverage, but T2's post-fix in-Electron re-run and
+`docs/verification/ui-visual-audit.md` were not published before this documentation pass.
+Resolution: R130 (cancel/timeout/reconnect) and R136 (visual acceptance) remain UNVERIFIED with this
+conflict cited; release gates G3 is PASS on the deterministic fixture suite with this caveat and the
+visual item is separate. Do not claim "reconnect verified in Electron" or "visual acceptance complete"
+until T2 publishes the re-run/visual report.
+
+## C-19. Installer lifecycle and upgrade evidence are host-level, not clean-VM
+
+`installer-lifecycle.json` (12/12 host steps, version 3.2.0) and the upgrade-source step (installed
+3.0.0-preview.1) were measured on the development host, which already has Node/Python and previous
+SuWen data; the probe removed `ELECTRON_RUN_AS_NODE` from the launching shell only. Resolution: R119 and
+release gate G8-clean-VM remain UNVERIFIED; only the host-level rows are PASS.
+
+## C-20. Public GitHub publication is blocked
+
+`gh` CLI is absent and no GitHub token exists in the session; the remote
+`https://github.com/ForrestGump618/suwen.git` is readable (`git ls-remote` OK). Release tag
+`suwen-vnext-3.2.0` and asset commands are documented in `docs/release/github-publication.md` but
+**were not executed**. Resolution: R138 BLOCKED_EXTERNAL, release gate G9 BLOCKED; MIT licence/public
+repo promise is not yet satisfied online.
+
+
+## C-17 Final 3.2.0 evidence supersedes earlier lifecycle/hash numbers (2026-10-25)
+
+The final 3.2.0 build is authoritative: `desktop/release/SuWen-Setup-3.2.0-win-x64.exe`
+**129,446,526 B** SHA-256 `7B0DDE7B9E12E403E620E16651D969CD21C874CF16598D409D6A7B2FA2199546`
+(**UNSIGNED**); blockmap 135,974 B SHA-256 `BCD62E14…1AC2`; unpacked `win-unpacked/SuWen.exe`
+249,801,728 B SHA-256 `8F7EAF76…22E1`; `SHA256SUMS` present in `desktop/release/` and mirrored at
+`docs/release/SHA256SUMS.txt`. Host lifecycle **12/12** (including installing 3.0.0-preview.1 and
+upgrading to 3.2.0) passed; final `npm test` 182 tests / 180 pass / 2 skipped / 33.4 s; packaged smoke
+8/8; `e2e-rpc --live` 42/0; chaos 12/12 in 51.4 s. Earlier numbers for 3.1.0 (`E1A1062C…`,
+129,425,145 B, 14/14 lifecycle, `82779B90…` pre-final) are historical and must never be reported as
+the delivered 3.2.0 artifact. Not done: clean-Windows-VM lifecycle, code signing, 8/24/72 h endurance,
+real external accounts, GitHub publication (`docs/release/final-acceptance-report.md`).

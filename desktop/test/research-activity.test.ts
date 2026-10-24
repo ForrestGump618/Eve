@@ -568,10 +568,9 @@ test('analysis profile delegates to the worker datasetProfile operation', async 
   assert.equal((output.profile as Record<string, unknown>).rows, 2);
   const call = fake.worker.lastCall('datasetProfile');
   assert.ok(call);
-  assert.equal((call.input as Record<string, unknown>).datasetPath, '/data/set.csv');
+  assert.equal((call.input as Record<string, unknown>).path, '/data/set.csv');
 
-  const source = await invoke(fake, 'analysis', { op: 'profile', source: 'x=1' });
-  assert.equal(source.sourceSha256, sha256Hex('x=1'));
+  await assert.rejects(async () => invoke(fake, 'analysis', { op: 'profile', source: 'x=1' }), ValidationError);
   await assert.rejects(async () => invoke(fake, 'analysis', { op: 'profile' }), ValidationError);
   await assert.rejects(async () => invoke(fake, 'analysis', { op: 'explode' }), ValidationError);
 });

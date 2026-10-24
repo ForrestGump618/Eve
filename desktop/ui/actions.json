@@ -109,7 +109,18 @@
     "page": "global",
     "method": "snapshot",
     "params": {},
-    "notes": "Automatic 800 ms poll; no user control. Drives every rendered task/status."
+    "notes": "Automatic 2500 ms reconciliation poll; no user control. Primary streaming is pushed through window.suwen.onEvent, this slow poll only reconciles task/health state and fills text when push transport is unavailable."
+  },
+  {
+    "id": "auto-stream-replay",
+    "selector": "#timeline",
+    "page": "chat",
+    "method": "events.replay",
+    "params": {
+      "since": "number (last applied global event sequence)",
+      "limit": "number (bounded by the main process, 2000 max)"
+    },
+    "notes": "Main-process bridge (events.stream itself is main-only): one replay request per detected envelope-sequence gap, applied through the same pure stream reducer, never rendered out of order."
   },
   {
     "id": "auto-health",
@@ -1478,5 +1489,15 @@
     "method": "secrets.status",
     "params": {},
     "notes": "List credential reference names stored in the OS-encrypted store; values are not returned."
+  },
+  {
+    "id": "theme-select",
+    "selector": "#defaults-theme",
+    "page": "settings",
+    "method": "defaults.set",
+    "params": {
+      "theme": "system | light | dark (persisted preference key)"
+    },
+    "notes": "Three-state theme control (system/light/dark). Applies immediately through document.documentElement data-theme without rebuilding the DOM, persists through the defaults.set preference key theme, and the system option follows prefers-color-scheme including live OS changes."
   }
 ]

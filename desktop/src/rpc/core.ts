@@ -249,7 +249,7 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
         const peerData = recordData(peer);
         if (peerData.selected === true) store.putRecord('hypothesis', { ...peerData, selected: false } as unknown as Json, { id: peer.id, expectedVersion: peer.version });
       }
-      const record = store.putRecord('hypothesis', { ...data, selected: true, selectedAt: Date.now() } as unknown as Json, { id, expectedVersion: current.version });
+      const record = store.putRecord('hypothesis', { ...data, selected: true, selectedAt: Date.now(), status: 'selected' } as unknown as Json, { id, expectedVersion: current.version });
       return { id: record.id, version: record.version, selected: true };
     },
 

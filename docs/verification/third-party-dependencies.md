@@ -57,11 +57,11 @@ SBOM reproduction script is declared in `desktop/package.json` (`sbom` script) a
 | Code-signing status | **Honest disclosure: build is UNSIGNED** (`signExecutable: false`), SmartScreen warning documented; no fake signature claims | `desktop/package.json`; `docs/progress.md`; `docs/release-notes-vnext.md`; `build-environment.json` (`signed:false`) |
 | Downloaded-executable permission | Skill install contract requires explicit `confirm:true` + static checks before enable; daemon rejects unregistered step kinds | `desktop/src/shared/contract.ts`; `docs/architecture/vnext-contract.md` |
 | Dangerous commands default | approvals/policy machinery exists; no blanket shell exposure in vNext UI (no UI wiring yet) | `desktop/src/security.ts`, `daemon.ts` approval step |
-| Installer hash publication | **NOT AVAILABLE in TARGET** — no `SHA256SUMS`, no `.exe` artifact (prototype only). CI produces `SHA256SUMS` when run | `docs/release/windows-installer-verification.md` (PENDING_LEAD) |
+| Installer hash publication | **AVAILABLE**: `desktop/release/SHA256SUMS` + `docs/release/SHA256SUMS.txt` (3 lines: 3.2.0 exe/blockmap/unpacked); CI produces `SHA256SUMS` when it runs | `docs/release/windows-installer-verification.md`, `docs/release/SHA256SUMS.txt` |
 
 ## 6. Gaps and honest limitations
 
-1. **No installer artifact or checksum in this workspace** — supply-chain verification of the release can only be completed after the Windows CI (or Lead) produces the NSIS installer and `SHA256SUMS`. Status: PENDING_LEAD.
+1. **Installer artifact and checksum now exist** (final 3.2.0 build, 129,446,526 B, SHA-256 `7B0D…`; `SHA256SUMS` in both locations). Remaining supply-chain gap: no signature and no independent third-party reproducible build.
 2. **No code signing certificate**; unsigned build is disclosed, not fixed. SmartScreen risk is real for end users.
 3. **SBOM scope is runtime JS/Node only** (`js-tiktoken`, Electron metadata); it does not enumerate Chromium/Node third-party packages shipped inside the Electron runtime. No SBOM for the Python baseline (not shipped) and no `pip-audit`/`safety` result in the repo.
 4. **License audit is not comprehensive/legal**: the repo has notices and inventory, but no per-transitive-license report for Electron/Chromium. Python dependency licenses rely on the user-supplied environment.

@@ -134,9 +134,53 @@ export interface RsiRunView {
   updatedAt: number;
 }
 
+/** Live model/step text buffer; append-only within one step. See docs/architecture/streaming-events.md. */
+export interface StreamBuffer {
+  text: string;
+  updatedAt: number;
+  stepId?: string;
+}
+
+export const STREAM_EVENT_SCHEMA_VERSION = 1;
+
+export interface StreamTaskSummary {
+  taskId: string;
+  status: string;
+  version: number;
+  updatedAt: number;
+}
+
+export interface StreamEnvelope {
+  schemaVersion: number;
+  eventId: string;
+  sequence: number;
+  taskId: string;
+  stepId?: string;
+  type: string;
+  sourceType: string;
+  at: number;
+  payload: Json;
+}
+
+export interface StreamSnapshotView {
+  taskId: string;
+  stepId?: string;
+  text: string;
+  updatedAt: number;
+}
+
+export interface StreamBatch {
+  schemaVersion: number;
+  cursor: number;
+  reset?: boolean;
+  tasks: StreamTaskSummary[];
+  events: StreamEnvelope[];
+  streams: StreamSnapshotView[];
+}
+
 /** Canonical RPC method names. daemon.ts and main.ts must agree with this list. */
 export const RPC_METHODS = [
-  'health', 'snapshot', 'create', 'control', 'approval', 'configure', 'python', 'shutdown',
+  'health', 'snapshot', 'create', 'control', 'approval', 'configure', 'python', 'shutdown', 'events.stream',
   'contextHistory', 'contextRestore', 'contextCompact', 'legacyStart',
   'project.list', 'project.create', 'project.update', 'project.delete',
   'conversation.list', 'conversation.create', 'conversation.get', 'conversation.append', 'conversation.update', 'conversation.delete',

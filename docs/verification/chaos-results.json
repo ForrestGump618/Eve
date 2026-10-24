@@ -1,16 +1,16 @@
 {
-  "home": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-chaos-Uf0f0X",
-  "startedAt": "2026-10-24T17:33:43.614Z",
+  "home": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-chaos-kKReUf",
+  "startedAt": "2026-10-24T19:16:09.682Z",
   "scenarios": [
     {
       "name": "daemon starts from durable state",
       "ok": true,
-      "detail": "pid 42800"
+      "detail": "pid 40776"
     },
     {
       "name": "python worker SIGKILL is retried and recovers",
       "ok": true,
-      "detail": "attempts 2, 15173 ms"
+      "detail": "attempts 2, 15199 ms"
     },
     {
       "name": "recovered python step wrote exactly one artifact",
@@ -25,7 +25,7 @@
     {
       "name": "daemon SIGKILL mid-step recovers from durable lease",
       "ok": true,
-      "detail": "completed, attempts 2, 26508 ms after restart"
+      "detail": "completed, attempts 2, 26318 ms after restart"
     },
     {
       "name": "recovery kept the same operation id and one artifact",
@@ -68,7 +68,7 @@
     "No 8h/24h/72h soak, no sleep/hibernate, no power loss, no OS reboot, no disk-full test.",
     "Model-provider faults are injected by a local HTTP fixture, not a real vendor account."
   ],
-  "durationMs": 52206,
+  "durationMs": 51434,
   "result": "passed",
-  "finishedAt": "2026-10-24T17:34:35.821Z"
+  "finishedAt": "2026-10-24T19:17:01.117Z"
 }

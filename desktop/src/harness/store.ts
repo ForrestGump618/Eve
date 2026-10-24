@@ -156,6 +156,15 @@ export class Store {
   getSteps(taskId: string): StepRun[] { return (this.db.prepare('SELECT * FROM steps WHERE task_id=? ORDER BY rowid').all(taskId) as Row[]).map(r => this.step(r)); }
   getStep(taskId: string, stepId: string): StepRun | undefined { const row = this.db.prepare('SELECT * FROM steps WHERE task_id=? AND id=?').get(taskId, stepId) as Row | undefined; return row && this.step(row); }
   events(taskId: string, after = 0): RunEvent[] { return (this.db.prepare('SELECT * FROM events WHERE task_id=? AND sequence>? ORDER BY sequence').all(taskId, after) as Row[]).map(r => ({ sequence: r.sequence, taskId: r.task_id, stepId: r.step_id, type: r.type, version: 1, at: r.at, data: JSON.parse(r.data_json) })); }
+  /** Global ordered event window used by the streaming protocol (docs/architecture/streaming-events.md). */
+  eventsSince(after = 0, limit = 500): RunEvent[] {
+    const capped = Math.max(1, Math.min(2000, Math.floor(limit)));
+    return (this.db.prepare('SELECT * FROM events WHERE sequence>? ORDER BY sequence LIMIT ?').all(after, capped) as Row[]).map(r => ({ sequence: r.sequence, taskId: r.task_id, stepId: r.step_id, type: r.type, version: 1, at: r.at, data: JSON.parse(r.data_json) }));
+  }
+  maxEventSequence(): number {
+    const row = this.db.prepare('SELECT COALESCE(MAX(sequence),0) AS seq FROM events').get() as { seq: number };
+    return row.seq;
+  }
   checkpoints(taskId: string): Checkpoint[] { return (this.db.prepare('SELECT * FROM checkpoints WHERE task_id=? ORDER BY id').all(taskId) as Row[]).map(r => ({ id: r.id, taskId: r.task_id, at: r.at, reason: r.reason, snapshot: JSON.parse(r.snapshot_json) })); }
   artifacts(taskId: string): Artifact[] { return (this.db.prepare('SELECT * FROM artifacts WHERE task_id=? ORDER BY created_at,rowid').all(taskId) as Row[]).map(r => ({ id: r.id, taskId: r.task_id, stepId: r.step_id, path: r.path, sha256: r.sha256, bytes: r.bytes, mediaType: r.media_type ?? undefined, createdAt: r.created_at })); }
   private checkpoint(taskId: string, reason: string, metadata?: CompletionMetadata): void {

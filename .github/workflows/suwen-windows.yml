@@ -1,10 +1,10 @@
 name: SuWen Windows CI
 
-# Real Windows CI for the vNext desktop app + preserved Python baseline.
-# Replaces the earlier draft workflow. It builds, tests, packages an unsigned
-# NSIS installer, generates an SBOM and SHA256SUMS, and uploads verifiable
-# artifacts. It does NOT sign and does NOT claim a clean-VM install; those
-# remain explicit external gates (see docs/release/windows-installer-verification.md).
+# Real Windows CI for the vNext desktop app + preserved Python baseline (round 3).
+# Builds, typechecks, tests, runs RPC E2E + UI DOM QA + security scan, packages an UNSIGNED NSIS
+# installer, generates an SBOM and SHA256SUMS, and uploads verifiable artifacts.
+# It does NOT sign and does NOT claim a clean-VM install; those remain explicit external gates
+# (see docs/release/windows-installer-verification.md and docs/release/release-gates.md).
 
 on:
   workflow_dispatch:
@@ -35,10 +35,17 @@ jobs:
   desktop-windows:
     name: Desktop build + test + installer (Windows x64)
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: desktop
+    env:
+      # Machine-readable exit codes for the packaged smoke / UI QA helpers.
+      SUWEN_SMOKE_PACKAGED: '1'
+      # electron-builder binary downloads occasionally time out from GitHub on CI; mirror is used
+      # only for build-time binaries, the app source still comes from this repository.
+      ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
+      ELECTRON_BUILDER_BINARIES_MIRROR: https://npmmirror.com/mirrors/electron-builder-binaries/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,8 +60,33 @@ jobs:
       - name: Install dependencies (lockfile exact)
         run: npm ci
 
-      - name: Compile TypeScript and run unit/integration tests
-        run: npm test
+      - name: Typecheck (no emit)
+        run: npx tsc -p tsconfig.json --noEmit
+
+      - name: Compile and run unit/integration tests
+        shell: pwsh
+        run: |
+          npm test 2>&1 | Tee-Object -FilePath release-test.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: RPC E2E against real detached daemon (live public databases)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          node scripts/e2e-rpc.mjs --dist dist --live 2>&1 | Tee-Object -FilePath release/e2e-rpc.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: UI DOM QA (actions.json + i18n + streaming basics)
+        shell: pwsh
+        run: |
+          node scripts/ui-dom-qa.mjs 2>&1 | Tee-Object -FilePath release/ui-dom-qa.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Security scan (working tree + history)
+        shell: pwsh
+        run: |
+          node scripts/security-scan.mjs --out release/security-scan.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build NSIS installer (unsigned; x64)
         run: npm run dist:win
@@ -74,7 +106,7 @@ jobs:
           if ($exe.Length -le 0) { throw 'Installer is empty' }
           $blockmap = Get-ChildItem release -Filter '*.blockmap' | Select-Object -First 1
           $lines = @()
-          foreach ($f in @($exe) + @($blockmap) + @(Get-Item release/sbom.cdx.json)) {
+          foreach ($f in @($exe) + @($blockmap) + @(Get-Item release/sbom.cdx.json) + @(Get-Item release/security-scan.json)) {
             $h = (Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLower()
             $lines += "$h  $($f.Name)"
           }
@@ -95,7 +127,7 @@ jobs:
             if (-not (Test-Path $p)) { throw "missing worker script: $p" }
           }
 
-      - name: Upload installer, checksums, SBOM and test log
+      - name: Upload installer, checksums, SBOM, security scan and logs
         uses: actions/upload-artifact@v4
         with:
           name: SuWen-windows-x64-preview
@@ -106,6 +138,10 @@ jobs:
             desktop/release/*.blockmap
             desktop/release/SHA256SUMS
             desktop/release/sbom.cdx.json
+            desktop/release/security-scan.json
+            desktop/release/e2e-rpc.log
+            desktop/release/ui-dom-qa.log
+            desktop/release-test.log
 
   python-baseline:
     name: Python baseline regression (Windows)
@@ -133,7 +169,7 @@ jobs:
           OMICSLAB_HOME: ${{ runner.temp }}\omicslab-ci-home
         run: |
           New-Item -ItemType Directory -Force -Path $env:OMICSLAB_HOME | Out-Null
-          python -m pytest -q -p no:cacheprovider tests 2>&1 | Tee-Object -FilePath pytest-desktop.json.log
+          python -m pytest -q -p no:cacheprovider tests 2>&1 | Tee-Object -FilePath pytest-ci.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload pytest log
@@ -143,4 +179,4 @@ jobs:
           name: suwen-python-pytest-log
           if-no-files-found: warn
           retention-days: 7
-          path: pytest-desktop.json.log
+          path: pytest-ci.log
