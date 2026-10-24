@@ -8,10 +8,19 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const repoRoot = resolve(root, '..');
-const sumsPath = join(root, 'release', 'SHA256SUMS');
+const allowMissingRelease = process.argv.includes('--allow-missing-release');
+let sumsPath = join(root, 'release', 'SHA256SUMS');
+let docsOnly = false;
 if (!existsSync(sumsPath)) {
-  console.error('verify-doc-hashes: release/SHA256SUMS is missing');
-  process.exit(1);
+  const mirror = join(repoRoot, 'docs', 'release', 'SHA256SUMS.txt');
+  if (allowMissingRelease && existsSync(mirror)) {
+    sumsPath = mirror;
+    docsOnly = true;
+    console.log('verify-doc-hashes: release/SHA256SUMS absent (fresh checkout); verifying the committed docs mirror only');
+  } else {
+    console.error('verify-doc-hashes: release/SHA256SUMS is missing (build locally, or pass --allow-missing-release in a fresh checkout)');
+    process.exit(1);
+  }
 }
 const entries = readFileSync(sumsPath, 'utf8')
   .split(/\r?\n/)
@@ -87,4 +96,4 @@ if (failures.length) {
   console.error(`verify-doc-hashes: FAIL (${failures.length} issue(s))`);
   process.exit(1);
 }
-console.log(`verify-doc-hashes: PASS (${entries.length} artifacts checked in release evidence)`);
+console.log(`verify-doc-hashes: PASS (${entries.length} artifacts checked in ${docsOnly ? 'committed docs mirror (release artifacts absent)' : 'release evidence'})`);
