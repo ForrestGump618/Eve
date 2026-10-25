@@ -1,4 +1,4 @@
-# 素问 / SuWen desktop 3.2.0
+# 素问 / SuWen desktop 3.3.0
 
 New Electron/TypeScript client plus an independent authenticated user-level daemon. The original
 Python research workbench remains in the parent repository and can be opened as an optional,
@@ -18,16 +18,18 @@ node scripts/streaming-ui-e2e.mjs --mode=final
 npm run dist:win                      # NSIS x64 installer into release/
 ```
 
-Measured on this machine (final 3.2.0 build, 2026-10-25, branch `suwen-vnext-durable`):
+Measured on this machine (final 3.3.0 build, 2026-10-25, branch `suwen-vnext-durable`):
 
 | Check | Result |
 |---|---|
-| `npm test` | **183 tests / 181 pass / 0 fail / 2 skipped**, 28.6 s (final full run), exit 0 |
+| `npm test` | **222 tests / 220 pass / 0 fail / 2 skipped**, 86 s, exit 0 |
 | `e2e-rpc.mjs --live` (real detached daemon over authenticated pipe) | **42 passed / 0 failed**, ~7 s, incl. real Europe PMC/PubMed (PMID 42878939) + UniProt (Q9Y2B4) calls |
-| packaged `electron-smoke.mjs` (final build) | **8/8 checks**, exit 0, 68 s (30 s durable timer completes after UI exit; reopen attaches same daemon) |
-| `ui-dom-qa.mjs` | **19 passed / 0 failed / 12 warnings** (main-process bridge methods); 144 actions, 81 RPC-contract entries + main bridge |
-| streaming UI E2E (T2) | deterministic fixture suite 22 cases → 19 pass / 0 fail / 3 skip, 10.8 s; delta matrix 100/1k/10k sha-exact; composer 0 px drift; scroll 0 px forced drift |
-| chaos (short window) | 12/12 scenarios, 51.7 s (worker/daemon SIGKILL, idempotency, cancel, provider 429→500→200 with approvals) |
+| packaged `electron-smoke.mjs` (final build, hosted workbench deps) | **10/10 checks, passed**, incl. hosted legacy SPA window (12 nav items / 12 routes) |
+| `ui-dom-qa.mjs` | **18 passed / 0 failed / 13 warnings** (main-process bridge methods); 148 actions, 84 RPC-contract entries + main bridge |
+| hosted workbench E2E | **34/34 checks**, 12/12 legacy routes, 0 page/console errors, 0 CSP violations, 19 screenshots |
+| runtime smoke / config injection | **27/27** / **13/13** (managed Python runtime, isolated bridge, model config handoff) |
+| markdown unit tests | **32/32** (progressive streaming, KaTeX, Mermaid, tables, degradation) |
+| chaos (short window) | 12/12 scenarios, 53.4 s (worker/daemon SIGKILL, idempotency, cancel, provider 429→500→200 with approvals) |
 | installer | `release/SuWen-Setup-3.3.0-win-x64.exe`, **131,011,183 B**, SHA-256 `0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03`, **UNSIGNED**; host lifecycle 12/12 + upgrade from 3.0.0-preview.1 (clean VM NOT run) |
 
 Skip reasons: Windows symlink `EPERM` in one research-worker test; optional legacy Python workbench
