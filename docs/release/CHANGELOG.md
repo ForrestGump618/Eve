@@ -20,7 +20,7 @@ versioning.
     (`sk-legacy-e2e-sentinel-…`, `fixture-key-not-a-real-credential`) were classified HIGH.
     Fixed by extending the documented test-fixture allowlist to `desktop/scripts/e2e-*.mjs` plus
     `sentinel|not-a-real|e2e-` fixture tokens (narrowly scoped; findings stay printed and listed).
-  - **run 40142902006 (`5ac5bd4`, 2026-10-25): SUCCESS** — both jobs green (Desktop Node job and
+  - **run 40144915574 (`0e94843`, 2026-10-25): SUCCESS** — both jobs green (Desktop Node job and
     Python baseline). This is the first verified green CI run for the vNext desktop; see
     `docs/verification/integration-and-e2e.md` §12.
 - Added `desktop/scripts/verify-doc-hashes.mjs` and a CI step: every current artifact hash must be

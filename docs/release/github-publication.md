@@ -3,7 +3,7 @@
 Status: **SOURCE PUBLISHED; RELEASE ASSETS NOT PUBLISHED (BLOCKED_EXTERNAL)**. The repository remote
 is writable via the user's existing SSH key; branch `suwen-vnext-durable` and annotated tag
 `suwen-vnext-3.2.0` were pushed (measured 2026-10-25). The two-job Windows CI workflow executes on
-GitHub and is green (run `40142902006`). No GitHub Release, Release asset, branch-protection change
+GitHub and is green (run `40144915574`). No GitHub Release, Release asset, branch-protection change
 or repository-settings change was performed: the release decision is **HOLD** (clean-VM lifecycle,
 signing and endurance gates remain unverified; `gh`/token absent). Never read this file as a claim
 that a Release exists.
@@ -13,10 +13,10 @@ that a Release exists.
 | Item | Value |
 | --- | --- |
 | Local workspace | `C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext` |
-| Local branch / HEAD | `suwen-vnext-durable` / `5ac5bd4` + round-4 working tree (see §3b) |
+| Local branch / HEAD | `suwen-vnext-durable` / `0e94843` + round-4 verification docs (see §3b) |
 | Remote | `https://github.com/ForrestGump618/suwen.git` (public) |
 | Remote state | source branch + tag `suwen-vnext-3.2.0` pushed (SSH over port 443; HTTPS push blocked by host network) |
-| CI | `.github/workflows/suwen-windows.yml` executes: **run 40142902006 SUCCESS on `5ac5bd4`** (Desktop Node job + Python baseline job). Earlier real failures were fixed, not hidden (worker optional-numpy assertion; scoped e2e fixture tokens in the secret scan). |
+| CI | `.github/workflows/suwen-windows.yml` executes: **run 40144915574 SUCCESS on `0e94843`** (Desktop Node job + Python baseline job). Earlier real failures were fixed, not hidden (worker optional-numpy assertion; scoped e2e fixture tokens in the secret scan). |
 | `gh` CLI | not installed (`Get-Command gh` fails / absent) |
 | GitHub auth | no `GITHUB_TOKEN`/`GH_TOKEN` in the environment; git credential helper `manager` holds a usable GitHub credential (used through git only; never printed) |
 | MIT licence | `LICENSE` (MIT at repo root for vNext), `desktop/LICENSE`, `NOTICE`, `desktop/third-party-licenses/`, SBOM; legacy Python keeps Apache-2.0 and is shipped as compatibility source |
@@ -88,7 +88,7 @@ secret was committed (never publish first and scan later).
 - Source publication **succeeded**: branch `suwen-vnext-durable` and annotated tag `suwen-vnext-3.2.0`
   were pushed over SSH (`ssh://git@ssh.github.com:443/ForrestGump618/suwen.git`); HTTPS push to
   `github.com:443` is blocked by this host network.
-- GitHub Actions executes the committed workflow: **run 40142902006 on `5ac5bd4` is green** (Desktop
+- GitHub Actions executes the committed workflow: **run 40144915574 on `0e94843` is green** (Desktop
   Node job: typecheck, full unit/integration suite, live RPC E2E, UI DOM QA, security scan, NSIS
   build, SBOM, checksums, artifact upload; Python baseline job: pytest).
 - GitHub **Release asset upload was NOT performed**: `gh` CLI and `GITHUB_TOKEN`/`GH_TOKEN` are
@@ -96,7 +96,7 @@ secret was committed (never publish first and scan later).
   gates remain unverified. The installer therefore exists only locally (path/hash in §6); it is not
   downloadable from a Release URL.
 - Never claim a Release URL, uploaded asset, signed installer, or clean-VM-verified release. A green
-  CI run is a real, verifiable claim (`actions/runs/40142902006`).
+  CI run is a real, verifiable claim (`actions/runs/40144915574`).
 
 ## 4. If credentials remain unavailable
 
@@ -125,6 +125,6 @@ scan clean, publication **not performed**.
   `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897` — **UNSIGNED**.
 - `desktop/release/SuWen-Setup-3.2.0-win-x64.exe.blockmap` — 135,948 B — SHA-256 `283B27E19D2A943DD940B8E83F748CEB2627950A87CAD509069EFAE4230CBB72`.
 - `desktop/release/SHA256SUMS` — mirrored at `docs/release/SHA256SUMS.txt` (checked by `scripts/verify-doc-hashes.mjs`).
-- Publication status: source branch/tag pushed; CI green (`40142902006`); **Release assets
+- Publication status: source branch/tag pushed; CI green (`40144915574`); **Release assets
   BLOCKED_EXTERNAL** (no `gh`/token) and **HOLD** (clean-VM/signing/endurance unverified).
   Never claim a Release URL, a signed installer, or a clean-VM-verified release.

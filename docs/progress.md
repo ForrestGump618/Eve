@@ -241,7 +241,7 @@ All numbers below were measured on the final 3.2.0 build in the TARGET workspace
   2. run on `9132ec1` failed at the security scan: scoped e2e fixture tokens were classified HIGH.
      Scanner now accepts only the documented fixture allowlist and the evidence artifact was refreshed
      (0 unresolved HIGH / 48 LOW / 14 documented fixtures; commit `5ac5bd4`).
-  3. **run 40142902006 on `5ac5bd4`: SUCCESS**, both jobs (Desktop: typecheck, tests, live RPC E2E,
+  3. **run 40144915574 on `5ac5bd4`: SUCCESS**, both jobs (Desktop: typecheck, tests, live RPC E2E,
      UI DOM QA, security scan, NSIS build, SBOM, SHA256SUMS, artifacts; Python baseline pytest).
 - Added `desktop/scripts/verify-doc-hashes.mjs` (checks every current artifact hash is quoted and no
   stale full hash remains in release evidence; also checks SHA256SUMS mirror) and wired it into CI as a
