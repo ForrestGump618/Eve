@@ -13,10 +13,11 @@ desktop takeover, durable harness and Windows release") · remote
 
 | Item | Value |
 | --- | --- |
-| Local repo / branch / commit | `desktop-vnext` / `suwen-vnext-durable` / `0e94843` + round-4 verification docs |
+| Local repo / branch / commit | `desktop-vnext` / `suwen-vnext-durable` / `9041901` + round-4 verification docs |
 | Upstream state | remote reachable; **source branch + tag `suwen-vnext-3.2.0` pushed via SSH**; Release assets not uploaded |
+| Branch protection | `main` protected with both CI jobs as required status checks; PR required; force-push/deletion blocked |
 | MIT status | `desktop/LICENSE` MIT (self-authored desktop); `NOTICE`; third-party licenses + CycloneDX SBOM; Python baseline preserved Apache-2.0 with original NOTICE |
-| CI status | `.github/workflows/suwen-windows.yml` **executed for real: run 40144915574 SUCCESS** on `0e94843` (both Desktop and Python-baseline jobs; typecheck/tests/live RPC E2E/UI DOM QA/security scan/NSIS build/SBOM/SHA256SUMS/artifacts) |
+| CI status | `.github/workflows/suwen-windows.yml` **executed for real: run 40145676187 SUCCESS** on `9041901` (both Desktop and Python-baseline jobs; typecheck/tests/live RPC E2E/UI DOM QA/security scan/NSIS build/SBOM/SHA256SUMS/artifacts) |
 | Release tag | `suwen-vnext-3.2.0` **pushed** (annotated); GitHub Release NOT created (gates HOLD; `gh`/token absent) |
 | Repo / Release URL | repo public: `https://github.com/ForrestGump618/suwen`; no Release URL exists — G9 **BLOCKED_EXTERNAL** |
 | Publication scan | `security-scan.mjs` PASS (0 HIGH / 48 LOW / 14 documented test fixtures); no real secret found in tracked tree/history |
@@ -81,7 +82,7 @@ desktop takeover, durable harness and Windows release") · remote
 1. **Clean-Windows-VM lifecycle** install → start → upgrade → uninstall: NOT RUN (host probe only).
 2. **Code signing / SmartScreen trust**: BLOCKED_EXTERNAL — no certificate; installer UNSIGNED.
 3. **8/24/72 h endurance, reboot, power-loss, disk-full**: NOT RUN (short-window chaos 12/12 + 25-min accelerated soak only; soak is not a substitute).
-4. **GitHub MIT publication + Release asset upload**: **source published** (branch + tag pushed; CI green run 40144915574); **Release assets BLOCKED_EXTERNAL** because `gh`/token are absent and gates remain HOLD.
+4. **GitHub MIT publication + Release asset upload**: **source published** (branch + tag pushed; CI green run 40145676187); **Release assets BLOCKED_EXTERNAL** because `gh`/token are absent and gates remain HOLD.
 5. **T2 post-fix SIGKILL/reconnect in-UI re-run**: **PASS 3/3** (R130 IMPLEMENTED_PASS); R136 visual acceptance IMPLEMENTED_PASS.
 
 6. **Real external vendor accounts** (model providers, Telegram/Slack/Discord/WeChat): not available;
@@ -91,17 +92,17 @@ desktop takeover, durable harness and Windows release") · remote
 8. **Not migrated / not started**: 23 legacy scientific skills in the new registry, Paper2Agent,
    Biomni/ERA/Robin/Kosmos external integrations, SSH/terminal/kernel/workspaces/trajectories/model
    routing/vision, OS-level sandbox quotas.
-9. **CI executed — run 40144915574 SUCCESS** on `0e94843` (both jobs); an installer built by CI is not downloaded back to this host for a second lifecycle run.
-10. Hygiene: worktree committed/pushed through `0e94843`; `desktop/dist-*` scratch outputs removed/ignored before commits.
+9. **CI executed — run 40145676187 SUCCESS** on `9041901` (both jobs); an installer built by CI is not downloaded back to this host for a second lifecycle run.
+10. Hygiene: worktree committed/pushed through `9041901`; `desktop/dist-*` scratch outputs removed/ignored before commits.
 
 ## Signature block (measured values; nothing signed)
 
 - Final test numbers: **183 tests / 181 pass / 0 fail / 2 skipped, 28.6 s, exit 0** (final 3.2.0 build,
-  pre-round-4 test-only/doc edits); CI independently ran the same suite green on `0e94843`.
+  pre-round-4 test-only/doc edits); CI independently ran the same suite green on `9041901`.
 - RPC / smoke / UI: **42/0 ~7 s; 8/8; 19/0/12**
 - Final installer: **129,447,101 B**, SHA256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`
   (+ blockmap 135,948 B `283B27E1…`, unpacked 249,801,728 B `8F7EAF76…`; `SHA256SUMS` present)
-- CI run link/status: **run 40144915574 (commit 5ac5bd4) SUCCESS — https://github.com/ForrestGump618/suwen/actions/runs/40144915574**
+- CI run link/status: **run 40145676187 (commit 5ac5bd4) SUCCESS — https://github.com/ForrestGump618/suwen/actions/runs/40145676187**
 - GitHub Release URL/tag: **tag pushed; no Release created** (BLOCKED_EXTERNAL + HOLD)
 - Clean-VM machine + steps: **NOT AVAILABLE**
 - Endurance run duration/results: **8/24/72 h NOT RUN**; accelerated soak PASS (25 min, 64 cycles, 12/12 faults, 0 errors)

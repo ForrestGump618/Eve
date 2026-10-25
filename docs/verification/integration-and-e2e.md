@@ -23,7 +23,7 @@ Anything not executed is listed as **NOT RUN** and must not be counted as passed
 | 9 | `node scripts/chaos-smoke.mjs` (short-window real fault injection) | **12/12 scenarios passed** (`result: passed`), incl. injected provider 429/500 retried with human approvals and billing-unknown reconciliation | 51.4 s | 0 |
 | 10 | Installer lifecycle on the FINAL artifact (`docs/verification/artifacts/installer-lifecycle.json`) | **12/12 steps passed** (install ~24 s, exe 3.2.0, running app, authenticated daemon attach `mode user-background`, daemon survives UI close, reinstall, uninstall, data preserved) | — | 0 (host probe) |
 | 11 | Cross-version upgrade `3.0.0-preview.1 → 3.2.0` (`installer-lifecycle.json`: `upgrade_install_old`, `upgrade_old_exe` then final install; `upgrade-path.json` is superseded 3.1.0 evidence) | **PASS**: old 3.0.0-preview.1 install + display version, then final 3.2.0 install/start/daemon health/uninstall | — | 0 (host probe) |
-| 12 | GitHub Actions `SuWen Windows CI` (real run) | **run 40144915574 SUCCESS on `0e94843`**: Desktop job (typecheck, tests, live RPC E2E, UI DOM QA, security scan, NSIS build, SBOM, checksums, upload) + Python baseline pytest | — | 0 |
+| 12 | GitHub Actions `SuWen Windows CI` (real run) | **run 40145676187 SUCCESS on `9041901`**: Desktop job (typecheck, tests, live RPC E2E, UI DOM QA, security scan, NSIS build, SBOM, checksums, upload) + Python baseline pytest | — | 0 |
 
 ## 2. Typecheck / build / unit+integration suite
 
@@ -166,7 +166,7 @@ recorded separately in `durability-soak.json` and does **not** substitute for th
 3. Real external model accounts (OpenAI-compatible/Anthropic protocols proven against local HTTP
    fixtures only; no paid vendor account success claimed).
 4. Code signing / SmartScreen trust (installer unsigned).
-5. GitHub Actions Windows CI: **now executed** — run 40144915574 SUCCESS on `0e94843`; the CI-built
+5. GitHub Actions Windows CI: **now executed** — run 40145676187 SUCCESS on `9041901`; the CI-built
    installer is not downloaded back to this host for a second lifecycle run.
 6. Live MCP inside packaged smoke (`SUWEN_SMOKE_LIVE` unset) — covered by §3 live RPC instead.
 7. macOS/Linux desktop builds, remote workers/Temporal, OS-level CPU/memory/disk quotas.
@@ -196,7 +196,7 @@ Get-FileHash release\SuWen-Setup-3.2.0-win-x64.exe -Algorithm SHA256
 
 The committed workflow `.github/workflows/suwen-windows.yml` runs on GitHub-hosted Windows runners:
 
-- **run 40144915574** (commit `0e94843`, 2026-10-25): **SUCCESS** — both jobs green.
+- **run 40145676187** (commit `9041901`, 2026-10-25): **SUCCESS** — both jobs green.
 - Desktop job: `npx tsc --noEmit`, `npm test`, live `e2e-rpc --live`, `ui-dom-qa`,
   `verify-doc-hashes`, security scan (0 unresolved HIGH), NSIS build (unsigned), CycloneDX SBOM,
   SHA256SUMS, artifact upload.

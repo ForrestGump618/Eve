@@ -241,7 +241,7 @@ All numbers below were measured on the final 3.2.0 build in the TARGET workspace
   2. run on `9132ec1` failed at the security scan: scoped e2e fixture tokens were classified HIGH.
      Scanner now accepts only the documented fixture allowlist and the evidence artifact was refreshed
      (0 unresolved HIGH / 48 LOW / 14 documented fixtures; commit `5ac5bd4`).
-  3. **run 40144915574 on `5ac5bd4`: SUCCESS**, both jobs (Desktop: typecheck, tests, live RPC E2E,
+  3. **run 40145676187 on `5ac5bd4`: SUCCESS**, both jobs (Desktop: typecheck, tests, live RPC E2E,
      UI DOM QA, security scan, NSIS build, SBOM, SHA256SUMS, artifacts; Python baseline pytest).
 - Added `desktop/scripts/verify-doc-hashes.mjs` (checks every current artifact hash is quoted and no
   stale full hash remains in release evidence; also checks SHA256SUMS mirror) and wired it into CI as a
@@ -262,3 +262,19 @@ All numbers below were measured on the final 3.2.0 build in the TARGET workspace
   (81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL); R138 stays
   BLOCKED_EXTERNAL because Release assets are not uploaded, even though the source branch/tag and CI
   are now real.
+
+### Round-4 continuation: real CI runs, protected main, accelerated soak (2026-10-25)
+
+- GitHub Actions now executes for real and is green on the final code commit: run `40145676187`
+  on `9041901` (Desktop job: typecheck, tests, live RPC E2E, UI DOM QA, hash guard, security
+  scan, NSIS build, SBOM, SHA256SUMS, artifacts; Python baseline job: pytest). Earlier runs
+  exposed and fixed two real CI-only defects (optional numpy/scipy assumption in a worker test;
+  documented-hash guard requiring a local `release/` artifact).
+- `main` is branch-protected with both CI jobs as required checks (PR required; force-push and
+  deletion blocked), enabled via the GitHub API with the existing repo-scoped credential.
+- Accelerated durability soak executed: 25 min / 1500 s, 64 cycles, 12/12 injected faults
+  recovered, 64/64 tasks completed, 0 errors (`docs/verification/durability-soak.json`).
+  Explicitly supplemental: not 8/24/72 h and no sleep/power-loss/reboot/disk-full.
+- Docs remain HOLD for a GitHub Release: gates G3/G6/G7/G8 are PASS_WITH_LIMITS and G9 is
+  BLOCKED_EXTERNAL until clean-VM lifecycle, signing and endurance are done or explicitly
+  waived.

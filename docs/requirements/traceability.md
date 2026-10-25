@@ -117,7 +117,7 @@
 ## 5. 追溯性缺口（必须由 Lead 补齐/决策）
 
 1. **干净 Windows VM** install → start → upgrade → uninstall（R119/R121）。最终 3.2.0 主机生命周期 12/12 通过（升级源 3.0.0-preview.1 已安装），但不是干净机。
-2. `SHA256SUMS` 已生成并发布（`desktop/release/SHA256SUMS` 与 `docs/release/SHA256SUMS.txt` 各 3 行）；Windows CI（`.github/workflows/suwen-windows.yml`）已实际运行且绿（run 40144915574，两个 job 全过）。
+2. `SHA256SUMS` 已生成并发布（`desktop/release/SHA256SUMS` 与 `docs/release/SHA256SUMS.txt` 各 3 行）；Windows CI（`.github/workflows/suwen-windows.yml`）已实际运行且绿（run 40145676187，两个 job 全过）。
 3. 代码签名证书（BLOCKED_EXTERNAL）；SmartScreen 风险已如实披露。
 4. 8/24/72h、重启、睡眠/断电、磁盘满长跑（R050）——当前仅短窗混沌 12/12。
 5. 真实外部模型账号调用证据（当前仅本地 HTTP fixture 协议测试）。
