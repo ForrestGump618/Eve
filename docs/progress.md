@@ -348,3 +348,15 @@ Delivered and measured:
 - Honest remaining gaps: normal `userData/python-env` download flow not exercised end-to-end (temp override),
   real vendor API keys / SSH hosts / channel peers not configured, hidden legacy views' deep actions not driven,
   SPA is zh-CN only, no accessibility/DPI audit.
+
+### Round-5 final release evidence (2026-10-25)
+
+- Tag `suwen-vnext-3.3.0` (annotated) moved to release commit `3a5b582`; branch `suwen-vnext-durable` pushed.
+- CI run `40168426610`: attempt 1 — Desktop build+test+installer job PASS, Python baseline FAIL
+  (`test_turn_governance.py::test_full_turn_degenerate_stream...`, 2 s asyncio timeout; 481 passed / 1 failed);
+  failed job re-run via API → attempt 2 both jobs **SUCCESS**. No product code change required; recorded as a
+  pre-existing legacy-test flake (deliberately not papered over).
+- Final artifact facts unchanged: installer `131,011,183 B` / `0B55D5BD…DAE03` (UNSIGNED); blockmap
+  `137,255 B` / `15EAB7E1…62ADB`; `win-unpacked/SuWen.exe` `469D75AD…0FA991`.
+- Release decision remains **HOLD**: clean-Windows-VM lifecycle, code signing, 8/24/72 h endurance,
+  real vendor accounts, and GitHub Release asset upload (no `gh`/token) are NOT VERIFIED / BLOCKED_EXTERNAL.

@@ -1,4 +1,4 @@
-# Windows installer verification — SuWen desktop 3.2.0
+# Windows installer verification — SuWen desktop 3.3.0 (round-5; 3.2.0 sections retained as history)
 
 ## Round-5 (3.3.0) supersession - current delivered evidence (2026-10-25)
 

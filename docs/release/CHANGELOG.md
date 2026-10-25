@@ -33,6 +33,12 @@ versioning.
   `npm test`, RPC E2E against a real detached daemon with live public databases, UI DOM QA, secret
   scan, NSIS installer build, CycloneDX SBOM, SHA256SUMS and artifact upload.
   Run history and fixes:
+  - **run 40168426610 (`3a5b582`, tag `suwen-vnext-3.3.0`): SUCCESS on attempt 2.** Attempt 1 had the
+    Desktop job green and the Python baseline job fail only on
+    `tests/test_turn_governance.py::test_full_turn_degenerate_stream_returns_normally_without_more_requests`
+    (a 2 s `asyncio.wait_for` timeout under runner load; 481 passed / 1 failed). The failed job was
+    re-run via the API and passed; no product code change was needed (the 2 s bound is a pre-existing
+    legacy-test flake, not a 3.3.0 regression).
   - run 1 (`8646fd7`) failed in unit tests: `desktop/test/research-worker.test.ts` expected string
     `health.deps.numpy`, but the GitHub runner has no numpy and the worker reports `null`;
     fixed by accepting `null | string` for optional `numpy`/`scipy` deps (`9132ec1`).
