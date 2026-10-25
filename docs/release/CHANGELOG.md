@@ -47,7 +47,7 @@ versioning.
 - Added `desktop/scripts/verify-doc-hashes.mjs` and a CI step: every current artifact hash must be
   quoted in the release evidence, no stale full hash may remain, and
   `docs/release/SHA256SUMS.txt` must mirror `desktop/release/SHA256SUMS`. Local run: PASS.
-- Local re-run of the scanner after the fix: **PASS — 0 HIGH / 48 LOW / 14 documented test fixtures**
+- Local re-run of the scanner after the fix: **PASS — 0 HIGH / 192 LOW / 20 documented test fixtures**
   (`docs/verification/artifacts/security-scan.json`).
 
 ### Added

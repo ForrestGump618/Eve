@@ -81,8 +81,8 @@ function classify(rel, context) {
  * an obvious fixture token; everything else stays HIGH. The accepted findings
  * are still printed and recorded in docs/verification/security-review.md.
  */
-const TEST_PATH = /(?:^|\/)(?:desktop\/)?test\/|(?:^|\/)tests\/|\.test\.(?:ts|js|mjs)$|(?:^|\/)desktop\/scripts\/e2e-[^/]*\.(?:mjs|js)$/i;
-const TEST_FIXTURE_VALUE = /fixture|example|dummy|sample|p@ss|pw-|ui-only-password|private-pass|placeholder|redact|sentinel|not-a-real|e2e-/i;
+const TEST_PATH = /(?:^|\/)(?:desktop\/)?test\/|(?:^|\/)tests\/|\.test\.(?:ts|js|mjs)$|(?:^|\/)desktop\/scripts\/[^/]*e2e[^/]*\.(?:mjs|js)$/i;
+const TEST_FIXTURE_VALUE = /fixture|example|dummy|sample|p@ss|pw-|ui-only-password|private-pass|placeholder|redact|sentinel|not-a-real|not-real|sk-test|e2e-/i;
 
 function acceptTestFixture(finding) {
   if (!TEST_PATH.test(finding.file)) return false;

@@ -43,7 +43,7 @@ desktop takeover, durable harness and Windows release") · remote
 | CI status | `.github/workflows/suwen-windows.yml` **executed for real: run 40145676187 SUCCESS** on `9041901` (both Desktop and Python-baseline jobs; typecheck/tests/live RPC E2E/UI DOM QA/security scan/NSIS build/SBOM/SHA256SUMS/artifacts) |
 | Release tag | `suwen-vnext-3.2.0` **pushed** (annotated); GitHub Release NOT created (gates HOLD; `gh`/token absent) |
 | Repo / Release URL | repo public: `https://github.com/ForrestGump618/suwen`; no Release URL exists — G9 **BLOCKED_EXTERNAL** |
-| Publication scan | `security-scan.mjs` PASS (0 HIGH / 48 LOW / 14 documented test fixtures); no real secret found in tracked tree/history |
+| Publication scan | `security-scan.mjs` PASS (0 HIGH / 192 LOW / 20 documented test fixtures); no real secret found in tracked tree/history |
 
 ## B. Windows installer
 
@@ -96,7 +96,7 @@ desktop takeover, durable harness and Windows release") · remote
 | Accelerated soak | `docs/verification/durability-soak.json`: **result passed, 1500 s, 64 cycles, 12 faults / 12 recovered, 64/64 tasks completed, 0 errors** (real daemon; explicit limits: single Windows session, not 8/24/72 h, no sleep/power/reboot/disk-full) |
 | Endurance 8/24/72 h, reboot, power-loss, disk-full | **NOT RUN** — must stay NOT_VERIFIED (R050/R116); the 25-min accelerated soak is supplemental only |
 | DB/context recovery | durable tests + 10-round ~201k-token compaction (round-2 evidence), versions/manual compaction/rollback; semantic losslessness not claimed |
-| Security audit | `docs/verification/security-review.md` + `scripts/security-scan.mjs`: **PASS — 0 HIGH / 48 LOW / 14 documented test fixtures**; `npm audit --omit=dev` 0 vulnerabilities; contextIsolation + sandbox renderer, CSP `connect-src 'none'`, sender/frame-checked IPC, path-confinement guards, safeStorage credentials, named-pipe random token. No OS-level CPU/memory/disk quotas (R144 NOT_STARTED) |
+| Security audit | `docs/verification/security-review.md` + `scripts/security-scan.mjs`: **PASS — 0 HIGH / 192 LOW / 20 documented test fixtures**; `npm audit --omit=dev` 0 vulnerabilities; contextIsolation + sandbox renderer, CSP `connect-src 'none'`, sender/frame-checked IPC, path-confinement guards, safeStorage credentials, named-pipe random token. No OS-level CPU/memory/disk quotas (R144 NOT_STARTED) |
 | Performance | `docs/verification/performance-baseline.md` (daemon ready p50 391 ms, create p50 0.82 ms, events.stream p50 1.49 ms, worker flowSummary 20.9 ms); UI/markdown first-token and endurance not measured |
 | Installer host lifecycle | 12/12 PASS on the final artifact — see §B |
 

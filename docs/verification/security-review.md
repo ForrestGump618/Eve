@@ -93,7 +93,7 @@ a product defect.
 ## 4. Verdict
 
 - No live credential, token, private key or tracked secret was found in the working tree or history
-  (0 HIGH; 14 documented test fixtures).
+  (0 HIGH; 20 documented test fixtures).
 - The Electron trust boundary uses the required controls (sandboxed renderer, contextIsolation,
   frozen preload, sender-validated IPC, CSP, safeStorage, authenticated named pipe).
 - **Residual risk remains** in the gaps above; this review is not a certification. Gate 7 is PASS for
