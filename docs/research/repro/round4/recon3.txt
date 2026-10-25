@@ -1,0 +1,986 @@
+========== store.js ==========
+// Shell-level application state shared by the router, top bar and views.
+// Views never import app.js; they read/write this store and emit events via bus.js.
+
+import { emit } from './bus.js?v=2.1.1';
+import { getPref, setPref } from './util.js?v=2.1.1';
+
+export const ROUTES = [
+  { id: 'tasks2', label: '任务中心', icon: 'jobs', subtitle: '持续任务、自动化与多 Agent 讨论' },
+  { id: 'research', label: '科研与证据', icon: 'shield', subtitle: '生物工具、来源与独立验证' },
+  { id: 'knowledge', label: '知识与记忆', icon: 'memory', subtitle: '当前工作区的检索知识' },
+  { id: 'workflow', label: '工作流', icon: 'layers', subtitle: '可视化步骤与审批' },
+  { id: 'artifacts', label: '产物中心', icon: 'files', subtitle: '文件、快照与版本' },
+  { id: 'extensions', label: '能力中心', icon: 'skills', subtitle: 'MCP、Skills、Agent 和消息渠道' },
+  { id: 'diagnostics', label: '系统诊断', icon: 'cpu', subtitle: '状态、资源与执行追踪' },
+  { id: 'connections', label: '连接设置', icon: 'key', subtitle: '兼容的模型连接与凭据配置', hidden: true },
+  { id: 'workbench', label: '工作台', icon: 'layers', subtitle: '工作区、会话与计算面板' },
+  { id: 'chat', label: '对话', icon: 'chat', subtitle: '与智能体协作分析' },
+  { id: 'discovery', label: '发现', icon: 'discovery', subtitle: '自主发现（RSI）项目' },
+  { id: 'vars', hidden: true, label: '变量', icon: 'vars', subtitle: '内核工作区变量' },
+  { id: 'files', hidden: true, label: '文件', icon: 'files', subtitle: '工作区文件管理' },
+  { id: 'figures', hidden: true, label: '图库', icon: 'figures', subtitle: '已生成的图表' },
+  { id: 'jobs', hidden: true, label: '任务', icon: 'jobs', subtitle: '后台脚本任务' },
+  { id: 'skills', hidden: true, label: '技能', icon: 'skills', subtitle: '可复用的分析技能包' },
+  { id: 'registry', hidden: true, label: '函数库', icon: 'registry', subtitle: '已安装包函数索引' },
+  { id: 'memory', hidden: true, label: '记忆', icon: 'memory', subtitle: '长期项目记忆' },
+  { id: 'ssh', label: 'SSH', icon: 'ssh', subtitle: '远程主机终端' },
+  { id: 'settings', label: '设置', icon: 'settings', subtitle: '模型、外观与系统' },
+];
+
+export const ROUTE_IDS = ROUTES.map((r) => r.id);
+
+export const state = {
+  route: 'workbench',
+  routeParams: {},
+  agents: [],
+  agentId: getPref('agent', ''),
+  // Effective default agent resolved at startup (CONTRACTS-3 T07):
+  // { id, source: 'session'|'settings'|'builtin', message } or null when unknown.
+  agentDefault: null,
+  conversations: [],
+  activeConversationId: null,
+  health: null,
+  online: true,
+  kernel: { running: false, varsCount: 0 },
+  figuresCount: 0,
+  settings: null,
+  providers: [],
+  // Currently selected workspace used for new runs / panels (T09).
+  workspaceId: getPref('workspaceId', ''),
+  workspace: null,
+  bootError: null,
+};
+
+export function getState() {
+  return state;
+}
+
+/** Merge a shallow patch into the state and notify subscribers. */
+export function setState(patch) {
+  if (!patch || typeof patch !== 'object') return state;
+  Object.assign(state, patch);
+  emit('state:change', patch);
+  return state;
+}
+
+/** Parse the route id out of a location hash (`#/files` -> `files`). */
+export function parseHash(hash = window.location.hash) {
+  const raw = String(hash || '').replace(/^#\/?/, '').split('?')[0].trim();
+  const preferred = getPref('homeRoute', 'workbench');
+  return ROUTE_IDS.includes(raw) ? raw : ROUTE_IDS.includes(preferred) ? preferred : 'workbench';
+}
+
+/** Navigate to a view by updating the hash (the router reacts to hashchange). */
+export function navigate(route, params = null) {
+  const target = ROUTE_IDS.includes(route) ? route : 'chat';
+  if (params && typeof params === 'object') state.routeParams = { ...params };
+  const next = `#/${target}`;
+  if (window.location.hash === next) {
+    emit('route:request', { route: target, params });
+  } else {
+    window.location.hash = next;
+  }
+}
+
+export function routeMeta(routeId) {
+  return ROUTES.find((r) => r.id === routeId) || ROUTES[0];
+}
+
+export function setAgent(agentId) {
+  state.agentId = agentId || '';
+  setPref('agent', state.agentId);
+  emit('agent:change', state.agentId);
+}
+
+/** Remember the backend-provided effective default agent (T07). */
+export function setAgentDefault(info) {
+  state.agentDefault = info || null;
+  return state.agentDefault;
+}
+
+/** Remember the active workspace (id + public record) and notify panes (T09). */
+export function setWorkspace(workspace) {
+  state.workspace = workspace || null;
+  state.workspaceId = workspace?.workspace_id || '';
+  if (state.workspaceId) setPref('workspaceId', state.workspaceId);
+  emit('workspace:change', { workspace: state.workspace, workspaceId: state.workspaceId });
+  return state.workspace;
+}
+
+export function bumpFigures(delta = 1) {
+  state.figuresCount = Math.max(0, state.figuresCount + delta);
+  emit('figures:count', state.figuresCount);
+}
+
+/** Refresh the data shown in the chrome (agents, health, figures count). */
+export function requestShellRefresh() {
+  emit('shell:refresh');
+}
+
+
+========== app.js: ROUTE/VIEW map ==========
+--- VIEW_LOADERS ---
+VIEW_LOADERS = {
+  settings: () => import('./views/platform.js?v=2.1.1'),
+  tasks2: () => import('./views/platform.js?v=2.1.1'),
+  extensions: () => import('./views/platform.js?v=2.1.1'),
+  knowledge: () => import('./views/platform.js?v=2.1.1'),
+  workflow: () => import('./views/platform.js?v=2.1.1'),
+  research: () => import('./views/platform.js?v=2.1.1'),
+  artifacts: () => import('./views/platform.js?v=2.1.1'),
+  diagnostics: () => import('./views/platform.js?v=2.1.1'),
+  connections: () => import('./views/settings.js?v=2.1.1'),
+  workbench: () => import('./views/workbench.js?v=2.1.1'),
+  chat: () => import('./views/chat.js?v=2.1.1'),
+  discovery: () => import('./views/discovery.js?v=2.1.1'),
+  vars: () => import('./views/vars.js?v=2.1.1'),
+  files: () => import('./views/files.js?v=2.1.1'),
+  figures: () => import('./views/figures.js?v=2.1.1'),
+  jobs: () => import('./views/jobs.js?v=2.1.1'),
+  skills: () => import('./views/skills.js?v=2.1.1'),
+  registry: () => import('./views/registry.js?v=2.1.1'),
+  memory: () => import('./views/memory.js?v=2.1.1'),
+  ssh: () => loadSshView(),
+};
+
+// SSH lives in js/views/ssh.js and is authored in parallel. If the module has not
+// landed yet (or fails to load), fall back to a friendly placeholder instead of the
+// generic error card so navigation never breaks.
+async function loadSshView() {
+  let mod = null;
+  try {
+    mod = await import('./views/ssh.js?v=2.1.1');
+  } catch (err) {
+    console.warn('[app] views/ssh.js 尚未就绪', err);
+    return sshPlaceholderView();
+  }
+  const view = mod && typeof mod.mount === 'function' ? mod : mod?.default;
+  if (!view || typeof view.mount !== 'function') {
+    console.warn('[app] views/ssh.js 未导出 mount');
+    return sshPlaceholderView();
+  }
+  return {
+    async mount(root, ctx) {
+      const instance = await view.mount(root, ctx);
+      return {
+        destroy() {
+          try {
+            if (instance && typeof instance.destroy === 'function') instance.destroy();
+            else if (typeof view.unmount === 'function') view.unmount();
+          } catch (err) {
+            console.warn('[app] SSH 页面卸载失败', err);
+          }
+        },
+      };
+    },
+  };
+}
+
+function sshPlaceholderView() {
+  return {
+    mount(root) {
+      root.innerHTML =
+        '<div class="page ssh-page">' +
+        emptyStateHtml({
+          iconName: 'ssh',
+          title: 'SSH 模块未就绪',
+          hint: 'SSH 前端模块（js/views/ssh.js）尚未加载，可能仍在构建中。稍后点击重试即可。',
+          actionLabel: '重试',
+          actionId: 'ssh-retry',
+        }) +
+        '</div>';
+      const btn = root.querySelector('#ssh-retry');
+      
+
+== app.js tasks2/platform refs ==
+
+== app.js nav label strings (authored) ==
+仍然无法连接后端 | 内核已重启 | 内核未启动 | 内核运行中 | 切换到浅色主题 | 切换到深色主题 | 刷新当前页面 | 加载页面 | 后端未连接 | 后端连接正常 | 外观 | 操作 | 新建对话 | 本地运行 | 离线 | 系统 | 重启内核 | 重新加载 | 重新加载页面 | 重新挂载当前视图 | 重新检测后端连接 | 重试 | 页面
+
+========== platform.js route/page registry ==========
+tasks2 hits 4 first ctx: ,['advanced','版本与迁移','settings']], extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']], tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']], knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settin
+knowledge hits 14 first ctx: skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']], tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']], knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']], research:[['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物
+workflow hits 18 first ctx: ['memory','检索设置','settings']], research:[['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']], workflow:[['workflow','工作流编排','layers']],artifacts:[['artifact','产物与版本','files']],diagnostics:[['diagnostics','系统诊断','cpu']], }; const TITLES={settings:['设置','默
+extensions hits 2 first ctx: ,'brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']], extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']], tasks2:[['tasks','持续任务','jobs'],['sc
+artifacts hits 4 first ctx: [['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']], workflow:[['workflow','工作流编排','layers']],artifacts:[['artifact','产物与版本','files']],diagnostics:[['diagnostics','系统诊断','cpu']], }; const TITLES={settings:['设置','默认简单，需要时再深入。'],extensions:['能力中心','连接工具、专业
+diagnostics hits 12 first ctx: nts','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']], workflow:[['workflow','工作流编排','layers']],artifacts:[['artifact','产物与版本','files']],diagnostics:[['diagnostics','系统诊断','cpu']], }; const TITLES={settings:['设置','默认简单，需要时再深入。'],extensions:['能力中心','连接工具、专业技能与消息入口。'],tasks2:['任务中心','工作持续运行，过程随时可查。
+research hits 14 first ctx: ['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']], knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']], research:[['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']], workflow:[['workflow','工作流编排','l
+
+========== per-view metadata ==========
+{
+ "channel-setup.js": {
+  "bytes": 10082,
+  "lines": 72,
+  "exports": [
+   "renderChannels"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "${esc(c.name)}",
+   "Telegram",
+   "当前工作区的连接",
+   "微信",
+   "扫一扫，把素问带进微信。",
+   "网页对话"
+  ],
+  "zh_hints": [
+   "企业微信",
+   "保存",
+   "保存并测试",
+   "停用",
+   "允许向已授权联系人发送文字消息（仍需确认）",
+   "允许回复已授权联系人",
+   "关闭",
+   "刷新二维码",
+   "刷新连接状态",
+   "取消",
+   "只读 Agent",
+   "启用",
+   "完成",
+   "将成功完成的文字回答自动回复给扫码本人",
+   "已停用",
+   "已扫码绑定",
+   "已配置",
+   "微信",
+   "微信扫码连接",
+   "我的 Telegram 助手",
+   "我的微信助手",
+   "手机显示的验证码",
+   "按工作区权限执行",
+   "按步骤连接",
+   "授权用户 ID（多个用逗号分隔）",
+   "接收消息中",
+   "测试连接",
+   "生成二维码",
+   "用微信扫一扫",
+   "网页对话",
+   "请填写 Token、用户 ID 与 Webhook 密钥",
+   "连接 Telegram",
+   "连接中断",
+   "连接名称",
+   "连接微信",
+   "连接测试通过",
+   "连接设置",
+   "重新扫码",
+   "飞书"
+  ]
+ },
+ "chat.js": {
+  "bytes": 96491,
+  "lines": 2517,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [
+   "agents",
+   "agentsDefault"
+  ],
+  "api_paths": [
+   "/api/runs/"
+  ],
+  "headings": [
+   "新对话"
+  ],
+  "zh_hints": [
+   "任务 ID",
+   "会话已删除",
+   "会话标题",
+   "例如：在现有结果基础上补充显著性检验并生成图表",
+   "保存",
+   "保留原名称",
+   "保留原选择",
+   "关闭",
+   "准备中",
+   "出错",
+   "创建时间",
+   "删除",
+   "删除会话",
+   "刷新",
+   "加载会话",
+   "加载失败",
+   "助手",
+   "后端未返回新会话",
+   "图片解读未启用",
+   "图表",
+   "失败",
+   "子任务",
+   "子任务失败",
+   "子任务详情",
+   "子任务错误",
+   "子运行",
+   "子运行详情",
+   "工具",
+   "已中断",
+   "已中断（服务重启）",
+   "已停止",
+   "已停止生成",
+   "已取消",
+   "已完成",
+   "已批准该工具调用",
+   "已拒绝该工具调用",
+   "已超时",
+   "已连接",
+   "已配置",
+   "已重命名"
+  ]
+ },
+ "discovery.js": {
+  "bytes": 55063,
+  "lines": 1517,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "${esc(project.title || '未命名项目')}",
+   "发现"
+  ],
+  "zh_hints": [
+   "不确定",
+   "优先排序",
+   "依据",
+   "假设",
+   "创建项目",
+   "删除",
+   "删除发现项目",
+   "加载发现项目",
+   "加载项目详情",
+   "反思",
+   "发现任务已结束",
+   "发现项目已创建",
+   "取消",
+   "可选：帮助智能体快速定位可用数据",
+   "失败",
+   "奖励",
+   "实验",
+   "导入种子策略",
+   "工具",
+   "工具返回",
+   "已停止",
+   "已停止发现任务",
+   "已取消",
+   "已完成",
+   "已暂停",
+   "已有运行中的发现任务",
+   "并发冲突",
+   "待运行",
+   "待验证",
+   "得到支持",
+   "成功标准",
+   "执行",
+   "批评",
+   "报告",
+   "报告 Markdown 已复制",
+   "报告已下载",
+   "报告已写入项目",
+   "提出假设",
+   "数据",
+   "数据线索"
+  ]
+ },
+ "figures.js": {
+  "bytes": 6083,
+  "lines": 157,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "图库"
+  ],
+  "zh_hints": [
+   "删除",
+   "删除图表",
+   "图表",
+   "图表已删除",
+   "换个关键词试试",
+   "没有匹配的图表",
+   "读取图库",
+   "还没有生成图表"
+  ]
+ },
+ "files.js": {
+  "bytes": 28765,
+  "lines": 725,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "文件"
+  ],
+  "zh_hints": [
+   "上传文件",
+   "二进制文件",
+   "例如 results",
+   "创建",
+   "删除",
+   "删除文件",
+   "删除文件夹",
+   "加载文件",
+   "加载文件树",
+   "工作区",
+   "已删除",
+   "文件夹",
+   "文件夹已创建",
+   "文件已创建",
+   "新建文件",
+   "新建文件夹",
+   "读取目录",
+   "选择一个文件预览"
+  ]
+ },
+ "jobs.js": {
+  "bytes": 16825,
+  "lines": 446,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "任务列表",
+   "后台任务",
+   "提交任务"
+  ],
+  "zh_hints": [
+   "任务已提交",
+   "取消任务",
+   "失败",
+   "已取消",
+   "已完成",
+   "已请求取消任务",
+   "排队中",
+   "收起日志",
+   "未知",
+   "查看日志",
+   "请填写要执行的代码",
+   "超时",
+   "运行中",
+   "还没有后台任务"
+  ]
+ },
+ "memory.js": {
+  "bytes": 13217,
+  "lines": 339,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "记忆"
+  ],
+  "zh_hints": [
+   "删除",
+   "删除记忆",
+   "放弃修改",
+   "新建记忆",
+   "有未保存的修改",
+   "记忆已保存",
+   "记忆已删除",
+   "请填写 slug（用于在对话中引用）",
+   "请填写标题",
+   "读取记忆",
+   "读取记忆列表",
+   "还没有记忆",
+   "选择或新建一条记忆"
+  ]
+ },
+ "platform.js": {
+  "bytes": 53972,
+  "lines": 221,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [
+   "request"
+  ],
+  "api_paths": [
+   "/api/platform${path}${path.includes",
+   "/api/platform/channels/${id}/webhook",
+   "/api/workspaces/${encodeURIComponent"
+  ],
+  "headings": [
+   "${esc(c.statement)}",
+   "${esc(groups.find(g=>g[0]===key)?.[1]||key)}",
+   "${esc(item.name)}",
+   "${esc(item.name||item.title||item.path||item.id)}",
+   "${esc(item.title)}",
+   "${esc(s.name)}",
+   "${esc(task.title)}",
+   "${esc(title)}",
+   "${names[kind]||kind}",
+   "Scientific Agent 方法技能",
+   "任务不会随页面关闭而终止",
+   "你定目标，素问安排执行。",
+   "允许分歧，也要求给出结论。",
+   "可检查、可恢复的执行步骤",
+   "可检索的项目知识",
+   "已保存模板",
+   "最近日志与追踪",
+   "检索规划 + 代码执行 + 证据检查",
+   "版本 ${r.revision}",
+   "系统运行中"
+  ],
+  "zh_hints": [
+   "上下文窗口（字符预算采用保守估算）",
+   "主题",
+   "产物与版本",
+   "产物中心",
+   "产物快照",
+   "人工复核",
+   "人工审批",
+   "人工科学复核",
+   "从目标生成初稿",
+   "从目标生成可编辑初稿",
+   "仓库子目录",
+   "任务中心",
+   "任务名称",
+   "任务并发数",
+   "任务目标",
+   "企业微信：需外部适配器",
+   "优先考虑",
+   "优化方向",
+   "例如 vision",
+   "依赖节点 ID 数组",
+   "保存",
+   "保存 Embedding API Key",
+   "保存并应用",
+   "保存模板",
+   "保存视觉 API Key",
+   "保存路由配置",
+   "停用",
+   "健康检查",
+   "允许工作区 ID 数组",
+   "允许执行",
+   "允许技能名称（空数组不限制）",
+   "入站：发起任务",
+   "公开检索词（请勿输入临床敏感信息）",
+   "关联任务 / 运行 ID",
+   "关联运行 ID",
+   "关闭",
+   "凭据名称",
+   "凭据已加密保存",
+   "出站：向联系人发送",
+   "分析、写作与大多数工作"
+  ]
+ },
+ "registry.js": {
+  "bytes": 17955,
+  "lines": 515,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "函数库"
+  ],
+  "zh_hints": [
+   "关闭",
+   "函数",
+   "函数索引尚未建立",
+   "函数索引已更新",
+   "函数详情",
+   "刷新索引",
+   "复制失败",
+   "复制示例",
+   "搜索函数",
+   "方法",
+   "未命名",
+   "模块",
+   "没有匹配的函数",
+   "索引尚未建立",
+   "调用示例已复制",
+   "输入关键词开始搜索"
+  ]
+ },
+ "settings.js": {
+  "bytes": 42153,
+  "lines": 986,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [
+   "health",
+   "systemInfo"
+  ],
+  "api_paths": [],
+  "headings": [
+   "外观",
+   "工作区与健康状态",
+   "工具审批策略",
+   "模型与供应商",
+   "生成参数",
+   "视觉模型（图片理解）",
+   "设置"
+  ],
+  "zh_hints": [
+   "例如 deepseek-chat",
+   "例如 gpt-4o-mini / qwen-vl-plus",
+   "供应商返回错误",
+   "内存",
+   "后端已连接",
+   "后端未连接",
+   "启用视觉模型前请填写模型名称",
+   "复制失败",
+   "工作区路径已复制",
+   "工作目录",
+   "已启用",
+   "已配置",
+   "平台",
+   "异常",
+   "待配置",
+   "无法读取设置",
+   "无需 Key",
+   "未启动",
+   "未启用",
+   "未知错误",
+   "未配置",
+   "粘贴 API Key（仅保存在本机后端）",
+   "粘贴视觉模型 API Key",
+   "视觉已关闭",
+   "视觉已启用",
+   "视觉未就绪",
+   "视觉模型返回错误",
+   "视觉能力已关闭",
+   "视觉配置已保存",
+   "设置已保存",
+   "设置已加载",
+   "该 Provider 无需 API Key",
+   "请先填写 API Key",
+   "请填写模型名称",
+   "运行中"
+  ]
+ },
+ "skills.js": {
+  "bytes": 9000,
+  "lines": 207,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "${esc(skill?.name || name)}",
+   "技能"
+  ],
+  "zh_hints": [
+   "复制失败",
+   "左侧列表中选择技能查看详情",
+   "技能名已复制",
+   "换个关键词试试",
+   "暂无描述",
+   "没有匹配的技能",
+   "读取技能内容",
+   "读取技能列表",
+   "还没有可用技能",
+   "选择一个技能",
+   "选择一个技能查看详情"
+  ]
+ },
+ "ssh.js": {
+  "bytes": 47186,
+  "lines": 1251,
+  "exports": [
+   "mount",
+   "unmount"
+  ],
+  "api_calls": [
+   "request"
+  ],
+  "api_paths": [
+   "/api/ssh/download",
+   "/api/ssh/exec",
+   "/api/ssh/info",
+   "/api/ssh/ls",
+   "/api/ssh/profiles",
+   "/api/ssh/profiles/${encodeURIComponent",
+   "/api/ssh/upload"
+  ],
+  "headings": [
+   "' +\n      esc(profile.name) +\n      '",
+   "SSH 主机"
+  ],
+  "zh_hints": [
+   "上传失败",
+   "主机指纹",
+   "主机指纹变化",
+   "保存修改",
+   "关闭",
+   "内存",
+   "创建档案",
+   "删除",
+   "删除 SSH 档案",
+   "删除失败",
+   "取消",
+   "可连接",
+   "命令执行失败",
+   "命令终端",
+   "密码",
+   "密钥",
+   "密钥认证无需密码",
+   "尚未获取远端信息",
+   "尚未连接",
+   "已复制终端输出",
+   "已打开远程工作区",
+   "开始测试",
+   "当前目录为空",
+   "打开 SSH 工作区",
+   "执行",
+   "操作系统",
+   "新增 SSH 档案",
+   "新增第一个 SSH 档案",
+   "暂无成功记录",
+   "曾连接成功 · 待检测",
+   "最近失败",
+   "服务端版本",
+   "未连接",
+   "测试中",
+   "测试连接失败",
+   "磁盘可用",
+   "端口需为 1-65535 的整数",
+   "终端还没有可复制的内容",
+   "请先在左侧选择一个 SSH 档案",
+   "请先选择一个 SSH 档案"
+  ]
+ },
+ "vars.js": {
+  "bytes": 13702,
+  "lines": 345,
+  "exports": [
+   "mount"
+  ],
+  "api_calls": [],
+  "api_paths": [],
+  "headings": [
+   "变量"
+  ],
+  "zh_hints": [
+   "关闭",
+   "内核中还没有变量",
+   "内核已重启",
+   "已发送中断信号",
+   "换个关键词试试",
+   "没有匹配的变量",
+   "读取内核变量",
+   "读取变量详情",
+   "重启内核"
+  ]
+ },
+ "workbench.js": {
+  "bytes": 51669,
+  "lines": 1204,
+  "exports": [
+   "mount",
+   "focusConversation"
+  ],
+  "api_calls": [
+   "request"
+  ],
+  "api_paths": [
+   "/api/kernels/${encodeURIComponent",
+   "/api/platform/layout",
+   "/api/ssh/profiles",
+   "/api/workspaces/${encodeURIComponent"
+  ],
+  "headings": [],
+  "zh_hints": [
+   "上一条命令仍在执行",
+   "不可访问",
+   "主内核默认环境",
+   "保存布局",
+   "保留",
+   "关闭",
+   "切换工作区",
+   "创建",
+   "刷新",
+   "取消",
+   "取消任务",
+   "取消后台任务",
+   "变量",
+   "可访问",
+   "后台任务",
+   "在线",
+   "失败",
+   "子任务树",
+   "尚未选择工作区",
+   "展开 Compute",
+   "工作区",
+   "工作区布局",
+   "工作区没有变量",
+   "已中断",
+   "已取消",
+   "已完成",
+   "已请求取消任务",
+   "应用",
+   "待检测",
+   "待确认",
+   "打开图库",
+   "执行失败",
+   "排队中",
+   "收起 Compute",
+   "文件",
+   "新会话",
+   "新建工作区",
+   "日志",
+   "未选择工作区",
+   "本机"
+  ]
+ }
+}
+
+========== desktop test dir ==========
+channels.test.ts 24118
+context-async.test.ts 4672
+context.test.ts 9330
+conversations.test.ts 3619
+daemon-integration.test.ts 10012
+domain-research.test.ts 16031
+durable.test.ts 15616
+fixtures 0
+import-service.test.ts 8605
+legacy-worker.test.ts 4015
+markdown.test.ts 9172
+mcp.test.ts 9002
+providers.test.ts 7054
+research-activity.test.ts 43403
+research-worker.test.ts 35221
+rsi.test.ts 14202
+security.test.ts 4843
+stream-core.test.ts 24393
+stream-events.test.ts 5039
+tools.test.ts 24934
+workbench.test.ts 5572
+
+========== markdown.js: head 80 ==========
+/* SuWen markdown renderer - deliberately small, safe subset for COMPLETED assistant
+   messages only. Streaming text stays plain text (see ui/app.js).
+
+   Safety contract:
+   - never uses innerHTML / insertAdjacentHTML / outerHTML; every string becomes a text node,
+     and the only generated markup is built with createElement/textContent
+   - raw HTML in the source is rendered as literal text, never parsed
+   - links render only for absolute http(s) URLs; anything else stays plain text
+   - LaTeX ($..$, $$..$$, \(..\), \[..\]) is rendered by the bundled offline KaTeX build when
+     it is available; until then (or on error) the raw source stays visible as text
+   - Mermaid fenced blocks are rendered by the bundled offline mermaid build, each in its own
+     container; unclosed / oversized / failing diagrams fall back to a labelled code block
+   - vendor scripts are loaded lazily from vendor/ (same-origin file, CSP 'self') at most once,
+     one render per turn of the event loop so a large message never blocks the main thread
+   - tables and code blocks always sit inside overflow containers (CSS)
+
+   The tokenizer (parse / scanInlineMath / analyze) is DOM-free; render(doc, text) needs a
+   document-like object with createElement/createTextNode/createDocumentFragment. Loaded as a
+   classic script before app.js, so it attaches SuwenMarkdown to globalThis.
+*/
+(function (root) {
+  'use strict';
+
+  var MAX_CHARS = 200000;
+  /* Per-expression caps: one pathological formula or diagram must not stall the renderer. */
+  var MAX_MATH_CHARS = 4000;
+  var MAX_DIAGRAM_CHARS = 20000;
+  var FENCE = /^\s*(`{3,}|~{3,})\s*([^\s`]*)\s*$/;
+  var HEADING = /^(#{1,6})\s+(.+?)\s*#*\s*$/;
+  var HR = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
+  var QUOTE = /^\s*>\s?(.*)$/;
+  var UL = /^\s*[-*+]\s+(.*)$/;
+  var OL = /^\s*\d+[.)]\s+(.*)$/;
+  var TABLE_ROW = /^\s*\|.*\|\s*$/;
+  var TABLE_SEP = /^\s*\|?\s*:?-{1,}:?\s*(?:\|\s*:?-{1,}:?\s*)+\|?\s*$/;
+  var MATH_FENCE = /^\s*\$\$\s*$/;
+  var MATH_LINE = /^\s*\$\$\s*(.+?)\s*\$\$\s*$/;
+  var BRACKET_MATH = /^\s*\\\[\s*$/;
+  var BRACKET_MATH_END = /^\s*\\\]\s*$/;
+
+  function splitLines(text) {
+    return String(text).replace(/\r\n?/g, '\n').split('\n');
+  }
+
+  function isBlockStart(line) {
+    return FENCE.test(line) || HEADING.test(line) || HR.test(line) || QUOTE.test(line) ||
+      UL.test(line) || OL.test(line) || TABLE_ROW.test(line) || MATH_FENCE.test(line) ||
+      MATH_LINE.test(line) || BRACKET_MATH.test(line);
+  }
+
+  function splitTableRow(line) {
+    var body = line.trim();
+    if (body.charAt(0) === '|') body = body.slice(1);
+    if (body.charAt(body.length - 1) === '|') body = body.slice(0, -1);
+    return body.split('|').map(function (cell) { return cell.trim(); });
+  }
+
+  function isTableSeparator(line) {
+    return TABLE_SEP.test(line) && line.indexOf('-') >= 0;
+  }
+
+  function shouldRenderMath(source) {
+    var text = String(source == null ? '' : source).trim();
+    return text.length > 0 && text.length <= MAX_MATH_CHARS;
+  }
+
+  function shouldRenderDiagram(source) {
+    var text = String(source == null ? '' : source);
+    return text.trim().length > 0 && text.length <= MAX_DIAGRAM_CHARS;
+  }
+
+  /* Pure tokenizer: returns a block list. No DOM access.
+     Fenced code / diagram / block-math blocks carry closed:false when the closing delimiter
+     has not been seen yet (the message is still streaming); callers must not hand those to
+     the async renderers. */
+  function parse(text) {
+    var source = String(text == null ? '' : text);
+    var lines = splitLines(source);
+    var blocks = [];
+    var index = 0;
+
+markdown.js api/exports tail:     enhancement.mermaidTheme = next;
+    try { if (window.mermaid) initMermaid(window.mermaid); } catch (error) { return; }
+    var nodes = document.querySelectorAll('[data-mermaid][data-md-state="rendered"]');
+    for (var index = 0; index < nodes.length; index += 1) {
+      var node = nodes[index];
+      node.setAttribute('data-md-state', 'queued');
+      node.className = node.className.replace(/\s*md-diagram-rendered/, '');
+      enhancement.queue.push({ kind: 'diagram', node: node, source: node.getAttribute('data-mermaid') || '' });
+    }
+    if (nodes.length) schedule();
+  }
+
+  var api = {
+    MAX_CHARS: MAX_CHARS,
+    MAX_MATH_CHARS: MAX_MATH_CHARS,
+    MAX_DIAGRAM_CHARS: MAX_DIAGRAM_CHARS,
+    parse: parse,
+    analyze: analyze,
+    render: render,
+    enhance: enhance,
+    refreshTheme: refreshTheme,
+    extractInlineMath: extractInlineMath,
+    scanInlineMath: scanInlineMath,
+    shouldRenderMath: shouldRenderMath,
+    shouldRenderDiagram: shouldRenderDiagram,
+    isSafeUrl: isSafeUrl,
+  };
+  if (root) root.SuwenMarkdown = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+markdown-ish tests: ['markdown.test.ts', 'stream-core.test.ts', 'stream-events.test.ts']
+
+========== docs matching markdown/legacy-web evidence ==========
+docs\archive\LEGACY-README.md 36081 mtime 1792804279.7951922
+
+-- refs to markdown-rendering.md --
+
+-- refs to legacy-web-parity --
+
+========== encoding check ==========
+desktop/src/main.ts valid utf-8, bytes 15839 U+FFFD 0
+desktop/src/workbench.ts valid utf-8, bytes 15071 U+FFFD 0
+desktop/ui/app.js valid utf-8, bytes 215394 U+FFFD 0

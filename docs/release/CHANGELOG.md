@@ -4,6 +4,27 @@ This file tracks the Electron/TypeScript desktop (`desktop/`) releases. The pres
 has its own project history in the repository-root `CHANGELOG.md`; it is not part of desktop semantic
 versioning.
 
+## [3.3.0] - 2026-10-25
+
+### Added
+- Sixth native workspace page **实验工作台 / Workbench** hosting the existing SuWen web SPA in an
+  isolated Electron window with a managed on-demand Python runtime (13 pinned deps, marker+probe
+  validation, cancelable ~130 MB install, per-window bearer auth, request-time CSP, config injection).
+- Progressive streaming markdown with offline KaTeX + Mermaid, closed-block typesetting and a plain
+  `.md-stream-tail` for open constructs.
+- Requirement rows R149-R152 (hosted parity, managed runtime, config injection, 3.3.0 docs).
+
+### Changed
+- Version 3.3.0 (package.json/lock, native footer).
+- Native shell CSP `style-src` now allows inline styles required by the vendored math/diagram
+  renderers; `script-src` remains `self`, `connect-src` remains `none` (documented trade-off in
+  `docs/verification/security-review.md`).
+
+### Verified
+- Full suite 222/220/0/2; RPC E2E live 42/42; hosted workbench E2E 34/34; runtime smoke 27/27;
+  config injection 13/13; markdown unit 32/32; chaos 12/12; packaged smoke passed; lifecycle 12/12
+  incl. 3.0.0-preview.1 upgrade; installer 0B55D5BDFBA86C6C... (UNSIGNED).
+
 ## [Unreleased] — post-3.2.0 hardening (2026-10-25)
 
 ### CI / repository

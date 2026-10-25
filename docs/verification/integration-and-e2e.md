@@ -1,5 +1,32 @@
 # Integration and end-to-end verification — SuWen desktop 3.2.0
 
+## Round-5 (3.3.0) supersession - current delivered evidence (2026-10-25)
+
+All commands executed in TARGET on 2026-10-25 for the 3.3.0 artifact:
+`desktop/release/SuWen-Setup-3.3.0-win-x64.exe` **131,011,183 B** SHA256
+**`0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03`** (UNSIGNED).
+
+| Check | Command | Result |
+|---|---|---|
+| Desktop suite | `npm test` | **222 tests / 220 pass / 0 fail / 2 skipped**, 83.7 s, exit 0 |
+| RPC E2E live | `node scripts/e2e-rpc.mjs --dist dist --live` | **42 passed / 0 failed** |
+| Hosted workbench E2E | `node scripts/workbench-ui-e2e.mjs` (real Electron, real Python bridge) | **34/34 checks, 12/12 routes, 0 errors, 0 CSP violations**, report `desktop/release/workbench-e2e/20261025-135558/report.json` |
+| Runtime smoke | `node scripts/workbench-runtime-smoke.mjs --deps %TEMP%\suwen-workbench-smoke` | **27/27 PASS** -> `docs/verification/workbench-runtime-smoke.json` |
+| Config injection | `node scripts/workbench-config-e2e.mjs` | **13/13 PASS** -> `docs/verification/workbench-config-injection.json` |
+| Markdown unit | `node --test dist/test/markdown.test.js` | **32/32 pass** |
+| Chaos | `node scripts/chaos-smoke.mjs` | **12/12 checks**, 53.4 s, exit 0 |
+| UI DOM QA | `node scripts/ui-dom-qa.mjs` | **18 passed / 0 failed / 13 warnings**, 148 actions, 84 RPC methods |
+| Packaged smoke | `SUWEN_SMOKE_PACKAGED=1 SUWEN_WORKBENCH_DEPS=... node scripts/electron-smoke.mjs` | **passed** incl. hosted SPA (12 nav items, 12 routes) |
+| Lifecycle | `pwsh scripts/verify-installer.ps1 -Installer release\SuWen-Setup-3.3.0-win-x64.exe -Version 3.3.0 -UpgradeFrom <3.0.0-preview.1>` | **12/12 PASS** incl. upgrade |
+
+Limitations: real vendor accounts absent; hidden legacy views smoke-only; clean VM, signing,
+8/24/72 h endurance/reboot/power/disk-full NOT RUN; installer UNSIGNED.
+
+---
+
+
+
+
 Measured by the Lead on 2026-10-25 in
 `C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`
 (branch `suwen-vnext-durable`, product version **3.2.0**, packaged runtime Node 24.22.0 /

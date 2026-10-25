@@ -3,7 +3,7 @@
 > 面向真实科研任务的 Windows 桌面科研 Agent：可持久运行、可追溯、可恢复、可诊断。
 > A desktop research agent for Windows built around durable execution, evidence provenance, and reproducible research workflows.
 
-- 当前版本 / Version: **3.2.0**
+- 当前版本 / Version: **3.3.0**
 - 桌面应用 / Desktop app: `desktop/` (Electron + TypeScript, MIT)
 - 旧版 Python 工作台 / Legacy Python workbench: `omicslab/` (Apache-2.0, 保留用于兼容与迁移)
 - 发布证据 / Release evidence: [`docs/release/`](docs/release/) · [`docs/verification/`](docs/verification/) · [`docs/progress.md`](docs/progress.md)
@@ -41,7 +41,7 @@ npm start           # 开发模式启动 Electron
 
 ```powershell
 cd desktop
-npm run dist:win    # -> release/SuWen-Setup-3.2.0-win-x64.exe
+npm run dist:win    # -> release/SuWen-Setup-3.3.0-win-x64.exe
 ```
 
 - 无 Python 也可使用基础聊天与数据库检索；Python 科研 Worker 作为受管子进程按需启动。
@@ -64,6 +64,16 @@ SuWen Harness Daemon (detached Node process)
 
 - 关键文档：[架构审计](docs/architecture/current.md) · [流式事件协议](docs/architecture/streaming-events.md) · [需求追溯](docs/requirements/traceability.md) · [能力对照](docs/migration/feature-parity-matrix.csv) · [UI 动作覆盖](docs/verification/ui-action-coverage.csv)。
 - 旧版 Python 能力清单与迁移证据见 [`docs/migration/`](docs/migration/)。
+
+## 实验工作台与 Markdown（3.3.0）
+
+- **实验工作台**：第六个原生工作区页面。按需安装固定版本的 Python 运行时（约 130 MB，可取消），
+  随后在隔离的 Electron 窗口中托管**现有素问网页版**（同一套 HTML/CSS/JS，12 个可导航路由），
+  桌面端模型/凭据配置会注入托管桥接；页面本身不获得 Node/preload 能力。
+- **Markdown 补齐**：流式过程中逐步排版已闭合内容（表格/代码块/公式/图表），未闭合区域保持纯文本尾部；
+  离线内置 KaTeX 与 Mermaid，失败时降级为标注代码块，不阻塞主线程。
+- 注意：安装包未签名；干净 Windows 虚拟机安装、8/24/72 小时耐久与重启/断电测试**未执行**；
+  真实厂商模型账号/SSH/消息渠道未配置。
 
 ## 测试与验证 / Testing and verification
 

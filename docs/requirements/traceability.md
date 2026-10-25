@@ -239,3 +239,18 @@ boundary; R136 visual acceptance is IMPLEMENTED_PASS per ui-visual-audit.md with
 | `docs/progress.md` | 22074 | `3a1138ab84aeb16cbfa81b6a9328a7211cb9051cfe46a717eb4498470b467587` |
 | `desktop/README.md` | 6545 | `0e1286c315d582ad1e75966d8d41262a012c10c03bc19fa5135eba3c1ecf064b` |
 | `desktop/acceptance-matrix.md` | 6742 | `5989be63731b2d761b749f8dabb1dde3420c777de6d94245f990602aec5078da` |
+
+## 10. Round-4 audit additions (2026-10-25)
+
+Files added/updated by the round-4 docs audit (SHA-256 at write time):
+
+| Path | Bytes | SHA-256 | Purpose |
+| --- | --- | --- | --- |
+| `docs/verification/legacy-web-parity.md` | 28787 | `bc683e1c42c6388d7985f3b9ebba460d476234284ba7c3b26af710aa5a4dd99d` | legacy web route/API parity + hosted workbench architecture |
+| `docs/requirements/markdown-parity.md` | 16965 | `d9e2326ac58ee89c87e456aaaebc9c7e28825ae904c1c67bf759fc1eab3cd816` | round-3 markdown/complex-content clause audit |
+| `docs/verification/markdown-rendering.md` | 11177 | `97e98c33433f4b38fc3afd6887a2eb36c6c70692bef999c4d2b33ecb59d8ecbc` | T5 owner report for KaTeX/Mermaid renderer (referenced) |
+| `docs/requirements/conflicts.md` | 23604 | `d4874278538fa364e6ad7d03f3dcaf6cbfe02bc16df5fbc8923c2f7eae2d3a29` | conflicts C-21..C-27 |
+| `docs/requirements/master-requirements.csv` | 87510 | `45c6ef868331886793e1e9c325c5d13ea2abaead954454a19889adb4ad432551` | 13-field requirement register (evidence refresh) |
+| `docs/migration/feature-parity-matrix.csv` | 30470 | `0031a602762f24b4c061771de7becbcd4e83dc5e221099a895f38dcf215b23e0` | parity matrix (+4 round-4 rows) |
+| `docs/progress.md` | 29605 | `6bb640f0d80822a44156ec14ce498f79c3afbfe5fea6792603f4f1933280ca04` | round-4 progress section (draft) |
+| `desktop/acceptance-matrix.md` | 6742 | `2664f12b550598d23429b800f4e0c7e4e8753d1d32f941e8ff2ec39d96dfd442` | acceptance matrix conservative refresh |

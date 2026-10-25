@@ -1,0 +1,134 @@
+== store.js route/nav hints ==
+== store.js route-like string arrays ==
+== app.js view/route mapping ==
+== app.js route constants ==
+
+== view files ==
+count 14
+channel-setup.js           72 lines  10082 B  fns=renderChannels routes=chat
+   api: /api/platform/channels/${row.id}/webhook
+chat.js                  2517 lines  96491 B  fns=mount routes=
+   api: /api/approvals/{id}, /api/chat, /api/runs/, /api/runs/{run_id}/stream, /api/traces/{trace_id}/events
+discovery.js             1517 lines  55063 B  fns=mount routes=
+figures.js                157 lines   6083 B  fns=mount routes=
+files.js                  725 lines  28765 B  fns=mount routes=
+jobs.js                   446 lines  16825 B  fns=mount routes=
+memory.js                 339 lines  13217 B  fns=mount routes=
+platform.js               221 lines  53972 B  fns=mount routes=
+   api: /api/platform${path}${path.includes, /api/platform/channels/${id}/webhook, /api/workspaces/${encodeURIComponent
+registry.js               515 lines  17955 B  fns=mount routes=
+settings.js               986 lines  42153 B  fns=mount routes=
+   api: /api/settings
+skills.js                 207 lines   9000 B  fns=mount routes=
+ssh.js                   1251 lines  47186 B  fns=mount,unmount routes=
+   api: /api/ssh/download, /api/ssh/exec, /api/ssh/info, /api/ssh/ls, /api/ssh/profiles, /api/ssh/profiles/${encodeURIComponent, /api/ssh/upload
+vars.js                   345 lines  13702 B  fns=mount routes=
+workbench.js             1204 lines  51669 B  fns=mount,focusConversation routes=
+   api: /api/kernels/${encodeURIComponent, /api/platform/layout, /api/ssh/profiles, /api/workspaces/${encodeURIComponent
+
+== api.js: 518 lines, 19141 B ==
+functions(8): isApiError, errorMessage, buildQuery, combineSignals, parseBody, request, requestFirst, uploadFile
+consts(1): api
+literal api paths(54): /api/agent-tasks, /api/agent-tasks/, /api/agents, /api/agents/default, /api/approvals, /api/approvals/, /api/chat/stop, /api/conversations, /api/conversations/, /api/discovery/projects, /api/discovery/projects/, /api/discovery/strategies/seed, /api/figures, /api/figures/, /api/files, /api/files/mkdir, /api/files/raw, /api/files/read, /api/files/tree, /api/files/upload, /api/files/write, /api/health, /api/jobs, /api/jobs/, /api/kernel/execute, /api/kernel/interrupt, /api/kernel/restart, /api/kernel/status, /api/kernel/var_detail, /api/kernel/vars, /api/kernels, /api/kernels/, /api/memory, /api/memory/, /api/registry/function, /api/registry/modules, /api/registry/refresh, /api/registry/search, /api/runs/, /api/runtime/agent-tasks/, /api/runtime/runs/, /api/runtime/timeline/, /api/sessions/, /api/settings, /api/settings/keys, /api/settings/test_llm, /api/settings/test_vision, /api/settings/vision, /api/skills, /api/skills/, /api/system/info, /api/traces/, /api/workspaces, /api/workspaces/
+
+== index.html nav hints ==
+
+== round-3 prompt 3.5 / 5 markdown clauses ==
+ 103 ### 3.5 Markdown / complex content
+ 105 Inputs: Markdown, LaTeX, code blocks, tables, Mermaid, quotes, JSON, multilingual, very long
+ 111 thread; (9) sanitize Markdown HTML against script injection; (10) unfinished output still
+ 157 tokens + very long chunks mixed; high-frequency bursts; real model long answer; Markdown table
+ 239 Measure: cold/warm start, first interactive, first token latency, Markdown render time, UI main
+ 322 unified event protocol + stable state management → accept composer/scroll/complex Markdown/
+
+== master CSV R127 + legacy/workbench rows ==
+master rows: 98 fields: 13
+ROW R010 | Full live audit of the old Python product (entrypoints/pages | IMPLEMENTED_PASS | Inventory is structural/evidence-based; no exhaustive runtime re-audit of each l
+ROW R012 | Reversible, versioned, repeatable legacy data migration tool | IMPLEMENTED_PASS | apply/rollback verified on fixtures + read-only real-home inspect; full real-dat
+ROW R014 | Isolated compatibility access to old Python workbench (separ | UNVERIFIED | TARGET packaged compatibility window not re-verified on a machine with fastapi; 
+ROW R021 | Stable chat: throttled streaming, virtualization/incremental | IMPLEMENTED_PASS | long-history behavior measured only up to compaction fixtures; no hours-long soa
+ROW R023 | Tool calls collapsible, logs expandable, high-risk actions a | IMPLEMENTED_PASS | approval UI proven for implemented tools; remote/high-risk tool set limited
+ROW R025 | Task execution panel: DAG/events/checkpoints/cost/tokens/rec | IMPLEMENTED_PASS | cost/token panels show recorded usage; exact prepaid money accounting not implem
+ROW R030 | Electron security: contextIsolation, sandbox, nodeIntegratio | IMPLEMENTED_PASS | No OS-level penetration test; path confinement is app-level. New UI must keep CS
+ROW R031 | Independent Harness Daemon (not renderer-bound) + current-us | IMPLEMENTED_PASS | Re-verify packaged build in TARGET; no Windows service/reboot durability claims.
+ROW R033 | SQLite WAL/FULL/FK/busy_timeout; config/logs in user data di | IMPLEMENTED_PASS | no long-duration endurance; crash-recovery proven only in short window
+ROW R034 | State machine/DAG/lease+fencing+heartbeat/reclaim/durable ti | IMPLEMENTED_PASS | 8/24/72 h and reboot/sleep/power-loss NOT run; waiting_approval survives restart
+ROW R035 | Idempotent operation_id/outbox/side-effect dedupe; unknown e | IMPLEMENTED_PASS | uncertain external effects still require reconciliation; no provider-side charge
+ROW R036 | Atomic checkpoints (task DAG + context refs + artifacts + co | IMPLEMENTED_PASS | large-object artifact storage not quota-tested
+ROW R037 | Resource budgets (wall/time/token/cost/concurrency/CPU/mem/d | IMPLEMENTED_PASS | CPU/memory/disk OS quotas and provider-side rate limiting NOT implemented; money
+ROW R038 | Observability: run/step/trace ids, heartbeats, durations/cos | IMPLEMENTED_PASS | support bundle redaction tested in unit suite; no field telemetry/aggregation
+ROW R042 | Memory layering: immutable raw event log, verbatim window, t | IMPLEMENTED_PASS | archive retrieval quality is explicit-source-linked, not semantic search over ar
+ROW R045 | Tool output artifactization + locator retrieval; sub-agent l | IMPLEMENTED_PASS | sub-agent local memory model limited to worker sandbox + project facts
+ROW R046 | Compaction must not rewrite research conclusions; settings t | IMPLEMENTED_PASS | preview/diff UI limited; no claim that scientific conclusions are preserved sema
+ROW R047 | Compaction tests: 100k+ tokens, >=10 rounds, mixed long tool | IMPLEMENTED_PASS | restart-retention verified in unit fixtures; no 100k-token soak beyond fixture s
+ROW R051 | Knowledge: broad literature/DB search + evidence synthesis w | IMPLEMENTED_PASS | workflow layer only; external synthesis engines/Edison adapter not bundled; evid
+ROW R052 | Hypothesis generation/reflection/ranking/evolution/neighbor/ | IMPLEMENTED_PASS | role orchestration is serialized same-provider; scientific validity not external
+ROW R055 | Discovery: hypothesis->experiment design->human approval->re | IMPLEMENTED_PASS | real scientific import from arbitrary instruments not implemented; simulated exp
+ROW R056 | Autonomy: recoverable research graph/DAG/world model/milesto | IMPLEMENTED_PASS | bounded local graph, not long-horizon autonomous science; external world model a
+ROW R057 | Knowledge/Hypothesis/Debate results form auditable evidence  | IMPLEMENTED_PASS | full cryptographic evidence chain for conclusions not independently audited
+ROW R060 | MCP Registry: stdio/HTTP import, discovery, health, credenti | IMPLEMENTED_PASS | HTTP/SSE/ OAuth transport variants and third-party registry import not exercised
+ROW R061 | Skill Registry: SKILL.md/version/source/license/deps/sandbox | IMPLEMENTED_PASS | dependency auto-install/marketplace/update channel missing; live third-party rep
+ROW R062 | GitHub import requires user confirmation, static checks + is | IMPLEMENTED_PASS | not exercised against a live GitHub repository (supply-chain scan on real remote
+ROW R064 | RSI constrained loop Observe->Diagnose->Propose->Sandbox Tes | IMPLEMENTED_PASS | canary on real production traffic / regression rollback in field UNVERIFIED; sou
+ROW R070 | Unified ChannelAdapter (connect/disconnect/send/receive/auth | IMPLEMENTED_PASS | real Telegram/Slack/Discord/email/WeChat accounts BLOCKED_EXTERNAL; no platform 
+ROW R071 | Remote channels read-only by default; file writes/shell/sens | IMPLEMENTED_PASS | policy enforced only for implemented adapter paths; real platform rate limits un
+ROW R090 | Brand cleanup: UI/title/package name/installer/app identity/ | IMPLEMENTED_PASS | package namespace/env/storage/API identifiers intentionally kept for compatibili
+ROW R091 | Global legacy-brand scan + exception list (`LEGACY-BRAND-COM | IMPLEMENTED_PASS | Brand text in package namespace/env/data dir cannot be removed without breaking 
+ROW R093 | Credential secure storage (Electron safeStorage/system crede | IMPLEMENTED_PASS | Recovery/backup of encrypted config across user accounts not tested (DPAPI scope
+ROW R102 | Upgrade migrates DB with backup; uninstall keeps user data b | UNVERIFIED | DB schema migration with pre-upgrade backup under the upgrade was not separately
+ROW R113 | Skill: Paper2Agent install/discover/disable + public paper r | NOT_STARTED | Paper2Agent install/discover/disable + public paper repo tool-construction test 
+ROW R127 | Markdown/complex content streaming safety: incremental displ | UNVERIFIED | Markdown/complex-content rendering during an active stream is not asserted; sani
+
+== parity CSV tail ==
+parity rows: 85 fields: ['capability', 'category', 'python_baseline', 'python_evidence', 'desktop_prototype', 'prototype_evidence', 'vnext_status', 'vnext_code', 'reuse_mode', 'data_migration', 'priority', 'test_id', 'gaps']
+P: Visual auto-acceptance screenshot matrix | IMPLEMENTED_PASS | streaming
+P: Clean-Windows-VM install/upgrade/uninstall lifecycle | UNVERIFIED | release
+P: GitHub MIT publication + Release asset upload | BLOCKED_EXTERNAL | release
+P: Security review + automated secret/credential scan | IMPLEMENTED_PASS | security
+P: Performance baseline measurement | IMPLEMENTED_PASS | performance
+P: Defect register + release gates governance | IMPLEMENTED_PASS | release
+
+== progress.md tail ==
+lines: 280
+  2. run on `9132ec1` failed at the security scan: scoped e2e fixture tokens were classified HIGH.
+     Scanner now accepts only the documented fixture allowlist and the evidence artifact was refreshed
+     (0 unresolved HIGH / 48 LOW / 14 documented fixtures; commit `5ac5bd4`).
+  3. **run 40145676187 on `5ac5bd4`: SUCCESS**, both jobs (Desktop: typecheck, tests, live RPC E2E,
+     UI DOM QA, security scan, NSIS build, SBOM, SHA256SUMS, artifacts; Python baseline pytest).
+- Added `desktop/scripts/verify-doc-hashes.mjs` (checks every current artifact hash is quoted and no
+  stale full hash remains in release evidence; also checks SHA256SUMS mirror) and wired it into CI as a
+  step. Local run: PASS.
+- Added `desktop/scripts/durability-soak.mjs` and ran a **25-minute accelerated durability soak**
+  against the real daemon (isolated home, real Python worker, periodic SIGKILL/cancel injection):
+  `docs/verification/durability-soak.json` -> `result: passed`, 1500 s, **64 cycles / 64 tasks
+  completed / 12 faults / 12 recovered / 0 errors**. Limits recorded in the report: single Windows
+  session, **not** an 8/24/72 h run, no sleep/power-loss/reboot/disk-full injection.
+- Refreshed release evidence for the final 3.2.0 artifact (installer 129,447,101 B SHA-256
+  `4590B7F3...B230B897`, blockmap 135,948 B, unpacked 249,801,728 B), GitHub source publication
+  state, CI run link, and the 25-min soak; R100/R119/R121/R138 evidence rows corrected where an older
+  3.1.0 hash/name was still quoted.
+- Environment note: Windows Sandbox cannot be enabled non-interactively here
+  (`Get-WindowsOptionalFeature` requires elevation; `WindowsSandbox.exe` is absent; HypervisorPresent=True),
+  so the clean-Windows-VM lifecycle remains **NOT RUN**.
+- Round-4 machine-readable status is unchanged in shape: 98 requirement rows
+  (81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL); R138 stays
+  BLOCKED_EXTERNAL because Release assets are not uploaded, even though the source branch/tag and CI
+  are now real.
+
+### Round-4 continuation: real CI runs, protected main, accelerated soak (2026-10-25)
+
+- GitHub Actions now executes for real and is green on the final code commit: run `40145676187`
+  on `9041901` (Desktop job: typecheck, tests, live RPC E2E, UI DOM QA, hash guard, security
+  scan, NSIS build, SBOM, SHA256SUMS, artifacts; Python baseline job: pytest). Earlier runs
+  exposed and fixed two real CI-only defects (optional numpy/scipy assumption in a worker test;
+  documented-hash guard requiring a local `release/` artifact).
+- `main` is branch-protected with both CI jobs as required checks (PR required; force-push and
+  deletion blocked), enabled via the GitHub API with the existing repo-scoped credential.
+- Accelerated durability soak executed: 25 min / 1500 s, 64 cycles, 12/12 injected faults
+  recovered, 64/64 tasks completed, 0 errors (`docs/verification/durability-soak.json`).
+  Explicitly supplemental: not 8/24/72 h and no sleep/power-loss/reboot/disk-full.
+- Docs remain HOLD for a GitHub Release: gates G3/G6/G7/G8 are PASS_WITH_LIMITS and G9 is
+  BLOCKED_EXTERNAL until clean-VM lifecycle, signing and endurance are done or explicitly
+  waived.
+
+== mojibake probe ==

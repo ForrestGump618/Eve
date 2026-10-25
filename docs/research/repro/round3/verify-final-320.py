@@ -58,9 +58,9 @@ check(mb["R139"]["Status"] == "IMPLEMENTED_PASS", "R139 not PASS")
 
 parity = list(csv.DictReader(open("docs/migration/feature-parity-matrix.csv", encoding="utf-8-sig", newline="")))
 pc = Counter(r["vnext_status"] for r in parity)
-check(len(parity) == 85, "parity rows=%d" % len(parity))
-check(pc.get("IMPLEMENTED_PASS") == 67, "parity PASS=%s" % pc.get("IMPLEMENTED_PASS"))
-check(pc.get("UNVERIFIED") == 6 and pc.get("NOT_STARTED") == 9 and pc.get("BLOCKED_EXTERNAL") == 1,
+check(len(parity) == 89, "parity rows=%d" % len(parity))
+check(pc.get("IMPLEMENTED_PASS") == 69, "parity PASS=%s" % pc.get("IMPLEMENTED_PASS"))
+check(pc.get("UNVERIFIED") == 8 and pc.get("NOT_STARTED") == 9 and pc.get("BLOCKED_EXTERNAL") == 1,
       "parity other statuses=%s" % dict(pc))
 
 ui = list(csv.DictReader(open("docs/verification/ui-action-coverage.csv", encoding="utf-8-sig", newline="")))
@@ -81,6 +81,8 @@ need = [
     "docs/verification/performance-baseline.md", "docs/verification/defect-register.csv",
     "docs/verification/ui-action-coverage.csv", "docs/verification/ui-e2e.md",
     "docs/verification/e2e-results.md", "docs/verification/ui-streaming-stability.md",
+    "docs/verification/legacy-web-parity.md", "docs/requirements/markdown-parity.md",
+    "docs/verification/markdown-rendering.md",
 ]
 for n in need:
     check(os.path.exists(n), "missing " + n)
@@ -128,6 +130,7 @@ check(smoke.get("result") == "passed", "smoke result")
 prog = open("docs/progress.md", encoding="utf-8").read()
 check("Round 3 final evidence (SuWen desktop 3.2.0" in prog, "progress final section missing")
 check("81 IMPLEMENTED_PASS" in prog, "progress counts missing")
+check("Round 4 — legacy web parity" in prog, "progress round-4 section missing")
 # parity md / traceability / conflicts appended
 for f, marker in [("docs/migration/feature-parity-matrix.md", "## 9. Final round-3 evidence"),
                   ("docs/requirements/traceability.md", "## 9. Final round-3 update"),
@@ -140,5 +143,5 @@ if errors:
     for e in errors:
         print(" -", e)
     sys.exit(1)
-print("PASS: master 98 rows (81/12/4/1), parity 85 (67/6/9/1/1/1), UI 144 (0 unknown), defects 20, deliverables present, hashes match artifacts")
+print("PASS: master 98 rows (81/12/4/1), parity 89 (69/8/9/1/1/1), UI 144 (0 unknown), defects 20, round-4 parity docs present, hashes match artifacts")
 print("UI statuses:", dict(uc))

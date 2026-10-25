@@ -1,6 +1,6 @@
 {
   "name": "suwen-desktop",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "private": true,
   "description": "SuWen local research workspace with durable task execution",
   "main": "dist/main.js",
@@ -23,6 +23,8 @@
     "@types/node": "24.12.0",
     "electron": "45.0.0",
     "electron-builder": "26.18.0",
+    "katex": "^0.16.21",
+    "mermaid": "^11.12.0",
     "playwright-core": "1.64.1",
     "typescript": "7.0.2"
   },

@@ -1,5 +1,29 @@
 # Windows installer verification — SuWen desktop 3.2.0
 
+## Round-5 (3.3.0) supersession - current delivered evidence (2026-10-25)
+
+Current delivered artifact for the **3.3.0** round; the 3.2.0 sections below remain accurate
+only for that historical build. Measured in TARGET on 2026-10-25.
+
+| Item | Value |
+|---|---|
+| Installer | `desktop/release/SuWen-Setup-3.3.0-win-x64.exe` - **131,011,183 B** - SHA256 `0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03` - **UNSIGNED** |
+| Blockmap | `SuWen-Setup-3.3.0-win-x64.exe.blockmap` - 137,255 B - SHA256 `15EAB7E1C14D36514DC8FB2A8B7BEE655E253D117DFBBAC1F5179EB5BB662ADB` |
+| Unpacked | `desktop/release/win-unpacked/SuWen.exe` - 249,801,728 B - SHA256 `469D75AD64B449B98D5DB8F7D1C64C0F988F8D2F99F6B04CD213A4481A0FA991` |
+| Build | `npm run dist:win`, electron 45.0.0 x64, electron-builder 26.18.0, 2026-10-25 13:58 (+08) |
+| Lifecycle (host) | `scripts/verify-installer.ps1`: **12/12 PASS** incl. silent install/uninstall,
+  daemon survival, user-data preservation and **upgrade from 3.0.0-preview.1**; evidence
+  `docs/verification/artifacts/installer-lifecycle.json` (installerBytes=131011183, sha256=`0B55D5BDFBA86C6C...`) |
+| Packaged smoke | `SUWEN_SMOKE_PACKAGED=1` + `SUWEN_WORKBENCH_DEPS`: **passed**, includes hosted
+  legacy SPA (12 nav items, 12 routes); report `desktop/release/smoke/work/electron-e2e-result.json` |
+| SHA256SUMS | `desktop/release/SHA256SUMS` == `docs/release/SHA256SUMS.txt` (3 lines) |
+| Clean VM / signing | clean-Windows-VM lifecycle **NOT RUN**; installer **UNSIGNED** - unchanged limitations |
+
+---
+
+
+
+
 Evidence measured in TARGET `C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`
 (branch `suwen-vnext-durable`, 2026-10-25). Only inspected files/artifacts are recorded here.
 Anything not executed is marked **NOT RUN** / **UNVERIFIED** / **PENDING_LEAD** — never claimed as passed.

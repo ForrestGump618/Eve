@@ -207,6 +207,44 @@ Object.assign(copy,{
  researchStackHelp:['上述两个只读 MCP 数据库工具已接入新任务。完整 Python 科研工作台可单独打开；其注册表、第三方 MCP/Skills、SSH 与其余科研能力尚未直接桥接到新任务执行器，未配置能力不会显示为已启用。','The two read-only MCP database tools above are connected to new tasks. The full Python research workbench can be opened separately. Its registry, third-party MCP/Skills, SSH, and other research capabilities are not directly bridged to the new task engine; unconfigured capabilities are not shown as enabled.'],
  backgroundHelp:['未安装 Windows Service；无人登录、系统睡眠或关机时不能继续本机计算。Python 子进程并非系统安全沙箱；新任务 worker 当前只支持固定统计操作。设置中的 Python 选择也用于可选的兼容科研工作台，旧任务的恢复语义不同。','No Windows Service is installed. Local computation cannot continue without a signed-in user, during sleep, or after shutdown. Python subprocesses are not OS security sandboxes; the new-task worker supports fixed statistical operations. The selected Python also serves the optional compatibility workbench, whose legacy tasks have different recovery semantics.']
 });
+Object.assign(copy,{
+  workbench:['实验工作台','Workbench'],
+  workbenchTitle:['实验工作台（网页版复刻）','Workbench (legacy web UI)'],
+  wbRuntimeTitle:['网页工作台运行时','Web workbench runtime'],
+  wbIntro:['完整网页版工作区在独立窗口中原样运行：聊天、发现、变量、文件、图表、任务、技能、注册表、记忆、SSH、设置与诊断等。运行时会安装一份固定版本的隔离 Python 依赖（约 130 MB），首次启用需要联网。','The complete legacy web workspace runs unchanged in a separate window: chat, discovery, variables, files, figures, jobs, skills, registry, memory, SSH, settings and diagnostics. A pinned, isolated Python dependency set (~130 MB) is installed on first enablement and requires network access.'],
+  wbRefresh:['刷新状态','Refresh status'],
+  wbInstall:['安装 / 修复运行时','Install / repair runtime'],
+  wbOpen:['打开实验工作台','Open workbench'],
+  wbCancel:['取消安装','Cancel install'],
+  wbHint:['打开工作台时注入桌面当前模型配置（仅通过内存环境变量传入，不写入网页存储或磁盘；修改桌面模型后关闭并重开工作台生效）。未配置模型时旧版界面使用离线 mock 模型，也可在旧版设置中自行配置。运行时只安装固定版本依赖到独立目录，不安装本机全局包。','Opening the workbench injects the current desktop model configuration in memory only (never written to web storage or disk; close and reopen the workbench after changing the desktop model). Without a desktop model the legacy UI uses its offline mock provider and can be configured in its own settings. The runtime installs pinned dependencies only into its own directory, never into global Python packages.'],
+  wbParityTitle:['复刻范围（以网页版为基准）','Replication scope (against the legacy web UI)'],
+  wbFeatureChat:['聊天：流式回复、Markdown、图片、运行追踪、审批与中断','Chat: streaming replies, Markdown, figures, run tracing, approvals and interruption'],
+  wbFeatureResearch:['发现工作台：项目、策略、假设池、报告与证据台账','Discovery: projects, strategies, hypothesis pool, reports and evidence ledger'],
+  wbFeatureFiles:['工作区文件、图表、变量、任务与技能、注册表与记忆','Workspace files, figures, variables, jobs and skills, registry and memory'],
+  wbFeatureOps:['SSH、消息渠道 Webhook、设置与诊断、Studio','SSH, channel webhooks, settings and diagnostics, Studio'],
+  wbParityNote:['逐项复刻状态记录在 docs/verification/legacy-web-parity.md；网页版中依赖外部机器或账号的条目会在该文档中如实标注。','Per-feature replication status is recorded in docs/verification/legacy-web-parity.md; items that require external machines or accounts are labelled honestly there.'],
+  wbStatusChecking:['正在检查工作台运行时…','Checking workbench runtime…'],
+  wbNotInstalled:['尚未安装工作台运行时','Workbench runtime is not installed'],
+  wbInstalled:['工作台运行时已就绪','Workbench runtime is ready'],
+  wbBroken:['运行时标记存在但导入检查失败','Runtime marker exists but the import probe failed'],
+  wbMissingPython:['未找到可用的 Python 解释器。请先在设置中指定 Python（3.11/3.12）。','No usable Python interpreter found. Select Python (3.11/3.12) in Settings first.'],
+  wbPython:['Python','Python'],
+  wbDeps:['依赖目录','Dependency directory'],
+  wbSize:['占用大小','Size'],
+  wbChecked:['检查时间','Checked'],
+  wbInstalling:['正在安装工作台运行时（约 130 MB 固定版本依赖；请保持窗口打开）…','Installing the workbench runtime (~130 MB of pinned dependencies; keep this window open)…'],
+  wbInstallDone:['工作台运行时已安装。打开实验工作台即可使用完整网页版界面。','Workbench runtime installed. Open the workbench for the full legacy web UI.'],
+  wbInstallCancelled:['安装已取消','Installation cancelled'],
+  wbNeedInstall:['请先安装工作台运行时，再打开实验工作台。','Install the workbench runtime before opening the workbench.'],
+  wbOpenFailed:['打开工作台失败：{detail}','Failed to open the workbench: {detail}'],
+  wbUnavailable:['当前构建没有暴露工作台接口；请更新桌面应用。','This build does not expose the workbench bridge; update the desktop app.'],
+  wbStageResolve:['解析依赖','Resolving dependencies'],
+  wbStageDownload:['下载依赖','Downloading dependencies'],
+  wbStageProbe:['校验运行时','Probing runtime'],
+  wbStageDone:['完成','Done'],
+  wbStageError:['安装失败','Install failed'],
+  wbStageCancel:['已取消','Cancelled']
+});
 /* Additional interface strings added by the vNext UI (zh, en). Existing keys from the
    preview UI are kept above; these cover the five-page workspace. */
 Object.assign(copy, {
@@ -678,6 +716,9 @@ const S = {
   importState: { inspect: null, kinds: new Set(), status: null, busy: false, jobs: [], dryRun: null },
   toolsTab: 'mcp',
   toolsLoaded: { mcp: false, skills: false, channels: false, rsi: false },
+  workbench: null,
+  workbenchBusy: false,
+  workbenchProgress: '',
   mcp: [], skills: [], channels: [], rsiRuns: [], rsiActive: null, rsiError: null,
   inbox: [], inboxChannel: null,
   modelSettings: null,
@@ -862,7 +903,7 @@ function renderAll() {
   for (const button of $$('.rail button[data-page]')) button.classList.toggle('active', button.dataset.page === S.page);
 }
 function showPage(name, { load = true } = {}) {
-  if (!['chat', 'projects', 'tasks', 'tools', 'settings'].includes(name)) return;
+  if (!['chat', 'projects', 'tasks', 'tools', 'workbench', 'settings'].includes(name)) return;
   S.page = name;
   for (const page of $$('.page')) page.hidden = page.id !== name;
   renderAll();
@@ -876,6 +917,8 @@ function showPage(name, { load = true } = {}) {
     void ensureProjectOptions();
   } else if (name === 'tools') {
     void loadToolsTab(S.toolsTab);
+  } else if (name === 'workbench') {
+    void loadWorkbench();
   } else if (name === 'settings') {
     void loadSettingsPage();
   }
@@ -1165,6 +1208,20 @@ function scheduleChatRender() {
     renderChat();
   }, 120);
 }
+/* Shared options for markdown.render/enhance and the progressive streaming path. Labels are
+   localized here so ui/markdown.js stays language neutral. */
+function markdownRenderOptions(extra = {}) {
+  return {
+    copyLabel: t('copyCode'),
+    copiedLabel: t('copied'),
+    onCopy: copyText,
+    mathRendering: t('mathRendering'),
+    mathFallback: t('mathFallback'),
+    diagramRendering: t('diagramRendering'),
+    diagramFallback: t('diagramFallback'),
+    ...extra,
+  };
+}
 function messageBubble(role, text, options = {}) {
   const article = el('article', { class: `message ${role}${options.streaming ? ' streaming' : ''}` });
   article.append(el('div', { class: 'label', text: role === 'user' ? t('messageUser') : t('messageAssistant') }));
@@ -1173,12 +1230,12 @@ function messageBubble(role, text, options = {}) {
   const bodyNode = el('div', { class: `body${options.markdown ? ' markdown' : ''}` });
   const markdown = options.markdown && typeof window !== 'undefined' ? window.SuwenMarkdown : null;
   if (markdown && body) {
+    const markdownOptions = markdownRenderOptions();
     try {
-      bodyNode.append(markdown.render(document, body, {
-        copyLabel: t('copyCode'),
-        copiedLabel: t('copied'),
-        onCopy: copyText,
-      }));
+      bodyNode.append(markdown.render(document, body, markdownOptions));
+      /* Inert math/diagram placeholders are upgraded asynchronously by markdown.js
+         (vendor scripts load lazily, one render per event-loop turn). */
+      if (typeof markdown.enhance === 'function') markdown.enhance(bodyNode, markdownOptions);
     } catch { bodyNode.textContent = body; }
   } else {
     bodyNode.textContent = body || '';
@@ -3407,6 +3464,13 @@ function applyTheme(mode) {
   try { localStorage.setItem('suwen.theme', target); } catch { /* storage optional */ }
   const select = $('defaults-theme');
   if (select && select.value !== target) select.value = target;
+  /* Mermaid bakes colors into rendered SVG; re-render completed diagrams when the resolved
+     theme changes (background work, old SVG stays until the replacement is ready). */
+  try {
+    if (window.SuwenMarkdown && typeof window.SuwenMarkdown.refreshTheme === 'function') {
+      window.SuwenMarkdown.refreshTheme(S.theme.resolved);
+    }
+  } catch { /* diagram recolor is optional */ }
 }
 function initTheme() {
   applyTheme(storedThemeMode());
@@ -3550,26 +3614,92 @@ function registerStreamNode(task, node) {
   if (!task || !task.id || !node || typeof node.querySelector !== 'function') return;
   const body = node.querySelector('.body');
   if (!body) return;
-  S.stream.nodes.set(task.id, { body, meta: node.querySelector('.meta'), painted: body.textContent || '' });
+  S.stream.nodes.set(task.id, {
+    body,
+    meta: node.querySelector('.meta'),
+    painted: body.textContent || '',
+    plan: null,
+    stableChars: -1,
+    renderedAt: 0,
+    renderTimer: 0,
+  });
 }
+/* Incremental body updates for live assistant messages. markdown.js exposes planProgressive():
+   only closed block boundaries are typeset, the open tail stays plain text, so a partial table
+   row, code fence, math delimiter or word never renders as half-finished structure. Rebuilds are
+   throttled to ~110 ms; between rebuilds only the tail text node is updated in place, which keeps
+   the DOM stable (no flicker, no scroll jump, composer untouched). */
+const STREAM_MARKDOWN_INTERVAL = 110;
 function applyStreamTextPatches() {
   const timeline = $('timeline');
   if (!timeline) return;
+  const markdown = typeof window !== 'undefined' ? window.SuwenMarkdown : null;
   let changed = false;
   for (const task of chatTaskList()) {
     const ref = S.stream.nodes.get(task.id);
     if (!ref) continue;
-    const status = statusFor(task);
-    if (FINAL_STATUS.has(status)) continue;
+    if (FINAL_STATUS.has(statusFor(task))) continue;
     const text = streamTextFor(task);
     if (!text || text === ref.painted) continue;
-    if (ref.painted && text.indexOf(ref.painted) === 0) {
-      ref.body.append(document.createTextNode(text.slice(ref.painted.length)));
-    } else {
-      ref.body.textContent = text;
-    }
     ref.painted = text;
     changed = true;
+    let plan = null;
+    if (markdown && typeof markdown.planProgressive === 'function') {
+      try { plan = markdown.planProgressive(text, ref.plan); } catch { plan = null; }
+    }
+    if (!plan) {
+      ref.body.textContent = text;
+      ref.body.classList.remove('markdown', 'progressive');
+      ref.plan = null;
+      ref.stableChars = -1;
+      continue;
+    }
+    if (plan.stableChars === 0) {
+      /* No closed block yet: one plain text node is both cheapest and safest. */
+      if (ref.body.textContent !== plan.tail) ref.body.textContent = plan.tail;
+      ref.body.classList.remove('markdown', 'progressive');
+      ref.plan = plan;
+      ref.stableChars = 0;
+      continue;
+    }
+    const now = monotonicNow();
+    const due = plan.stableChars !== ref.stableChars && (now - ref.renderedAt >= STREAM_MARKDOWN_INTERVAL);
+    if (due) {
+      try {
+        const options = markdownRenderOptions({ allowDiagrams: false });
+        ref.body.replaceChildren(markdown.renderProgressivePlan(document, plan, options));
+        ref.body.classList.add('markdown', 'progressive');
+        /* Complete inline math inside closed blocks may upgrade now; Mermaid waits for the
+           completed message so a diagram is never re-rendered on every closed block. */
+        if (typeof markdown.enhance === 'function') markdown.enhance(ref.body, options);
+        ref.stableChars = plan.stableChars;
+        ref.renderedAt = now;
+      } catch {
+        ref.body.textContent = text;
+        ref.body.classList.remove('markdown', 'progressive');
+        ref.plan = null;
+        ref.stableChars = -1;
+        continue;
+      }
+    } else {
+      /* Text never waits for the rebuild throttle: the tail is updated in place. When the last
+         rebuild ended exactly on a block boundary there is no tail node yet, so one is created. */
+      let tailNode = typeof ref.body.querySelector === 'function' ? ref.body.querySelector('.md-stream-tail') : null;
+      if (!tailNode && typeof document !== 'undefined') {
+        tailNode = document.createElement('div');
+        tailNode.className = 'md-stream-tail';
+        ref.body.appendChild(tailNode);
+      }
+      if (tailNode && tailNode.textContent !== plan.tail) tailNode.textContent = plan.tail;
+      if (plan.stableChars !== ref.stableChars && !ref.renderTimer) {
+        /* A closed block arrived inside the throttle window: flush it after the interval. */
+        ref.renderTimer = setTimeout(() => {
+          ref.renderTimer = 0;
+          scheduleStreamPaint();
+        }, STREAM_MARKDOWN_INTERVAL);
+      }
+    }
+    ref.plan = plan;
   }
   if (changed && followScroll()) scrollTimelineToBottom();
 }
@@ -3731,7 +3861,7 @@ function reconcileStreamSnapshot() {
 }
 
 Object.assign(copy, {
-  version: ['3.2.0 · 开发预览版', '3.2.0 · dev preview'],
+  version: ['3.3.0 · 开发预览版', '3.3.0 · dev preview'],
   themeLabel: ['界面主题', 'Interface theme'],
   themeSystem: ['跟随系统', 'Follow system'],
   themeLight: ['浅色', 'Light'],
@@ -3740,6 +3870,10 @@ Object.assign(copy, {
   jumpLatest: ['跳到最新 ↓', 'Jump to latest ↓'],
   copyCode: ['复制', 'Copy'],
   copied: ['已复制', 'Copied'],
+  mathRendering: ['公式渲染中…', 'Rendering math…'],
+  mathFallback: ['公式未渲染（原始 LaTeX 保留）', 'Math not rendered (raw LaTeX kept)'],
+  diagramRendering: ['图表渲染中…', 'Rendering diagram…'],
+  diagramFallback: ['图表未渲染（原始 Mermaid 保留）', 'Diagram not rendered (raw Mermaid kept)'],
   toolActivity: ['步骤活动（{count}）', 'Step activity ({count})'],
   streamPreparing: ['准备中…', 'Preparing…'],
   streamToolRunning: ['执行工具中…', 'Running a tool…'],
@@ -3752,6 +3886,100 @@ Object.assign(copy, {
   streamRestored: ['后台已恢复，正在校准事件。', 'Background restored; reconciling events.'],
   streamReplayFailed: ['事件重放未完成，已用快照校准；若仍有缺口请重连后台。', 'Event replay did not complete; a snapshot reconciliation ran. Reconnect the background if gaps persist.'],
 });
+/* ---------- workbench runtime (legacy web UI replication) ---------- */
+function workbenchBridge() { return window.suwen && typeof window.suwen.onWorkbench === 'function' ? window.suwen : null; }
+function workbenchStatusLine(status) {
+  if (!status) return t('wbStatusChecking');
+  if (status.installed) return t('wbInstalled') + (status.pythonVersion ? ` · Python ${status.pythonVersion}` : '');
+  if (!status.pythonVersion) return t('wbMissingPython');
+  if (Array.isArray(status.missing) && status.missing.length && (status.installedAt || status.markerPython)) return t('wbBroken');
+  return t('wbNotInstalled');
+}
+function renderWorkbench() {
+  const status = S.workbench;
+  const state = $('wb-state');
+  if (state) {
+    const lines = [workbenchStatusLine(status)];
+    if (status) {
+      if (status.python) lines.push(`${t('wbPython')}: ${status.python}${status.pythonVersion ? ` (${status.pythonVersion})` : ''}`);
+      if (status.depsDir) lines.push(`${t('wbDeps')}: ${status.depsDir}`);
+      if (Number.isFinite(status.bytes) && status.bytes > 0) lines.push(`${t('wbSize')}: ${(status.bytes / 1048576).toFixed(1)} MB`);
+      if (status.installed && status.installedAt) lines.push(`${t('wbChecked')}: ${new Date(status.installedAt).toLocaleString()}`);
+      if (Array.isArray(status.missing) && status.missing.length) lines.push(`missing: ${status.missing.join(', ')}`);
+      if (status.error) lines.push(String(status.error).slice(0, 500));
+    }
+    state.textContent = lines.join('\n');
+  }
+  const install = $('wb-install');
+  const open = $('wb-open');
+  if (install) { install.disabled = S.workbenchBusy; install.textContent = S.workbenchBusy ? t('wbCancel') : t('wbInstall'); }
+  if (open) open.disabled = !(status && status.installed) || S.workbenchBusy;
+  const progress = $('wb-progress');
+  if (progress && S.workbenchProgress) progress.textContent = S.workbenchProgress;
+}
+async function loadWorkbench() {
+  if (!workbenchBridge()) {
+    S.workbench = { installed: false, reason: 'bridge-missing' };
+    renderWorkbench();
+    const state = $('wb-state');
+    if (state) state.textContent = t('wbUnavailable');
+    return;
+  }
+  try { S.workbench = await window.suwen.call('workbench.status'); }
+  catch (error) { S.workbench = { installed: false, reason: 'status-error' }; showError(error); }
+  renderWorkbench();
+}
+function workbenchProgressText(event) {
+  const keys = { checking: 'wbStageResolve', installing: 'wbStageDownload', verifying: 'wbStageProbe', installed: 'wbStageDone', error: 'wbStageError', cancelled: 'wbStageCancel' };
+  const phase = event && keys[event.phase] ? t(keys[event.phase]) : String((event && event.phase) || '');
+  const detail = event && event.detail ? ` · ${String(event.detail).split(/\r?\n/).filter(Boolean).slice(-2).join(' / ').slice(0, 400)}` : '';
+  return `${phase}${detail}`;
+}
+async function installWorkbench() {
+  if (!workbenchBridge()) { showError(new Error(t('wbUnavailable'))); return; }
+  if (S.workbenchBusy) {
+    try { await window.suwen.call('workbench.cancel'); S.workbenchProgress = t('wbInstallCancelled'); } catch (error) { showError(error); }
+    return;
+  }
+  S.workbenchBusy = true;
+  S.workbenchProgress = t('wbInstalling');
+  renderWorkbench();
+  try {
+    const status = await window.suwen.call('workbench.install');
+    S.workbench = status;
+    S.workbenchProgress = status && status.installed ? t('wbInstallDone') : workbenchStatusLine(status);
+    if (status && status.installed) toast('wbInstallDone');
+  } catch (error) {
+    showError(error);
+    S.workbenchProgress = String((error && error.message) || error);
+  } finally {
+    S.workbenchBusy = false;
+    renderWorkbench();
+  }
+}
+async function openWorkbenchWindow() {
+  if (!workbenchBridge()) { showError(new Error(t('wbUnavailable'))); return; }
+  if (!(S.workbench && S.workbench.installed)) { showError(new Error(t('wbNeedInstall'))); return; }
+  try {
+    const result = await window.suwen.call('legacyOpen');
+    if (result && result.ok === false) {
+      S.workbench = result.status || S.workbench;
+      renderWorkbench();
+      showError(new Error(result.code === 'runtime-required' ? t('wbNeedInstall') : t('wbOpenFailed', { detail: result.code || 'unknown' })));
+    }
+  } catch (error) {
+    showError(new Error(t('wbOpenFailed', { detail: String((error && error.message) || error) })));
+  }
+}
+function subscribeWorkbench() {
+  const bridge = workbenchBridge();
+  if (!bridge) return;
+  bridge.onWorkbench(event => {
+    S.workbenchProgress = workbenchProgressText(event || {});
+    const progress = $('wb-progress');
+    if (progress) progress.textContent = S.workbenchProgress;
+  });
+}
 /* ---------- boot ---------- */
 function bindEvents() {
   for (const button of $$('.rail [data-page]')) {
@@ -3760,6 +3988,9 @@ function bindEvents() {
       if (button.dataset.page === 'settings') void loadSettingsPage();
     });
   }
+  on('wb-refresh', 'click', () => { void loadWorkbench(); });
+  on('wb-install', 'click', () => { void installWorkbench(); });
+  on('wb-open', 'click', () => { void openWorkbenchWindow(); });
   on('new-chat', 'click', () => newConversation());
   on('language', 'click', () => {
     locale = locale === 'en' ? 'zh' : 'en';
@@ -3866,6 +4097,8 @@ async function boot() {
     void loadConversations();
     void loadProjects();
     void loadThemePreference();
+    subscribeWorkbench();
+    void loadWorkbench();
   } catch (error) {
     showError(error);
   }

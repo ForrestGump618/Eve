@@ -4,11 +4,14 @@ import { existsSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 
 export interface LegacyHandle { port: number; token: string; pid: number; stop: () => Promise<void> }
+/** Optional session model configuration injected in memory for the hosted workspace. */
+export interface LegacyModelConfig { provider: string; model: string; apiBase: string; apiKey: string }
 
 /** Starts only the trusted bridge script; no model-generated code, shell or inherited API credentials. */
-export async function launchLegacy(python: string, script: string, source: string, home: string, signal?: AbortSignal): Promise<LegacyHandle> {
+export async function launchLegacy(python: string, script: string, source: string, home: string, deps?: string, signal?: AbortSignal, model?: LegacyModelConfig): Promise<LegacyHandle> {
   if (signal?.aborted) throw new Error('Legacy bridge launch cancelled');
   if (!python || /[\u0000-\u001f]/.test(python) || ![script, source, home].every(isAbsolute) || !existsSync(script) || !existsSync(join(source, 'omicslab', 'config.py'))) throw new Error('Legacy bridge requires a Python interpreter and trusted absolute paths');
+  const dependencyDir = deps && isAbsolute(deps) && !/[\u0000-\u001f]/.test(deps) && existsSync(join(deps, '.suwen-workbench.json')) ? deps : undefined;
   const token = randomBytes(32).toString('hex');
   const env: NodeJS.ProcessEnv = {};
   // OS and installed-Python dependency discovery only; API/SSH/model and
@@ -16,7 +19,21 @@ export async function launchLegacy(python: string, script: string, source: strin
   for (const key of ['SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA']) if (process.env[key]) env[key] = process.env[key];
   env.HOME = resolve(home);
   env.SUWEN_BRIDGE_TOKEN = token;
-  const child = spawn(python, ['-E', '-X', 'utf8', '-u', script, '--source', source, '--home', home], { cwd: resolve(home, '..'), env, shell: false, windowsHide: true, detached: process.platform !== 'win32', stdio: ['pipe', 'pipe', 'pipe'] });
+  // The session model config is handed to the inherited bridge only when it is
+  // complete and structurally valid; an invalid or empty config falls back to the
+  // bridge's offline mock provider instead of failing to start.
+  if (model && /^(custom-openai|custom-anthropic)$/.test(model.provider)
+    && model.model.length > 0 && model.model.length <= 160 && !/[\u0000-\u001f\u007f]/.test(model.model)
+    && /^https?:\/\//i.test(model.apiBase) && model.apiBase.length <= 2000 && !/[\u0000-\u001f\u007f]/.test(model.apiBase)
+    && model.apiKey.length > 0 && model.apiKey.length <= 4096 && !/[\u0000-\u001f\u007f]/.test(model.apiKey)) {
+    env.SUWEN_LEGACY_PROVIDER = model.provider;
+    env.SUWEN_LEGACY_MODEL = model.model;
+    env.SUWEN_LEGACY_API_BASE = model.apiBase;
+    env.SUWEN_LEGACY_API_KEY = model.apiKey;
+  }
+  const args = ['-E', '-X', 'utf8', '-u', script, '--source', source, '--home', home];
+  if (dependencyDir) args.push('--deps', dependencyDir);
+  const child = spawn(python, args, { cwd: resolve(home, '..'), env, shell: false, windowsHide: true, detached: process.platform !== 'win32', stdio: ['pipe', 'pipe', 'pipe'] });
   const pid = child.pid;
   let closed = false;
   let ready = false;

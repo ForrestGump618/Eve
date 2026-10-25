@@ -1,0 +1,250 @@
+== omicslab/web/js/store.js 4773 B ==
+   route: 'workbench',
+   Route', 'workbench');
+   ROUTE_IDS.includes(raw) ? raw : ROUTE_IDS.includes(preferred) ? preferred : 'workbench';
+== omicslab/web/js/app.js 22717 B ==
+   views/settings.js?v=2.1.1'),
+   views/workbench.js?v=2.1.1'),
+   views/discovery.js?v=2.1.1'),
+   views/ssh.js and is authored in parallel. If the module has not
+   views/ssh.js?v=2.1.1');
+   views/ssh.js 尚未就绪', err);
+   views/ssh.js 未导出 mount');
+   page ssh-page">' +
+   views/ssh.js）尚未加载，可能仍在构建中。稍后点击重试即可。',
+   Route('ssh', { force: true });
+  app.js workbench ctx: .1'), workflow: () => import('./views/platform.js?v=2.1.1'), research: () => import('./views/platform.js?v=2.1.1'), artifacts: () => import('./views/platform.js?v=2.1.1'), diagnostics: () => import('./views/platform.js?v=2.1.1'), connections: () => import('./views/settings.js?v=2.1.1'), workbench: () => import('./views/workbench.js?v=2.1.1'), chat: () => import('./views/chat.js?v=2.1.1'), discovery: () => import('./views/discovery.js?v=2.1.1'), vars: () => import('./views/vars.js?v=2.1.1'), files: () => import('./views/files.js?v=2.1.1'), figures: () => import('./views/fi
+== omicslab/web/js/util.js 9087 B ==
+   navailable (private mode); settings simply do not persist */
+
+== index.html nav area ==
+size 5885
+  inline script:  // Apply the persisted theme before first paint to avoid a flash. (function () { try { var raw = localStorage.getItem('omicslab.theme'); var value = raw ? JSON.parse(raw) : null; if (value === "system") value = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; if (value === 'light' || value === 'dark') { document.documentElement.dataset.theme = value; } } catch (err) { /* ignore unavailable storage */ } })(); 
+
+== platform.js ==
+lines 221 B 53972
+routes: []
+labels: ['brain', 'checked', 'configured', 'disabled', 'embedding', 'is-active', 'selected', 'wand']
+
+== prompt lines 100-125 ==
+ 100 don't move reading position; (7) long-message virtualization preserves selection/copy; (8) tool
+ 101 panel expand/collapse must not jump. Use anchor preservation or equivalent.
+ 102 
+ 103 ### 3.5 Markdown / complex content
+ 104 
+ 105 Inputs: Markdown, LaTeX, code blocks, tables, Mermaid, quotes, JSON, multilingual, very long
+ 106 single lines, file/artifact refs, images/charts, structured research results. Requirements: (1)
+ 107 incomplete output must not flicker whole page; (2) avoid continuous expensive highlighting for
+ 108 unfinished code blocks; (3) large tables have controlled overflow; (4) code blocks scroll+copy
+ 109 independently; (5) LaTeX failure degrades locally, never crashes page; (6) Mermaid isolated +
+ 110 error handled; (7) images/async visuals avoid layout shift; (8) long content must not block main
+ 111 thread; (9) sanitize Markdown HTML against script injection; (10) unfinished output still
+ 112 readable. Suggested: lightweight incremental display during streaming; enhance stable segments;
+ 113 full normalized render when done. Never lose model content for visual stability.
+ 114 
+ 115 ### 3.6 Reasoning / tool / answer separation
+ 116 
+ 117 Clearly separate run status, displayable thinking/progress summaries, tool calls, tool results,
+ 118 final answer, files/artifacts. Never assume every model exposes showable internal reasoning;
+ 119 normalize via adapter into allowed status/summary. Tool calls collapsed by default, expandable
+ 120 to params/process/results. Growing tool logs must not push composer or shake the page. Final
+ 121 answer and tool trace use different visual hierarchy.
+ 122 
+ 123 ### 3.7 Run state machine
+ 124 
+ 125 States: idle, connecting, preparing, streaming, tool_running, waiting_approval, compacting,
+
+== prompt lines 150-175 ==
+ 150 100%; uncaught frontend exceptions 0; composer layout displacement 0 unexpected during steady
+ 151 streaming; auto-follow respects scroll intent; typical frame rate near 60 FPS; one bad content
+ 152 must not crash chat; late events after cancel 0 wrong writes; reconnect content integrity 100%
+ 153 with dedupe/recovery; long-session resource use no sustained unrecoverable growth. Record
+ 154 average/P95/extremes/environment; no single-sample claim of long-term stability.
+ 155 
+ 156 Test matrix (Playwright Electron or equivalent): 100/1,000/10,000 incremental events; short
+ 157 tokens + very long chunks mixed; high-frequency bursts; real model long answer; Markdown table
+ 158 forming line by line; code block across many deltas; zh/en/Unicode across chunk boundaries;
+ 159 multiple tool calls interleaved; model resumes after tool; user scrolls history during output;
+ 160 user edits composer during output; user switches projects during output; repeated cancel and
+ 161 resend; two independent runs in parallel; daemon disconnect+recovery; duplicate/out-of-order/
+ 162 replayed events; malformed model JSON; large code/table/chart; 100+ message session; window
+ 163 resize, theme and language switch. Use deterministic event replay tests AND real provider live
+ 164 tests; label results separately.
+ 165 
+ 166 ## 5. P0 fix known failures
+ 167 
+ 168 Reproduce previous known issues: `Unknown rsi run`; RPC E2E failures; possible Activity Handler
+ 169 registration inconsistency; UI/backend state sync; Python Worker ↔ Harness bridge. Flow:
+ 170 reproduce → root cause → minimal safe fix → regression case → integration → E2E → update matrix.
+ 171 Never hide errors, skip assertions, delete failing tests, or use mocks to mask real failures.
+ 172 Full regression after fixes.
+ 173 
+ 174 ## 6. P0 durable harness, DB, runtime
+ 175 
+
+== desktop/ui/markdown.js 35583 B ==
+lines 933
+exports: ['module.exports = api']
+features: ['Copy', 'FENCE', 'Fence', 'HEADING', 'LaTeX', 'List', 'Mermaid', 'blockquote', 'code', 'copy', 'fence', 'heading', 'latex', 'link', 'list', 'mermaid', 'table']
+
+== docs/verification/ui-e2e.md 21800 B ==
+markdown hits: 12
+   19 | Harness | `desktop/scripts/streaming-ui-e2e.mjs` (new); Electron dev binary `desktop/node_modules/electron/dist/electron.exe`; per-run `SUWEN_TEST_HOME` temp profile; inherited `ELECTRON_R
+   26 The suite invocation was `node scripts/streaming-ui-e2e.mjs --mode final --runs 1`. The script's `argValue` only accepts `--name=value`, so the run is stored/labelled `baseline` in the JSON 
+   54 `*` n/m = completion lag not sampled (50 ms sampler stopped before the last growth sample); the completed DOM was still verified exactly by sha256, and the harness now treats this as "not me
+   98 - `node scripts/streaming-ui-e2e.mjs --mode=final --only=persist,kill --runs=1` → `release/smoke/ui-streaming-20261024-192946-final.json` (34,543 ms):
+   152 - Gap replay cap (2,000/round) not exercised; clipboard copy not exercised; drafts are in-memory only; markdown rendering asserted only for final (non-streaming) bodies; stress beyond 10,000
+   160 node scripts/streaming-ui-e2e.mjs --mode=final --runs=1
+   162 node scripts/streaming-ui-e2e.mjs --mode=probe --probe
+   163 node scripts/streaming-ui-e2e.mjs --mode=final --only=sizes,scroll --runs=2
+   174 node scripts/streaming-ui-e2e.mjs --mode=final --only=persist,kill --runs=1   # final P1 + reconnect PASS run (report 192946)
+   175 node scripts/visual-audit.mjs --sizes=1366x768 --dsf=1 --locales=zh --themes=light   # P2 PASS: painted review notice + stale-notice lifecycle guard (reports 194627/194944)
+   176 node scripts/visual-audit.mjs --sizes=1366x768 --dsf=1 --locales=zh,en --themes=light   # zh+en notice copy (report 194718)
+   181 - The full matrix (`sizes`, `composer`, `scroll`, `concurrent`, `long`, `layouts`, `dark`, `persist`, `kill`) was measured **pre-Lead-fix** on build `ui/app.js` sha256 `54DB16F7…` → `ui-stre
+
+== docs/verification/ui-streaming-stability.md 19475 B ==
+markdown hits: 17
+   12 | `desktop/ui/stream-core.js` | New, ~518 lines. Pure DOM-free reducer for `StreamBatch` (dedupe, ordering, gap/replay, reset, stream buffers, run state machine, scroll-intent predicate). Cl
+   13 | `desktop/ui/markdown.js` | New, ~390 lines. Safe markdown subset parser + DOM renderer (`SuwenMarkdown`), `textContent`-only, no raw HTML, optional copy button injected by the caller. |
+   15 | `desktop/ui/index.html` | Adds `#stream-banner` (role=status, hidden by default), `#jump-latest` (UI-only), three-state `#defaults-theme` select, version 3.2.0, `<script src="stream-core.j
+   16 | `desktop/ui/style.css` | Palette rewritten as CSS custom properties (light + `:root[data-theme="dark"]` + OS-following fallback), stream banner, markdown containers, responsive breakpoints
+   18 | `desktop/scripts/ui-dom-qa.mjs` | `BRIDGE_METHODS` now includes `events.replay` (main-process bridge outside `RPC_METHODS`). Still static-only, no runtime claimed. |
+   39 * Terminal runs are immutable: once a task reaches `completed`/`failed`/`cancelled`, later
+   68 trimming to 16 entries, and clips transcript entries the same way the daemon does (6000 chars
+   93 tool parameters are never copied into the chat transcript (they remain in the evidence panel).
+   99 * Streaming messages stay plain text. Markdown is only rendered for completed assistant
+   105 ## 4. Markdown subset (completed messages only)
+   108 fenced code blocks with a language label, flat ordered/unordered lists, pipe tables with a
+   111 never parsed. Code blocks and tables are wrapped in overflow containers
+   112 (`.md-code-scroll`, `.md-table-scroll`) so they scroll locally instead of widening the page.
+   164 node --check ui/app.js                 # OK (also ui/stream-core.js, ui/markdown.js)
+   167 node scripts/ui-dom-qa.mjs
+   241 * Markdown copy labels are passed in by `app.js`; `markdown.js` renders no button by itself and
+   248 * Markdown and theme limitations are listed in sections 4 and 5.
+
+== desktop workbench page ==
+index workbench ids: ['wb-install', 'wb-open', 'wb-progress', 'wb-refresh', 'wb-state']
+app.js workbench fns: ['installWorkbench', 'loadWorkbench', 'openWorkbenchWindow', 'renderWorkbench', 'subscribeWorkbench', 'workbenchBridge', 'workbenchProgressText', 'workbenchStatusLine']
+app.js onWorkbench: ['onWorkbench', 'onWorkbench']
+actions page count: 3
+
+== master rows of interest (full) ==
+   R014 Requirement ID = R014
+   R014 Feature = Isolated compatibility access to old Python workbench (separate process/credentials/home; never copy user credentials)
+   R014 Priority = P1
+   R014 Source = round-2 register docs/requirements/master-requirements-source.md
+   R014 Implementation Module = desktop/src/legacy-worker.ts; desktop/worker/legacy_server.py; desktop/src/main.ts legacyOpen (partition + authenticated window); desktop/src/security.ts
+   R014 UI Entry = legacy workbench window
+   R014 IPC/RPC = legacyStart
+   R014 Backend Handler = src/legacy-worker.ts + worker/legacy_server.py
+   R014 Persistence = legacy home read-only
+   R014 Test ID = packaged smoke records legacyWorkbench = "unavailable on this machine" (python lacks fastapi) - NOT a pass; legacy-worker unit tests pass; prototype 10-check E2E previously passed
+   R014 Evidence = isolated compatibility window implemented in main.ts/legacy-worker.ts (separate session partition, Bearer token, new home, mock default)
+   R014 Status = UNVERIFIED
+   R014 Blocker = TARGET packaged compatibility window not re-verified on a machine with fastapi; real legacy workflow unchanged
+  ---
+   R020 Requirement ID = R020
+   R020 Feature = Five-workspace UI (chat/projects/tasks/tools/settings+diagnostics): narrow nav + list + central timeline + right on-demand panel
+   R020 Priority = P0
+   R020 Source = round-2 register docs/requirements/master-requirements-source.md
+   R020 Implementation Module = desktop/ui/index.html; desktop/ui/app.js; desktop/ui/style.css
+   R020 UI Entry = five pages chat/projects/tasks/tools/settings
+   R020 IPC/RPC = snapshot + events.stream
+   R020 Backend Handler = ui/app.js + main.ts
+   R020 Persistence = n/a
+   R020 Test ID = node scripts/ui-dom-qa.mjs: 19 passed / 0 failed / 12 warnings; node --check desktop/ui/app.js exit 0; ui/actions.json 144 actions; contract RPC_METHODS 79; SUWEN_SMOKE_PACKAGED=1 node scripts/electron-smoke.mjs: exit 0, 8/8 checks, 98 s; artifact desktop/rele
+   R020 Evidence = five-page shell chat/projects/tasks/tools/settings with diagnostics, narrow nav/list/timeline/right panel; app.js rewritten 173,830 B 00:49
+   R020 Status = IMPLEMENTED_PASS
+   R020 Blocker = UI shell proven by DOM QA + packaged smoke; per-page long-tail polish and all-model envelope coverage remain partial
+  ---
+   R021 Requirement ID = R021
+   R021 Feature = Stable chat: throttled streaming, virtualization/incremental rendering, persistent scroll, error recovery, no input jitter, long sessions stable
+   R021 Priority = P0
+   R021 Source = round-2 register docs/requirements/master-requirements-source.md
+   R021 Implementation Module = desktop/ui/app.js; desktop/src/daemon.ts stream path
+   R021 UI Entry = chat timeline/composer
+   R021 IPC/RPC = events.stream + conversation.append
+   R021 Backend Handler = ui/app.js streaming render
+   R021 Persistence = events + conversations
+   R021 Test ID = npm test: 182 tests / 180 pass / 0 fail / 2 skipped, 33.4 s, exit 0 (tsc build then node --test dist/test/*.test.js); 2 skips = Windows symlink EPERM in research-worker test + optional legacy Python workbench deps unavailable; SUWEN_SMOKE_PACKAGED=1 node scrip
+   R021 Evidence = streaming render code in new app.js; daemon snapshot/stream unchanged
+   R021 Status = IMPLEMENTED_PASS
+   R021 Blocker = long-history behavior measured only up to compaction fixtures; no hours-long soak
+  ---
+   R127 Requirement ID = R127
+   R127 Feature = Markdown/complex content streaming safety: incremental display, local degradation for LaTeX/Mermaid, no main-thread block, sanitized HTML
+   R127 Priority = P0
+   R127 Source = round-3 prompt docs/requirements/round-3-release-master-prompt.md
+   R127 Implementation Module = desktop/ui/app.js
+   R127 UI Entry = chat messages
+   R127 IPC/RPC = events.stream
+   R127 Backend Handler = app.js markdown renderer
+   R127 Persistence = n/a
+   R127 Test ID = ui-dom-qa.mjs
+   R127 Evidence = Safe markdown subset parser (ui/markdown.js, textContent-only, no raw HTML) renders completed messages; docs/verification/ui-e2e.md: deterministic local-fixture suite 22 cases (19 pass / 0 fail / 3 skip) 10.8 s.
+   R127 Status = UNVERIFIED
+   R127 Blocker = Markdown/complex-content rendering during an active stream is not asserted; sanitisation/fuzz cases beyond the subset table not measured.
+  ---
+
+== desktop/acceptance-matrix.md (full) ==
+B 6742 lines 44
+# vNext acceptance status — desktop 3.2.0 (2026-10-25, final evidence round)
+
+Measured evidence and full caveats: `../docs/release/final-acceptance-report.md`,
+`../docs/release/release-gates.md`, `../docs/verification/integration-and-e2e.md`,
+`../docs/release/windows-installer-verification.md`,
+`../docs/requirements/master-requirements.csv` (80 IMPLEMENTED_PASS / 13 UNVERIFIED / 4 NOT_STARTED /
+1 BLOCKED_EXTERNAL of 98 rows) and `../docs/migration/feature-parity-matrix.md`.
+
+| Requirement | Actual status |
+|---|---|
+| Typecheck / build / unit+integration suite | **Pass** — `tsc --noEmit` exit 0; `npm run build` exit 0; `npm test` 150 tests / 148 pass / 0 fail / 2 skipped (29.5 s, exit 0) |
+| RPC E2E on real detached daemon | **Pass** — `e2e-rpc.mjs --live` 42/0, ~7 s, authenticated named pipe; live Europe PMC/PubMed + UniProt artifacts with sha256 |
+| Packaged Electron E2E (final 3.2.0 build) | **Pass** — 8/8 checks, exit 0, 68 s: detached daemon, context isolation, safeStorage config, streamed chat, UI exit keeps daemon, 30 s timer completes with `attempts=1`, same-daemon reopen, sandboxed Python worker |
+| Functional / live E2E (T3) | **Pass** — deterministic 22 cases 19 pass / 0 fail / 3 skip (10.8 s); live suite **21/21** (13.7 s): six research capabilities, debate rules, MCP/skill/channel/RSI checks against real daemon + real public DBs |
+| Typed streaming protocol | **Pass** — `events.stream` + `StreamEnvelope` v1 merged into daemon dispatch, unit tests `stream-events.test.ts` + `stream-core.test.ts` 23/23, documented in `../docs/architecture/streaming-protocol.md` |
+| Streaming UI stability / delta matrix (T2) | **Pass for measured scope** — deterministic fixture suite 22 cases 19/0/3; 100/1k/10k-delta text integrity via exact DOM sha256; composer deviation 0 px; scroll forced drift 0 px; layouts 1920×1080/1366×768/980×680 × zh/en × five workspaces; dark theme implemented. **Limits:** frame/FPS paint not measured; markdown-during-stream not asserted |
+| Auto-reconnect / duplicate append after daemon SIGKILL | **UNVERIFIED** — T2 interim report recorded FAIL; fixes landed afterwards (`main.ts` bounded backoff 300 ms–12 s, `conversations.ts` idempotent append, `conversations.test.ts`), but T2 post-fix in-Electron re-run was not published → R130 remains UNVERIFIED |
+| Visual acceptance matrix | **UNVERIFIED** — `ui-visual-audit.md` not published; screenshots exist under `../docs/verification/screenshots/` and layout checks are in `ui-e2e.md` |
+| UI DOM QA / actions wiring | **Pass with warnings** — 19/0/12 (warnings = intentional main-process bridge methods); `actions.json` **144 actions**, coverage 91 daemon RPC / 10 main process / 43 UI-only / **0 unknown methods** |
+| Real public research DB calls | **Pass** — Europe PMC/PubMed `CRISPR base editing` PMID **42878939**; UniProt TP53 **Q9Y2B4** (release 2026_03), artifacts with sha256 |
+| Python research worker | **Pass for implemented scope** — v2.0.0 stdlib worker, 22/21 tests (1 Windows symlink skip), real demo.fcs metrics + sandboxed `runScript`; no scientific stacks/OS sandbox |
+| SQLite/durable state machine/lease/outbox/timers/checkpoints/budgets | **Implemented + short-window chaos tested** — 12/12 scenarios passed in 51.7 s (worker/daemon SIGKILL, idempotency, cancel, billing-unknown reconciliation); **8/24/72 h NOT run** |
+| Context compaction / versions | **Pass for implemented behavior** — ten-round ~201k-token compaction, versions/manual compaction/rollback; semantic losslessness NOT claimed |
+| Two provider adapters | **Local HTTP protocol fixtures pass** — real external model accounts UNVERIFIED/BLOCKED_EXTERNAL |
+| MCP / Skill registries | **Pass at registry/scan/install/test level** — no live third-party repo install exercise; 23 legacy scientific skills NOT migrated into the new registry |
+| Channels adapter | **Pass for framework + local fixtures** — real Telegram/Slack/Discord/WeChat accounts BLOCKED_EXTERNAL; read-only default |
+| Research workflows (knowledge/hypothesis/debate/methods/analysis/discovery/autonomy) + RSI | **Pass as durable typed DAG workflows** — external Biomni/ERA/Robin/Kosmos/Paper2Agent integrations NOT bundled; scientific validity externally unvalidated |
+| Legacy data import | **Pass (backup-first, explicit)** — real legacy home read-only scan; apply idempotent, rollback 5/5 unit tests; user data untouched; no automatic migration |
+| Optional legacy Python workbench | **Unavailable on this host** (Python lacks `fastapi`) — source preserved under `resources/legacy`; not a pass |
+| Branding | **Pass** — 983 raw hits / 143 files, 0 requiring change; all retained hits documented legacy-compat paths/fields |
+| Build / installer artifacts | **Pass** — NSIS x64 installer `release/SuWen-Setup-3.2.0-win-x64.exe`, **129,447,101 B**, SHA-256 `4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897`, blockmap 135,948 B, unpacked exe hash verified; **UNSIGNED** |
+| Install/upgrade/uninstall lifecycle | **Host probe PASS** — final-artifact lifecycle **12/12** (install, version metadata, running app, authenticated daemon attach, daemon survives UI close, reinstall, uninstall, user-data preservation) and upgrade source `3.0.0-preview.1` installed PASS; **clean-VM lifecycle NOT verified** |
+| `SHA256SUMS` / Windows CI execution | **`SHA256SUMS` present** (`release/SHA256SUMS`, mirrored `docs/release/SHA256SUMS.txt`); Windows CI workflow exists but was **never executed** |
+| Security | **Pass for implemented layer** — contextIsolation/sandbox renderer, CSP, schema IPC/sender checks, path guards, safeStorage, timing-safe token; scan PASS 0 HIGH/48 LOW/14 test fixtures; npm audit 0; full OS sandbox/quotas NOT implemented |
+| Performance | **Baseline measured** — daemon ready p50 391 ms, create p50 0.82 ms, events.stream p50 1.49 ms, worker flowSummary 20.9 ms; UI/markdown first-token and endurance not measured |
+| 8/24/72 h / reboot / power-loss / disk-full durability | **Not performed** — no endurance claim |
+| Code signing / SmartScreen | **BLOCKED_EXTERNAL** — unsigned; SmartScreen warning expected |
+| GitHub MIT publication / Release assets | **BLOCKED_EXTERNAL** — remote readable, `gh` absent/no token; commands documented, not executed |
+| Paper2Agent/Biomni/ERA/Robin/Kosmos, 23 legacy skills in new desktop, SSH/terminal/kernel/workspaces/trajectories/model routing/vision | **NOT_STARTED** — preserved only in bundled legacy Python workbench where applicable |
+
+Rule: only rows backed by TARGET evidence count as passed. Do not promote
+UNVERIFIED/NOT_STARTED rows, and do not describe 3.2.0 as a fully accepted, clean-machine-verified or
+published vNext release.
+
+
+== progress headings ==
+   1 # SuWen vNext — actual progress / 2026-10-24
+   5 ## Completed and verified
+  19 ## Unfinished acceptance gates / next work
+  30 ## 3.1.0 update — 2026-10-25
+  38 ### Verified in TARGET
+  93 ### Still unproven / PENDING (do not claim as passed)
+ 117 ## Round 3 — release convergence (2026-10-25, first coherent pass)
+ 122 ### Completed in this pass (measurable)
+ 176 ### Still open (honest blockers after the final round-3 evidence)
+ 197 ## Round 3 final evidence (SuWen desktop 3.2.0, 2026-10-25, Lead-measured)
+ 218 ### Final T2 correction (Lead-measured, 2026-10-25)
+ 233 ### Round 4 (2026-10-25): real GitHub CI, accelerated soak, documented-hash guard
+ 266 ### Round-4 continuation: real CI runs, protected main, accelerated soak (2026-10-25)
+total lines 280

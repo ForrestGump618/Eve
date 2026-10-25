@@ -1499,5 +1499,37 @@
       "theme": "system | light | dark (persisted preference key)"
     },
     "notes": "Three-state theme control (system/light/dark). Applies immediately through document.documentElement data-theme without rebuilding the DOM, persists through the defaults.set preference key theme, and the system option follows prefers-color-scheme including live OS changes."
+  },
+  {
+    "id": "nav-workbench",
+    "selector": ".rail button[data-page=\"workbench\"]",
+    "page": "global",
+    "method": null,
+    "params": {},
+    "notes": "Switch to the workbench page; loads workbench.status on entry. The page hosts the legacy web UI inside a separate Electron window."
+  },
+  {
+    "id": "workbench-refresh",
+    "selector": "#wb-refresh",
+    "page": "workbench",
+    "method": "workbench.status",
+    "params": {},
+    "notes": "Re-probe the managed workbench runtime (Python minor, pinned dependency hash, import probe, disk size)."
+  },
+  {
+    "id": "workbench-install",
+    "selector": "#wb-install",
+    "page": "workbench",
+    "method": "workbench.install",
+    "params": {},
+    "notes": "Install or repair the pinned ~130 MB isolated Python dependency set inside the app-data directory; progress streams on suwen:workbench; a second click cancels an in-flight install."
+  },
+  {
+    "id": "workbench-open",
+    "selector": "#wb-open",
+    "page": "workbench",
+    "method": "legacyOpen",
+    "params": {},
+    "notes": "Open the full legacy web UI in an isolated window; refused with runtime-required unless the managed runtime is installed and its import probe passes."
   }
 ]

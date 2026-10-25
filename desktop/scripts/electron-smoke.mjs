@@ -55,9 +55,18 @@ try{
    assert.equal(await legacyPage.evaluate(()=>typeof window.suwen),'undefined');
    const health=await rpc(connection,'health');assert.ok(health.legacy?.port);
    const unauthorized=await fetch(`http://127.0.0.1:${health.legacy.port}/api/health`);assert.equal(unauthorized.status,401);
+   // The hosted legacy web UI must be the real SPA, not an empty shell.
+   await legacyPage.waitForFunction(()=>document.querySelectorAll('nav [data-route], .nav-item, #nav button, #nav a').length>=8,{timeout:30000}).catch(()=>null);
+   const legacyShell=await legacyPage.evaluate(()=>({title:document.title,brand:(document.body.textContent||'').includes('素问'),nav:document.querySelectorAll('nav [data-route], .nav-item, #nav button, #nav a').length,routes:[...document.querySelectorAll('[data-route]')].map(e=>e.getAttribute('data-route'))}));
+   assert.match(legacyShell.title,/素问/);assert.equal(legacyShell.brand,true);assert.ok(legacyShell.nav>=8,`legacy nav items: ${legacyShell.nav}`);
+   await legacyPage.screenshot({path:join(workspace,'work','legacy-workbench.png')}).catch(()=>null);
+   log.legacyWorkbench={hosted:true,title:legacyShell.title,navItems:legacyShell.nav,routes:legacyShell.routes.slice(0,20),screenshot:'work/legacy-workbench.png'};
    log.checks.push('packaged optional Python workbench opens isolated authenticated window; unauthorized HTTP rejected');
+   log.checks.push('packaged hosted legacy web SPA renders shell navigation');
   } catch(legacyError){
-   await newWindow;log.legacyWorkbench='unavailable on this machine: '+legacyError.message;
+   await newWindow;
+   if(process.env.SUWEN_WORKBENCH_DEPS)throw legacyError;
+   log.legacyWorkbench='unavailable on this machine: '+legacyError.message;
   }
  }catch(legacyOuter){log.legacyWorkbench='unavailable on this machine: '+legacyOuter.message;}
  log.runtimeVersions=(await rpc(connection,'health')).runtimeVersions;log.packaged=packaged;log.result='passed';

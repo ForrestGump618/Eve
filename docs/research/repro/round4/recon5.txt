@@ -1,0 +1,244 @@
+== snapshot ==
+    6172 d9f2b86a2910862a38a24e69994df3003d4adb9ac24e832ec80f2ea4d7fc752b 1792811991 omicslab/web/index.html
+    5225 ae62f8feb6a4d980141f5c847578ba83d8a0c2b57b55e549049ae7ae2aa13ffc 1792811991 omicslab/web/js/store.js
+   23540 98b2f1dfa52b0096d13cbe121e877be0ed2d5bb5fc40339e83e6d189ca24f973 1792811991 omicslab/web/js/app.js
+   19141 f4f212e8fa2947996519291bef162259d2a96acfcaf449e1726d80f27584411b 1792811991 omicslab/web/js/api.js
+   15071 25da38f136bcfde926d35a0d1e2282754534dae57b5d82b9b069df30051f46ed 1792905289 desktop/src/workbench.ts
+    5356 208d4006c369c63503f2ebbbad823990cf929717ac82673f818bc2514438e253 1792904745 desktop/src/legacy-worker.ts
+   15839 cee10c45f7c676d11c3088549ae296dc0de6233ac688f53cda7dd248e8d1ff92 1792905421 desktop/src/main.ts
+   20133 07fdbf06b27044702f4b887f9d41e9c08b870e4170cc81bb777e8723756e99f2 1792904781 desktop/src/daemon.ts
+    7485 d06088fc96e747e6ccde1fcb87daba6480dec5b4afb125d4b64e7c3692ddfa8c 1792905194 desktop/src/shared/contract.ts
+    6455 7413e98bf7d4d6c87699829f26cf167f41eff6d50809dac4b69b967ed04ec068 1792904738 desktop/worker/legacy_server.py
+   35583 9c82a0c1e474e6894721f8e033eb8fd1736e55102b1278449333503625aa86e9 1792905858 desktop/ui/markdown.js
+  215394 4a13523ef8e6d6caa94efa7d00d3852bfb48dbf692b9831a9387eeab986b8528 1792905829 desktop/ui/app.js
+   25380 deee1b194f1c208e0f3adfcec75ee061589a60e016738a50d142de57eda6a49a 1792905943 desktop/ui/index.html
+   42150 b8bb0cf504c70f7f73aae2c1eef82bc6ac38d3e631a21ef4f6e0b157c107e00a 1792905219 desktop/ui/actions.json
+    9355 05a570b908aff83936538291670e76bc70061b6cd09b784285396b0f1a8ac733 1792905917 desktop/test/markdown.test.ts
+    5572 c622c9bf6d4246456f3206ccf76780f00a7e84d01150b715e990c3bbc806b4b9 1792905266 desktop/test/workbench.test.ts
+    6831 f1ea1d2ab89a50c4714cc3a37696984e1901b92c4b68e108145fc6152687c7b1 1792905534 desktop/scripts/workbench-runtime-smoke.mjs
+    2250 5a6c591d7f06a8a86d8c9e297b2488f64ed9a01b1ced1fec88504fe57e3cd7ce 1792905927 desktop/package.json
+     873 42514ac59f67632db69be221df3410973e10335bc92a9e07ad19f717dbb93430 1792905561 desktop/scripts/copy-assets.mjs
+   10082 b6b98d973d3fe81f0f26d11a325c5c260ece1e68fb71f9120c64e68851c86c8f 1792812323 omicslab/web/js/views/channel-setup.js
+   96491 37f82a42c34aba80e46839a5ec13c3def44d88cb29ba7287ec0e312d67aab52c 1792811991 omicslab/web/js/views/chat.js
+   55063 7fe119b2164198a96b541de6bbe82ce0dda3972ac612812c9be62dd8ac47d602 1792811991 omicslab/web/js/views/discovery.js
+    6083 20b35013284b3ef9e0d7b3859ef07627bae8eab1fd7cd9240afab665fe48a232 1792811991 omicslab/web/js/views/figures.js
+   28765 c1caa59823afa47775e978590448d86f89159254cbdf8a17ede22c247bb05cfb 1792811991 omicslab/web/js/views/files.js
+   16825 4f01767958c640669656b22d91eb06c7b5ff34611cf99fe8351008065eed7960 1792811991 omicslab/web/js/views/jobs.js
+   13217 5ce60f1f653c4e18ef21dbe273366dd545bc8a2c4eb0634ead7363f35fffb39b 1792811991 omicslab/web/js/views/memory.js
+   53972 c94ad4c8e16556a441d11ff295a82095b2e06dd84e5c781f3c1d675e42c7ce3b 1792811991 omicslab/web/js/views/platform.js
+   17955 b3d7b6e35460f3202deb533bfed022165ea6f737c0a371add494e4bbd0aba4d3 1792811991 omicslab/web/js/views/registry.js
+   42153 a92ae778f19961761e692b674a754ceb29bdeb7098343219af5d6d6ef3739a97 1792811991 omicslab/web/js/views/settings.js
+    9000 63a933bfb0efff410b4d59bdc67fdf17f9923662647c9e94012858016b6b4327 1792811991 omicslab/web/js/views/skills.js
+   47186 47aae7be334a0e9a088ce45791bc472a5b9af53a876ce65ef78b66b13f3aa34e 1792811991 omicslab/web/js/views/ssh.js
+   13702 ea779a34d99fa9fdb39c3d27ca749e052b68fdd5e34d73708c0862e368070365 1792811991 omicslab/web/js/views/vars.js
+   51669 d038d11dc976969d25db2ca7d161752d5786f25aae643f358578a744b7ea1420 1792811991 omicslab/web/js/views/workbench.js
+
+== package.json deps/devDeps ==
+version 3.3.0 deps {"js-tiktoken": "1.0.21"} dev {"@types/node": "24.12.0", "electron": "45.0.0", "electron-builder": "26.18.0", "katex": "^0.16.21", "mermaid": "^11.12.0", "playwright-core": "1.64.1", "typescript": "7.0.2"}
+scripts {"build": "tsc && node scripts/copy-assets.mjs", "start": "electron .", "test": "npm run build && node --test dist/test/*.test.js", "dist:win": "npm run build && electron-builder --win nsis --x64", "pack": "npm run build && electron-builder --dir", "sbom": "npm sbom --sbom-format cyclonedx > release/sbom.cdx.json", "smoke": "node scripts/electron-smoke.mjs"}
+
+== copy-assets.mjs ==
+import { cpSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+mkdirSync('dist/ui', {recursive:true});
+cpSync('ui','dist/ui',{recursive:true});
+// main lives under src/ because tests and application share one typecheck.
+cpSync('src-entry.cjs','dist/main.js');
+// Offline renderers for Markdown math/diagrams (generated into the build, not committed).
+const katex = 'node_modules/katex/dist';
+const mermaid = 'node_modules/mermaid/dist';
+mkdirSync('dist/ui/vendor/katex/fonts', {recursive:true});
+cpSync(join(katex,'katex.min.css'), 'dist/ui/vendor/katex/katex.min.css');
+cpSync(join(katex,'katex.min.js'), 'dist/ui/vendor/katex/katex.min.js');
+cpSync(join(katex,'fonts'), 'dist/ui/vendor/katex/fonts', {recursive:true});
+mkdirSync('dist/ui/vendor/mermaid', {recursive:true});
+cpSync(join(mermaid,'mermaid.min.js'), 'dist/ui/vendor/mermaid/mermaid.min.js');
+
+
+== vendor dirs ==
+desktop/ui/vendor exists False 
+desktop/node_modules/katex exists True ['LICENSE', 'README.md', 'cli.js', 'contrib', 'dist', 'katex.js', 'node_modules', 'package.json', 'src', 'types']
+desktop/node_modules/mermaid exists True ['LICENSE', 'README.md', 'README.zh-CN.md', 'dist', 'node_modules', 'package.json']
+
+== packaged ui files ==
+desktop/release/win-unpacked/resources/app/dist/ui\actions.json 40938
+desktop/release/win-unpacked/resources/app/dist/ui\app.js 204682
+desktop/release/win-unpacked/resources/app/dist/ui\index.html 23161
+desktop/release/win-unpacked/resources/app/dist/ui\markdown.js 14232
+desktop/release/win-unpacked/resources/app/dist/ui\stream-core.js 18950
+desktop/release/win-unpacked/resources/app/dist/ui\style.css 20586
+
+== markdown.js image / vendor refs ==
+   5 - never uses innerHTML / insertAdjacentHTML / outerHTML; every string becomes a text node,
+   9 - LaTeX ($..$, $$..$$, \(..\), \[..\]) is rendered by the bundled offline KaTeX build when
+  11 - Mermaid fenced blocks are rendered by the bundled offline mermaid build, each in its own
+  13 - vendor scripts are loaded lazily from vendor/ (same-origin file, CSP 'self') at most once,
+  19 classic script before app.js, so it attaches SuwenMarkdown to globalThis.
+  98 if (lowered === 'mermaid') {
+  99 blocks.push({ type: 'diagram', lang: 'mermaid', text: code.join('\n'), closed: closed });
+ 196 /* Pure streaming analysis: `open` means at least one fenced block (code, mermaid or block
+ 338 node.setAttribute('data-mermaid', source);
+ 510 ? (opts.diagramFallback || 'mermaid (not rendered)')
+ 511 : (opts.diagramWaiting || 'mermaid (waiting for closing fence)');
+ 581 /* ---------- lazy vendor loading + queued enhancement ----------
+ 582 KaTeX and Mermaid are built into vendor/ by scripts/copy-assets.mjs and served from the
+ 588 vendorBase: 'vendor/',
+ 589 katex: 'idle',
+ 590 mermaid: 'idle',
+ 591 katexPromise: null,
+ 592 mermaidPromise: null,
+ 593 mermaidTheme: null,
+ 594 busymermaid: false,
+ 604 vendorBase: typeof opts.vendorBase === 'string' && opts.vendorBase ? opts.vendorBase : 'vendor/',
+ 613 diagramFallback: opts.diagramFallback || 'Mermaid not rendered',
+ 615 diagramTooLarge: opts.diagramTooLarge || 'mermaid (too large to render)',
+ 616 diagramWaiting: opts.diagramWaiting || 'mermaid (waiting for closing fence)',
+ 620 function vendorUrl(base, path) {
+ 621 var prefix = String(base || 'vendor/').replace(/\/?$/, '/');
+ 625 function loadScriptOnce(src) {
+ 628 var script = document.createElement('script');
+ 629 script.src = src;
+ 630 script.async = true;
+ 631 script.onload = function () { resolve(true); };
+ 632 script.onerror = function () { resolve(false); };
+ 633 document.head.appendChild(script);
+ 637 function ensureKatex(base) {
+ 638 if (typeof window !== 'undefined' && window.katex) { enhancement.katex = 'ready'; return Promise.resolve(window.katex); }
+ 639 if (enhancement.katex === 'missing') return Promise.resolve(null);
+ 640 if (enhancement.katexPromise) return enhancement.katexPromise;
+ 641 enhancement.katex = 'loading';
+ 642 enhancement.katexPromise = loadScriptOnce(vendorUrl(base, 'katex/katex.min.js')).then(function (ok) {
+ 643 var katex = (typeof window !== 'undefined' && window.katex) || null;
+ 644 enhancement.katex = ok && katex ? 'ready' : 'missing';
+ 645 return katex;
+ 647 enhancement.katex = 'missing';
+ 650 return enhancement.katexPromise;
+ 661 function initMermaid(mermaid) {
+ 664 mermaid.initialize({
+ 672 enhancement.mermaidTheme = theme;
+ 673 } catch (error) { /* an uninitialized mermaid simply leaves text fallbacks */ }
+ 676 function ensureMermaid(base) {
+ 677 if (typeof window !== 'undefined' && window.mermaid) {
+ 678 if (enhancement.mermaid !== 'ready') initMermaid(window.mermaid);
+ 679 enhancement.mermaid = 'ready';
+ 680 return Promise.resolve(window.mermaid);
+ 682 if (enhancement.mermaid === 'missing') return Promise.resolve(null);
+ 683 if (enhancement.mermaidPromise) return enhancement.mermaidPromise;
+ 684 enhancement.mermaid = 'loading';
+ 685 enhancement.mermaidPromise = loadScriptOnce(vendorUrl(base, 'mermaid/mermaid.min.js')).then(function (ok) {
+ 686 var mermaid = (typeof window !== 'undefined' && window.mermaid) || null;
+ 687 if (ok && mermaid) {
+ 688 initMermaid(mermaid);
+ 689 enhancement.mermaid = 'ready';
+ 690 return mermaid;
+ 692 enhancement.mermaid = 'missing';
+ 695 enhancement.mermaid = 'missing';
+ 698 return enhancement.mermaidPromise;
+ 721 (enhancement.options.diagramFallback || 'Mermaid not rendered') +
+ 733 var katex = (typeof window !== 'undefined' && window.katex) || null;
+ 734 if (!katex) {
+ 735 if (enhancement.katex === 'missing') { markMathFailed(item); return; }
+ 737 if (enhancement.katex !== 'loading') {
+ 738 ensureKatex(enhancement.options.vendorBase).then(function (loaded) {
+ 756 katex.render(item.source, node, {
+ 774 var mermaid = (typeof window !== 'undefined' && window.mermaid) || null;
+ 775 if (!mermaid) {
+ 776 if (enhancement.mermaid === 'missing') { markDiagramFailed(item); return; }
+ 778 if (enhancement.mermaid !== 'loading') {
+ 779 ensureMermaid(enhancement.options.vendorBase).then(function (loaded) {
+ 790 if (enhancement.busymermaid) { enhancement.queue.unshift(item); return; }
+ 791 enhancement.busymermaid = true;
+ 793 var id = 'md-mermaid-' + (enhancement.sequence += 1);
+ 796 rendering = mermaid.render(id, item.source);
+ 798 enhancement.busymermaid = false;
+ 804 enhancement.busymermaid = false;
+ 808 if (!svg) throw new Error('empty mermaid output');
+ 809 var parsed = new DOMParser().parseFromString(svg, 'image/svg+xml');
+ 811 if (!rootNode || rootNode.nodeName.toLowerCase() !== 'svg') throw new Error('mermaid output is not svg');
+ 829 enhancement.busymermaid = false;
+ 850 /* While a vendor bundle is in flight the item is re-queued untouched; stop this turn so
+ 852 if (item.kind === 'diagram' && enhancement.mermaid === 'loading' && !(typeof window !== 'undefined' && window.mermaid)) {
+ 856 if (item.kind === 'math' && enhancement.katex === 'loading' && !(typeof window !== 'undefined' && window.katex)) {
+ 869 if (!enhancement.queue.length && enhancement.katex !== 'loading' && enhancement.mermaid !== 'loading') return;
+ 886 var diagramNodes = container.querySelectorAll('[data-mermaid]');
+ 890 if (!shouldRenderDiagram(diagramNode.getAttribute('data-mermaid') || '')) continue;
+ 892 enhancement.queue.push({ kind: 'diagram', node: diagramNode, source: diagramNode.getAttribute('data-mermaid') || '' });
+ 897 /* Re-color existing diagrams after a theme switch (mermaid bakes colors into the SVG).
+ 900 if (enhancement.mermaid !== 'ready' || typeof document === 'undefined') return;
+ 902 if (enhancement.mermaidTheme === next) return;
+ 903 enhancement.mermaidTheme = next;
+ 904 try { if (window.mermaid) initMermaid(window.mermaid); } catch (error) { return; }
+ 905 var nodes = document.querySelectorAll('[data-mermaid][data-md-state="rendered"]');
+ 910 enhancement.queue.push({ kind: 'diagram', node: node, source: node.getAttribute('data-mermaid') || '' });
+
+== app.js markdownOptions ==
+ 1211 function messageBubble(role, text, options = {}) {
+ 1212   const article = el('article', { class: `message ${role}${options.streaming ? ' streaming' : ''}` });
+ 1213   article.append(el('div', { class: 'label', text: role === 'user' ? t('messageUser') : t('messageAssistant') }));
+ 1214   let body = text;
+ 1215   if (!body && options.streaming) body = t('replyPending');
+ 1216   const bodyNode = el('div', { class: `body${options.markdown ? ' markdown' : ''}` });
+ 1217   const markdown = options.markdown && typeof window !== 'undefined' ? window.SuwenMarkdown : null;
+ 1218   if (markdown && body) {
+ 1219     const markdownOptions = {
+ 1220       copyLabel: t('copyCode'),
+ 1221       copiedLabel: t('copied'),
+ 1222       onCopy: copyText,
+ 1223       mathRendering: t('mathRendering'),
+ 1224       mathFallback: t('mathFallback'),
+ 1225       diagramRendering: t('diagramRendering'),
+ 1226       diagramFallback: t('diagramFallback'),
+ 1227     };
+ 1228     try {
+ 1229       bodyNode.append(markdown.render(document, body, markdownOptions));
+ 1230       /* Inert math/diagram placeholders are upgraded asynchronously by markdown.js
+ 1231          (vendor scripts load lazily, one render per event-loop turn). */
+ 1232       if (typeof markdown.enhance === 'function') markdown.enhance(bodyNode, markdownOptions);
+ 1233     } catch { bodyNode.textContent = body; }
+ 1234   } else {
+ 1235     bodyNode.textContent = body || '';
+ 1236   }
+ 1237   article.append(bodyNode);
+ 1238   if (options.meta) article.append(el('div', { class: 'meta', text: options.meta }));
+ 1239   if (options.actions && options.actions.length) article.append(el('div', { class: 'message-actions' }, ...options.actions));
+ 1240   if (options.task) registerStreamNode(options.task, article);
+ 1241   return article;
+ 1242 }
+ 1243 function taskActionButtons(task, { compact = false } = {}) {
+ 1244   const buttons = [];
+ 1245   const status = statusFor(task);
+
+== contract methods count ==
+count 84
+['health', 'snapshot', 'create', 'control', 'approval', 'configure', 'python', 'shutdown', 'events.stream', 'contextHistory', 'contextRestore', 'contextCompact', 'legacyStart', 'legacyOpen', 'workbench.status', 'workbench.install', 'workbench.cancel', 'project.list', 'project.create', 'project.update', 'project.delete', 'conversation.list', 'conversation.create', 'conversation.get', 'conversation.append', 'conversation.update', 'conversation.delete', 'import.inspect', 'import.apply', 'import.jobs', 'import.rollback', 'research.knowledge', 'research.hypothesis', 'research.debate', 'research.methods', 'research.analysis', 'research.discovery', 'research.autonomy', 'research.graph', 'hypothesis.list', 'hypothesis.get', 'hypothesis.select', 'experiment.list', 'experiment.create', 'experiment.approve', 'experiment.result', 'evidence.list', 'evidence.get', 'artifact.read', 'skill.list', 'skill.inspect', 'skill.install', 'skill.enable', 'skill.disable', 'skill.test', 'skill.remove', 'mcp.list', 'mcp.add', 'mcp.remove', 'mcp.health', 'mcp.tools', 'mcp.enable', 'mcp.disable', 'channel.list', 'channel.save', 'channel.test', 'channel.send', 'channel.inbox', 'channel.remove', 'rsi.list', 'rsi.run', 'rsi.review', 'rsi.promote', 'rsi.rollback', 'rsi.active', 'doctor.run', 'worker.health', 'worker.describe', 'defaults.get', 'defaults.set', 'secrets.status', 'secret.put', 'secret.remove', 'secrets.set']
+
+== actions json summary ==
+total 148 pages Counter({'tools': 33, 'global': 28, 'projects': 26, 'chat': 23, 'tasks': 21, 'settings': 14, 'workbench': 3})
+workbench actions [{'id': 'nav-workbench', 'selector': '.rail button[data-page="workbench"]', 'page': 'global', 'method': None, 'params': {}, 'notes': 'Switch to the workbench page; loads workbench.status on entry. The page hosts the legacy web UI inside a separate Electron window.'}, {'id': 'workbench-refresh', 'selector': '#wb-refresh', 'page': 'workbench', 'method': 'workbench.status', 'params': {}, 'notes': 'Re-probe the managed workbench runtime (Python minor, pinned dependency hash, import probe, disk size).'}, {'id': 'workbench-install', 'selector': '#wb-install', 'page': 'workbench', 'method': 'workbench.install', 'params': {}, 'notes': 'Install or repair the pinned ~130 MB isolated Python dependency set inside the app-data directory; progress streams on suwen:workbench; a second click cancels an in-flight install.'}, {'id': 'workbench-open', 'selector': '#wb-open', 'page': 'workbench', 'method': 'legacyOpen', 'params': {}, 'notes': 'Open the full legacy web UI in an isolated window; refused with runtime-required unless the managed runtime is installed and its import probe passes.'}]
+
+== index nav data-page + version ==
+rail pages ['chat', 'projects', 'tasks', 'tools', 'workbench', 'settings']
+version footer ['3.3.0 · 开发预览版']
+workbench section ids ['wb-state', 'wb-refresh', 'wb-install', 'wb-open', 'wb-progress']
+
+== daemon workbench.* dispatch? ==
+workbench refs ["const requestedValid = requested !== null && existsSync(join(requested, '.suwen-workbench.json'));"]
+
+== main.ts legacyOpen exact lines 146-161 ==
+ 146    if(method==='legacyOpen') {
+ 147     const status=await workbench.status();
+ 148     if(!status.installed)return {ok:false,code:'runtime-required',status};
+ 149     if(!connection)await connectDaemon();const result=await rpc(connection!,'legacyStart',{deps:status.depsDir});
+ 150     const origin=`http://127.0.0.1:${result.port}`;
+ 151     const isolated=session.fromPartition(`suwen-legacy-${randomUUID()}`);
+ 152     const legacyWindow=new BrowserWindow({width:1600,height:1000,title:'素问 · 实验工作台（网页版复刻）',webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ 153     isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
+ 154     isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
+ 155      if(details.webContentsId===legacyWindow.webContents.id)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
+ 156     });
+ 157     legacyWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+ 158     legacyWindow.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
+ 159     legacyWindow.on('closed',()=>isolated.webRequest.onBeforeSendHeaders(null));
+ 160     await legacyWindow.loadURL(origin);return {ok:true};
+ 161    }
+ 162    if(method==='events.replay') {

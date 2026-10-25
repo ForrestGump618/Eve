@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>素问 · SuWen</title><link rel="stylesheet" href="style.css"></head>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>素问 · SuWen</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="vendor/katex/katex.min.css"></head>
 <body>
 <nav class="rail" data-i18n-aria="navigation">
   <div class="brand" title="SuWen">素</div>
@@ -7,6 +7,7 @@
   <button data-page="projects" data-i18n-title="projects" title="科研项目">▦</button>
   <button data-page="tasks" data-i18n-title="tasks" title="任务执行">☷</button>
   <button data-page="tools" data-i18n-title="tools" title="工具 / 技能">⌘</button>
+  <button data-page="workbench" data-i18n-title="workbench" title="实验工作台">▤</button>
   <div class="grow"></div>
   <button data-page="settings" data-i18n-title="settings" title="设置 / 诊断">⚙</button>
 </nav>
@@ -19,7 +20,7 @@
   <div id="sessions" class="sessions"></div>
   <div class="grow"></div>
   <div id="health" class="health" role="status" data-i18n="connecting">连接后台…</div>
-  <div class="version" data-i18n="version">3.2.0 · 开发预览版</div>
+  <div class="version" data-i18n="version">3.3.0 · 开发预览版</div>
 </aside>
 <main>
 <header><h1 id="page-title">对话</h1><div class="grow"></div><button id="language" class="quiet" data-i18n-title="switchLanguage">English</button><button id="toggle-evidence" class="quiet" data-i18n="showTrace">执行记录 ↗</button></header>
@@ -210,6 +211,33 @@
   <pre id="tool-results" class="tool-output" aria-live="polite"></pre>
 </section>
 
+<section id="workbench" class="page pad" hidden>
+  <h2 data-i18n="workbenchTitle">实验工作台</h2>
+  <div class="cards">
+    <article class="card">
+      <h3 data-i18n="wbRuntimeTitle">网页工作台运行时</h3>
+      <p class="muted small" data-i18n="wbIntro">完整网页版工作区在独立窗口中原样运行：聊天、发现、变量、文件、图表、任务、技能、注册表、记忆、SSH、设置与诊断等。运行时会安装一份固定版本的隔离 Python 依赖（约 130 MB），首次启用需要联网。</p>
+      <pre id="wb-state">…</pre>
+      <div class="actions">
+        <button id="wb-refresh" data-i18n="wbRefresh">刷新状态</button>
+        <button id="wb-install" class="primary" data-i18n="wbInstall">安装 / 修复运行时</button>
+        <button id="wb-open" data-i18n="wbOpen" disabled>打开实验工作台</button>
+      </div>
+      <div id="wb-progress" class="small muted" role="status"></div>
+      <p class="muted small" data-i18n="wbHint">工作台使用本次会话的模型配置与凭据（通过本机隔离子进程注入，不写入网页存储）。已安装的运行时只覆盖固定版本依赖，不安装本机全局包。</p>
+    </article>
+    <article class="card">
+      <h3 data-i18n="wbParityTitle">复刻范围（以网页版为基准）</h3>
+      <ul class="muted small">
+        <li data-i18n="wbFeatureChat">聊天：流式回复、Markdown、图片、运行追踪、审批与中断</li>
+        <li data-i18n="wbFeatureResearch">发现工作台：项目、策略、假设池、报告与证据台账</li>
+        <li data-i18n="wbFeatureFiles">工作区文件、图表、变量、任务与技能、注册表与记忆</li>
+        <li data-i18n="wbFeatureOps">SSH、消息渠道 Webhook、设置与诊断、Studio</li>
+      </ul>
+      <p class="muted small" data-i18n="wbParityNote">逐项复刻状态记录在 docs/verification/legacy-web-parity.md；网页版中依赖外部机器或账号的条目会在该文档中如实标注。</p>
+    </article>
+  </div>
+</section>
 <section id="settings" class="page pad" hidden>
   <h2 data-i18n="settings">设置 / 诊断</h2>
   <div class="cards">

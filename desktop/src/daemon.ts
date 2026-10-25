@@ -8,10 +8,10 @@
  */
 import { createServer } from 'node:net';
 import { readFileSync, writeFileSync, openSync, closeSync, unlinkSync, existsSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { join, resolve, dirname, isAbsolute } from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { launchLegacy } from './legacy-worker.js';
+import { launchLegacy, type LegacyModelConfig } from './legacy-worker.js';
 import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
 import { ValidationError, type TaskDefinition, type Json } from './harness/types.js';
@@ -218,6 +218,19 @@ const capabilities = createCapabilityHandlers({
 
 let legacy: Awaited<ReturnType<typeof launchLegacy>> | null = null;
 let legacyStarting: Promise<Awaited<ReturnType<typeof launchLegacy>>> | null = null;
+/** Signature of the model configuration currently injected into the running bridge. */
+let legacySignature: string | null = null;
+/** Validate the injected session model config; invalid input falls back to the bridge mock provider. */
+function legacyModelConfig(value: Json | undefined): LegacyModelConfig | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, Json | undefined>;
+  const provider = raw.provider, model = raw.model, apiBase = raw.apiBase, apiKey = raw.apiKey;
+  if (typeof provider !== 'string' || (provider !== 'custom-openai' && provider !== 'custom-anthropic')) return undefined;
+  if (typeof model !== 'string' || model.length === 0 || model.length > 160 || /[\u0000-\u001f\u007f]/.test(model)) return undefined;
+  if (typeof apiBase !== 'string' || !/^https?:\/\//i.test(apiBase) || apiBase.length > 2000 || /[\u0000-\u001f\u007f]/.test(apiBase)) return undefined;
+  if (typeof apiKey !== 'string' || apiKey.length === 0 || apiKey.length > 4096 || /[\u0000-\u001f\u007f]/.test(apiKey)) return undefined;
+  return { provider, model, apiBase, apiKey };
+}
 
 function healthPayload(): Json {
   return {
@@ -330,15 +343,31 @@ handlers['contextRestore'] = params => {
   if (busy) throw new ValidationError('请先停止此会话的执行，再压缩或恢复摘要视图。');
   return new ContextManager(options).restore(Number(params.version)) as unknown as Json;
 };
-handlers['legacyStart'] = async () => {
+handlers['legacyStart'] = async (params: Record<string, Json>) => {
+  const config = legacyModelConfig(params?.config);
+  const signature = config ? createHash('sha256').update([config.provider, config.model, config.apiBase, config.apiKey].join('\u0000')).digest('hex') : null;
   if (legacy) {
-    try { process.kill(legacy.pid, 0); return { port: legacy.port, pid: legacy.pid, token: legacy.token }; } catch { legacy = null; }
+    let alive = false;
+    try { process.kill(legacy.pid, 0); alive = true; } catch { alive = false; }
+    // Reuse the running bridge only when the injected model config matches; a
+    // changed desktop configuration restarts it so the hosted UI is not stale.
+    if (alive && signature === legacySignature) return { port: legacy.port, pid: legacy.pid, token: legacy.token };
+    if (alive) await legacy.stop();
+    legacy = null;
+    legacySignature = null;
   }
   const sourceArg = process.argv.indexOf('--legacy-source');
   const scriptArg = process.argv.indexOf('--legacy-script');
+  const depsArg = process.argv.indexOf('--legacy-deps');
   const source = sourceArg >= 0 ? resolve(process.argv[sourceArg + 1]) : resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
   const script = scriptArg >= 0 ? resolve(process.argv[scriptArg + 1]) : resolve(dirname(fileURLToPath(import.meta.url)), '../../worker/legacy_server.py');
-  if (!legacyStarting) legacyStarting = launchLegacy(pythonPath, script, source, join(home, 'legacy'));
+  // Dependency directory is normally fixed at daemon spawn time, but the renderer
+  // may request it after an in-session install. Only an absolute path carrying a
+  // matching desktop marker is accepted; nothing is read from untrusted input.
+  const requested = typeof params?.deps === 'string' && isAbsolute(params.deps) ? params.deps : null;
+  const requestedValid = requested !== null && existsSync(join(requested, '.suwen-workbench.json'));
+  const deps = requestedValid ? (requested as string) : (depsArg >= 0 ? resolve(process.argv[depsArg + 1]) : undefined);
+  if (!legacyStarting) legacyStarting = launchLegacy(pythonPath, script, source, join(home, 'legacy'), deps, undefined, config).then(handle => { legacySignature = signature; return handle; });
   try { legacy = await legacyStarting; return { port: legacy.port, pid: legacy.pid, token: legacy.token }; } finally { legacyStarting = null; }
 };
 handlers['shutdown'] = () => { setTimeout(() => void shutdown(), 100); return { ok: true }; };

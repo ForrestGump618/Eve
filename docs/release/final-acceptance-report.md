@@ -1,5 +1,28 @@
 # Final acceptance report — SuWen Desktop vNext 3.2.0 (final evidence round)
 
+## Round-5 (3.3.0) supersession - current delivered evidence (2026-10-25)
+
+The 3.3.0 round closed the web-parity and markdown gaps; measured evidence:
+
+- Version **3.3.0**; hosted workbench E2E **34/34** (12/12 routes, 19 screenshots, 0 errors,
+  0 CSP violations, report `desktop/release/workbench-e2e/20261025-135558/report.json`), runtime smoke **27/27**, config injection **13/13**,
+  markdown unit **32/32**, full suite **222 tests / 220 pass / 0 fail / 2 skipped**, RPC E2E live
+  **42/42**, chaos **12/12** (53.4 s), UI DOM QA **18/0/13** (148 actions, 84 RPC methods).
+- Packaged smoke **passed** incl. hosted legacy SPA; Windows lifecycle **12/12 PASS** incl.
+  upgrade from 3.0.0-preview.1 on the final artifact.
+- Final installer **131,011,183 B SHA256 `0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03`** (UNSIGNED); blockmap 137,255 B `15EAB7E1C14D3651...`;
+  unpacked 249,801,728 B `469D75AD64B449B9...`.
+- Requirements: **102 rows -> 87 IMPLEMENTED_PASS / 10 UNVERIFIED / 4 NOT_STARTED /
+  1 BLOCKED_EXTERNAL**; parity 92 rows; UI action coverage 148 rows; defect register 23 rows.
+- Release decision remains **HOLD**: clean Windows VM, code signing, 8/24/72 h endurance /
+  reboot / power-loss, real vendor accounts and GitHub Release assets are still NOT verified /
+  BLOCKED_EXTERNAL.
+
+---
+
+
+
+
 Status: **FINAL EVIDENCE ROUND — NOT PUBLISHED**. All values below are measured on disk in TARGET
 `C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext` (branch `suwen-vnext-durable`,
 2026-10-25) unless marked `NOT RUN` / `UNVERIFIED` / `BLOCKED_EXTERNAL`. This report does **not**

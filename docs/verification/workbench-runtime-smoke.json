@@ -1,0 +1,155 @@
+{
+  "at": "2026-10-25T06:06:44.522Z",
+  "result": "passed",
+  "passed": 27,
+  "failed": [],
+  "checks": [
+    {
+      "id": "runtime-installed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "bridge-ready",
+      "ok": true,
+      "detail": "port=14503"
+    },
+    {
+      "id": "api-health",
+      "ok": true,
+      "detail": "{\"ok\":true,\"version\":\"2.1.1\",\"kernel\":{\"running\":true,\"python\":\"D:\\\\Develop\\\\python\\\\python.exe\",\"pid\":48924,\"started_at\":1792908400.3583493,\"kernel_name\":\"omicslab\",\"execution_count\":1,\"boot_error\":n"
+    },
+    {
+      "id": "spa-index",
+      "ok": true,
+      "detail": "status=200 bytes=5885"
+    },
+    {
+      "id": "spa-app-js",
+      "ok": true,
+      "detail": "bytes=22717 sha256=98b2f1dfa52b0096"
+    },
+    {
+      "id": "spa-css",
+      "ok": true,
+      "detail": "bytes=16287"
+    },
+    {
+      "id": "auth-required",
+      "ok": true,
+      "detail": "status=401"
+    },
+    {
+      "id": "endpoint /api/settings",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/agents",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/agents/default",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/conversations",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/skills",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/memory",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/jobs",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/figures",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/workspaces",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/kernels",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/kernel/status",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/kernel/vars",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/registry/modules",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/registry/search?q=tool",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/discovery/projects",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/files/tree?path=",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/system/info",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "endpoint /api/approvals",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "create-conversation",
+      "ok": true,
+      "detail": "status=200 id=c_8dfaaaa09041"
+    },
+    {
+      "id": "create-run",
+      "ok": true,
+      "detail": "status=200 run=run_0990b333a2aa"
+    }
+  ],
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "python": "python",
+    "depsDir": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-workbench-smoke"
+  },
+  "limits": [
+    "local loopback only",
+    "uses the existing managed dependency directory",
+    "does not install dependencies unless --install is passed"
+  ],
+  "stderr": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-workbench-smoke\\zmq\\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.\r\n  self._get_loop()\r\n[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.\r\n"
+}

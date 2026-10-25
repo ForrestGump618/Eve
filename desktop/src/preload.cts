@@ -14,5 +14,12 @@ contextBridge.exposeInMainWorld('suwen', Object.freeze({
   const listener=(_event:unknown,payload:unknown)=>handler(payload);
   ipcRenderer.on('suwen:connection',listener);
   return ()=>ipcRenderer.removeListener('suwen:connection',listener);
+ },
+ // Managed workbench runtime install progress (phase/message/percent).
+ onWorkbench:(handler:(event:unknown)=>void)=>{
+  if(typeof handler!=='function')throw new Error('onWorkbench requires a function');
+  const listener=(_event:unknown,payload:unknown)=>handler(payload);
+  ipcRenderer.on('suwen:workbench',listener);
+  return ()=>ipcRenderer.removeListener('suwen:workbench',listener);
  }
 }));

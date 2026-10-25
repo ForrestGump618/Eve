@@ -8,6 +8,7 @@ import { rpc } from './rpc.js';
 import { ensureHome, readConnection, safeError, type Connection } from './security.js';
 import { validateModelConfig } from './providers.js';
 import { RPC_METHODS } from './shared/contract.js';
+import { WorkbenchManager } from './workbench.js';
 
 const here=dirname(fileURLToPath(import.meta.url));
 app.setName('SuWen');
@@ -18,6 +19,11 @@ let streamCursor=0,pumpTimer:NodeJS.Timeout|null=null,pumpBusy=false;
 let reconnectTimer:NodeJS.Timeout|null=null,reconnecting=false;
 const home=join(app.getPath('userData'),'runtime');
 const uiFile=resolve(here,'../ui/index.html');
+/** Python selected for the detached daemon (frozen preferences.json), used by the workbench runtime. */
+function daemonPythonPath():string{try{const value=JSON.parse(readFileSync(join(home,'preferences.json'),'utf8')) as {pythonPath?:unknown};return typeof value.pythonPath==='string'&&value.pythonPath?value.pythonPath:'python';}catch{return 'python';}}
+/** Managed, pinned Python dependency set for the legacy web workbench (never bundled credentials). */
+const workbenchDeps=process.env.SUWEN_WORKBENCH_DEPS?resolve(process.env.SUWEN_WORKBENCH_DEPS):join(app.getPath('userData'),'python-env');
+const workbench=new WorkbenchManager({home,depsDir:workbenchDeps,python:daemonPythonPath});
 async function connectDaemon():Promise<void>{
  const old=readConnection(home);if(old){try{await rpc(old,'health');connection=old;return;}catch{}}
  const script=join(here,'daemon.js');const worker=app.isPackaged?join(process.resourcesPath,'worker','research_worker.py'):resolve(here,'../../worker/research_worker.py');
@@ -29,7 +35,9 @@ async function connectDaemon():Promise<void>{
   if(match){env.HTTPS_PROXY='http://'+match[1];env.HTTP_PROXY=env.HTTPS_PROXY;}
  }
  env.NO_PROXY=env.NO_PROXY??'localhost,127.0.0.1,::1';
- const child=spawn(process.execPath,[script,'--home',home,'--worker',worker,'--legacy-source',app.isPackaged?join(process.resourcesPath,'legacy'):resolve(here,'../../..'),'--legacy-script',app.isPackaged?join(process.resourcesPath,'worker','legacy_server.py'):resolve(here,'../../worker/legacy_server.py')],{detached:true,windowsHide:true,stdio:'ignore',env});child.unref();
+ const args=[script,'--home',home,'--worker',worker,'--legacy-source',app.isPackaged?join(process.resourcesPath,'legacy'):resolve(here,'../../..'),'--legacy-script',app.isPackaged?join(process.resourcesPath,'worker','legacy_server.py'):resolve(here,'../../worker/legacy_server.py')];
+ if(existsSync(join(workbenchDeps,'.suwen-workbench.json')))args.push('--legacy-deps',workbenchDeps);
+ const child=spawn(process.execPath,args,{detached:true,windowsHide:true,stdio:'ignore',env});child.unref();
  for(let i=0;i<80;i++){await new Promise(r=>setTimeout(r,150));const c=readConnection(home);if(c){try{await rpc(c,'health');connection=c;return;}catch{}}}
  throw new Error('后台未启动，请在诊断中重试。');
 }
@@ -104,9 +112,9 @@ function writeSecrets(map:Record<string,string>):void{
  const encrypted=safeStorage.encryptString(JSON.stringify(map));const tmp=secretsPath+'.tmp';writeFileSync(tmp,encrypted,{mode:0o600});renameSync(tmp,secretsPath);
 }
 async function pushSecrets():Promise<void>{if(!connection)return;try{await rpc(connection,'secrets.set',{refs:readSecrets()});}catch{/* daemon may still be starting */}}
-const MAIN_ONLY=new Set(['settings','configure','login','reconnect','pythonPicker','legacyOpen','shutdown','support','secrets.status','secret.put','secret.remove','secrets.set','events.stream']);
+const MAIN_ONLY=new Set(['settings','configure','login','reconnect','pythonPicker','legacyOpen','shutdown','support','secrets.status','secret.put','secret.remove','secrets.set','events.stream','workbench.status','workbench.install','workbench.cancel']);
 /** Main-process handlers that the sandboxed renderer may invoke directly (no daemon passthrough). */
-const UI_MAIN_METHODS=['secrets.status','secret.put','secret.remove','events.replay'];
+const UI_MAIN_METHODS=['secrets.status','secret.put','secret.remove','events.replay','workbench.status','workbench.install','workbench.cancel'];
 const exposed=new Set<string>([...RPC_METHODS.filter(method=>!MAIN_ONLY.has(method)),...UI_MAIN_METHODS]);
 app.whenReady().then(async()=>{
  ensureHome(home);let startupError='';try{await connectDaemon();const c=readConfig();if(c&&connection)await rpc(connection,'configure',c);if(connection)await pushSecrets();}catch(err){startupError=safeError(err);}
@@ -128,11 +136,25 @@ app.whenReady().then(async()=>{
    if(method==='login') {if(typeof params.enabled!=='boolean')throw new Error('Invalid login setting');app.setLoginItemSettings({openAtLogin:params.enabled,args:['--background']});return {enabled:app.getLoginItemSettings().openAtLogin};}
    if(method==='reconnect'){await connectDaemon();const c=readConfig();if(c)await rpc(connection!,'configure',c);await pushSecrets();return {ok:true};}
    if(method==='pythonPicker') {const result=await dialog.showOpenDialog(win,{title:'选择 Python 解释器（可选）',properties:['openFile'],filters:[{name:'Python',extensions:['exe']}]});if(result.canceled)return {cancelled:true};if(!connection)await connectDaemon();await rpc(connection!,'python',{path:result.filePaths[0]});return {path:result.filePaths[0]};}
+   if(method==='workbench.status')return await workbench.status();
+   if(method==='workbench.cancel')return {cancelled:workbench.cancel()};
+   if(method==='workbench.install') {
+    if(!win)throw new Error('窗口不可用');
+    // Long-running but bounded: resolves only after install/probe finishes; progress events stream separately.
+    return await workbench.install(progress=>{try{if(win&&!win.isDestroyed())win.webContents.send('suwen:workbench',progress);}catch{/* window may close mid-install */}});
+   }
    if(method==='legacyOpen') {
-    if(!connection)await connectDaemon();const result=await rpc(connection!,'legacyStart');
+    const status=await workbench.status();
+    if(!status.installed)return {ok:false,code:'runtime-required',status};
+    // Hand the session model config to the hosted workspace in memory so its chat
+    // uses the same provider as the desktop instead of the offline mock. The key
+    // travels top-level -> daemon pipe -> child env and is never written to disk.
+    const cfg=readConfig();
+    const modelConfig=cfg&&cfg.apiKey?{provider:cfg.provider==='anthropic'?'custom-anthropic':'custom-openai',model:cfg.model,apiBase:cfg.baseUrl,apiKey:cfg.apiKey}:undefined;
+    if(!connection)await connectDaemon();const result=await rpc(connection!,'legacyStart',{deps:status.depsDir,...(modelConfig?{config:modelConfig}:{})});
     const origin=`http://127.0.0.1:${result.port}`;
     const isolated=session.fromPartition(`suwen-legacy-${randomUUID()}`);
-    const legacyWindow=new BrowserWindow({width:1400,height:930,title:'素问 · 科研工作台（Python 兼容）',webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+    const legacyWindow=new BrowserWindow({width:1600,height:1000,title:'素问 · 实验工作台（网页版复刻）',webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
     isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
     isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
      if(details.webContentsId===legacyWindow.webContents.id)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});

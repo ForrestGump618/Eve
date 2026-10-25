@@ -72,7 +72,7 @@ for (const action of actions) {
   else if (actionIds.has(action.id)) fail('action-duplicate', action.id);
   else actionIds.add(action.id);
   if (typeof action.selector !== 'string' || !action.selector.trim()) fail('action-selector', action.id);
-  if (action.page !== 'global' && !['chat', 'projects', 'tasks', 'tools', 'settings'].includes(action.page)) fail('action-page', `${action.id} -> ${action.page}`);
+  if (action.page !== 'global' && !['chat', 'projects', 'tasks', 'tools', 'workbench', 'settings'].includes(action.page)) fail('action-page', `${action.id} -> ${action.page}`);
   pagesSeen.add(action.page);
   if (action.params === undefined || action.params === null || typeof action.params !== 'object') fail('action-params', action.id);
   if (typeof action.notes !== 'string' || !action.notes.trim()) fail('action-notes', action.id);
@@ -88,7 +88,7 @@ else fail('actions', 'actions.json is empty');
 
 /* ---------- index.html ---------- */
 const html = read(path.join(uiDir, 'index.html'));
-const EXPECTED_CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+const EXPECTED_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
 if (html.includes(EXPECTED_CSP)) ok('csp', 'frozen CSP intact');
 else fail('csp', 'CSP meta content changed or missing');
 if (!/connect-src 'none'/.test(html)) fail('csp-connect', "connect-src 'none' missing");
@@ -101,13 +101,14 @@ const REQUIRED_IDS = [
   'tool-results', 'settings-form', 'saved', 'diagnostics', 'launch-login', 'reconnect',
   'pick-python', 'support', 'shutdown', 'evidence', 'close-evidence', 'evidence-content',
   'provider', 'baseUrl', 'model', 'apiKey', 'contextWindow', 'maxOutput', 'confirm-dialog',
+  'wb-state', 'wb-refresh', 'wb-install', 'wb-open', 'wb-progress',
 ];
 const missingIds = REQUIRED_IDS.filter(id => !new RegExp(`id="${id}"`).test(html));
 if (missingIds.length) fail('legacy-ids', `missing: ${missingIds.join(', ')}`);
 else ok('legacy-ids', `${REQUIRED_IDS.length} ids present`);
 
-const pageIds = ['chat', 'projects', 'tasks', 'tools', 'settings'].filter(id => new RegExp(`id="${id}"`).test(html));
-if (pageIds.length === 5) ok('pages', 'chat/projects/tasks/tools/settings');
+const pageIds = ['chat', 'projects', 'tasks', 'tools', 'workbench', 'settings'].filter(id => new RegExp(`id="${id}"`).test(html));
+if (pageIds.length === 6) ok('pages', 'chat/projects/tasks/tools/workbench/settings');
 else fail('pages', `found ${pageIds.join(',') || 'none'}`);
 
 /* ---------- app.js: called methods, i18n, innerHTML, brand ---------- */

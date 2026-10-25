@@ -929,6 +929,11 @@ export class SkillRegistry {
     }
     mkdirSync(this.installRoot, { recursive: true });
     const target = join(this.installRoot, id);
+    // A previous crash can leave an orphan tree without its record (the record is
+    // written after the copy). Windows renameSync then fails with EPERM against the
+    // existing directory, so clear the orphan first; a live record would have been
+    // returned or rejected above.
+    try { rmSync(target, { recursive: true, force: true }); } catch { /* best effort */ }
     const staging = join(this.installRoot, `.staging-${randomUUID()}`);
     mkdirSync(staging, { recursive: false });
     try {
@@ -937,7 +942,15 @@ export class SkillRegistry {
         mkdirSync(dirname(destination), { recursive: true });
         writeFileSync(destination, file.bytes, { mode: 0o600, flag: 'wx' });
       }
-      renameSync(staging, target);
+      // Windows scanners or another process can briefly hold the staging tree;
+      // retry the rename a few times before surfacing the failure.
+      for (let attempt = 0; ; attempt += 1) {
+        try { renameSync(staging, target); break; }
+        catch (error) {
+          if (attempt >= 3 || (error as NodeJS.ErrnoException).code !== 'EPERM') throw error;
+          await new Promise(resolve => setTimeout(resolve, 25 * (attempt + 1)));
+        }
+      }
     } catch (error) {
       try { rmSync(staging, { recursive: true, force: true }); } catch { /* best effort cleanup */ }
       throw new Error(`Skill copy failed: ${failureMessage(error)}`);

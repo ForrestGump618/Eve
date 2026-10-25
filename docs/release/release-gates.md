@@ -1,9 +1,32 @@
 # Release gates — SuWen desktop 3.2.0 (final evidence round)
 
+## Round-5 (3.3.0) supersession - current delivered evidence (2026-10-25)
+
+Gate status for the **3.3.0** artifact (round-5). Earlier 3.2.0 gate evidence below is historical.
+
+| Gate | Status | Evidence |
+|---|---|---|
+| G1 Build | **PASS** | `npm test` 222/220/0/2 exit 0; `tsc --noEmit`/`npm run build` exit 0; CI green on the pushed 3.2.0-era tree (run 40146054329) |
+| G2 Runtime | **PASS** | RPC E2E `--live` **42/42**; packaged Electron smoke **passed** (incl. hosted SPA); daemon health 3.3.0 |
+| G3 Streaming/UI stability | **PASS_WITH_LIMITS** | hosted workbench E2E 34/34; native streaming E2E (round-3) 16/16 case types with P1 fixes; markdown progressive unit 32/32; pre-T1 poll-only baseline NOT RUN |
+| G4 Functional breadth | **PASS_WITH_LIMITS** | live RPC 42/42; web-parity view matrix 12/12 routes; hidden legacy views smoke-only |
+| G5 Research capabilities | **PASS** | deterministic research E2E 19 PASS/3 SKIP; live 21/21 incl. real Europe PMC/UniProt evidence |
+| G6 Durability | **PASS_WITH_LIMITS** | chaos 12/12 (53.4 s); accelerated soak 25 min/64 cycles/12 faults recovered; **8/24/72 h + reboot/sleep/power/disk-full NOT RUN** |
+| G7 Security/compliance | **PASS_WITH_LIMITS** | scanner 0 HIGH / 48 LOW (14 fixtures); npm audit 0; hosted CSP measured 0 violations; no pen-test, unsigned |
+    | G8 Windows installer | **PASS_WITH_LIMITS** | final 3.3.0 artifact built; host lifecycle 12/12 incl. upgrade; packaged smoke passed; clean-VM install NOT RUN; UNSIGNED |
+| G9 GitHub publication | **BLOCKED_EXTERNAL** | source branch/tag pushable via SSH; CI executes; Release assets require `gh`/token (absent) and gates are HOLD |
+
+**Release decision: HOLD (not published).**
+
+---
+
+
+
+
 Status: **NOT PUBLISHED / NOT A CLEAN-MACHINE SIGN-OFF**. Each gate has an enforced evidence link;
 uncompleted gates are not passed. Machine-readable companion:
 `docs/verification/defect-register.csv`; requirement matrix `docs/requirements/master-requirements.csv`
-(98 rows — 81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL).
+(102 rows — 87 IMPLEMENTED_PASS / 10 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL; round-5 rows R149-R152).
 
 Evidence measured in TARGET `C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext`
 (branch `suwen-vnext-durable`, 2026-10-25) on the **final 3.2.0 build**. `PASS` is used only where a

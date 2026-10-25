@@ -257,3 +257,60 @@ upgrading to 3.2.0) passed; final `npm test` 182 tests / 180 pass / 2 skipped / 
 129,425,145 B, 14/14 lifecycle, `82779B90…` pre-final) are historical and must never be reported as
 the delivered 3.2.0 artifact. Not done: clean-Windows-VM lifecycle, code signing, 8/24/72 h endurance,
 real external accounts, GitHub publication (`docs/release/final-acceptance-report.md`).
+
+## C-21. Hosted legacy workbench: host smoke not archived, Electron E2E not published
+
+The only runtime evidence for the hosted legacy SPA is a Lead-run host smoke reported as
+**26/28 checks**, whose two failures were wrong test-path assumptions in the smoke script and are being
+corrected; the smoke prints JSON to the console only and leaves **no persisted report**. No Electron
+window E2E (header injection, route clicks, token absence, window-close bridge shutdown) is published.
+Resolution: all 8 hosted routes are `HOSTED_LEGACY_PENDING_E2E` in
+`docs/verification/legacy-web-parity.md`; R014 remains UNVERIFIED.
+
+## C-22. Version/build drift vs round-4 release evidence
+
+`desktop/package.json` and the UI footer now say **3.3.0** (dev preview), the round-4 release evidence
+describes **3.2.0**, and `desktop/release/win-unpacked` was built from older sources (its `dist/ui` has
+no `vendor/`, `markdown.js` 14,232 B vs 35,583 B in the working tree, `app.js` 204,682 B vs 215,394 B).
+`scripts/copy-assets.mjs` now builds KaTeX/Mermaid vendor assets into `dist/ui/vendor/`. Resolution:
+the installer must be rebuilt from a frozen tree and hashes re-recorded before any parity claim is tied
+to the artifact; current instructions use the 3.2.0 numbers only where labelled.
+
+## C-23. Workbench provider/credential copy vs implementation
+
+The native workbench page hint says the hosted UI uses "this session's model configuration and
+credentials injected through the isolated local process, never written to web storage". Code inspection
+shows the bridge home is fresh and `worker/legacy_server.py` forces a **mock** provider unless the user
+configures the bridge home; no safeStorage credential injection into the bridge was found. Resolution:
+implement injection or fix the UI copy before claiming parity (legacy-web-parity Q4, P0 honesty).
+
+## C-24. `ui-action-coverage.csv` 144 actions vs current `actions.json` 148
+
+The coverage CSV (144 rows) predates the round-4 UI additions (`actions.json` now has 148 actions,
+including 3 workbench actions + nav-workbench). Owning teammate/Lead must regenerate the coverage CSV;
+this audit did not modify it (write scope; would invalidate the round-3 verifier expectation until
+regenerated). Not a pass claim.
+
+## C-25. Prompt matrix "table forming line by line" vs completed-only Markdown
+
+The round-3 prompt §4 matrix requires "Markdown table forming line by line / code block across many
+deltas / zh/en/Unicode across chunk boundaries". The shipped design deliberately renders **plain text
+while streaming** and Markdown only on completion (`docs/verification/markdown-rendering.md` §1), so
+those matrix items are `NOT_VERIFIED` rather than failed. Resolution: either record an explicit waiver
+(design decision: no markdown during stream) or implement streaming-safe incremental markdown; R127
+stays UNVERIFIED until then (`docs/requirements/markdown-parity.md`).
+
+## C-26. Hosted legacy surface has no CSP of its own
+
+The legacy SPA was served by the baseline Python server without a Content-Security-Policy
+(`docs/architecture/current.md`); the hosted window mitigates with a separate session partition,
+per-window Authorization injection, permission denial and origin-restricted navigation, but not CSP.
+Resolution: accepted residual risk must be recorded in `docs/verification/security-review.md` (compat
+surface) and re-evaluated before any production claim.
+
+## C-27. `desktop/acceptance-matrix.md` was stale after the T2 correction
+
+After the T2 post-fix corrections the master CSV counts changed to 81/12/4/1, actions to 148 and R130/R136
+to PASS, while the acceptance matrix still said 80/13/4/1, 144 actions and "auto-reconnect UNVERIFIED /
+visual UNVERIFIED". Resolution: conservative refresh in this round (counts/actions/R130/R136/visual/
+managed-workbench row + markdown verdict row); no status inflation beyond master CSV.

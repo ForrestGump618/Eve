@@ -26,7 +26,11 @@ class BearerGateway:
         self.expected = ("Bearer " + token).encode("ascii")
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] in ("http", "websocket"):
+        # Static application assets carry no data and are allowed so the window's
+        # document can load before the authenticated API calls start.
+        path = scope.get("path", "/")
+        needs_auth = scope["type"] == "websocket" or path.startswith("/api") or path.startswith("/bootstrap")
+        if scope["type"] in ("http", "websocket") and needs_auth:
             values = [value for name, value in scope.get("headers", ()) if name.lower() == b"authorization"]
             authorized = len(values) == 1 and hmac.compare_digest(values[0], self.expected)
             if not authorized:
@@ -40,7 +44,7 @@ class BearerGateway:
         await self.app(scope, receive, send)
 
 
-async def run(source: Path, home: Path, token: str, wire) -> None:
+async def run(source: Path, home: Path, deps: "Path | None", token: str, wire) -> None:
     # Source is trusted application code, never downloaded or supplied by model output.
     if not (source / "omicslab" / "server" / "__init__.py").is_file() or not (source / "omicslab" / "config.py").is_file():
         raise RuntimeError("Trusted legacy source package is unavailable")
@@ -60,8 +64,18 @@ async def run(source: Path, home: Path, token: str, wire) -> None:
     }.items():
         directory.mkdir(parents=True, exist_ok=True)
         os.environ[name] = str(directory)
+    # Desktop-managed isolated dependency directory (optional). The bridge runs
+    # with -E so inherited PYTHON* variables cannot leak; the kernel child is a
+    # normal interpreter and therefore receives an explicit PYTHONPATH.
+    if deps is not None:
+        deps = deps.resolve(strict=True)
+        if not deps.is_dir():
+            raise RuntimeError("Desktop-managed Python dependency directory is unavailable")
+        sys.path.insert(0, str(deps))
+        existing = os.environ.get("PYTHONPATH", "")
+        os.environ["PYTHONPATH"] = str(deps) + (os.pathsep + existing if existing else "")
     sys.path.insert(0, str(source))
-    from omicslab.config import load_settings
+    from omicslab.config import PROVIDERS, load_settings
     from omicslab.server import create_app
     import uvicorn
 
@@ -72,12 +86,52 @@ async def run(source: Path, home: Path, token: str, wire) -> None:
     settings = load_settings(workspace=workspace, home=home)
     settings.host = "127.0.0.1"
     settings.port = port
+    # The desktop main process injects the user's current model configuration over
+    # the authenticated local channel. Apply it only in memory (an env var for the
+    # provider key), never write it to the bridge settings file or web storage.
+    provider = os.environ.pop("SUWEN_LEGACY_PROVIDER", "").strip()
+    if provider:
+        settings.provider = provider
+        model = os.environ.pop("SUWEN_LEGACY_MODEL", "").strip()
+        if model:
+            settings.model = model
+        api_base = os.environ.pop("SUWEN_LEGACY_API_BASE", "").strip()
+        if api_base:
+            settings.api_base = api_base
+        api_key = os.environ.pop("SUWEN_LEGACY_API_KEY", "")
+        env_name = str((PROVIDERS.get(provider) or {}).get("env_key") or "")
+        if api_key and env_name:
+            os.environ[env_name] = api_key
     if settings.provider == "auto":
         settings.provider = "mock"
         settings.model = "mock-model"
     settings.approval_policy = "ask"
-    # No inherited model credentials or old notebook configuration are used.
-    app = BearerGateway(create_app(settings), token)
+    # Desktop-hosted workspace defaults to the dark research theme required by the
+    # product spec; the legacy SPA would otherwise resolve `system` against a light
+    # host OS. Only seed on first run so user changes in the workbench persist.
+    try:
+        from omicslab.suwen.store import PlatformStore
+        seed_store = PlatformStore(home)
+        try:
+            if not seed_store.get("config", "appearance"):
+                seed_store.put("config", "appearance", {"value": {"theme": "dark"}})
+        finally:
+            seed_store.close()
+    except Exception:
+        pass
+    # The hosted workspace is trusted local code but receives model messages and
+    # research data, so constrain the document like the native renderer does.
+    legacy_app = create_app(settings)
+
+    @legacy_app.middleware("http")
+    async def security_headers(request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'none'")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        return response
+
+    app = BearerGateway(legacy_app, token)
 
     class ReadyServer(uvicorn.Server):
         async def startup(self, sockets=None):
@@ -112,6 +166,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", required=True)
     parser.add_argument("--home", required=True)
+    parser.add_argument("--deps", default=None)
     args = parser.parse_args()
     # Remove before imports or notebook children can inherit it. Never log token.
     token = os.environ.pop("SUWEN_BRIDGE_TOKEN", "")
@@ -121,7 +176,7 @@ def main() -> int:
     wire = sys.stdout
     sys.stdout = sys.stderr
     try:
-        asyncio.run(run(Path(args.source).resolve(strict=True), Path(args.home).resolve(), token, wire))
+        asyncio.run(run(Path(args.source).resolve(strict=True), Path(args.home).resolve(), Path(args.deps) if args.deps else None, token, wire))
         return 0
     except Exception:
         # Do not print private source/home paths, headers or arbitrary dependency errors.

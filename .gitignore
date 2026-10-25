@@ -89,3 +89,5 @@ ssh_known_hosts.json
 
 # SuWen native preview build output
 /desktop/release/
+
+desktop/dist-*/

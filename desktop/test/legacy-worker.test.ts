@@ -57,5 +57,5 @@ test('optional actual Python workbench authenticates all routes and shuts down i
 test('legacy launch rejects a pre-cancelled request without starting Python', async () => {
   const controller = new AbortController();
   controller.abort();
-  await assert.rejects(launchLegacy('python', '/unused/legacy_server.py', '/unused/source', '/unused/home', controller.signal), /cancelled/);
+  await assert.rejects(launchLegacy('python', '/unused/legacy_server.py', '/unused/source', '/unused/home', undefined, controller.signal), /cancelled/);
 });

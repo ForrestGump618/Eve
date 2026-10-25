@@ -1,88 +1,88 @@
 {
-    "at":  "2026-10-24T20:01:24.2649839Z",
-    "version":  "3.2.0",
-    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.2.0-win-x64.exe",
-    "installerBytes":  129447101,
-    "installerSha256":  "4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897",
+    "at":  "2026-10-25T06:03:51.1652917Z",
+    "version":  "3.3.0",
+    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.3.0-win-x64.exe",
+    "installerBytes":  131011183,
+    "installerSha256":  "0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03",
     "upgradeFrom":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\2026-10-23\\c-users-qingyuan-zhuang-documents-deepseek-2\\outputs\\omicslab\\desktop\\release\\SuWen-Setup-3.0.0-preview.1-win-x64.exe",
     "steps":  [
                   {
                       "name":  "upgrade_source",
                       "status":  "INFO",
                       "detail":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\2026-10-23\\c-users-qingyuan-zhuang-documents-deepseek-2\\outputs\\omicslab\\desktop\\release\\SuWen-Setup-3.0.0-preview.1-win-x64.exe sha256=F263AF7BB412CCBB2FB3A8F1798D35D2A7210997954E68669ED110B62A55514C",
-                      "at":  "2026-10-24T19:59:20.9803675Z"
+                      "at":  "2026-10-25T06:00:48.8949214Z"
                   },
                   {
                       "name":  "upgrade_install_old",
                       "status":  "PASS",
-                      "detail":  "DisplayVersion=3.0.0-preview.1 expected=3.0.0-preview.1",
-                      "at":  "2026-10-24T19:59:41.3769320Z"
+                      "detail":  "DisplayVersion=3.0.0-preview.1",
+                      "at":  "2026-10-25T06:01:21.4855576Z"
                   },
                   {
                       "name":  "upgrade_old_exe",
                       "status":  "PASS",
                       "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\SuWen\\SuWen.exe bytes=249801728 version=3.0.0-preview.1",
-                      "at":  "2026-10-24T19:59:41.3871527Z"
+                      "at":  "2026-10-25T06:01:21.5251338Z"
                   },
                   {
                       "name":  "install",
                       "status":  "PASS",
-                      "detail":  "exit=0 installerBytes=129447101 sha256=4590B7F3C38041985EB31F56047E4C35FCF0B2286FE6E989F55F736CB230B897 duration=~25s",
-                      "at":  "2026-10-24T20:00:12.1468581Z"
+                      "detail":  "exit=0 installerBytes=131011183 sha256=0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03 duration=~44s",
+                      "at":  "2026-10-25T06:02:11.5791482Z"
                   },
                   {
                       "name":  "files",
                       "status":  "PASS",
-                      "detail":  "SuWen.exe bytes=249801728 FileVersion=3.2.0 ProductVersion=3.2.0.0",
-                      "at":  "2026-10-24T20:00:12.1568457Z"
+                      "detail":  "SuWen.exe bytes=249801728 FileVersion=3.3.0 ProductVersion=3.3.0.0",
+                      "at":  "2026-10-25T06:02:11.6085168Z"
                   },
                   {
                       "name":  "registry",
                       "status":  "PASS",
-                      "detail":  "DisplayName=SuWen DisplayVersion=3.2.0",
-                      "at":  "2026-10-24T20:00:12.2008463Z"
+                      "detail":  "DisplayName=SuWen DisplayVersion=3.3.0",
+                      "at":  "2026-10-25T06:02:11.6748723Z"
                   },
                   {
                       "name":  "app_launch",
                       "status":  "PASS",
-                      "detail":  "pid=43316 alive after 12s",
-                      "at":  "2026-10-24T20:00:34.1210939Z"
+                      "detail":  "pid=11768 alive after 12s",
+                      "at":  "2026-10-25T06:02:35.0594219Z"
                   },
                   {
                       "name":  "daemon_health",
                       "status":  "PASS",
-                      "detail":  "version=3.2.0 mode=user-background pid=32432",
-                      "at":  "2026-10-24T20:00:34.2747669Z"
+                      "detail":  "version=3.3.0 mode=user-background pid=45600",
+                      "at":  "2026-10-25T06:02:35.4076612Z"
                   },
                   {
                       "name":  "daemon_survives_ui_close",
                       "status":  "PASS",
-                      "detail":  "version=3.2.0 pid=32432",
-                      "at":  "2026-10-24T20:00:37.4273196Z"
+                      "detail":  "version=3.3.0 pid=45600",
+                      "at":  "2026-10-25T06:02:38.5962559Z"
                   },
                   {
                       "name":  "reinstall",
                       "status":  "PASS",
                       "detail":  "same-version reinstall kept the app executable",
-                      "at":  "2026-10-24T20:01:05.8149520Z"
+                      "at":  "2026-10-25T06:03:28.2157489Z"
                   },
                   {
                       "name":  "uninstall",
                       "status":  "PASS",
                       "detail":  "exit=0 install directory removed",
-                      "at":  "2026-10-24T20:01:24.2004789Z"
+                      "at":  "2026-10-25T06:03:50.9465622Z"
                   },
                   {
                       "name":  "user_data_preserved",
                       "status":  "PASS",
                       "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Roaming\\SuWen",
-                      "at":  "2026-10-24T20:01:24.2014778Z"
+                      "at":  "2026-10-25T06:03:50.9499239Z"
                   },
                   {
                       "name":  "registry_removed",
                       "status":  "PASS",
                       "detail":  "HKCU uninstall entry removed",
-                      "at":  "2026-10-24T20:01:24.2510405Z"
+                      "at":  "2026-10-25T06:03:51.1072671Z"
                   }
               ],
     "passed":  12,

@@ -278,3 +278,73 @@ All numbers below were measured on the final 3.2.0 build in the TARGET workspace
 - Docs remain HOLD for a GitHub Release: gates G3/G6/G7/G8 are PASS_WITH_LIMITS and G9 is
   BLOCKED_EXTERNAL until clean-VM lifecycle, signing and endurance are done or explicitly
   waived.
+
+## Round 4 — legacy web parity & Markdown prompt audit (draft for Lead, 2026-10-25)
+
+Round-4 docs audit (task-12). Scope: `docs/verification/legacy-web-parity.md` and
+`docs/requirements/markdown-parity.md`; no source/UI/CI changes by this audit.
+
+Verified by inspection and measurement:
+
+- **Hosted legacy web architecture mapped**: 20 legacy SPA routes (12 visible / 8 hidden; platform.js
+  hosts 8 of them), 14 view modules, 54 `/api` paths (`omicslab/web/js/{store,app,api}.js`, `views/*`),
+  now hosted through a managed isolated Python runtime (13 pinned deps, ~130 MB download) +
+  bearer-authenticated bridge + isolated Electron window. Host-level managed install measured:
+  **132,868,111 B / 11,866 files**, marker python **3.11.9**, requirementsHash
+  **3887b118…af256ab** (temp override directory; `userData/python-env` NOT installed on this host).
+- **Route/API parity matrix published** (`docs/verification/legacy-web-parity.md`): 1
+  NATIVE_EQUIVALENT (chat), 11 PARTIAL, 8 HOSTED_LEGACY_PENDING_E2E; every hosted route still gated on
+  the unpublished Electron E2E; 84 RPC methods vs 54 legacy API paths mapped by domain.
+- **Markdown prompt clauses audited** (`docs/requirements/markdown-parity.md`): of the 10 §3.5 clauses,
+  10 IMPLEMENTED-equivalent items (incl. suggested render pipeline), 3 PARTIAL (code copy, long-content
+  timing, stable-segment enhancement) and 1 **NOT_IMPLEMENTED** (images/async layout shift); the
+  published `docs/verification/markdown-rendering.md` (11,177 B, sha256 `97e98c33…d8ecbc`) closes the
+  earlier "no report" gap, and `desktop/test/markdown.test.ts` is 26/26.
+- **CSV updates**: master rows R014/R020/R090/R091/R127 evidence refreshed (statuses unchanged:
+  98 rows = **81 IMPLEMENTED_PASS / 12 UNVERIFIED / 4 NOT_STARTED / 1 BLOCKED_EXTERNAL**); parity matrix
+  appended 4 audit rows → **89 rows = 69 IMPLEMENTED_PASS / 8 UNVERIFIED / 9 NOT_STARTED / 1 N/A_PORT /
+  1 REPLACED / 1 BLOCKED_EXTERNAL**; `ui-action-coverage.csv` intentionally untouched (144 vs current
+  148 actions — conflict C-24).
+- **Acceptance matrix refreshed** to the post-T2 master state (counts 81/12/4/1, 148 actions,
+  R130/R136 PASS with T2 post-fix report, visual audit PASS) and extended with the hosted-workbench
+  row (host runtime measured, E2E pending) and the Markdown verdict row (R127 UNVERIFIED).
+- **Conflicts C-21..C-27 recorded**: host smoke not archived; 3.3.0-vs-3.2.0 build drift and stale
+  packaged UI; workbench credential/provider copy mismatch; 144-vs-148 coverage drift; prompt matrix
+  "table line by line" vs completed-only rendering; hosted legacy surface has no CSP; stale acceptance
+  matrix (fixed in this pass).
+
+Still open in round 4:
+
+1. Archived Electron E2E for the hosted workbench window (open/route clicks/token absence/close→bridge
+   stop) and a persisted runtime-smoke JSON (`desktop/scripts/workbench-runtime-smoke.mjs` has no `--out`).
+2. Real `userData/python-env` install flow (progress/cancel/repair) and runtime uninstaller; disk-full /
+   proxy / offline behaviour.
+3. Workbench credential/provider copy resolution (Q4) and hosted-surface CSP risk entry.
+4. Markdown: streaming matrix rows, render-time measurement, image/layout-shift clause, clipboard copy,
+   T2 visual check, XSS fuzz; R127 stays UNVERIFIED.
+5. Installer rebuild from frozen tree (3.3.0 drift) with re-recorded SHA-256; `ui-action-coverage.csv`
+   regeneration for 148 actions.
+
+## Round 5 — legacy web parity in DESKTOP + markdown gap fill (2026-10-25)
+
+User request: replicate the existing web product's functionality and presentation in DESKTOP, then close the
+remaining markdown-prompt gaps, then report replicated / filled / still missing.
+
+Delivered and measured:
+- **Hosted legacy workbench**: the legacy SPA is shipped and served (unchanged presentation/feature surface) by a
+  managed, isolated Python runtime, opened from a new native "实验工作台" workspace page in a hardened Electron
+  window. On-demand pinned dependency install (~130 MB, disclosed, cancelable, marker+import probe valid), bearer
+  authenticated bridge with static assets loadable for the document, config/credential/dark-appearance injection,
+  and per-window network isolation.
+- **Evidence**: hosted Electron E2E **34/34 PASS** (12/12 legacy routes, 19 screenshots, 0 legacy page/console
+  errors, real dark shell, isolated origin, no Node/bridge leak into the page) — `desktop/release/workbench-e2e/20261025-135558/report.json`;
+  bridge runtime smoke **27/27** — `docs/verification/workbench-runtime-smoke.json`; config injection **13/13** —
+  `docs/verification/workbench-config-injection.json`; markdown unit tests **32/32**.
+- **Markdown gap (R127)**: progressive streaming markdown with real offline KaTeX + Mermaid (lazy vendored, strict
+  security level, labeled fallback), closed blocks typeset during the stream, open constructs kept plain in
+  `.md-stream-tail`, zero CSP violations, light/dark screenshots. `markdown-rendering.md` and R127/R014 updated to
+  IMPLEMENTED_PASS; three new requirement rows R149–R151 added for hosted parity/runtime/config injection.
+- Version bumped to **3.3.0** (native footer, package.json, package-lock).
+- Honest remaining gaps: normal `userData/python-env` download flow not exercised end-to-end (temp override),
+  real vendor API keys / SSH hosts / channel peers not configured, hidden legacy views' deep actions not driven,
+  SPA is zh-CN only, no accessibility/DPI audit.

@@ -1,5 +1,18 @@
 # GitHub MIT publication runbook — SuWen vNext
 
+## Round-5 (3.3.0) supersession - current delivered evidence (2026-10-25)
+
+Source publication unchanged (branch `suwen-vnext-durable`, annotated tag per release); CI executes
+on GitHub. **No Release asset is published.** The 3.3.0 installer is a local, unsigned artifact:
+`desktop/release/SuWen-Setup-3.3.0-win-x64.exe` 131,011,183 B SHA256 `0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03`. Publishing a Stable
+Release remains blocked by gates HOLD (clean VM, signing, endurance) and by the absence of
+`gh`/`GITHUB_TOKEN` on this host.
+
+---
+
+
+
+
 Status: **SOURCE PUBLISHED; RELEASE ASSETS NOT PUBLISHED (BLOCKED_EXTERNAL)**. The repository remote
 is writable via the user's existing SSH key; branch `suwen-vnext-durable` and annotated tag
 `suwen-vnext-3.2.0` were pushed (measured 2026-10-25). The two-job Windows CI workflow executes on
