@@ -693,7 +693,7 @@ async function main() {
   log('runtime', `deps=${depsDir}`);
   log('runtime', `marker hash match=${markerHashOk} python=${pythonVersion || 'missing'} size=${(inventory.bytes / 1048576).toFixed(1)}MB files=${inventory.files}`);
   if (!markerHashOk) throw new Error(`workbench runtime marker does not match current pinned requirements (marker=${marker.requirementsHash} expected=${expectedHash}); refusing to reinstall — repair the runtime manually`);
-  if (!pythonOk) throw new Error(`Python 3.11.x required but detected "${pythonVersion || 'none'}"; marker python=${marker.python}`);
+  if (!pythonOk) throw new Error(`Python interpreter "${pythonVersion || 'none'}" does not match runtime marker ${marker.python}`);
 
   // ---------- launch ----------
   const profile = mkdtempSync(join(tmpdir(), 'suwen-wb-e2e-'));
@@ -789,7 +789,7 @@ async function main() {
     markdownFixture = await startMarkdownFixture();
     report.native.markdownFixture = { url: `http://127.0.0.1:${markdownFixture.port}/v1`, port: markdownFixture.port, deterministic: true, plainHttpOnly: true };
     log('fixture', `markdown SSE fixture http://127.0.0.1:${markdownFixture.port}/v1 (deterministic local)`);
-    app = await _electron.launch({ executablePath: electronExe, args: [project], env, timeout: 60000 });
+    app = await _electron.launch({ executablePath: electronExe, args: [project, '--native'], env, timeout: 60000 });
     const electronPid = app.process()?.pid;
     cleanup.electronPid = electronPid;
     log('launch', `electron pid=${electronPid}`);

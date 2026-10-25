@@ -549,10 +549,10 @@ test('chat model steps carry the current user turn and mode instruction inside m
   assert.ok(multi.every(message => typeof message.content === 'string' && message.content.length > 0));
 
   const research = hooks.chatSteps('find papers', 'research', hooks.buildHistory('conv-1'));
-  const synthesis = research.find(step => step.id === 'synthesis') as Json;
+  const synthesis = research.find(step => step.id === 'research') as Json;
   const synthesisMessages = (synthesis.input as Json).messages as Json[];
-  assert.equal(synthesisMessages[synthesisMessages.length - 1].content, 'synthesisPrompt:find papers');
-  assert.ok(research.some(step => step.id === 'literature'), 'research mode still starts with literature');
+  assert.match(String(synthesisMessages[synthesisMessages.length - 1].content), /find papers/);
+  assert.equal(research.length, 1, 'research uses the unified model/tool activity, not a forced raw-query PubMed step');
 
   const debate = hooks.chatSteps('argue', 'debate', hooks.buildHistory('conv-1'));
   for (const step of debate) {

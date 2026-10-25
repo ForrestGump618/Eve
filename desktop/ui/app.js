@@ -792,6 +792,7 @@ function taskText(task) {
     const output = steps[index] && steps[index].output;
     if (output && typeof output === 'object' && typeof output.text === 'string' && output.text.trim()) return output.text;
   }
+  if (task && ['failed','cancelled','waiting_approval'].includes(task.status)) return (task.steps||[]).find(step=>step.error)?.error || statusName(task.status);
   if (task && task.stream && typeof task.stream.text === 'string' && task.stream.text) return task.stream.text;
   return '';
 }
@@ -1197,7 +1198,7 @@ function chatSignature() {
      applyStreamTextPatches(); text length is deliberately absent so a token burst never
      rebuilds (and scroll-jumps) the timeline. Status/step changes still rebuild once. */
   const taskSignature = conversationTaskList(S.conversationId)
-    .map(task => `${task.id}:${statusFor(task)}:${task.version || ''}:${(task.steps || []).length}`)
+    .map(task => `${task.id}:${statusFor(task)}:${(task.events||[]).filter(event=>/^(tool\.|agent\.(?:verif|failed))/.test(event.type)).at(-1)?.sequence||''}:${(task.steps || []).length}`)
     .join('|');
   return `${locale}|${S.conversationId}|${S.conversationDerived}|${messageSignature}|${taskSignature}|${(S.chatNotice || '').length}`;
 }
@@ -1273,6 +1274,18 @@ function toolActivity(task) {
     const line = `${statusName(step.status)} · ${step.kind || 'step'} · ${step.id || ''}`.replace(/\s+·\s*$/, '');
     details.append(el('div', { class: 'tool-row', text: line }));
   }
+  const traces=(task.events||[]).filter(event=>/^(tool\.|agent\.(?:verif|failed))/.test(event.type));
+  for(const event of traces.slice(-24)){
+    const data=event.data||{};
+    const label=event.type==='tool.started'?'执行中':event.type==='tool.completed'?'已返回':event.type==='tool.failed'?'失败':event.type==='agent.verified'?'验证完成':event.type==='agent.failed'?'验证或执行失败':'验证中';
+    details.append(el('div',{class:'tool-row',text:`${label} · ${data.name||''}${data.durationMs!==undefined?` · ${data.durationMs} ms`:''}${data.error?` · ${data.error}`:''}`}));
+  }
+  const output=steps.map(step=>step.output).filter(Boolean).at(-1);
+  if(output?.traceId)details.append(el('div',{class:'tool-row',text:`Trace: ${output.traceId}`}));
+  for(const source of output?.sources||[]){
+    if(!/^https?:\/\//.test(source.url||''))continue;
+    details.append(el('div',{class:'tool-row',text:`${source.title} · ${source.url} · ${source.retrievedAt||''}`}));
+  }
   return details;
 }
 function renderStreamingBubble(task, actions) {
@@ -1304,10 +1317,16 @@ function renderChat() {
      disable auto-follow. Capture the intent (and the reading position) before mutating DOM. */
   const previousFollow = followScroll();
   const previousTop = timeline.scrollTop;
-  const conversationMessages = Array.isArray(S.conversation?.messages) ? S.conversation.messages : [];
+  const allMessages = (Array.isArray(S.conversation?.messages) ? S.conversation.messages : []).filter(message=>typeof message.text==='string'&&message.text.trim());
+  const windowKey=S.conversationId||'new';
+  if(S.chatWindow?.key!==windowKey)S.chatWindow={key:windowKey,end:null};
+  const end=S.chatWindow.end===null?allMessages.length:Math.min(S.chatWindow.end,allMessages.length);
+  const start=Math.max(0,end-80);
+  const conversationMessages=allMessages.slice(start,end);
   const derivedTasks = deriveTasksForChat();
   const activeTask = derivedTasks.filter(task => !FINAL_STATUS.has(statusFor(task))).slice(-1)[0] || null;
   const nodes = [];
+  if(start>0)nodes.push(textButton(locale==='en'?`Earlier messages (${start})`:`查看更早消息（${start}）`,()=>{S.chatWindow.end=Math.max(80,end-60);S.chatSignature='';scheduleChatRender();}));
   if (!conversationMessages.length && !derivedTasks.length) {
     if (S.welcomeNode) nodes.push(S.welcomeNode);
     timeline.replaceChildren(...nodes);
@@ -1323,16 +1342,25 @@ function renderChat() {
       const actions = role === 'assistant' && task && !FINAL_STATUS.has(status) ? taskActionButtons(task) : null;
       const taskMeta = task ? statusName(status) : '';
       const timeMeta = message.at ? fmtClock(message.at) : '';
-      nodes.push(messageBubble(role, message.text, {
+      const bubble=messageBubble(role, message.text, {
         meta: [taskMeta, timeMeta].filter(Boolean).join(' · '),
         streaming: live,
         markdown: role === 'assistant' && !live,
         actions,
         task: role === 'assistant' && !live ? null : task,
-      }));
+      });
+      if(role==='assistant'&&task){const activity=toolActivity(task);if(activity)bubble.append(activity);}
+      nodes.push(bubble);
     }
-    if (activeTask) {
+    if (activeTask && end===allMessages.length) {
       if (!nodes.some(node => node.classList?.contains('streaming'))) nodes.push(renderStreamingBubble(activeTask, taskActionButtons(activeTask)));
+    }
+    if(end<allMessages.length)nodes.push(textButton(locale==='en'?'Newer messages':'查看更新消息',()=>{S.chatWindow.end=end+60>=allMessages.length?null:end+60;S.chatSignature='';scheduleChatRender();}));
+    // A failed/cancelled run has no persisted assistant answer. Keep its actual
+    // failure visible beside the user turn rather than leaving a blank timeline.
+    for(const task of derivedTasks.filter(task=>FINAL_STATUS.has(statusFor(task))&&!allMessages.some(m=>m.role==='assistant'&&m.taskId===task.id))){
+      const bubble=messageBubble('assistant',taskText(task)||statusName(statusFor(task)),{meta:statusName(statusFor(task)),actions:taskActionButtons(task)});
+      const activity=toolActivity(task);if(activity)bubble.append(activity);nodes.push(bubble);
     }
   } else {
     for (const task of derivedTasks) {
@@ -1383,8 +1411,7 @@ function chatSteps(prompt, mode, messages) {
     };
   };
   if (mode === 'research') {
-    const search = { id: 'literature', kind: 'pubmed', input: { query: prompt.slice(0, 1000), projectId: null }, sideEffect: true, maxAttempts: 2, timeoutMs: 30000 };
-    return [search, modelStep('synthesis', { prompt: t('synthesisPrompt', { question: prompt }) }, ['literature'])];
+    return [modelStep('research', { prompt: `请实际检索科研证据后回答，先生成精确查询并使用数据库/网页工具，核验来源。问题：${prompt}` })];
   }
   if (mode === 'debate') {
     return [
@@ -1438,7 +1465,7 @@ async function sendMessage(event) {
   const sendButton = $('send');
   const requestedMode = $('mode')?.value || 'auto';
   let mode = requestedMode;
-  if (mode === 'auto') mode = /检索|文献|引用|证据|literature|pubmed|citation|evidence/i.test(text) ? 'research' : 'chat';
+  if (mode === 'auto') mode = /文献|PubMed|literature|论文/i.test(text) ? 'research' : 'chat';
   S.sending = true;
   S.failedNoticeTask = null;
   S.reviewNoticeTask = null;
@@ -1459,7 +1486,7 @@ async function sendMessage(event) {
     const task = await call('create', {
       name: text.slice(0, 120),
       steps,
-      limits: { maxCalls: 10, maxWallMs: 900000, concurrency: 2, maxTokens: 300000 },
+      limits: { maxCalls: 24, maxWallMs: 900000, concurrency: 2, maxTokens: 300000 },
     });
     if (task && task.id) {
       S.selectedTaskId = task.id;
@@ -3573,6 +3600,7 @@ function scrollTimelineToBottom() {
   if (!timeline) return;
   markProgrammaticScroll();
   timeline.scrollTop = timeline.scrollHeight;
+  S.stream.programmaticTop=timeline.scrollTop;
 }
 function restoreTimelineScroll(top) {
   const timeline = $('timeline');
@@ -3580,6 +3608,7 @@ function restoreTimelineScroll(top) {
   markProgrammaticScroll();
   const value = Number(top);
   timeline.scrollTop = Math.max(0, Math.min(Number.isFinite(value) ? value : 0, timeline.scrollHeight));
+  S.stream.programmaticTop=timeline.scrollTop;
 }
 function updateStreamBanner() {
   const banner = $('stream-banner');
@@ -3617,7 +3646,9 @@ function registerStreamNode(task, node) {
   S.stream.nodes.set(task.id, {
     body,
     meta: node.querySelector('.meta'),
-    painted: body.textContent || '',
+    // Even when the first snapshot already contains text, it still needs the
+    // initial progressive Markdown pass. Equal text must not skip that pass.
+    painted: null,
     plan: null,
     stableChars: -1,
     renderedAt: 0,
@@ -4068,7 +4099,7 @@ function bindEvents() {
        replacing nodes clamps scrollTop to 0 and used to be mistaken for a scroll-up intent,
        which silently stopped auto-follow on very long streams. */
     timeline.addEventListener('scroll', () => {
-      if (S.stream.programmaticUntil && monotonicNow() < S.stream.programmaticUntil) {
+      if (S.stream.programmaticUntil && monotonicNow() < S.stream.programmaticUntil && Math.abs(timeline.scrollTop-(S.stream.programmaticTop??-1))<=1) {
         updateJumpLatest();
         return;
       }
@@ -4077,6 +4108,7 @@ function bindEvents() {
       S.stream.userIntent = pinned ? 'down' : 'up';
       updateJumpLatest();
     });
+    timeline.addEventListener('wheel',event=>{if(event.deltaY<0){S.stream.programmaticUntil=0;S.stream.userIntent='up';S.stream.scrollPinned=false;updateJumpLatest();}},{passive:true});
   }
 }
 async function boot() {

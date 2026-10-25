@@ -4,6 +4,7 @@ import { StringDecoder } from 'node:string_decoder';
 import { fileURLToPath } from 'node:url';
 import type { Json } from './harness/types.js';
 import { safeError } from './security.js';
+import { parseMcpResult } from './mcp-result.js';
 
 const VERSION = '2025-03-26'; const MAX_FRAME = 2_000_000;
 interface Pending { method: string; resolve: (result: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout>; cleanup: () => void }
@@ -52,14 +53,14 @@ export class McpClientSession {
   }
   async listTools(signal?: AbortSignal): Promise<any[]> {
     if (!this.initialized) throw new Error('MCP initialization required');
-    const result = await this.request('tools/list', {}, signal); if (!Array.isArray(result?.tools)) throw new Error('Malformed MCP tools/list result'); return result.tools;
+    const tools:any[]=[];let cursor:string|undefined;const seen=new Set<string>();
+    do {const result=await this.request('tools/list',cursor?{cursor}:{},signal);if(!Array.isArray(result?.tools))throw new Error('Malformed MCP tools/list result');tools.push(...result.tools);if(tools.length>500)throw new Error('MCP tool discovery limit exceeded');cursor=result.nextCursor;if(cursor){if(typeof cursor!=='string'||seen.has(cursor))throw new Error('Invalid or repeated MCP discovery cursor');seen.add(cursor);}}while(cursor);
+    return tools;
   }
   async callTool(name: string, args: Record<string, Json>, signal?: AbortSignal): Promise<Json> {
     if (!this.initialized) throw new Error('MCP initialization required');
     const result = await this.request('tools/call', { name, arguments: args }, signal);
-    if (!result || !Array.isArray(result.content) || result.content.length !== 1 || result.content[0]?.type !== 'text' || typeof result.content[0]?.text !== 'string') throw new Error('Malformed MCP tool result');
-    if (result.isError) throw new Error(`MCP tool failed: ${safeError(result.content[0].text)}`);
-    try { return JSON.parse(result.content[0].text) as Json; } catch { throw new Error('MCP database result is not JSON'); }
+    return parseMcpResult(result);
   }
   private receive = (message: any): void => {
     if (!message || typeof message !== 'object' || message.jsonrpc !== '2.0') throw new Error('Invalid MCP response envelope');
@@ -104,6 +105,35 @@ export class McpClientSession {
     if (!this.sink.destroyed && !this.sink.writableEnded) this.sink.end();
     this.closing = Promise.resolve().then(() => this.options.closeTransport?.()); return this.closing;
   }
+}
+
+/** Streamable HTTP lifecycle, including initialized notification and session id.
+ * No tool call is automatically replayed: a transport failure may hide side effects. */
+export class McpHttpSession {
+  private sessionId:string|undefined;private nextId=1;
+  constructor(private readonly url:string,private readonly fetcher:typeof fetch=fetch,private readonly timeoutMs=10000){}
+  private async send(method:string,params:unknown,signal:AbortSignal,notification=false):Promise<any>{
+    signal.throwIfAborted();const id=notification?undefined:this.nextId++;
+    const deadline=AbortSignal.any([signal,AbortSignal.timeout(this.timeoutMs)]);
+    const headers:Record<string,string>={'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':VERSION};
+    if(this.sessionId)headers['mcp-session-id']=this.sessionId;
+    const r=await this.fetcher(this.url,{method:'POST',headers,body:JSON.stringify({jsonrpc:'2.0',...(id===undefined?{}:{id}),method,params}),signal:deadline,redirect:'error'});
+    if(!r.ok){await r.body?.cancel();throw new Error(`MCP HTTP ${method} failed with status ${r.status}`);}
+    if(method==='initialize')this.sessionId=r.headers.get('mcp-session-id')??undefined;
+    if(notification){await r.body?.cancel();return;}
+    if(!r.body)throw new Error('MCP HTTP returned empty response');
+    const sse=(r.headers.get('content-type')??'').includes('text/event-stream');let text='',bytes=0;const decoder=new TextDecoder();
+    const unwrap=(body:any):any=>{if(!body||body.jsonrpc!=='2.0'||body.id!==id||Object.hasOwn(body,'result')===Object.hasOwn(body,'error'))throw new Error('Malformed MCP HTTP envelope or response id');if(body.error)throw new Error(`MCP HTTP error ${Number(body.error.code)}: ${safeError(body.error.message)}`);return body.result;};
+    for await(const chunk of r.body){bytes+=chunk.byteLength;if(bytes>2000000)throw new Error('MCP HTTP response limit exceeded');text+=decoder.decode(chunk,{stream:true});
+      if(sse){let boundary:number;while((boundary=text.search(/\r?\n\r?\n/))>=0){const frame=text.slice(0,boundary);text=text.slice(boundary).replace(/^\r?\n\r?\n/,'');const data=frame.split(/\r?\n/).filter(x=>x.startsWith('data:')).map(x=>x.slice(5).trimStart()).join('\n');if(!data)continue;let body:any;try{body=JSON.parse(data);}catch{throw new Error('Malformed MCP HTTP SSE JSON');}if(body.id===id)return unwrap(body);}}
+    }
+    text+=decoder.decode();if(sse)throw new Error('MCP HTTP event stream ended without matching response');
+    let body:any;try{body=JSON.parse(text);}catch{throw new Error('Malformed MCP HTTP JSON');}return unwrap(body);
+  }
+  async initialize(signal:AbortSignal):Promise<void>{const result=await this.send('initialize',{protocolVersion:VERSION,capabilities:{},clientInfo:{name:'suwen-harness',version:'1.0.0'}},signal);if(result?.protocolVersion!==VERSION||!result?.capabilities?.tools)throw new Error('Incompatible MCP version or missing tools capability');await this.send('notifications/initialized',{},signal,true);}
+  async listTools(signal:AbortSignal):Promise<any[]>{const tools:any[]=[];let cursor:string|undefined;const seen=new Set<string>();do{const r=await this.send('tools/list',cursor?{cursor}:{},signal);if(!Array.isArray(r?.tools))throw new Error('Malformed MCP tools/list result');tools.push(...r.tools);if(tools.length>500)throw new Error('MCP tool discovery limit exceeded');cursor=r.nextCursor;if(cursor){if(typeof cursor!=='string'||seen.has(cursor))throw new Error('Invalid MCP discovery cursor');seen.add(cursor);}}while(cursor);return tools;}
+  async callTool(name:string,args:Record<string,Json>,signal:AbortSignal):Promise<Json>{return parseMcpResult(await this.send('tools/call',{name,arguments:args},signal));}
+  async close():Promise<void>{if(!this.sessionId)return;try{await this.fetcher(this.url,{method:'DELETE',headers:{'mcp-session-id':this.sessionId,'mcp-protocol-version':VERSION},signal:AbortSignal.timeout(1000),redirect:'error'}).then(r=>r.body?.cancel());}catch{}this.sessionId=undefined;}
 }
 
 let children = 0;

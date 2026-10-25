@@ -135,7 +135,7 @@ async function launchElectron({ dsf, locale, profile, size }) {
   delete env.ELECTRON_RUN_AS_NODE; // DSH exports this; Electron would run as Node and exit silently
   const app = await _electron.launch({
     executablePath: ELECTRON,
-    args: [ROOT, `--force-device-scale-factor=${dsf}`, `--lang=${locale === 'zh' ? 'zh-CN' : 'en-US'}`],
+    args: [ROOT, '--native', `--force-device-scale-factor=${dsf}`, `--lang=${locale === 'zh' ? 'zh-CN' : 'en-US'}`],
     env,
     timeout: 40000,
   });

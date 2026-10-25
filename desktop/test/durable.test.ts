@@ -17,6 +17,15 @@ function fixture(t: { after: (fn: () => void) => void }) {
   t.after(() => { for (const s of stores) try { s.close(); } catch {} rmSync(dir, { recursive: true, force: true }); });
   return { path, dir, open, advance: (ms: number) => { time += ms; } };
 }
+
+test('model transcript mirror commits atomically and late replies after cancellation cannot append',t=>{
+  const f=fixture(t),store=f.open();const conv=store.putRecord('conversation',{title:'test',mode:'chat',messages:[]});
+  const task=store.createTask({steps:[{id:'reply',kind:'model',input:{conversationId:conv.id}}]});const lease=store.claim('owner',10000)!;
+  store.complete(lease,{text:'Verified answer'});assert.equal((store.getRecord(conv.id)!.data as any).messages.length,1);
+  const cancelled=store.createTask({steps:[{id:'reply',kind:'model',input:{conversationId:conv.id}}]});const late=store.claim('owner',10000)!;
+  store.cancelTask(cancelled.id);assert.throws(()=>store.complete(late,{text:'Late answer'}),ConflictError);
+  assert.equal((store.getRecord(conv.id)!.data as any).messages.length,1);assert.equal(store.getTask(task.id)!.status,'completed');
+});
 test('SQLite durability settings, atomic completion checkpoint, and restart without repeated work', async t => {
   const f = fixture(t); const first = f.open();
   assert.equal((first.db.prepare('PRAGMA journal_mode').get() as any).journal_mode, 'wal');

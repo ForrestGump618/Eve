@@ -1,5 +1,5 @@
 /** Mutable model configuration + the typed `ModelCaller` used by activities. */
-import { modelReply, validateModelConfig, type ModelConfig } from './providers.js';
+import { modelReply, modelTurn, validateModelConfig, type ModelConfig, type TurnMessage, type FunctionSpec, type ModelTurn } from './providers.js';
 import { ValidationError, type Json } from './harness/types.js';
 import type { ModelCaller, ModelMessage } from './shared/contract.js';
 
@@ -11,6 +11,7 @@ export class ModelRuntime implements ModelCaller {
     return config;
   }
   current(): ModelConfig | null { return this.config; }
+  fork():ModelRuntime { const runtime=new ModelRuntime();if(this.config)runtime.configure({...this.config});return runtime; }
   configured(): boolean { return this.config !== null; }
   contextWindow(): number { return this.config?.contextWindow ?? 128_000; }
   model(): string | null { return this.config?.model ?? null; }
@@ -19,6 +20,11 @@ export class ModelRuntime implements ModelCaller {
   publicConfig(): Json {
     const config = this.config;
     return config ? { provider: config.provider, model: config.model, baseUrl: config.baseUrl, contextWindow: config.contextWindow, maxOutput: config.maxOutput } : null;
+  }
+  async turn(messages: TurnMessage[], tools: FunctionSpec[], signal: AbortSignal, onText?: (text:string)=>void): Promise<ModelTurn> {
+    const config=this.config;
+    if(!config)throw new ValidationError('模型凭据未解锁。请打开设置保存配置后恢复任务。');
+    return modelTurn(config,messages,signal,onText??(()=>{}),tools);
   }
   async call(messages: ModelMessage[], signal: AbortSignal, onText?: (text: string) => void): Promise<{ text: string; tokens: number }> {
     const config = this.config;

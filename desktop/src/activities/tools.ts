@@ -114,6 +114,7 @@ export function createToolHandlers(services: ToolActivityServices): Record<strin
     const id = skillIdOf(input);
     const worker: WorkerClient | undefined = services.worker;
     const result = await tools.skills.test(id, { signal: context.signal, ...(worker === undefined ? {} : { worker }) });
+    if (result.status !== 'passed') throw new ValidationError(`Skill test failed: ${result.detail}`);
     return {
       output: json({
         skillId: id,

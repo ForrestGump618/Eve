@@ -1,0 +1,23 @@
+﻿id,category,prompt,required_tools,baseline,after,latency_before_ms,latency_after_ms,model,evidence,unverified
+web-electron,web,检索 Electron 官方文档，说明 contextIsolation 的作用。必须实际检索并引用官方来源，回答不超过150字。,web_search,failed,passed,7939,8440,deepseek-v4.1-flash-economy,final.json#web-electron,
+web-typescript,web,搜索 TypeScript 官方文档，说明 satisfies 操作符用途，附来源链接，回答不超过150字。,web_search,failed,passed,6049,60229,deepseek-v4.1-flash-economy,final.json#web-typescript,
+web-dsh,web,网页检索 deepseek-ai/deepseek-harness 官方仓库，给出仓库链接和插件架构名称，不超过150字。,web_search,failed,passed,4753,9634,deepseek-v4.1-flash-economy,final.json#web-dsh,
+web-mcp,web,搜索 Model Context Protocol 官方文档，列出 stdio 与 Streamable HTTP 两种传输，引用来源，不超过150字。,web_search,failed,passed,9249,11893,deepseek-v4.1-flash-economy,final.json#web-mcp,
+pubmed-reprogramming,pubmed,实际检索 PubMed：Takahashi Yamanaka induced pluripotent stem cells 2006。给出一篇原始论文标题、PMID 和来源链接，不超过200字。,database_search,failed,passed,5740,9297,deepseek-v4.1-flash-economy,final.json#pubmed-reprogramming,
+pubmed-crispr,pubmed,在 PubMed 检索 Jinek 2012 programmable dual RNA guided endonuclease，给出标题、PMID 与链接，不超过200字。,database_search,failed,passed,7496,16067,deepseek-v4.1-flash-economy,final.json#pubmed-crispr,
+pubmed-spatial,pubmed,在 PubMed 检索 Ståhl 2016 spatial transcriptomics，给出论文题名、年份、PMID 与链接，不超过200字。,database_search,failed,passed,6074,9567,deepseek-v4.1-flash-economy,final.json#pubmed-spatial,
+pubmed-summary,summary,实际检索 PMID 16904174 的摘要，根据摘要用中文总结研究对象和主要结果，附来源，不超过200字。,database_search,failed,passed,7911,6792,deepseek-v4.1-flash-economy,final.json#pubmed-summary,
+pubmed-compare,comparison,分别检索 PMID 16904174 和 18029452，按物种、细胞来源对比两篇论文，附两条来源，不超过250字。,database_search,failed,passed,16282,8002,deepseek-v4.1-flash-economy,final.json#pubmed-compare,
+uniprot-human,database,检索 UniProt accession:P04637，给出蛋白名称和物种、来源链接，不超过150字。,database_search,failed,passed,5299,4453,deepseek-v4.1-flash-economy,final.json#uniprot-human,
+uniprot-egfr,database,实际检索 UniProt accession:P00533，给出蛋白名称、物种和来源，不超过150字。,database_search,failed,passed,6377,7778,deepseek-v4.1-flash-economy,final.json#uniprot-egfr,
+fetch-electron,fetch,实际读取 https://www.electronjs.org/docs/latest/tutorial/context-isolation 并提炼两条要点，附该链接，不超过200字。,web_fetch,failed,passed,11919,6547,deepseek-v4.1-flash-economy,final.json#fetch-electron,
+fetch-mcp,fetch,实际读取 https://modelcontextprotocol.io/specification/2025-03-26/basic/transports ，列出两种传输，附来源，不超过200字。,web_fetch,failed,passed,5292,5748,deepseek-v4.1-flash-economy,final.json#fetch-mcp,
+read-file,file,读取已授权文件 benchmark-notes.txt，报告样本数量与均值。必须实际读文件，不超过100字。,read_file,failed,passed,3707,3118,deepseek-v4.1-flash-economy,final.json#read-file,
+file-summary,file,读取已授权文件 benchmark-notes.txt，总结实验组名和结论，包含原文标识 SW-BENCH-20261025，不超过150字。,read_file,failed,passed,5544,4059,deepseek-v4.1-flash-economy,final.json#file-summary,
+mcp-discovery,mcp,动态发现当前启用的 MCP 服务器和工具，报告实际工具名称 e2e_ping，不要只报告连接成功。,mcp_tools,failed,passed,13789,8448,deepseek-v4.1-flash-economy,final.json#mcp-discovery,
+mcp-execute,mcp,先发现 MCP 工具，再实际调用 e2e_ping，message 参数为 SUWEN-LIVE-42。报告真实返回值。,"mcp_tools,mcp_call",failed,passed,7994,10472,deepseek-v4.1-flash-economy,final.json#mcp-execute,
+skill-discover,skill,查找本地已启用的均值计算 Skill，报告名称与版本，不要执行脚本。,skill_search,failed,passed,11150,7801,deepseek-v4.1-flash-economy,final.json#skill-discover,
+skill-load,skill,发现并加载 benchmark-mean Skill 的说明，报告其输入格式，不执行。,"skill_search,skill_load",failed,passed,6998,8494,deepseek-v4.1-flash-economy,final.json#skill-load,
+skill-execute,skill,"发现并加载 benchmark-mean Skill，然后实际执行它，输入 numbers=[2,4,6,8,10]，报告均值。",skill_run,failed,failed,7624,686,deepseek-v4.1-flash-economy,final.json#skill-execute,External result unknown: 模型 API HTTP 429; provider=openai。请求可能已计费，请检查服务端记录后重试。
+multi-file-skill,multi-step,读取已授权的 benchmark-notes.txt，再加载并执行 benchmark-mean Skill 复算其中 numbers 的均值，比较文件记录，简短报告是否一致。,"read_file,skill_run",failed,failed,5236,706,deepseek-v4.1-flash-economy,final.json#multi-file-skill,External result unknown: 模型 API HTTP 429; provider=openai。请求可能已计费，请检查服务端记录后重试。
+multi-search-fetch,multi-step,先搜索 Electron contextIsolation 官方文档，再读取官方页面，依据读取的内容总结为什么应启用隔离，附官方链接，不超过200字。,"web_search,web_fetch",failed,failed,16971,698,deepseek-v4.1-flash-economy,final.json#multi-search-fetch,External result unknown: 模型 API HTTP 429; provider=openai。请求可能已计费，请检查服务端记录后重试。

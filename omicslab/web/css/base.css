@@ -675,7 +675,7 @@ hr {
   padding-right: 4px;
 }
 
-.view-root {
+.view-root, .route-mount {
   position: relative;
   flex: 1;
   min-height: 0;

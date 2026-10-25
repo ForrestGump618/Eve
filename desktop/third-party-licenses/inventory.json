@@ -33,5 +33,59 @@
       "resources/legacy/LICENSE"
     ],
     "scope": "existing source, no Python interpreter/dependency wheels bundled"
+  },
+  {
+    "name": "ajv",
+    "version": "8.20.0",
+    "declaredLicense": "MIT",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "ajv-formats",
+    "version": "3.0.1",
+    "declaredLicense": "MIT",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "fast-deep-equal",
+    "version": "3.1.3",
+    "declaredLicense": "MIT",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "fast-uri",
+    "version": "3.1.9",
+    "declaredLicense": "BSD-3-Clause",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "json-schema-traverse",
+    "version": "1.0.0",
+    "declaredLicense": "MIT",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "scope": "bundled Node runtime dependency"
+  },
+  {
+    "name": "require-from-string",
+    "version": "2.0.2",
+    "declaredLicense": "MIT",
+    "licenseFiles": [
+      "license"
+    ],
+    "scope": "bundled Node runtime dependency"
   }
 ]

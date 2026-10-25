@@ -284,6 +284,10 @@ export async function mount(root, ctx = {}) {
     visionWarned: false,
     run: null,
   };
+  // The composer is stable and read-only until history/model initialization
+  // finishes. Early input cannot race a second route mount or boot projection.
+  el.input.disabled=true;
+  el.sendBtn.disabled=true;
 
   /* ---------------------------------------------------------------- */
   /* Layout helpers                                                    */
@@ -459,6 +463,8 @@ export async function mount(root, ctx = {}) {
       return;
     }
     local.activeId = id;
+    const loadEpoch=local.loadEpoch=(local.loadEpoch||0)+1;
+    local.historyEnd=null;
     setState({ activeConversationId: id });
     openDrawer(false);
     renderConversationList();
@@ -466,6 +472,7 @@ export async function mount(root, ctx = {}) {
     setHtmlNode(el.messages, `<div class="messages-loading">${spinnerHtml('加载会话')}</div>`);
     try {
       const raw = await api.conversations.get(id);
+      if(local.loadEpoch!==loadEpoch||local.activeId!==id)return;
       const conv = raw?.conversation || raw;
       if (conv?.title || conv?.agent) {
         const idx = local.conversations.findIndex((c) => c.id === id);
@@ -480,6 +487,7 @@ export async function mount(root, ctx = {}) {
       updateHeader();
       if (scroll) scrollToBottom(true);
     } catch (err) {
+      if(local.loadEpoch!==loadEpoch||local.activeId!==id)return;
       el.messages.innerHTML = '';
       el.messages.appendChild(
         h(
@@ -564,10 +572,15 @@ export async function mount(root, ctx = {}) {
     for (const msg of local.messages) {
       if (msg?.role === 'tool' && msg.tool_call_id) toolResults.set(msg.tool_call_id, msg);
     }
-    for (const msg of local.messages) {
+    const end=local.historyEnd===null||local.historyEnd===undefined?local.messages.length:Math.min(local.historyEnd,local.messages.length);
+    const start=Math.max(0,end-80);
+    if(start>0){const older=h(`<button type="button" class="btn btn-ghost">查看更早消息（${start}）</button>`);older.addEventListener('click',()=>{local.historyEnd=Math.max(80,end-60);renderMessages();el.messages.scrollTop=0;});el.messages.appendChild(older);}
+    for (const msg of local.messages.slice(start,end)) {
       if (msg?.role === 'tool') continue; // rendered together with its assistant tool card
+        if(!msg?.content?.trim()&&!msg?.tool_calls?.length&&!msg?.figures?.length)continue;
       el.messages.appendChild(renderMessage(msg, toolResults));
     }
+    if(end<local.messages.length){const newer=h('<button type="button" class="btn btn-ghost">查看更新消息</button>');newer.addEventListener('click',()=>{local.historyEnd=end+60>=local.messages.length?null:end+60;renderMessages();});el.messages.appendChild(newer);}
     renderFinishedChildren();
     local.live = null;
     scrollToBottom(true);
@@ -787,8 +800,9 @@ export async function mount(root, ctx = {}) {
       state.pendingRender = true;
       requestAnimationFrame(() => {
         state.pendingRender = false;
+        const follow=isNearBottom();
         refs.text.innerHTML = renderMarkdown(state.text) + (state.done ? '' : '<span class="stream-cursor"></span>');
-        autoScroll();
+        if(follow)scrollToBottom(true);
       });
     };
 
@@ -801,6 +815,10 @@ export async function mount(root, ctx = {}) {
       appendText(delta) {
         if (!delta) return;
         state.text += delta;
+        scheduleTextRender();
+      },
+      replaceText(text) {
+        state.text=String(text||'');
         scheduleTextRender();
       },
       appendReasoning(delta) {
@@ -919,7 +937,7 @@ export async function mount(root, ctx = {}) {
         state.done = true;
         scheduleTextRender();
         if (!state.text && !state.tools && !state.figures) {
-          refs.text.innerHTML = '<p class="md-p muted">（空回复）</p>';
+          refs.text.innerHTML = '<p class="md-p muted">未收到有效回答，任务尚未验证完成。</p>';
         }
         const labelEl = node.querySelector('.msg-live-label');
         if (labelEl) {
@@ -1381,6 +1399,10 @@ export async function mount(root, ctx = {}) {
       case 'text':
         turn.hasText = true;
         local.live?.appendText(data.delta || '');
+        break;
+      case 'text_snapshot':
+        turn.hasText=Boolean(data.text);
+        local.live?.replaceText(data.text||'');
         break;
       case 'reasoning':
         local.live?.appendReasoning(data.delta || '');
@@ -2404,7 +2426,6 @@ export async function mount(root, ctx = {}) {
     el.input.focus();
   }
 
-  el.view.classList.add('is-mounted');
   const offNewConversation = on('chat:new-conversation', () => {
     if (!local.streaming) createConversation();
     else toastInfo('请先停止当前生成');
@@ -2428,6 +2449,12 @@ export async function mount(root, ctx = {}) {
     void selectConversation(String(conversationId));
   });
   await boot();
+  if(root.isConnected){
+    el.view.classList.add('is-mounted');
+    el.view.dataset.ready='true';
+    el.input.disabled=false;
+    el.sendBtn.disabled=local.streaming;
+  }
 
   return {
     destroy() {

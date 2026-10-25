@@ -17,6 +17,7 @@ EventType = Literal[
     "connected",
     "status",
     "text",
+    "text_snapshot",
     "reasoning",
     "tool_call",
     "tool_result",

@@ -75,6 +75,7 @@ const workerIndex = process.argv.indexOf('--worker');
 const workerScript = workerIndex >= 0 ? resolve(process.argv[workerIndex + 1]) : resolve('worker/research_worker.py');
 
 const modelRuntime = new ModelRuntime();
+const taskModels=new Map<string,ModelRuntime>();
 /** Step kinds whose activity calls the configured model; gated until the user unlocks credentials. */
 const MODEL_KINDS = new Set(['model', 'hypothesis', 'debate', 'research', 'knowledge', 'methods', 'analysis', 'discovery', 'autonomy']);
 const streams = new Map<string, StreamBuffer>();
@@ -169,7 +170,7 @@ const databases: DatabaseQuery = {
 const services: ActivityServices = { store, model: modelRuntime, worker, databases, home, clock: () => Date.now() };
 
 const activities = createAllActivities(services, {
-  model: { home, store, model: modelRuntime, streams, pythonPath: () => pythonPath },
+  model: { home, store, model: modelRuntime, streams, pythonPath: () => pythonPath, modelForTask:id=>taskModels.get(id) },
   databases: { home },
   toolServices,
 });
@@ -178,9 +179,9 @@ const engine = new Engine(store, {
   leaseMs: 15000,
   pollMs: 250,
   concurrency: 2,
-  canRun: step => {
+  canRun: (step,task) => {
     const needsModel = MODEL_KINDS.has(step.kind);
-    return !needsModel || modelRuntime.configured();
+    return !needsModel || taskModels.has(task.id) || modelRuntime.configured();
   },
   handlers: activities,
   onError: err => console.error(safeError(err)),
@@ -276,17 +277,25 @@ handlers['python'] = params => {
   return { ok: true, python: value };
 };
 handlers['create'] = params => {
-  const definition = params as unknown as TaskDefinition;
+  // Bind a request-local model before queuing. A simultaneous settings save or
+  // another hosted conversation must never switch the model midway through a run.
+  const {modelConfig,...taskParams}=params;
+  const runtime=modelConfig?new ModelRuntime():modelRuntime.fork();
+  if(modelConfig)runtime.configure(modelConfig);
+  const definition = taskParams as unknown as TaskDefinition;
   const allowed = new Set(['echo', 'delay', 'approval', 'model', 'pubmed', 'uniprot', 'python', 'research', 'knowledge', 'hypothesis', 'debate', 'methods', 'analysis', 'discovery', 'autonomy', 'skill.test', 'channel.send', 'rsi.evaluate']);
   if (!Array.isArray(definition.steps) || definition.steps.length === 0) throw new ValidationError('create requires at least one step');
   if (definition.steps.some(step => !allowed.has(step.kind))) throw new ValidationError('Unknown or forbidden activity');
   const needsModel = definition.steps.some(step => MODEL_KINDS.has(step.kind));
-  if (needsModel && !modelRuntime.configured()) throw new ValidationError('请先配置并解锁模型；离线后台演示和数据库检索无需模型。');
+  if (needsModel && !runtime.configured()) throw new ValidationError('请先配置并解锁模型；离线后台演示和数据库检索无需模型。');
   const EFFECTFUL = new Set(['model', 'research', 'knowledge', 'hypothesis', 'debate', 'methods', 'analysis', 'discovery', 'autonomy', 'skill.test', 'channel.send', 'rsi.evaluate']);
-  return store.createTask({
+  const task=store.createTask({
     ...definition,
     steps: definition.steps.map(step => ({ ...step, sideEffect: step.sideEffect ?? EFFECTFUL.has(step.kind) })),
-  }) as unknown as Json;
+  });
+  if(needsModel)taskModels.set(task.id,runtime);
+  for(const id of taskModels.keys())if(['completed','failed','cancelled'].includes(store.getTask(id)?.status??''))taskModels.delete(id);
+  return task as unknown as Json;
 };
 handlers['control'] = params => {
   const id = params.id;
@@ -367,7 +376,7 @@ handlers['legacyStart'] = async (params: Record<string, Json>) => {
   const requested = typeof params?.deps === 'string' && isAbsolute(params.deps) ? params.deps : null;
   const requestedValid = requested !== null && existsSync(join(requested, '.suwen-workbench.json'));
   const deps = requestedValid ? (requested as string) : (depsArg >= 0 ? resolve(process.argv[depsArg + 1]) : undefined);
-  if (!legacyStarting) legacyStarting = launchLegacy(pythonPath, script, source, join(home, 'legacy'), deps, undefined, config).then(handle => { legacySignature = signature; return handle; });
+  if (!legacyStarting) legacyStarting = launchLegacy(pythonPath, script, source, join(home, 'legacy'), deps, undefined, config,connection).then(handle => { legacySignature = signature; return handle; });
   try { legacy = await legacyStarting; return { port: legacy.port, pid: legacy.pid, token: legacy.token }; } finally { legacyStarting = null; }
 };
 handlers['shutdown'] = () => { setTimeout(() => void shutdown(), 100); return { ok: true }; };
@@ -379,6 +388,7 @@ async function dispatch(method: string, params: Record<string, Json>): Promise<J
 }
 
 const server = createServer(socket => {
+  socket.setEncoding('utf8');
   socket.setTimeout(120000, () => socket.destroy());
   let raw = '';
   let handled = false;

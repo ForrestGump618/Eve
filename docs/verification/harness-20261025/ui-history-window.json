@@ -1,0 +1,218 @@
+{
+  "schema": "suwen.ui-streaming-e2e/1",
+  "mode": "final",
+  "label": "deterministic local fixture",
+  "stamp": "20261025-133122",
+  "startedAt": "2026-10-25T13:31:22.917Z",
+  "commands": {
+    "node": "D:\\Develop\\nodejs\\node.exe",
+    "script": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\scripts\\streaming-ui-e2e.mjs",
+    "argv": [
+      "--mode=final",
+      "--runs=1",
+      "--only=long,persist"
+    ]
+  },
+  "env": {
+    "platform": "win32 10.0.26200",
+    "osVersion": "Windows 11 Home China",
+    "cpu": "Intel(R) Core(TM) i7-14700HX",
+    "cores": 28,
+    "totalMemGb": 31.8,
+    "node": "v24.14.0",
+    "electronPackage": "45.0.0",
+    "playwrightCore": "1.64.1",
+    "hostTime": "2026-10-25T13:31:22.921Z"
+  },
+  "fixture": {
+    "kind": "local OpenAI-compatible SSE server",
+    "host": "127.0.0.1",
+    "notes": "no vendor API; SSE chunks are deterministic w00000..wNNNNN tokens",
+    "baseUrl": "http://127.0.0.1:1597/v1"
+  },
+  "phases": [
+    {
+      "at": "2026-10-25T13:31:22.940Z",
+      "phase": "fixture",
+      "msg": "listening http://127.0.0.1:1597/v1"
+    },
+    {
+      "at": "2026-10-25T13:31:26.494Z",
+      "phase": "boot",
+      "msg": "daemon ready pid=49112 configured=false electron=45.0.0"
+    },
+    {
+      "at": "2026-10-25T13:31:26.512Z",
+      "phase": "boot",
+      "msg": "model configured=true"
+    },
+    {
+      "at": "2026-10-25T13:31:26.512Z",
+      "phase": "scenario",
+      "msg": "120+ message session"
+    },
+    {
+      "at": "2026-10-25T13:31:27.728Z",
+      "phase": "long",
+      "msg": "messages=80 openMs=148 bottomGap=-0.66650390625"
+    },
+    {
+      "at": "2026-10-25T13:31:27.730Z",
+      "phase": "scenario",
+      "msg": "conversation persistence duplicate check"
+    },
+    {
+      "at": "2026-10-25T13:31:32.198Z",
+      "phase": "persist",
+      "msg": "conversation=cc2f5831-b366-42d5-bfb6-26e2fe2b6da2 assistants=1 taskAssistants=1"
+    }
+  ],
+  "scenarios": {
+    "longSession": {
+      "label": "120+ message session render / scroll",
+      "status": "completed",
+      "openMs": 148,
+      "expectedMessages": 120,
+      "messageCount": 80,
+      "userCount": 40,
+      "assistantCount": 40,
+      "scrollTop": 7686.66650390625,
+      "scrollHeight": 8350,
+      "clientHeight": 664,
+      "bottomGap": -0.66650390625,
+      "composerBottom": 842.6666717529297,
+      "innerHeight": 867,
+      "docOverflowX": 0,
+      "pass": {
+        "boundedWindow": true,
+        "olderReachable": true,
+        "latestReachable": true,
+        "noPageHorizontalOverflow": true,
+        "composerInViewport": true,
+        "scrollPositionValid": true
+      }
+    },
+    "persistence": {
+      "label": "conversation persistence after one model run (duplicate assistant bookkeeping)",
+      "conversation": {
+        "id": "cc2f5831-b366-42d5-bfb6-26e2fe2b6da2",
+        "messageCount": 2,
+        "messages": [
+          {
+            "id": "2752d1b1-72a0-4c43-a25c-19f167935668",
+            "role": "user",
+            "taskId": null,
+            "at": 1792935088086,
+            "len": 30,
+            "text": "E2E SIZE=60 TAG=PERSIST1 持久化检查"
+          },
+          {
+            "id": "a-f0ee6f811486bcec0d49c8842690e8fd2d1b3944200955be35a8857cdea080af",
+            "role": "assistant",
+            "taskId": "fa877c54-c7b6-42cd-b0a3-1d667f211274",
+            "at": 1792935090148,
+            "len": 430,
+            "text": "[PERSIST1]w00000 w00001 w00002 w00003 w00004 w00005 w00006 w00007 w00008 w00009 w00010 w00011 w00012 w00013 w00014 w00015 w00016 w00017 w00018 w00019 w00020 w00021 w00022 w00023 w00024 w00025 w00026 w00027 w00028 w00029 w00030 w00031 w00032 w00033 w00034 w00035 w00036 w00037 w00038 w00039 w00040 w00041 w00042 w00043 w00044 w00045 w00046 w00047 w00048 w00049 w00050 w00051 w00052 w00053 w00054 w00055 w00056 w00057 w00058 w00059 "
+          }
+        ]
+      },
+      "assistantCount": 1,
+      "assistantMessagesWithTaskId": 1,
+      "pass": {
+        "exactlyOneAssistant": true,
+        "exactlyOneTaskAssistant": true
+      }
+    }
+  },
+  "findings": [],
+  "profile": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-e2e-LGh5Zs",
+  "app": {
+    "appPath": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop",
+    "userData": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-e2e-LGh5Zs",
+    "version": "3.3.1",
+    "electron": "45.0.0",
+    "chrome": "156.0.8078.48",
+    "node": "24.22.0"
+  },
+  "initialHealth": {
+    "pid": 49112,
+    "version": "3.3.1",
+    "uptime": 1.4252131,
+    "startedAt": 1792935086065,
+    "mode": "user-background",
+    "configured": false,
+    "python": "python",
+    "serviceInstalled": false,
+    "legacy": null,
+    "runtimeVersions": {
+      "node": "24.22.0",
+      "electron": "45.0.0",
+      "sqlite": "3.53.4"
+    },
+    "ready": true
+  },
+  "configure": {
+    "ok": true,
+    "result": {
+      "ok": true
+    }
+  },
+  "configuredHealth": {
+    "pid": 49112,
+    "version": "3.3.1",
+    "uptime": 1.4442096,
+    "startedAt": 1792935086065,
+    "mode": "user-background",
+    "configured": true,
+    "python": "python",
+    "serviceInstalled": false,
+    "legacy": null,
+    "runtimeVersions": {
+      "node": "24.22.0",
+      "electron": "45.0.0",
+      "sqlite": "3.53.4"
+    },
+    "ready": true
+  },
+  "transport": "push (window.suwen.onEvent -> main pump -> events.stream batches)",
+  "partial": true,
+  "finishedAt": "2026-10-25T13:31:32.201Z",
+  "durationMs": 9284,
+  "phaseLog": [
+    {
+      "at": "2026-10-25T13:31:22.940Z",
+      "phase": "fixture",
+      "msg": "listening http://127.0.0.1:1597/v1"
+    },
+    {
+      "at": "2026-10-25T13:31:26.494Z",
+      "phase": "boot",
+      "msg": "daemon ready pid=49112 configured=false electron=45.0.0"
+    },
+    {
+      "at": "2026-10-25T13:31:26.512Z",
+      "phase": "boot",
+      "msg": "model configured=true"
+    },
+    {
+      "at": "2026-10-25T13:31:26.512Z",
+      "phase": "scenario",
+      "msg": "120+ message session"
+    },
+    {
+      "at": "2026-10-25T13:31:27.728Z",
+      "phase": "long",
+      "msg": "messages=80 openMs=148 bottomGap=-0.66650390625"
+    },
+    {
+      "at": "2026-10-25T13:31:27.730Z",
+      "phase": "scenario",
+      "msg": "conversation persistence duplicate check"
+    },
+    {
+      "at": "2026-10-25T13:31:32.198Z",
+      "phase": "persist",
+      "msg": "conversation=cc2f5831-b366-42d5-bfb6-26e2fe2b6da2 assistants=1 taskAssistants=1"
+    }
+  ]
+}

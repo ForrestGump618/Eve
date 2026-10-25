@@ -15,6 +15,7 @@ app.setName('SuWen');
 if(process.env.SUWEN_TEST_HOME)app.setPath('userData',resolve(process.env.SUWEN_TEST_HOME));
 if(!app.requestSingleInstanceLock())app.quit();
 let win:BrowserWindow|null=null,connection:Connection|null=null;
+let researchWindow:BrowserWindow|null=null;
 let streamCursor=0,pumpTimer:NodeJS.Timeout|null=null,pumpBusy=false;
 let reconnectTimer:NodeJS.Timeout|null=null,reconnecting=false;
 const home=join(app.getPath('userData'),'runtime');
@@ -116,9 +117,37 @@ const MAIN_ONLY=new Set(['settings','configure','login','reconnect','pythonPicke
 /** Main-process handlers that the sandboxed renderer may invoke directly (no daemon passthrough). */
 const UI_MAIN_METHODS=['secrets.status','secret.put','secret.remove','events.replay','workbench.status','workbench.install','workbench.cancel'];
 const exposed=new Set<string>([...RPC_METHODS.filter(method=>!MAIN_ONLY.has(method)),...UI_MAIN_METHODS]);
+/** The full research workspace is the default product window. The native console
+ * remains available with --native for diagnostics and deterministic shell E2E. */
+async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
+ if(researchWindow&&!researchWindow.isDestroyed()){researchWindow.show();researchWindow.focus();return {ok:true};}
+ let runtime=await workbench.runtime();
+ if(!runtime.ready){
+  if(primary&&win){win.show();await win.webContents.executeJavaScript("document.getElementById('health').textContent='正在准备素问运行环境，完成后自动进入科研工作台…'");}
+  const installed=await workbench.install(progress=>{try{win?.webContents.send('suwen:workbench',progress);}catch{}});
+  if(!installed.installed)throw new Error(installed.error||'科研工作台运行环境未就绪，请在设置中检查 Python');
+  runtime={ready:true,depsDir:installed.depsDir};
+ }
+ const cfg=readConfig();
+ const modelConfig=cfg&&cfg.apiKey?{provider:cfg.provider==='anthropic'?'custom-anthropic':'custom-openai',model:cfg.model,apiBase:cfg.baseUrl,apiKey:cfg.apiKey}:undefined;
+ await ensureConnected();const result=await rpc(connection!,'legacyStart',{...(runtime.depsDir?{deps:runtime.depsDir}:{}),...(modelConfig?{config:modelConfig}:{})});
+ const origin=`http://127.0.0.1:${result.port}`;
+ const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
+ const window=new BrowserWindow({width:1600,height:1000,title:'素问 · SuWen 科研工作台',show:false,webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ researchWindow=window;
+ isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
+ isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
+  if(details.webContentsId===window.webContents.id)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
+ });
+ window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+ window.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
+ window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);researchWindow=null;if(primary)win?.close();});
+ try {await window.loadURL(origin);window.show();if(primary)win?.hide();return {ok:true};}
+ catch(error){window.destroy();throw error;}
+}
 app.whenReady().then(async()=>{
  ensureHome(home);let startupError='';try{await connectDaemon();const c=readConfig();if(c&&connection)await rpc(connection,'configure',c);if(connection)await pushSecrets();}catch(err){startupError=safeError(err);}
- win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'素问 · SuWen',backgroundColor:'#f6f7fa',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'素问 · SuWen',show:process.argv.includes('--native'),backgroundColor:'#f6f7fa',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  win.webContents.on('will-navigate',(event,url)=>{if(url!==pathToFileURL(uiFile).href)event.preventDefault();});
  win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
@@ -144,25 +173,7 @@ app.whenReady().then(async()=>{
     return await workbench.install(progress=>{try{if(win&&!win.isDestroyed())win.webContents.send('suwen:workbench',progress);}catch{/* window may close mid-install */}});
    }
    if(method==='legacyOpen') {
-    const status=await workbench.status();
-    if(!status.installed)return {ok:false,code:'runtime-required',status};
-    // Hand the session model config to the hosted workspace in memory so its chat
-    // uses the same provider as the desktop instead of the offline mock. The key
-    // travels top-level -> daemon pipe -> child env and is never written to disk.
-    const cfg=readConfig();
-    const modelConfig=cfg&&cfg.apiKey?{provider:cfg.provider==='anthropic'?'custom-anthropic':'custom-openai',model:cfg.model,apiBase:cfg.baseUrl,apiKey:cfg.apiKey}:undefined;
-    if(!connection)await connectDaemon();const result=await rpc(connection!,'legacyStart',{deps:status.depsDir,...(modelConfig?{config:modelConfig}:{})});
-    const origin=`http://127.0.0.1:${result.port}`;
-    const isolated=session.fromPartition(`suwen-legacy-${randomUUID()}`);
-    const legacyWindow=new BrowserWindow({width:1600,height:1000,title:'素问 · 实验工作台（网页版复刻）',webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
-    isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
-    isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
-     if(details.webContentsId===legacyWindow.webContents.id)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
-    });
-    legacyWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
-    legacyWindow.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
-    legacyWindow.on('closed',()=>isolated.webRequest.onBeforeSendHeaders(null));
-    await legacyWindow.loadURL(origin);return {ok:true};
+    return await openResearchWorkspace();
    }
    if(method==='events.replay') {
     // Renderer-initiated gap replay: same frozen daemon protocol, bounded window.
@@ -188,8 +199,11 @@ app.whenReady().then(async()=>{
  });
  await win.loadFile(uiFile);
  startEventPump();
+ if(!process.argv.includes('--native')&&!process.argv.includes('--background')){
+  try{await openResearchWorkspace(true);}catch(error){win.show();await win.webContents.executeJavaScript(`document.getElementById('error').hidden=false;document.getElementById('error').textContent=${JSON.stringify('科研工作台启动失败：'+safeError(error))}`);}
+ }
  if(process.argv.includes('--background'))win.hide();
- app.on('second-instance',()=>{const target=win&&!win.isDestroyed()?win:BrowserWindow.getAllWindows()[0];target?.show();target?.focus();});
+ app.on('second-instance',()=>{const target=researchWindow&&!researchWindow.isDestroyed()?researchWindow:win&&!win.isDestroyed()?win:BrowserWindow.getAllWindows()[0];target?.show();target?.focus();});
 });
 app.on('window-all-closed',()=>app.quit());
 // UI exit deliberately leaves the detached daemon alive; explicit shutdown pauses work.

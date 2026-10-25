@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { once } from 'node:events';
-import { modelReply, validateModelConfig, type ModelConfig } from '../src/providers.js';
+import { modelReply, modelTurn, ModelApiError, validateModelConfig, type ModelConfig } from '../src/providers.js';
 
 async function fixture(t: any, handler: (request: IncomingMessage, response: ServerResponse, body: any) => void | Promise<void>): Promise<string> {
   const server = createServer((request, response) => {
@@ -119,4 +119,31 @@ test('configuration rejects remote cleartext, URL credentials, controls and unkn
     { ...good, model: 'model\u0000name' },
     { ...good, executeCommand: 'forbidden-extra-setting' },
   ]) assert.throws(() => validateModelConfig(bad));
+});
+
+test('fragmented function-call arguments survive streaming and a text-free tool turn is valid',async t=>{
+  const baseUrl=await fixture(t,(_request,response,body)=>{
+    assert.equal(body.tools[0].function.name,'lookup');
+    response.writeHead(200,{'content-type':'text/event-stream'});
+    for(const event of [{choices:[{delta:{tool_calls:[{index:0,id:'call-1',function:{name:'lookup',arguments:'{"que'}}]}}]},{choices:[{delta:{tool_calls:[{index:0,function:{arguments:'ry":"cells"}'}}]},finish_reason:'tool_calls'}],usage:{prompt_tokens:10,completion_tokens:5}}])response.write('data: '+JSON.stringify(event)+'\n\n');
+    response.end('data: [DONE]'); // Terminal event without a final newline.
+  });
+  const result=await modelTurn(config(baseUrl),[{role:'user',content:'lookup cells'}],new AbortController().signal,()=>{},[{name:'lookup',description:'lookup',parameters:{type:'object'}}]);
+  assert.equal(result.text,'');assert.deepEqual(result.toolCalls,[{id:'call-1',name:'lookup',arguments:'{"query":"cells"}'}]);
+});
+test('truncated answers and rejected API calls have truthful completion/retry semantics',async t=>{
+  const short=await fixture(t,(_r,response)=>{response.writeHead(200,{'content-type':'text/event-stream'});response.end('data: {"choices":[{"delta":{"content":"partial"},"finish_reason":"length"}]}\n\ndata: [DONE]\n\n');});
+  await assert.rejects(modelReply(config(short),[{role:'user',content:'hello'}],new AbortController().signal,()=>{}),/截断/);
+  const limited=await fixture(t,(_r,response)=>{response.writeHead(429,{'retry-after':'1'});response.end('credential-bearing error fixture-enterprise-credential');});
+  await assert.rejects(modelReply(config(limited),[{role:'user',content:'hello'}],new AbortController().signal,()=>{}),e=>e instanceof ModelApiError&&e.definitive&&e.retryable&&e.retryAfterMs===1000&&!e.message.includes('fixture-enterprise-credential'));
+});
+test('Anthropic tool blocks and tool results preserve native protocol semantics',async t=>{
+  const baseUrl=await fixture(t,(_r,response,body)=>{
+    assert.equal(body.messages[1].content[0].type,'tool_use');assert.equal(body.messages[2].content[0].type,'tool_result');
+    response.writeHead(200,{'content-type':'text/event-stream'});
+    const events=[{type:'content_block_start',index:0,content_block:{type:'tool_use',id:'native-1',name:'lookup',input:{}}},{type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:'{"query":"cells"}'}},{type:'message_delta',delta:{stop_reason:'tool_use'},usage:{output_tokens:7}},{type:'message_stop'}];
+    response.end(events.map(e=>'data: '+JSON.stringify(e)+'\n\n').join(''));
+  });
+  const result=await modelTurn(config(baseUrl,'anthropic'),[{role:'user',content:'hello'},{role:'assistant',content:'',tool_calls:[{id:'previous',type:'function',function:{name:'lookup',arguments:'{}'}}]},{role:'tool',tool_call_id:'previous',content:'{"result":1}'}],new AbortController().signal,()=>{},[{name:'lookup',description:'lookup',parameters:{type:'object'}}]);
+  assert.deepEqual(result.toolCalls,[{id:'native-1',name:'lookup',arguments:'{"query":"cells"}'}]);
 });

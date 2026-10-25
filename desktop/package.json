@@ -1,6 +1,6 @@
 {
   "name": "suwen-desktop",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "private": true,
   "description": "SuWen local research workspace with durable task execution",
   "main": "dist/main.js",
@@ -14,9 +14,14 @@
     "dist:win": "npm run build && electron-builder --win nsis --x64",
     "pack": "npm run build && electron-builder --dir",
     "sbom": "npm sbom --sbom-format cyclonedx > release/sbom.cdx.json",
-    "smoke": "node scripts/electron-smoke.mjs"
+    "smoke": "node scripts/electron-smoke.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:integration": "node scripts/e2e-rpc.mjs --live",
+    "test:harness": "node scripts/harness-benchmark.mjs"
   },
   "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "js-tiktoken": "1.0.21"
   },
   "devDependencies": {

@@ -1,0 +1,546 @@
+{
+  "schema": "suwen.ui-streaming-e2e/1",
+  "mode": "final",
+  "label": "deterministic local fixture",
+  "stamp": "20261025-130115",
+  "startedAt": "2026-10-25T13:01:15.184Z",
+  "commands": {
+    "node": "D:\\Develop\\nodejs\\node.exe",
+    "script": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\scripts\\streaming-ui-e2e.mjs",
+    "argv": [
+      "--mode=final",
+      "--runs=1",
+      "--only=composer,scroll,concurrent,persist"
+    ]
+  },
+  "env": {
+    "platform": "win32 10.0.26200",
+    "osVersion": "Windows 11 Home China",
+    "cpu": "Intel(R) Core(TM) i7-14700HX",
+    "cores": 28,
+    "totalMemGb": 31.8,
+    "node": "v24.14.0",
+    "electronPackage": "45.0.0",
+    "playwrightCore": "1.64.1",
+    "hostTime": "2026-10-25T13:01:15.187Z"
+  },
+  "fixture": {
+    "kind": "local OpenAI-compatible SSE server",
+    "host": "127.0.0.1",
+    "notes": "no vendor API; SSE chunks are deterministic w00000..wNNNNN tokens",
+    "baseUrl": "http://127.0.0.1:14957/v1"
+  },
+  "phases": [
+    {
+      "at": "2026-10-25T13:01:15.204Z",
+      "phase": "fixture",
+      "msg": "listening http://127.0.0.1:14957/v1"
+    },
+    {
+      "at": "2026-10-25T13:01:18.317Z",
+      "phase": "boot",
+      "msg": "daemon ready pid=42980 configured=false electron=45.0.0"
+    },
+    {
+      "at": "2026-10-25T13:01:18.333Z",
+      "phase": "boot",
+      "msg": "model configured=true"
+    },
+    {
+      "at": "2026-10-25T13:01:18.334Z",
+      "phase": "scenario",
+      "msg": "composer bounding box + draft preserved"
+    },
+    {
+      "at": "2026-10-25T13:01:34.957Z",
+      "phase": "stream",
+      "msg": "size=1000 run=1 sha=ok first=163ms lagP50=47 lagMax=248 completionLag=248ms composerΔ=0px status=completed batches/s=9.2 paints/s=9.4 paintAvg=0.8ms"
+    },
+    {
+      "at": "2026-10-25T13:01:34.959Z",
+      "phase": "scenario",
+      "msg": "scroll follow / user scroll-up"
+    },
+    {
+      "at": "2026-10-25T13:01:37.416Z",
+      "phase": "scroll",
+      "msg": "after user scroll-up, timeline.scrollTop=0 (sampler captures drift)"
+    },
+    {
+      "at": "2026-10-25T13:04:07.708Z",
+      "phase": "stream",
+      "msg": "size=10000 run=1 sha=ok first=145ms lagP50=47 lagMax=215 completionLag=215ms composerΔ=0px status=completed batches/s=9.2 paints/s=9.3 paintAvg=4.85ms"
+    },
+    {
+      "at": "2026-10-25T13:04:07.710Z",
+      "phase": "scenario",
+      "msg": "concurrent run isolation"
+    },
+    {
+      "at": "2026-10-25T13:06:10.372Z",
+      "phase": "concurrent",
+      "msg": "bodies=2 bothFinal=true contamination=false bothVisibleSamples=2314"
+    },
+    {
+      "at": "2026-10-25T13:06:10.374Z",
+      "phase": "scenario",
+      "msg": "conversation persistence duplicate check"
+    },
+    {
+      "at": "2026-10-25T13:06:14.885Z",
+      "phase": "persist",
+      "msg": "conversation=8d3cb058-ec8a-44c3-aefc-e632777aadae assistants=1 taskAssistants=1"
+    }
+  ],
+  "scenarios": {
+    "composer": {
+      "label": "composer bounding box + draft preserved during 1000-delta stream",
+      "size": 1000,
+      "run": 1,
+      "tag": "DRAFT1",
+      "expectedLen": 7008,
+      "actualLen": 7008,
+      "expectedSha256": "7493a9cc2052eaaf076836d35879048d6dd47dffe2c1fb6d63d38525bd136394",
+      "actualSha256": "7493a9cc2052eaaf076836d35879048d6dd47dffe2c1fb6d63d38525bd136394",
+      "shaMatch": true,
+      "exactTextMatch": true,
+      "duplicateFinalCopies": 1,
+      "assistantBodyCount": 1,
+      "firstTextLatencyMs": 163,
+      "completionLagMs": 248,
+      "serverFirstDeltaAt": 1792933279024,
+      "totalWallMs": 15866,
+      "renderLagMs": {
+        "n": 149,
+        "p50": 47,
+        "p95": 77,
+        "max": 248,
+        "min": 2,
+        "mean": 48.4
+      },
+      "updateCount": 149,
+      "updateIntervalMs": {
+        "n": 148,
+        "p50": 100,
+        "p95": 150,
+        "max": 251,
+        "min": 50,
+        "mean": 106.1
+      },
+      "domMutations": 151,
+      "domAddedNodes": 153,
+      "domRemovedNodes": 152,
+      "domCharDataMutations": 0,
+      "composerMaxDeltaPx": 0,
+      "draftPreserved": true,
+      "draftValue": "E2E 草稿仍在输入框中（不要发送）",
+      "scroll": {
+        "followGapMaxPx": 0.7000000000000455,
+        "scrollUpDriftMaxPx": null,
+        "finalBottomGapPx": -0.2999999999999545,
+        "jumpControls": 0
+      },
+      "finalScrollTop": 1027.3,
+      "finalScrollHeight": 1691,
+      "pass": {
+        "streamIntegrity": true,
+        "noDuplicateFinal": true,
+        "liveRendering": true,
+        "composerStable": true,
+        "draftPreserved": true,
+        "scrollFollow": true,
+        "scrollUpStable": null
+      },
+      "status": "completed",
+      "streamDebug": {
+        "available": true,
+        "samples": 32,
+        "status": "ok",
+        "first": {
+          "batches": 5,
+          "paints": 3,
+          "chars": 169,
+          "events": 5,
+          "at": 1792933279373
+        },
+        "last": {
+          "batches": 148,
+          "paints": 149,
+          "chars": 7008,
+          "events": 13,
+          "at": 1792933294952
+        },
+        "final": {
+          "batches": 148,
+          "paints": 149,
+          "paintTotalMs": 120.7,
+          "chars": 7008,
+          "events": 13
+        },
+        "batchRatePerSec": 9.2,
+        "paintRatePerSec": 9.4,
+        "paintAvgMs": 0.8,
+        "attribution": "renderer keeping up with arrival cadence"
+      },
+      "fixture": {
+        "requestCount": 1,
+        "deltasEmitted": 1000,
+        "aborted": false,
+        "providerRequest": {
+          "at": "2026-10-25T13:01:19.023Z",
+          "tag": "DRAFT1",
+          "size": 1000,
+          "hold": false,
+          "planConsumed": true,
+          "promptDetected": true,
+          "auth": "Bearer fixture",
+          "stream": true,
+          "maxTokens": 512,
+          "messagesPreview": [
+            {
+              "role": "system",
+              "content": "你是素问 SuWen，使用已注册的工具完成当前用户任务。简单任务直接执行，不必写计划或调用多 Agent。\n需要检索、读取、计算或执行时必须真实调用相应工具；不得凭记忆声称已经执行。普通网页搜索用 w",
+              "text": null
+            },
+            {
+              "role": "system",
+              "content": "你是严谨的科研助手。区分事实、推断与未知，不编造文献、数据或结论。",
+              "text": null
+            },
+            {
+              "role": "user",
+              "content": "E2E SIZE=1000 TAG=DRAFT1 流式渲染验收",
+              "text": null
+            }
+          ]
+        }
+      }
+    },
+    "scroll": {
+      "label": "scroll follow while at bottom + no forced jump after user scrolls up",
+      "size": 10000,
+      "run": 1,
+      "tag": "SCROLL1",
+      "expectedLen": 70009,
+      "actualLen": 70009,
+      "expectedSha256": "ee2b8530291539022554117dc94aec279c1084f214dfa810e9b68b90e06f7d9f",
+      "actualSha256": "ee2b8530291539022554117dc94aec279c1084f214dfa810e9b68b90e06f7d9f",
+      "shaMatch": true,
+      "exactTextMatch": true,
+      "duplicateFinalCopies": 1,
+      "assistantBodyCount": 1,
+      "firstTextLatencyMs": 145,
+      "completionLagMs": 215,
+      "serverFirstDeltaAt": 1792933295524,
+      "totalWallMs": 150861,
+      "renderLagMs": {
+        "n": 1416,
+        "p50": 47,
+        "p95": 81,
+        "max": 215,
+        "min": 4,
+        "mean": 47.6
+      },
+      "updateCount": 1417,
+      "updateIntervalMs": {
+        "n": 1416,
+        "p50": 101,
+        "p95": 150,
+        "max": 297,
+        "min": 41,
+        "mean": 106.4
+      },
+      "domMutations": 1420,
+      "domAddedNodes": 1423,
+      "domRemovedNodes": 1422,
+      "domCharDataMutations": 0,
+      "composerMaxDeltaPx": 0,
+      "draftPreserved": null,
+      "scroll": {
+        "followGapMaxPx": 0,
+        "scrollUpDriftMaxPx": 0,
+        "finalBottomGapPx": 14046,
+        "jumpControls": 0
+      },
+      "finalScrollTop": 0,
+      "finalScrollHeight": 14710,
+      "pass": {
+        "streamIntegrity": true,
+        "noDuplicateFinal": true,
+        "liveRendering": true,
+        "composerStable": true,
+        "draftPreserved": null,
+        "scrollFollow": true,
+        "scrollUpStable": true
+      },
+      "status": "completed",
+      "streamDebug": {
+        "available": true,
+        "samples": 297,
+        "status": "ok",
+        "first": {
+          "batches": 155,
+          "paints": 150,
+          "chars": 128,
+          "events": 18,
+          "at": 1792933295768
+        },
+        "last": {
+          "batches": 1552,
+          "paints": 1566,
+          "chars": 69995,
+          "events": 53,
+          "at": 1792933447698
+        },
+        "final": {
+          "batches": 1552,
+          "paints": 1566,
+          "paintTotalMs": 6988.5,
+          "chars": 69995,
+          "events": 53
+        },
+        "batchRatePerSec": 9.2,
+        "paintRatePerSec": 9.3,
+        "paintAvgMs": 4.85,
+        "attribution": "renderer keeping up with arrival cadence"
+      },
+      "fixture": {
+        "requestCount": 1,
+        "deltasEmitted": 10000,
+        "aborted": false,
+        "providerRequest": {
+          "at": "2026-10-25T13:01:35.524Z",
+          "tag": "SCROLL1",
+          "size": 10000,
+          "hold": false,
+          "planConsumed": true,
+          "promptDetected": true,
+          "auth": "Bearer fixture",
+          "stream": true,
+          "maxTokens": 512,
+          "messagesPreview": [
+            {
+              "role": "system",
+              "content": "你是素问 SuWen，使用已注册的工具完成当前用户任务。简单任务直接执行，不必写计划或调用多 Agent。\n需要检索、读取、计算或执行时必须真实调用相应工具；不得凭记忆声称已经执行。普通网页搜索用 w",
+              "text": null
+            },
+            {
+              "role": "system",
+              "content": "你是严谨的科研助手。区分事实、推断与未知，不编造文献、数据或结论。",
+              "text": null
+            },
+            {
+              "role": "user",
+              "content": "E2E SIZE=10000 TAG=SCROLL1 流式渲染验收",
+              "text": null
+            }
+          ]
+        }
+      }
+    },
+    "concurrent": {
+      "label": "concurrent model runs isolation (same conversation, two tasks)",
+      "tags": {
+        "a": "CA",
+        "b": "CB"
+      },
+      "taskA": null,
+      "taskB": {
+        "id": "c74289ed-5fc2-4a9b-8ed1-02956890614f",
+        "status": "created"
+      },
+      "expectedA": {
+        "len": 1404,
+        "sha256": "ac310257491f4b343f0569c7d4ca0ff068178a3e26b00834b60dffeb8b420543"
+      },
+      "expectedB": {
+        "len": 1054,
+        "sha256": "57faa3d6a66f3c4ea4c14d34e600c718fe938dbfe00aee69dc6720a133a6f60d"
+      },
+      "renderedBodies": [
+        {
+          "len": 1054,
+          "sha256": "57faa3d6a66f3c4ea4c14d34e600c718fe938dbfe00aee69dc6720a133a6f60d",
+          "isA": false,
+          "isB": true,
+          "head": "[CB]w00000 w0000"
+        },
+        {
+          "len": 1404,
+          "sha256": "ac310257491f4b343f0569c7d4ca0ff068178a3e26b00834b60dffeb8b420543",
+          "isA": true,
+          "isB": false,
+          "head": "[CA]w00000 w0000"
+        }
+      ],
+      "bothFinalTextsRendered": true,
+      "crossContamination": false,
+      "duplicatesA": 1,
+      "duplicatesB": 1,
+      "streamingVisibility": {
+        "aVisibleSamples": 2422,
+        "bVisibleSamples": 2314,
+        "bothVisibleSamples": 2314,
+        "aHiddenAfterBStarted": null,
+        "bFirstVisibleAt": 1792933453699
+      },
+      "assistantBodyPeak": 2,
+      "streamingBubblePeak": 1,
+      "sampledMs": 121358,
+      "domMutations": 56,
+      "pass": {
+        "bothFinalTextsExact": true,
+        "noCrossContamination": true,
+        "noDuplicates": true,
+        "bothStreamsVisibleTogether": true
+      }
+    },
+    "persistence": {
+      "label": "conversation persistence after one model run (duplicate assistant bookkeeping)",
+      "conversation": {
+        "id": "8d3cb058-ec8a-44c3-aefc-e632777aadae",
+        "messageCount": 2,
+        "messages": [
+          {
+            "id": "ef9a9952-50c8-4673-9bc2-73d91b932741",
+            "role": "user",
+            "taskId": null,
+            "at": 1792933570636,
+            "len": 30,
+            "text": "E2E SIZE=60 TAG=PERSIST1 持久化检查"
+          },
+          {
+            "id": "a-69d17a0b2382d461985ee0a1a4e64b4f474bc2633e86ffb348e5d33ac9bbdcad",
+            "role": "assistant",
+            "taskId": "4de13636-44d0-4d8d-9ce2-878ce9e9e6d6",
+            "at": 1792933572817,
+            "len": 430,
+            "text": "[PERSIST1]w00000 w00001 w00002 w00003 w00004 w00005 w00006 w00007 w00008 w00009 w00010 w00011 w00012 w00013 w00014 w00015 w00016 w00017 w00018 w00019 w00020 w00021 w00022 w00023 w00024 w00025 w00026 w00027 w00028 w00029 w00030 w00031 w00032 w00033 w00034 w00035 w00036 w00037 w00038 w00039 w00040 w00041 w00042 w00043 w00044 w00045 w00046 w00047 w00048 w00049 w00050 w00051 w00052 w00053 w00054 w00055 w00056 w00057 w00058 w00059 "
+          }
+        ]
+      },
+      "assistantCount": 1,
+      "assistantMessagesWithTaskId": 1,
+      "pass": {
+        "exactlyOneAssistant": true,
+        "exactlyOneTaskAssistant": true
+      }
+    }
+  },
+  "findings": [],
+  "profile": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-e2e-OtMu7N",
+  "app": {
+    "appPath": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop",
+    "userData": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-e2e-OtMu7N",
+    "version": "3.3.0",
+    "electron": "45.0.0",
+    "chrome": "156.0.8078.48",
+    "node": "24.22.0"
+  },
+  "initialHealth": {
+    "pid": 42980,
+    "version": "3.3.0",
+    "uptime": 1.2495792,
+    "startedAt": 1792933277861,
+    "mode": "user-background",
+    "configured": false,
+    "python": "python",
+    "serviceInstalled": false,
+    "legacy": null,
+    "runtimeVersions": {
+      "node": "24.22.0",
+      "electron": "45.0.0",
+      "sqlite": "3.53.4"
+    },
+    "ready": true
+  },
+  "configure": {
+    "ok": true,
+    "result": {
+      "ok": true
+    }
+  },
+  "configuredHealth": {
+    "pid": 42980,
+    "version": "3.3.0",
+    "uptime": 1.2666752,
+    "startedAt": 1792933277861,
+    "mode": "user-background",
+    "configured": true,
+    "python": "python",
+    "serviceInstalled": false,
+    "legacy": null,
+    "runtimeVersions": {
+      "node": "24.22.0",
+      "electron": "45.0.0",
+      "sqlite": "3.53.4"
+    },
+    "ready": true
+  },
+  "transport": "push (window.suwen.onEvent -> main pump -> events.stream batches)",
+  "partial": true,
+  "finishedAt": "2026-10-25T13:06:14.886Z",
+  "durationMs": 299702,
+  "phaseLog": [
+    {
+      "at": "2026-10-25T13:01:15.204Z",
+      "phase": "fixture",
+      "msg": "listening http://127.0.0.1:14957/v1"
+    },
+    {
+      "at": "2026-10-25T13:01:18.317Z",
+      "phase": "boot",
+      "msg": "daemon ready pid=42980 configured=false electron=45.0.0"
+    },
+    {
+      "at": "2026-10-25T13:01:18.333Z",
+      "phase": "boot",
+      "msg": "model configured=true"
+    },
+    {
+      "at": "2026-10-25T13:01:18.334Z",
+      "phase": "scenario",
+      "msg": "composer bounding box + draft preserved"
+    },
+    {
+      "at": "2026-10-25T13:01:34.957Z",
+      "phase": "stream",
+      "msg": "size=1000 run=1 sha=ok first=163ms lagP50=47 lagMax=248 completionLag=248ms composerΔ=0px status=completed batches/s=9.2 paints/s=9.4 paintAvg=0.8ms"
+    },
+    {
+      "at": "2026-10-25T13:01:34.959Z",
+      "phase": "scenario",
+      "msg": "scroll follow / user scroll-up"
+    },
+    {
+      "at": "2026-10-25T13:01:37.416Z",
+      "phase": "scroll",
+      "msg": "after user scroll-up, timeline.scrollTop=0 (sampler captures drift)"
+    },
+    {
+      "at": "2026-10-25T13:04:07.708Z",
+      "phase": "stream",
+      "msg": "size=10000 run=1 sha=ok first=145ms lagP50=47 lagMax=215 completionLag=215ms composerΔ=0px status=completed batches/s=9.2 paints/s=9.3 paintAvg=4.85ms"
+    },
+    {
+      "at": "2026-10-25T13:04:07.710Z",
+      "phase": "scenario",
+      "msg": "concurrent run isolation"
+    },
+    {
+      "at": "2026-10-25T13:06:10.372Z",
+      "phase": "concurrent",
+      "msg": "bodies=2 bothFinal=true contamination=false bothVisibleSamples=2314"
+    },
+    {
+      "at": "2026-10-25T13:06:10.374Z",
+      "phase": "scenario",
+      "msg": "conversation persistence duplicate check"
+    },
+    {
+      "at": "2026-10-25T13:06:14.885Z",
+      "phase": "persist",
+      "msg": "conversation=8d3cb058-ec8a-44c3-aefc-e632777aadae assistants=1 taskAssistants=1"
+    }
+  ]
+}

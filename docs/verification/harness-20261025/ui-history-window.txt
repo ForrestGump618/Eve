@@ -1,0 +1,16 @@
+[21:31:22] fixture      listening http://127.0.0.1:1597/v1
+[21:31:26] boot         daemon ready pid=49112 configured=false electron=45.0.0
+[21:31:26] boot         model configured=true
+[21:31:26] scenario     120+ message session
+[21:31:27] long         messages=80 openMs=148 bottomGap=-0.66650390625
+[21:31:27] scenario     conversation persistence duplicate check
+[21:31:32] persist      conversation=cc2f5831-b366-42d5-bfb6-26e2fe2b6da2 assistants=1 taskAssistants=1
+[21:31:32] done         report written C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\release\smoke\ui-streaming-20261025-133122-final.json (9284ms, 0 findings)
+
+=== SUMMARY (deterministic local fixture) ===
+transport: push (window.suwen.onEvent -> main pump -> events.stream batches)
+long session: 80 msgs open=148ms bottomGap=-0.66650390625
+persistence: assistants=1 taskAssistants=1
+
+Findings (0):
+[21:31:43] cleanup      electron/fixture/daemon cleanup attempted

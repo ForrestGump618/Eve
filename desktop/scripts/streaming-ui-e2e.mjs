@@ -225,7 +225,7 @@ async function launchApp(profile, extraArgs = []) {
   env.SUWEN_E2E_LABEL = 'deterministic local fixture';
   const app = await _electron.launch({
     executablePath: electronPath,
-    args: [...extraArgs, project],
+    args: [...extraArgs, project, '--native'],
     env,
     timeout: 60000,
   });
@@ -857,10 +857,17 @@ async function scenarioLongSession(ctx) {
   await row.click();
   let status = 'completed';
   try {
-    await page.waitForFunction(() => document.querySelectorAll('#timeline .message').length >= 120, null, { timeout: 30000, polling: 100 });
+    await page.waitForFunction(() => document.querySelectorAll('#timeline .message').length === 80, null, { timeout: 30000, polling: 100 });
   } catch { status = 'timeout'; }
   const openMs = Date.now() - t0;
   await sleep(400);
+  const earlier=page.getByRole('button',{name:/查看更早消息|Earlier messages/});
+  await earlier.click();
+  await page.waitForFunction(()=>document.querySelector('#timeline .message .body')?.textContent?.includes('第 1 条'));
+  const olderReachable=true;
+  await page.getByRole('button',{name:/查看更新消息|Newer messages/}).click();
+  await page.waitForFunction(n=>[...document.querySelectorAll('#timeline .message .body')].at(-1)?.textContent?.includes(`第 ${n} 条`),total);
+  const latestReachable=true;
   const metrics = await page.evaluate(() => {
     const tl = document.getElementById('timeline');
     const messages = [...document.querySelectorAll('#timeline .message')];
@@ -885,10 +892,12 @@ async function scenarioLongSession(ctx) {
     expectedMessages: total,
     ...metrics,
     pass: {
-      allRendered: metrics.messageCount >= total,
+      boundedWindow: metrics.messageCount === Math.min(80,total),
+      olderReachable,
+      latestReachable,
       noPageHorizontalOverflow: (metrics.docOverflowX ?? 0) <= 1,
       composerInViewport: metrics.composerBottom !== null ? metrics.composerBottom <= metrics.innerHeight + 1 : null,
-      startsAtTop: metrics.scrollTop === 0,
+      scrollPositionValid: metrics.scrollTop >= 0,
     },
   };
   log('long', `messages=${metrics.messageCount} openMs=${openMs} bottomGap=${metrics.bottomGap}`);

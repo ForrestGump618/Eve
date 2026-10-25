@@ -2,13 +2,14 @@ import { spawn, execFile } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
+import type { Connection } from './security.js';
 
 export interface LegacyHandle { port: number; token: string; pid: number; stop: () => Promise<void> }
 /** Optional session model configuration injected in memory for the hosted workspace. */
 export interface LegacyModelConfig { provider: string; model: string; apiBase: string; apiKey: string }
 
 /** Starts only the trusted bridge script; no model-generated code, shell or inherited API credentials. */
-export async function launchLegacy(python: string, script: string, source: string, home: string, deps?: string, signal?: AbortSignal, model?: LegacyModelConfig): Promise<LegacyHandle> {
+export async function launchLegacy(python: string, script: string, source: string, home: string, deps?: string, signal?: AbortSignal, model?: LegacyModelConfig, harness?:Connection): Promise<LegacyHandle> {
   if (signal?.aborted) throw new Error('Legacy bridge launch cancelled');
   if (!python || /[\u0000-\u001f]/.test(python) || ![script, source, home].every(isAbsolute) || !existsSync(script) || !existsSync(join(source, 'omicslab', 'config.py'))) throw new Error('Legacy bridge requires a Python interpreter and trusted absolute paths');
   const dependencyDir = deps && isAbsolute(deps) && !/[\u0000-\u001f]/.test(deps) && existsSync(join(deps, '.suwen-workbench.json')) ? deps : undefined;
@@ -19,6 +20,7 @@ export async function launchLegacy(python: string, script: string, source: strin
   for (const key of ['SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA']) if (process.env[key]) env[key] = process.env[key];
   env.HOME = resolve(home);
   env.SUWEN_BRIDGE_TOKEN = token;
+  if (harness) env.SUWEN_HARNESS_CONNECTION = JSON.stringify(harness);
   // The session model config is handed to the inherited bridge only when it is
   // complete and structurally valid; an invalid or empty config falls back to the
   // bridge's offline mock provider instead of failing to start.

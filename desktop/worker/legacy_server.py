@@ -26,10 +26,9 @@ class BearerGateway:
         self.expected = ("Bearer " + token).encode("ascii")
 
     async def __call__(self, scope, receive, send):
-        # Static application assets carry no data and are allowed so the window's
-        # document can load before the authenticated API calls start.
-        path = scope.get("path", "/")
-        needs_auth = scope["type"] == "websocket" or path.startswith("/api") or path.startswith("/bootstrap")
+        # The Electron partition supplies authentication for every local route,
+        # including the root document and assets. No anonymous bypass is needed.
+        needs_auth = scope["type"] in ("http", "websocket")
         if scope["type"] in ("http", "websocket") and needs_auth:
             values = [value for name, value in scope.get("headers", ()) if name.lower() == b"authorization"]
             authorized = len(values) == 1 and hmac.compare_digest(values[0], self.expected)
@@ -77,6 +76,17 @@ async def run(source: Path, home: Path, deps: "Path | None", token: str, wire) -
     sys.path.insert(0, str(source))
     from omicslab.config import PROVIDERS, load_settings
     from omicslab.server import create_app
+    harness_connection = os.environ.pop("SUWEN_HARNESS_CONNECTION", "")
+    if harness_connection:
+        from omicslab.runtime.desktop_harness import DesktopHarness
+        from omicslab.server.state import AppState
+        original_create = AppState.create.__func__
+        adapter = DesktopHarness(json.loads(harness_connection))
+        async def create_with_harness(cls, configuration):
+            state = await original_create(cls, configuration)
+            state.loop.desktop_harness = adapter
+            return state
+        AppState.create = classmethod(create_with_harness)
     import uvicorn
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -90,6 +100,7 @@ async def run(source: Path, home: Path, deps: "Path | None", token: str, wire) -
     # the authenticated local channel. Apply it only in memory (an env var for the
     # provider key), never write it to the bridge settings file or web storage.
     provider = os.environ.pop("SUWEN_LEGACY_PROVIDER", "").strip()
+    provider = {"custom-openai":"custom_openai", "custom-anthropic":"custom_anthropic"}.get(provider, provider)
     if provider:
         settings.provider = provider
         model = os.environ.pop("SUWEN_LEGACY_MODEL", "").strip()

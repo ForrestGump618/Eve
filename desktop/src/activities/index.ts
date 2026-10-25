@@ -82,7 +82,7 @@ function createPythonActivity(services: ActivityServices): ActivityHandler {
 export function createAllActivities(services: ActivityServices, deps: AllActivityDeps): Record<string, ActivityHandler> {
   const toolServices: ActivityServices & { tools?: ToolServices } = { ...services, tools: deps.toolServices };
   return {
-    model: createModelActivity(deps.model),
+    model: createModelActivity({ ...deps.model, tools:deps.toolServices }),
     python: createPythonActivity(services),
     ...createDatabaseActivities(deps.databases),
     ...createResearchHandlers(services),

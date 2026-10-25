@@ -1,0 +1,58 @@
+{
+  "model": "deepseek-v4.1-flash-economy",
+  "taskSetSha256": "08e2cc0eddd7db3d0bd87c4f0027e9825e7fccd0fa1f68a0015f3d4776caf2e6",
+  "baseline": {
+    "passed": 0,
+    "total": 22,
+    "p50Ms": 6998,
+    "p95Ms": 16282,
+    "tokens": 64397,
+    "toolCompleted": 0,
+    "toolFailed": 0,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+  },
+  "after": {
+    "passed": 19,
+    "total": 22,
+    "p50Ms": 7801,
+    "p95Ms": 16067,
+    "tokens": 162302,
+    "toolCompleted": 39,
+    "toolFailed": 7,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+  },
+  "acceptance": "NOT_MET: 19/22 < 90%; last three blocked by external HTTP 429. Final build must be rerun with recovered credentials.",
+  "toolSuccessRate": 0.8478260869565217,
+  "toolRecoverySameName": {
+    "recovered": 5,
+    "failed": 7
+  },
+  "citationProvenance": {
+    "verifiedUrlMentions": 14,
+    "uniqueUrls": 11,
+    "semanticAccuracy": "not exhaustively validated"
+  },
+  "uiExceptions": {
+    "baseline": [
+      "scrollUpDrift=14363.3px",
+      "scroll-scenario composerDelta=1078px",
+      "persistence scenario timed out"
+    ],
+    "after": [
+      "scrollUpDrift=0px",
+      "composerDelta=0px",
+      "one persisted assistant",
+      "120 messages rendered in window of 80"
+    ]
+  },
+  "afterSuccessfulOnly": {
+    "count": 19,
+    "p50Ms": 8440,
+    "p95Ms": 60229,
+    "maxMs": 60229
+  }
+}

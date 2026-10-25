@@ -1,0 +1,23 @@
+[21:01:15] fixture      listening http://127.0.0.1:14957/v1
+[21:01:18] boot         daemon ready pid=42980 configured=false electron=45.0.0
+[21:01:18] boot         model configured=true
+[21:01:18] scenario     composer bounding box + draft preserved
+[21:01:34] stream       size=1000 run=1 sha=ok first=163ms lagP50=47 lagMax=248 completionLag=248ms composerΔ=0px status=completed batches/s=9.2 paints/s=9.4 paintAvg=0.8ms
+[21:01:34] scenario     scroll follow / user scroll-up
+[21:01:37] scroll       after user scroll-up, timeline.scrollTop=0 (sampler captures drift)
+[21:04:07] stream       size=10000 run=1 sha=ok first=145ms lagP50=47 lagMax=215 completionLag=215ms composerΔ=0px status=completed batches/s=9.2 paints/s=9.3 paintAvg=4.85ms
+[21:04:07] scenario     concurrent run isolation
+[21:06:10] concurrent   bodies=2 bothFinal=true contamination=false bothVisibleSamples=2314
+[21:06:10] scenario     conversation persistence duplicate check
+[21:06:14] persist      conversation=8d3cb058-ec8a-44c3-aefc-e632777aadae assistants=1 taskAssistants=1
+[21:06:14] done         report written C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\release\smoke\ui-streaming-20261025-130115-final.json (299702ms, 0 findings)
+
+=== SUMMARY (deterministic local fixture) ===
+transport: push (window.suwen.onEvent -> main pump -> events.stream batches)
+draft preserved=true composerΔ=0px
+scroll: followGapMax=0px scrollUpDrift=0px jumpControls=0
+concurrent: bothFinal=true bothStreamsVisible=true contamination=false
+persistence: assistants=1 taskAssistants=1
+
+Findings (0):
+[21:06:25] cleanup      electron/fixture/daemon cleanup attempted

@@ -1,0 +1,35 @@
+SuWen UI DOM QA
+  ok   contract — 84 RPC methods
+  ok   actions — 148 actions, 148 unique ids, pages: chat,global,projects,settings,tasks,tools,workbench
+  ok   csp — frozen CSP intact
+  ok   legacy-ids — 48 ids present
+  ok   pages — chat/projects/tasks/tools/workbench/settings
+  ok   i18n-dict — 712 bilingual keys
+  ok   i18n-html — 182 data-i18n keys resolved
+  ok   i18n-t — 293 t() references resolved
+  ok   innerHTML — no dynamic innerHTML assignments
+  ok   dynamic-code — no eval/new Function/innerHTML-injection APIs
+  ok   old-brand — OmicLab/omicslab absent from UI
+  ok   step-kind-labels — 18 contract step kinds labeled
+  ok   coverage-family — chat
+  ok   coverage-family — task controls
+  ok   coverage-family — projects
+  ok   coverage-family — import
+  ok   coverage-family — tools
+  ok   coverage-family — settings
+Warnings:
+  warn bridge-method: auto-stream-replay -> events.replay (main-process bridge outside RPC_METHODS)
+  warn bridge-method: auto-settings-read -> settings (main-process bridge outside RPC_METHODS)
+  warn bridge-method: launch-login -> login (main-process bridge outside RPC_METHODS)
+  warn bridge-method: reconnect -> reconnect (main-process bridge outside RPC_METHODS)
+  warn bridge-method: pick-python -> pythonPicker (main-process bridge outside RPC_METHODS)
+  warn bridge-method: support -> support (main-process bridge outside RPC_METHODS)
+  warn bridge-call: settings (3x) is a main-process bridge outside RPC_METHODS
+  warn bridge-call: login (1x) is a main-process bridge outside RPC_METHODS
+  warn bridge-call: reconnect (1x) is a main-process bridge outside RPC_METHODS
+  warn bridge-call: pythonPicker (1x) is a main-process bridge outside RPC_METHODS
+  warn bridge-call: support (1x) is a main-process bridge outside RPC_METHODS
+  warn bridge-call: events.replay (2x) is a main-process bridge outside RPC_METHODS
+  warn action-coverage: methods called but not declared as an action: workbench.cancel
+Summary: 18 passed, 0 failed, 13 warning(s); 148 actions, 84 contract RPC methods.
+Bridge methods used outside RPC_METHODS: events.replay, login, pythonPicker, reconnect, settings, support

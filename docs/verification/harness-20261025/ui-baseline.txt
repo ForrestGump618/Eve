@@ -1,0 +1,27 @@
+[20:50:38] fixture      listening http://127.0.0.1:2410/v1
+[20:50:54] boot         daemon ready pid=27892 configured=false electron=45.0.0
+[20:50:54] boot         model configured=true
+[20:50:54] scenario     composer bounding box + draft preserved
+[20:51:11] stream       size=1000 run=1 sha=ok first=130ms lagP50=47 lagMax=242 completionLag=242ms composerΔ=0px status=completed batches/s=9.3 paints/s=9 paintAvg=0.96ms
+[20:51:11] scenario     scroll follow / user scroll-up
+[20:51:13] scroll       after user scroll-up, timeline.scrollTop=0 (sampler captures drift)
+[20:53:43] stream       size=10000 run=1 sha=ok first=158ms lagP50=51 lagMax=244 completionLag=244ms composerΔ=1078px status=completed batches/s=9.2 paints/s=4.6 paintAvg=3.4ms
+[20:53:43] scenario     concurrent run isolation
+[20:55:54] concurrent   bodies=3 bothFinal=true contamination=false bothVisibleSamples=2348
+[20:55:54] scenario     conversation persistence duplicate check
+[20:56:08] scenario     persistence FAILED: page.waitForFunction: Timeout 10000ms exceeded.
+    at newChat (C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\scripts\streaming-ui-e2e.mjs:403:14)
+    at async scenarioPersistence (C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\scripts\streaming-ui-e2e.mjs:1026:3)
+    at async safeRun (C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\scripts\streaming-ui-e2e.mjs:1447:33)
+    at async main (C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\scripts\streaming-ui-e2e.mjs:1459:30)
+[20:56:08] done         report written C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\release\smoke\ui-streaming-20261025-125038-baseline.json (329716ms, 1 findings)
+
+=== SUMMARY (deterministic local fixture) ===
+transport: push (window.suwen.onEvent -> main pump -> events.stream batches)
+draft preserved=true composerΔ=0px
+scroll: followGapMax=0px scrollUpDrift=14363.3px jumpControls=0
+concurrent: bothFinal=true bothStreamsVisible=true contamination=false
+
+Findings (1):
+  [P2] scroll: user scroll-up drift 14363.3px (forced scroll)
+[20:56:19] cleanup      electron/fixture/daemon cleanup attempted

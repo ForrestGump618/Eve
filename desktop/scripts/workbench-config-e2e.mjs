@@ -108,7 +108,7 @@ try {
   check('bridge-started', Number(first.port) > 0 && typeof first.token === 'string', 'pid=' + first.pid + ' port=' + first.port);
   const settings1 = await getJson(first.port, '/api/settings', first.token);
   const view1 = settings1.body?.settings && !Array.isArray(settings1.body.settings) ? settings1.body.settings : settings1.body;
-  check('injected-provider', view1?.provider === 'custom-openai', view1?.provider);
+  check('injected-provider', view1?.provider === 'custom_openai', view1?.provider);
   check('injected-model', view1?.model === 'legacy-injected', view1?.model);
   check('injected-api-base', view1?.api_base === 'http://127.0.0.1:9/v1', view1?.api_base);
   check('bridge-csp', /default-src 'self'/.test(String(settings1.headers['content-security-policy'] || '')), String(settings1.headers['content-security-policy'] || '').slice(0, 80));
@@ -124,7 +124,7 @@ try {
   const settings2 = await getJson(second.port, '/api/settings', second.token);
   const view2 = settings2.body?.settings && !Array.isArray(settings2.body.settings) ? settings2.body.settings : settings2.body;
   check('restart-applied-model', view2?.model === 'legacy-injected-2', view2?.model);
-  check('restart-applied-provider', view2?.provider === 'custom-anthropic', view2?.provider);
+  check('restart-applied-provider', view2?.provider === 'custom_anthropic', view2?.provider);
 
   await rpc(connection, 'shutdown').catch(() => {});
 } catch (error) {

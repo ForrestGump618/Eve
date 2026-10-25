@@ -1,0 +1,18 @@
+{
+  "kind": "real external model and public network; default product launch",
+  "checks": [
+    {
+      "name": "default-launch-opens-formal-workspace",
+      "ok": true
+    },
+    {
+      "name": "single-visible-product-window",
+      "ok": true,
+      "detail": "[{\"title\":\"工作台 · 素问 Suwen\",\"url\":\"http://127.0.0.1:12537/\"}]"
+    }
+  ],
+  "errors": [],
+  "screenshots": [],
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-route=\"chat\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <button title=\"对话\" type=\"button\" class=\"nav-item\" data-route=\"chat\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div data-layer=\"1\" class=\"modal-backdrop is-open\">…</div> from <div id=\"modal-root\" class=\"modal-root\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div data-layer=\"1\" class=\"modal-backdrop is-open\">…</div> from <div id=\"modal-root\" class=\"modal-root\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    56 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div data-layer=\"1\" class=\"modal-backdrop is-open\">…</div> from <div id=\"modal-root\" class=\"modal-root\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+  "at": "2026-10-25T13:10:30.859Z"
+}

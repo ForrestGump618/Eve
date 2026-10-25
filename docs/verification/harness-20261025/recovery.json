@@ -1,0 +1,549 @@
+{
+  "phase": "recovery",
+  "model": "deepseek-v4.1-flash-economy",
+  "taskSetSha256": "08e2cc0eddd7db3d0bd87c4f0027e9825e7fccd0fa1f68a0015f3d4776caf2e6",
+  "startedAt": "2026-10-25T13:10:31.597Z",
+  "kind": "real external model, public network, real isolated daemon; MCP/Skill are local executable fixtures",
+  "results": [
+    {
+      "id": "skill-execute",
+      "category": "skill",
+      "prompt": "发现并加载 benchmark-mean Skill，然后实际执行它，输入 numbers=[2,4,6,8,10]，报告均值。",
+      "status": "failed",
+      "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": null,
+      "trace": [],
+      "events": [
+        {
+          "sequence": 1,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792933832181,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 2,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792933832227,
+          "data": {
+            "owner": "worker-31480-9d376db2-3d66-4779-9c4e-8ca78d5dd4b2",
+            "fence": 1,
+            "operationId": "bb95d0e43b9d48748af7df2080514962c414d22ce544393e26aeff36ecf15e24",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 3,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792933832294,
+          "data": {
+            "type": "agent.started",
+            "at": 1792933832293,
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "phase": "act",
+            "promptSha256": "27d7d22d4b379e5c29ed3637bd7b4046c261c38198ada01d74497aca34eebb2b"
+          }
+        },
+        {
+          "sequence": 4,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792933832295,
+          "data": {
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 5,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792933832295,
+          "data": {
+            "type": "model.started",
+            "at": 1792933832295,
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 6,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792933832462,
+          "data": {
+            "type": "model.retry",
+            "at": 1792933832462,
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 7,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792933834464,
+          "data": {
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 8,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792933834464,
+          "data": {
+            "type": "model.started",
+            "at": 1792933834464,
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 9,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792933834548,
+          "data": {
+            "traceId": "f8d7c21b-45b0-4866-8224-283d56021519:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 10,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792933834549,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 11,
+          "taskId": "f8d7c21b-45b0-4866-8224-283d56021519",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792933834549,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "skill_run"
+      ],
+      "missingContent": [
+        "6"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2377
+    },
+    {
+      "id": "multi-file-skill",
+      "category": "multi-step",
+      "prompt": "读取已授权的 benchmark-notes.txt，再加载并执行 benchmark-mean Skill 复算其中 numbers 的均值，比较文件记录，简短报告是否一致。",
+      "status": "failed",
+      "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": null,
+      "trace": [],
+      "events": [
+        {
+          "sequence": 12,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792933834559,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 13,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792933834604,
+          "data": {
+            "owner": "worker-31480-9d376db2-3d66-4779-9c4e-8ca78d5dd4b2",
+            "fence": 1,
+            "operationId": "5dc2170f17ae037caa1cc6b1d91d8fc9ab9a9403fa2f3408c83986bb06cfe00a",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 14,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792933834738,
+          "data": {
+            "type": "agent.started",
+            "at": 1792933834738,
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "phase": "act",
+            "promptSha256": "a673e03ab90f93a88007e466aa76c7a75d4f1952654ae1be93a13768131903db"
+          }
+        },
+        {
+          "sequence": 15,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792933834739,
+          "data": {
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 16,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792933834740,
+          "data": {
+            "type": "model.started",
+            "at": 1792933834739,
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 17,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792933834833,
+          "data": {
+            "type": "model.retry",
+            "at": 1792933834832,
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 18,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792933836843,
+          "data": {
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 19,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792933836844,
+          "data": {
+            "type": "model.started",
+            "at": 1792933836843,
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 20,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792933836957,
+          "data": {
+            "traceId": "d648ac55-c321-4b0b-a443-b466fd6928a5:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 21,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792933836959,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 22,
+          "taskId": "d648ac55-c321-4b0b-a443-b466fd6928a5",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792933836960,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "read_file",
+        "skill_run"
+      ],
+      "missingContent": [
+        "6"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2645
+    },
+    {
+      "id": "multi-search-fetch",
+      "category": "multi-step",
+      "prompt": "先搜索 Electron contextIsolation 官方文档，再读取官方页面，依据读取的内容总结为什么应启用隔离，附官方链接，不超过200字。",
+      "status": "failed",
+      "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": null,
+      "trace": [],
+      "events": [
+        {
+          "sequence": 23,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792933837207,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 24,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792933837463,
+          "data": {
+            "owner": "worker-31480-9d376db2-3d66-4779-9c4e-8ca78d5dd4b2",
+            "fence": 1,
+            "operationId": "b6add20df87e29a60096836e93bd147f031db44feec6767abc540f0f235d27da",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 25,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792933837630,
+          "data": {
+            "type": "agent.started",
+            "at": 1792933837629,
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "phase": "act",
+            "promptSha256": "cbf6f01b3c6421edfcd93a5dfb481386c42726853045e53616be7b959c6a54f5"
+          }
+        },
+        {
+          "sequence": 26,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792933837631,
+          "data": {
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 27,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792933837632,
+          "data": {
+            "type": "model.started",
+            "at": 1792933837632,
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 28,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792933837711,
+          "data": {
+            "type": "model.retry",
+            "at": 1792933837710,
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 29,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792933839727,
+          "data": {
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 30,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792933839728,
+          "data": {
+            "type": "model.started",
+            "at": 1792933839727,
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 31,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792933839813,
+          "data": {
+            "traceId": "2e48d239-b577-4cf4-881b-14617ab5e94e:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 32,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792933839816,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 33,
+          "taskId": "2e48d239-b577-4cf4-881b-14617ab5e94e",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792933839817,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_search",
+        "web_fetch"
+      ],
+      "missingContent": [
+        "contextIsolation"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2663
+    }
+  ],
+  "finishedAt": "2026-10-25T13:10:39.874Z",
+  "metrics": {
+    "passed": 0,
+    "total": 3,
+    "p50Ms": 2645,
+    "p95Ms": 2663,
+    "tokens": 0,
+    "toolCompleted": 0,
+    "toolFailed": 0,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+  }
+}

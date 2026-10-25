@@ -1,0 +1,82 @@
+{
+  "at": "2026-10-25T13:32:12.381Z",
+  "result": "passed",
+  "checks": [
+    {
+      "id": "deps-installed",
+      "ok": true,
+      "detail": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env"
+    },
+    {
+      "id": "python-available",
+      "ok": true,
+      "detail": "python"
+    },
+    {
+      "id": "daemon-ready",
+      "ok": true,
+      "detail": "pipe+token"
+    },
+    {
+      "id": "daemon-version",
+      "ok": true,
+      "detail": "3.3.1"
+    },
+    {
+      "id": "bridge-started",
+      "ok": true,
+      "detail": "pid=18660 port=9477"
+    },
+    {
+      "id": "injected-provider",
+      "ok": true,
+      "detail": "custom_openai"
+    },
+    {
+      "id": "injected-model",
+      "ok": true,
+      "detail": "legacy-injected"
+    },
+    {
+      "id": "injected-api-base",
+      "ok": true,
+      "detail": "http://127.0.0.1:9/v1"
+    },
+    {
+      "id": "bridge-csp",
+      "ok": true,
+      "detail": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-"
+    },
+    {
+      "id": "dark-default-seeded",
+      "ok": true,
+      "detail": "dark"
+    },
+    {
+      "id": "config-change-restarts-bridge",
+      "ok": true,
+      "detail": "pid 18660 -> 45836"
+    },
+    {
+      "id": "restart-applied-model",
+      "ok": true,
+      "detail": "legacy-injected-2"
+    },
+    {
+      "id": "restart-applied-provider",
+      "ok": true,
+      "detail": "custom_anthropic"
+    }
+  ],
+  "daemonStderr": "(node:50052) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "limits": [
+    "local loopback only",
+    "provider URL is a closed port; no vendor API is called",
+    "single Windows session"
+  ]
+}

@@ -1,4 +1,8 @@
-# 素问 / SuWen desktop 3.3.0
+# 素问 / SuWen desktop 3.3.1
+
+3.3.1 默认直接打开完整科研工作台。运行 `./启动素问.ps1`（或 `npm run build; npm start`）；原生诊断控制台使用 `--native`。模型工具循环、正式页面配置兼容和聊天稳定性已做实质修复；真实固定任务 **19/22**，其余被供应商 HTTP 429 阻断，**尚未完整验收**。完整证据、运行命令和未解决问题见 [本轮报告](../docs/verification/harness-20261025/README.md)。
+
+以下为 **3.3.0 历史记录**，不能当作本轮最终代码的验收声明。
 
 New Electron/TypeScript client plus an independent authenticated user-level daemon. The original
 Python research workbench remains in the parent repository and can be opened as an optional,

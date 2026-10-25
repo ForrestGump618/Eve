@@ -4,9 +4,11 @@ import {
   lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync,
 } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { McpClientSession } from '../mcp-client.js';
+import { McpClientSession, McpHttpSession } from '../mcp-client.js';
 import { ConflictError, ValidationError, type Json } from '../harness/types.js';
 import { safeError } from '../security.js';
+import { parseMcpResult } from '../mcp-result.js';
+import { validateArguments } from '../harness/tool-registry.js';
 import type { McpServerView, RecordRow, RecordStore, SkillView, WorkerClient } from '../shared/contract.js';
 
 /** Minimal injectable fetch surface; tests pass a deterministic fake and never touch the public network. */
@@ -266,37 +268,6 @@ function openStdioSession(server: McpServerRecordData, secrets: SecretResolver |
   return { session, failure, handshakeComplete: () => { handshake = true; } };
 }
 
-async function openHttpRequest(
-  server: McpServerRecordData, fetchImpl: FetchLike, method: string, params: Json, id: number, signal: AbortSignal, timeoutMs: number,
-): Promise<any> {
-  if (typeof server.url !== 'string') throw new ValidationError('MCP http server is missing url');
-  const response = await withDeadline(fetchImpl(server.url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
-    body: JSON.stringify({ jsonrpc: '2.0', id, method, params }),
-    signal,
-  }), timeoutMs, `MCP HTTP ${method}`);
-  if (!response.ok) throw new Error(`MCP HTTP ${method} failed with status ${response.status}`);
-  const text = await response.text();
-  let body: any;
-  const dataLines = text.split(/\r?\n/).filter(line => line.startsWith('data:')).map(line => line.slice(5).trim()).filter(Boolean);
-  if (dataLines.length) {
-    body = null;
-    for (const line of dataLines) {
-      try {
-        const parsed = JSON.parse(line);
-        if (parsed && typeof parsed === 'object') { body = parsed; break; }
-      } catch { /* try the next SSE data line */ }
-    }
-    if (!body) throw new Error('Malformed MCP HTTP event stream');
-  } else {
-    try { body = JSON.parse(text); } catch { throw new Error('Malformed MCP HTTP response'); }
-  }
-  if (body?.error) throw new Error(`MCP HTTP error ${Number(body.error.code)}: ${failureMessage(body.error.message)}`);
-  if (!('result' in body)) throw new Error('Malformed MCP HTTP response');
-  return body.result;
-}
-
 function probeTool(tool: unknown): McpProbeTool {
   const item = plainObject(tool, 'tool');
   const name = requireString(item.name, 'tool name', 1, 128);
@@ -330,15 +301,8 @@ export function createMcpProbe(options: { secrets?: SecretResolver; timeoutMs?: 
       }
     }
     const fetchImpl = options.fetch ?? ((url: string, init?: RequestInit) => globalThis.fetch(url, init));
-    const initialized = await openHttpRequest(server, fetchImpl, 'initialize', {
-      protocolVersion: '2025-03-26', capabilities: {}, clientInfo: { name: 'suwen-harness', version: '1.0.0' },
-    }, 1, signal, timeoutMs);
-    if (initialized?.protocolVersion !== '2025-03-26' || !initialized?.capabilities?.tools || typeof initialized?.serverInfo?.name !== 'string') {
-      throw new Error('Incompatible MCP version or missing tools capability');
-    }
-    const listed = await openHttpRequest(server, fetchImpl, 'tools/list', {}, 2, signal, timeoutMs);
-    if (!Array.isArray(listed?.tools)) throw new Error('Malformed MCP tools/list result');
-    return { tools: listed.tools.map((tool: unknown) => probeTool(tool)), serverInfo: { name: initialized.serverInfo.name } };
+    const session=new McpHttpSession(server.url!,fetchImpl as typeof fetch,timeoutMs);
+    try{await session.initialize(signal);return {tools:(await session.listTools(signal)).map((tool:unknown)=>probeTool(tool)),serverInfo:null};}finally{await session.close();}
   };
 }
 
@@ -357,22 +321,11 @@ export function createMcpToolCaller(options: { secrets?: SecretResolver; timeout
       }
     }
     const fetchImpl = options.fetch ?? ((url: string, init?: RequestInit) => globalThis.fetch(url, init));
-    const initialized = await openHttpRequest(server, fetchImpl, 'initialize', {
-      protocolVersion: '2025-03-26', capabilities: {}, clientInfo: { name: 'suwen-harness', version: '1.0.0' },
-    }, 1, signal, timeoutMs);
-    if (initialized?.protocolVersion !== '2025-03-26' || !initialized?.capabilities?.tools) throw new Error('Incompatible MCP version or missing tools capability');
-    const result = await openHttpRequest(server, fetchImpl, 'tools/call', { name: tool, arguments: args }, 2, signal, timeoutMs);
-    return parseCallResult(result);
+    const session=new McpHttpSession(server.url!,fetchImpl as typeof fetch,timeoutMs);
+    try{await session.initialize(signal);return await session.callTool(tool,args,signal);}finally{await session.close();}
   };
 }
 
-function parseCallResult(result: any): Json {
-  if (!result || !Array.isArray(result.content) || result.content.length !== 1 || result.content[0]?.type !== 'text' || typeof result.content[0]?.text !== 'string') {
-    throw new Error('Malformed MCP tool result');
-  }
-  if (result.isError) throw new Error(`MCP tool failed: ${failureMessage(result.content[0].text)}`);
-  try { return JSON.parse(result.content[0].text) as Json; } catch { throw new Error('MCP tool result is not JSON'); }
-}
 
 export class McpRegistry {
   private readonly store: RecordStore;
@@ -500,7 +453,8 @@ export class McpRegistry {
     return this.toView(updated);
   }
 
-  async health(id: string): Promise<McpServerView> {
+  async health(id: string, signal?:AbortSignal): Promise<McpServerView> {
+    signal?.throwIfAborted();
     const row = this.row(id);
     const data = this.data(row);
     const started = this.clock();
@@ -509,6 +463,7 @@ export class McpRegistry {
     let annotations = data.toolAnnotations;
     try {
       const controller = new AbortController();
+      const cancel=()=>controller.abort(signal?.reason);signal?.addEventListener('abort',cancel,{once:true});
       const timer = setTimeout(() => controller.abort(new Error('MCP health check timed out')), this.healthTimeoutMs);
       try {
         const probe = await withDeadline(this.prober(data, controller.signal), this.healthTimeoutMs + 100, 'MCP health check');
@@ -521,6 +476,7 @@ export class McpRegistry {
         health = { status: 'ok', at: this.clock(), latencyMs: Math.max(0, this.clock() - started) };
       } finally {
         clearTimeout(timer);
+        signal?.removeEventListener('abort',cancel);
       }
     } catch (error) {
       health = { status: 'failed', at: this.clock(), latencyMs: Math.max(0, this.clock() - started), error: failureMessage(error) };
@@ -534,10 +490,11 @@ export class McpRegistry {
     return this.toView(updated);
   }
 
-  async tools(id: string, options: { refresh?: boolean } = {}): Promise<McpServerView['tools']> {
+  async tools(id: string, options: { refresh?: boolean;signal?:AbortSignal } = {}): Promise<McpServerView['tools']> {
+    options.signal?.throwIfAborted();
     const row = this.row(id);
     const data = this.data(row);
-    if (options.refresh || data.health.status !== 'ok' || data.tools.length === 0) return (await this.health(id)).tools;
+    if (options.refresh || data.health.status !== 'ok' || data.tools.length === 0) return (await this.health(id,options.signal)).tools;
     return data.tools;
   }
 
@@ -547,11 +504,14 @@ export class McpRegistry {
 
   /** Read-only servers may only invoke tools explicitly annotated `readOnlyHint: true`. */
   async callTool(id: string, tool: string, args: Record<string, Json>, options: { signal?: AbortSignal; projectId?: string | null } = {}): Promise<Json> {
+    options.signal?.throwIfAborted();
     const row = this.row(id);
     const data = this.data(row);
     if (!this.isEnabledFor(data, options.projectId)) throw new ValidationError(`MCP server ${id} is disabled`);
     const name = requireString(tool, 'tool', 1, 128);
     if (!data.tools.some(entry => entry.name === name)) throw new ValidationError(`MCP server ${id} has no tool named ${name}; run mcp.tools first`);
+    const schema = data.tools.find(entry => entry.name === name)?.inputSchema;
+    if (schema) validateArguments(args, schema);
     if (data.readOnly && this.annotationsFor(data, name).readOnlyHint !== true) {
       throw new ValidationError(`MCP server ${id} is read-only; tool ${name} is not annotated readOnlyHint:true`);
     }
@@ -589,6 +549,8 @@ export interface SkillManifest {
   permissions: string[];
   description?: string;
   test?: SkillTestDeclaration;
+  run?: SkillTestDeclaration;
+  dependencies?: string[];
   samples?: string[];
 }
 export interface SkillFileEntry { path: string; sha256: string; bytes: number }
@@ -732,6 +694,19 @@ function parseManifest(files: SkillSourceFile[], findings: SkillScanFinding[]): 
   const manifest: SkillManifest = { name, version, entry, license, permissions };
   if (typeof raw.description === 'string') manifest.description = raw.description.slice(0, 2000);
   if (test) manifest.test = test;
+  if (raw.run !== undefined) {
+    try {
+      const run = plainObject(raw.run, 'manifest run');
+      if (run.language !== 'python' && run.language !== 'node') throw new ValidationError('run.language must be python or node');
+      const script = requireString(run.script, 'run.script', 1, 300);
+      if (!safeRelativePath(script) || !files.some(file => file.path === script)) throw new ValidationError('run script is missing or unsafe');
+      manifest.run = { language:run.language, script, timeoutMs: typeof run.timeoutMs === 'number' ? Math.max(1000,Math.min(120000,run.timeoutMs)) : 30000 };
+    } catch(error) { findings.push({code:'invalid-run',severity:'blocker',path:'skill.json',message:failureMessage(error)}); }
+  }
+  if (raw.dependencies !== undefined) {
+    if (!Array.isArray(raw.dependencies) || raw.dependencies.some(x=>typeof x !== 'string'||!/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(x))) findings.push({code:'invalid-dependencies',severity:'blocker',path:'skill.json',message:'dependencies must be module names'});
+    else manifest.dependencies = raw.dependencies as string[];
+  }
   if (Array.isArray(raw.samples)) {
     try {
       manifest.samples = raw.samples.map((value, index) => requireString(value, `samples[${index}]`, 1, 300));
@@ -827,6 +802,47 @@ export class SkillRegistry {
 
   list(): SkillView[] { return this.store.listRecords('skill', { limit: 500 }).map(row => this.toView(row)); }
   get(id: string): SkillView { return this.toView(this.row(id)); }
+
+  /** Progressive discovery: descriptions only, never all SKILL.md bodies. */
+  search(query: string): Json {
+    const words = query.toLowerCase().split(/[^\p{L}\p{N}_-]+/u).filter(Boolean);
+    return this.store.listRecords('skill',{limit:500}).filter(row=>recordData(row).enabled!==false).map(row=>{
+      const data=recordData(row),manifest=data.manifest as unknown as SkillManifest;
+      const description=manifest?.description??'';
+      const text=`${data.name} ${description}`.toLowerCase();
+      return {id:row.id,name:String(data.name),version:String(data.version),description,score:words.reduce((n,w)=>n+(text.includes(w)?1:0),0)};
+    }).sort((a,b)=>b.score-a.score).slice(0,8) as unknown as Json;
+  }
+  load(id: string): Json {
+    const row=this.row(id),data=recordData(row);
+    if(data.enabled===false)throw new ValidationError('Skill is disabled');
+    const files=this.installedFiles(id);
+    if(treeSha(files)!==data.sha256)throw new ValidationError('Skill content digest changed; reinstall and review');
+    const manifest=data.manifest as unknown as SkillManifest;
+    const entry=files.find(file=>file.path===manifest.entry);
+    if(!entry?.text)throw new ValidationError('Skill instructions missing');
+    return {id,name:manifest.name,version:manifest.version,instructions:entry.text.slice(0,18000),run:manifest.run as unknown as Json??null,dependencies:manifest.dependencies??[],sha256:String(data.sha256)};
+  }
+  async run(id:string,input:Json,signal:AbortSignal):Promise<Json> {
+    signal.throwIfAborted();this.load(id);
+    const data=recordData(this.row(id)),manifest=data.manifest as unknown as SkillManifest;
+    if(!manifest.run)throw new ValidationError('Skill declares no executable run entry; tests are not task execution');
+    if(manifest.permissions.length)throw new ValidationError('Chat skill execution only permits reviewed skills without host/network permissions');
+    if(!this.worker)throw new ValidationError('Skill Python worker unavailable');
+    mkdirSync(this.sandboxRoot,{recursive:true});
+    const files=this.installedFiles(id),script=files.find(x=>x.path===manifest.run!.script);
+    if(!script?.text)throw new ValidationError('Skill run script missing');
+    let source=script.text;
+    if(manifest.dependencies?.length){
+      if(manifest.run.language!=='python')throw new ValidationError('Node dependency preflight is unsupported');
+      source=`import importlib.util\nfor _module in ${JSON.stringify(manifest.dependencies)}:\n    if importlib.util.find_spec(_module) is None: raise RuntimeError('Missing dependency: '+_module)\n`+source;
+    }
+    const result=await this.worker.call('runScript',{language:manifest.run.language,source,args:[JSON.stringify(input)],timeoutMs:manifest.run.timeoutMs??30000,sandboxRoot:this.sandboxRoot,files:files.filter(x=>x.text!==null).map(x=>({name:x.path,text:x.text!}))},signal);
+    const shaped=plainObject(result,'skill run result');
+    if(shaped.timedOut===true||shaped.exitCode!==0)throw new Error(`Skill execution failed (exit=${shaped.exitCode}, timedOut=${shaped.timedOut===true})`);
+    if(typeof shaped.stdout!=='string'||!shaped.stdout.trim())throw new Error('Skill produced no result');
+    return {skillId:id,version:manifest.version,sha256:String(data.sha256),result};
+  }
 
   installedPath(id: string): string {
     const data = recordData(this.row(id));

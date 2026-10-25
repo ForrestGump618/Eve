@@ -89,6 +89,11 @@ class AgentLoop:
         base_emit = emit or _noop_emit
         cancel_event = cancel_event or asyncio.Event()
         agent = self._resolve_agent(agent_id or conv.agent or self.settings.default_agent)
+        desktop_harness = getattr(self, "desktop_harness", None)
+        if desktop_harness is not None and agent.id == "lead" and not agent_task_id and not extra_system:
+            return await desktop_harness.run(self, conv, user_text, emit=base_emit, cancel_event=cancel_event,
+                                             provider=provider, model=model, attachments=attachments,
+                                             run_id=run_id, workspace=workspace, steer=steer)
 
         # Record the turn as a replayable trajectory; failures never break the
         # turn (the recorder swallows IO errors internally).

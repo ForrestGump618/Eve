@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-25T13:31:25.133Z",
+  "result": "failed",
+  "checks": [
+    {
+      "id": "deps-installed",
+      "ok": true,
+      "detail": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-workbench-smoke"
+    },
+    {
+      "id": "python-available",
+      "ok": true,
+      "detail": "python"
+    },
+    {
+      "id": "daemon-ready",
+      "ok": true,
+      "detail": "pipe+token"
+    },
+    {
+      "id": "daemon-version",
+      "ok": true,
+      "detail": "3.3.1"
+    },
+    {
+      "id": "run",
+      "ok": false,
+      "detail": "RPC failed"
+    }
+  ],
+  "daemonStderr": "(node:48248) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "limits": [
+    "local loopback only",
+    "provider URL is a closed port; no vendor API is called",
+    "single Windows session"
+  ]
+}

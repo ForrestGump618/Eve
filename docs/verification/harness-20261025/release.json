@@ -1,0 +1,11 @@
+{
+  "version": "3.3.1",
+  "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.3.1-win-x64.exe",
+  "bytes": 131380397,
+  "sha256": "0c4148d30df3e4dbea75e284082d2f5f6db5b54bf8b994e241b95e940ab34178",
+  "signed": false,
+  "cleanWindowsVmInstall": "NOT_RUN",
+  "baselineInstallerRetained": true,
+  "packagedUiE2E": "8/8 controlled-model + real PubMed, formal-ui-packaged.json",
+  "buildProvenance": "Working tree; unrelated concurrent omicslab/cli.py and omicslab/integrations files preserved and not owned by this change."
+}

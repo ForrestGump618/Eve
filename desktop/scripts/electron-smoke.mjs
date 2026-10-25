@@ -20,7 +20,7 @@ server.listen(0,'127.0.0.1');await once(server,'listening');
 const env={...process.env,SUWEN_TEST_HOME:profile};delete env.ELECTRON_RUN_AS_NODE;
 const packaged=process.env.SUWEN_SMOKE_PACKAGED==='1';
 const executablePath=packaged?project+'/release/win-unpacked/SuWen.exe':project+'/node_modules/electron/dist/electron.exe';
-const launchArgs=packaged?[]:[project];
+const launchArgs=packaged?['--native']:[project,'--native'];
 let app,connection;const closes=[];const log={modelProtocol:'local HTTP fixture only; no external model account',checks:[]};
 try{
  app=await _electron.launch({executablePath,args:launchArgs,env,timeout:30000});

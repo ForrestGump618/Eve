@@ -4,6 +4,7 @@ import { mkdirSync, existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { ApprovalDecision, Artifact, Checkpoint, CompletionMetadata, ConflictError, FailureOptions, Json, Lease, RunEvent, RunStatus, StepRun, TaskDefinition, TaskRun, ValidationError } from './types.js';
 import type { PutRecordOptions, RecordRow } from '../shared/contract.js';
+import { normalizeConversation } from '../conversations.js';
 
 const SCHEMA_VERSION = 3;
 const terminal = new Set<RunStatus>(['completed', 'failed', 'cancelled']);
@@ -281,6 +282,19 @@ export class Store {
     return step;
   }
   isLeaseValid(lease: Lease): boolean { try { this.requireLease(lease); return true; } catch { return false; } }
+  /** Fenced per-turn accounting and trace events inside a durable model activity.
+   * The first model call uses the activity's existing call reservation. */
+  activityProgress(taskId:string, step:StepRun, type:string, data:Json, usage:{call?:boolean;tokens?:number;artifact?:Artifact}={}):void {
+    this.tx(()=>{
+      const task=this.getTask(taskId);if(!task)throw new ConflictError();
+      this.requireLease({task,step,owner:step.owner!,fence:step.fence});
+      if(usage.call&&task.limits.maxCalls!==undefined&&task.calls>=task.limits.maxCalls)throw new ValidationError('Task call budget exhausted');
+      const tokens=usage.tokens??0;validNumber(tokens,'tokens',0);
+      this.db.prepare('UPDATE tasks SET calls=calls+?,tokens=tokens+? WHERE id=?').run(usage.call?1:0,tokens,taskId);
+      if(usage.artifact){const a=usage.artifact;this.db.prepare('INSERT INTO artifacts(id,task_id,step_id,path,sha256,bytes,media_type,created_at) VALUES(?,?,?,?,?,?,?,?)').run(a.id,taskId,step.id,a.path,a.sha256,a.bytes,a.mediaType??null,this.now());}
+      this.event(taskId,step.id,type,data);
+    });
+  }
   heartbeat(lease: Lease, leaseMs = 30000): boolean {
     return this.tx(() => { const s = this.requireLease(lease); this.db.prepare('UPDATE steps SET lease_until=?,version=version+1 WHERE task_id=? AND id=?').run(this.now() + Math.min(leaseMs, s.timeoutMs), s.taskId, s.id); this.event(s.taskId, s.id, 'step.heartbeat', { fence: s.fence }); return true; });
   }
@@ -295,6 +309,19 @@ export class Store {
         this.db.prepare('INSERT INTO artifacts(id,task_id,step_id,path,sha256,bytes,media_type,created_at) VALUES(?,?,?,?,?,?,?,?)').run(artifact.id, s.taskId, s.id, artifact.path, artifact.sha256, artifact.bytes, artifact.mediaType ?? null, this.now());
       }
       this.db.prepare("UPDATE steps SET status='completed',output_json=?,owner=NULL,lease_until=NULL,version=version+1 WHERE task_id=? AND id=?").run(JSON.stringify(output), s.taskId, s.id);
+      // Mirror only after a fenced completion, in the same transaction. A late
+      // model reply after pause/cancel can never append a successful transcript.
+      const conversationId=s.kind==='model'&&s.input&&typeof s.input==='object'&&!Array.isArray(s.input)?s.input.conversationId:undefined;
+      if(typeof conversationId==='string'&&output&&typeof output==='object'&&!Array.isArray(output)&&typeof output.text==='string'&&output.text.trim()){
+        const record=this.getRecord(conversationId);
+        if(record?.kind==='conversation'){
+          const view=normalizeConversation(record.data),id=`a-${s.operationId}`.slice(0,100);
+          if(view.messages.length<4000&&!view.messages.some(m=>m.id===id)){
+            view.messages.push({id,role:'assistant',text:output.text.slice(0,100000),at:this.now(),taskId:s.taskId});view.updatedAt=this.now();
+            this.db.prepare('UPDATE records SET data_json=?,version=version+1,updated_at=? WHERE id=?').run(JSON.stringify(redact(view)),this.now(),record.id);
+          }
+        }
+      }
       this.db.prepare('UPDATE tasks SET cost=cost+?,tokens=tokens+? WHERE id=?').run(usage.cost ?? 0, usage.tokens ?? 0, s.taskId);
       if (s.sideEffect) this.db.prepare("UPDATE outbox SET status='confirmed',updated_at=? WHERE operation_id=?").run(this.now(), s.operationId);
       this.event(s.taskId, s.id, 'step.completed', { operationId: s.operationId, usage }); this.refresh(s.taskId); this.checkpoint(s.taskId, 'step.completed', usage);

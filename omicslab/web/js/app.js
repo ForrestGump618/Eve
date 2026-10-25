@@ -361,7 +361,12 @@ async function renderRoute(route, { force = false } = {}) {
     if (token !== app.mountToken) return;
     if (typeof mod.mount !== 'function') throw new Error('页面模块缺少 mount 导出');
     app.viewRoot.innerHTML = '';
-    const instance = await mod.mount(app.viewRoot, {
+    // Each asynchronous mount owns its own DOM root. A superseded mount's
+    // destroy() must never clear a newer route that shares viewRoot.
+    const mountRoot=document.createElement('div');
+    mountRoot.className='route-mount';
+    app.viewRoot.replaceChildren(mountRoot);
+    const instance = await mod.mount(mountRoot, {
       navigate,
       refreshShell: requestShellRefresh,
       getState,
