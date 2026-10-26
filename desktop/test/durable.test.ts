@@ -9,6 +9,7 @@ import { Store } from '../src/harness/store.js';
 import { Engine } from '../src/harness/engine.js';
 import { writeArtifact, verifyArtifact } from '../src/harness/artifacts.js';
 import { ConflictError, ValidationError } from '../src/harness/types.js';
+import {restoreAgentCheckpoint} from '../src/resume-context.js';
 
 function fixture(t: { after: (fn: () => void) => void }) {
   const dir = mkdtempSync(join(tmpdir(), 'suwen-durable-')); const path = join(dir, 'state.sqlite');
@@ -17,6 +18,29 @@ function fixture(t: { after: (fn: () => void) => void }) {
   t.after(() => { for (const s of stores) try { s.close(); } catch {} rmSync(dir, { recursive: true, force: true }); });
   return { path, dir, open, advance: (ms: number) => { time += ms; } };
 }
+
+test('checkpoint restore reuses committed observations and identifies unknown side effects',async t=>{
+ const f=fixture(t),store=f.open();
+ const task=store.createTask({steps:[{id:'reply',kind:'model',sideEffect:true}]}),lease=store.claim('owner',10000)!;
+ const calls=['committed','unknown'].map(id=>({id,type:'function',function:{name:'write_file',arguments:'{"path":"notes.txt","content":"updated"}'}}));
+ const artifact=await writeArtifact(f.dir,JSON.stringify({history:[{role:'user',content:'write notes'},{role:'assistant',content:'',tool_calls:calls}],sources:[]}));
+ store.activityProgress(task.id,lease.step,'agent.checkpoint',{artifact} as any);
+ const observation={ok:true,result:{path:'notes.txt',sha256:'a'.repeat(64),verified:true}};
+ const result=await writeArtifact(f.dir,JSON.stringify({observation}));
+ store.activityProgress(task.id,lease.step,'agent.tool_artifact',{callId:'committed',artifact:result} as any);
+ store.activityProgress(task.id,lease.step,'tool.completed',{callId:'committed',name:'write_file'});
+ store.cancelTask(task.id);
+ const restored=await restoreAgentCheckpoint(store,task.id);
+ assert.deepEqual(restored.actions,['write_file']);assert.deepEqual(restored.unknownCalls,['unknown']);
+ assert.deepEqual(JSON.parse(restored.history[2]!.content),observation);
+ assert.equal(JSON.parse(restored.history[3]!.content).error.category,'unknown');
+ appendFileSync(artifact.path,'tamper');await assert.rejects(restoreAgentCheckpoint(store,task.id),/integrity/);
+});
+
+test('redaction preserves numeric token accounting but removes credential tokens',t=>{
+ const f=fixture(t),store=f.open();const row=store.putRecord('diagnostic',{reservedTokens:512,tokens:128,apiKey:'fixture-secret',token:123});
+ assert.deepEqual(row.data,{reservedTokens:512,tokens:128,apiKey:'[REDACTED]',token:'[REDACTED]'});
+});
 
 test('model transcript mirror commits atomically and late replies after cancellation cannot append',t=>{
   const f=fixture(t),store=f.open();const conv=store.putRecord('conversation',{title:'test',mode:'chat',messages:[]});
@@ -43,6 +67,21 @@ test('SQLite durability settings, atomic completion checkpoint, and restart with
   assert.equal(restored.getTask('restart')!.status, 'completed'); assert.equal(executions, 2);
   assert.equal(restored.getStep('restart', 'timer')!.attempts, 1);
   await second.tick(); assert.equal(executions, 2);
+});
+test('idle scheduler skips SQLite transactions but resumes immediately for newly queued work', async t => {
+  const f = fixture(t); const s = f.open();
+  let claims = 0, reclaims = 0;
+  const claim = s.claim.bind(s), reclaim = s.reclaimExpired.bind(s);
+  (s as any).claim = (...args: Parameters<Store['claim']>) => { claims++; return claim(...args); };
+  (s as any).reclaimExpired = () => { reclaims++; return reclaim(); };
+  const engine = new Engine(s);
+  assert.equal(await engine.tick(), 0);
+  assert.equal(claims, 0); assert.equal(reclaims, 0);
+  s.createTask({ id: 'wake', steps: [{ id: 'echo', kind: 'echo' }] });
+  assert.equal(await engine.tick(), 1);
+  await engine.whenIdle();
+  assert.ok(claims >= 1); assert.equal(reclaims, 1);
+  assert.equal(s.getTask('wake')!.status, 'completed');
 });
 test('two owners cannot claim the same step; expired fences and late cancellation writes are rejected', t => {
   const f = fixture(t); const a = f.open(); const b = f.open();

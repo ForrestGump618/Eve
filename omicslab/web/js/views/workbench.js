@@ -4,11 +4,11 @@
  * One screen for the whole analysis loop:
  *   top bar   : workspace + backend / host / directory / environment / connection
  *   left      : sessions
- *   center    : the standard chat view (mounted as-is so no feature is lost)
+ *   center    : shared conversation controller, rendered directly as a workbench pane
  *   right     : Results / Files / Variables panes (switchable, drag-resizable)
  *   bottom    : Compute (terminal / job log / background jobs / child task tree)
  *
- * Legacy routes are preserved: the top bar offers "旧版对话" and every pane keeps
+ * Legacy routes are preserved: the top bar offers "专注对话" and every pane keeps
  * working through the same REST APIs as the standalone pages.
  */
 
@@ -63,6 +63,7 @@ function hostLabel(ws) {
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();
+  if(ctx.shellSidebar)root.querySelector('.workbench-page').classList.add('unified-workspace');
   const el = {
     page: root.querySelector('.workbench-page'),
     wsBtn: root.querySelector('#wb-ws-btn'),
@@ -1176,7 +1177,7 @@ function layout() {
     '<button type="button" class="btn btn-ghost btn-sm" id="wb-layout">布局</button>' +
     `<button type="button" class="btn btn-ghost btn-sm" id="wb-probe">${icon('refresh', { size: 14 })}<span>刷新状态</span></button>` +
     `<button type="button" class="btn btn-ghost btn-sm" id="wb-new-ws">${icon('folderPlus', { size: 14 })}<span>新建工作区</span></button>` +
-    `<button type="button" class="btn btn-ghost btn-sm" id="wb-old-chat">${icon('external', { size: 14 })}<span>旧版对话</span></button>` +
+    `<button type="button" class="btn btn-ghost btn-sm" id="wb-old-chat">${icon('external', { size: 14 })}<span>专注对话</span></button>` +
     '</div>' +
     '</div>' +
     '<div class="wb-main">' +

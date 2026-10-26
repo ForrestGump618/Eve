@@ -42,7 +42,8 @@ logger = logging.getLogger("omicslab.ssh")
 
 AUTH_PASSWORD = "password"
 AUTH_KEY = "key"
-AUTH_METHODS = (AUTH_PASSWORD, AUTH_KEY)
+AUTH_AGENT = "agent"
+AUTH_METHODS = (AUTH_PASSWORD, AUTH_KEY, AUTH_AGENT)
 DEFAULT_PORT = 22
 DEFAULT_TIMEOUT_S = 120
 MAX_TIMEOUT_S = 3600
@@ -169,7 +170,7 @@ def _coerce_timeout(value: Any, default: float = DEFAULT_TIMEOUT_S) -> float:
 def _normalize_auth(value: Any) -> str:
     auth = _as_text(value, AUTH_PASSWORD).lower()
     if auth not in AUTH_METHODS:
-        raise SSHValidationError("认证方式必须是 password 或 key")
+        raise SSHValidationError("认证方式必须是 password、key 或 agent")
     return auth
 
 
@@ -460,6 +461,7 @@ class SSHManager:
         self._lock = threading.RLock()
         self._store_lock = threading.RLock()
         self._pool: dict[str, _PooledConnection] = {}
+        self._connect_locks: dict[str, threading.RLock] = {}
         self._session_passwords: dict[str, str] = {}
         self._credentials = CredentialStore(self.home)
         self._migration_notices: list[dict[str, Any]] = []
@@ -768,7 +770,7 @@ class SSHManager:
         profile["updated_at"] = now
         remember = _is_true(fields.get("remember_password"))
         password = _as_text(fields.get("password"))
-        if clean["auth"] == AUTH_KEY:
+        if clean["auth"] in (AUTH_KEY, AUTH_AGENT):
             profile["credential_notice"] = ""
         else:
             self._apply_password(profile, password, remember=remember)
@@ -801,7 +803,7 @@ class SSHManager:
             password_given = password is not None and _as_text(password) != ""
             remember_value = fields.get("remember_password")
             remember = _is_true(remember_value) if remember_value is not None else bool(profile.get("credential_stored"))
-            if clean["auth"] == AUTH_KEY:
+            if clean["auth"] in (AUTH_KEY, AUTH_AGENT):
                 self._clear_credential(profile)
                 profile["updated_at"] = _now()
             elif password_given:
@@ -867,7 +869,7 @@ class SSHManager:
 
     # -- 密码解析 ---------------------------------------------------------
     def _resolve_password(self, profile: dict[str, Any], password: str | None = None) -> str | None:
-        if _as_text(profile.get("auth")) == AUTH_KEY:
+        if _as_text(profile.get("auth")) in (AUTH_KEY, AUTH_AGENT):
             return None
         explicit = _as_text(password)
         if explicit:
@@ -936,17 +938,10 @@ class SSHManager:
         else:
             previous_fingerprint = _normalize_fingerprint(previous)
         if previous_fingerprint and fingerprint and previous_fingerprint != fingerprint:
-            warning = (
+            raise SSHError(
                 f"服务器指纹已变化：原 {previous_fingerprint}，现 {fingerprint}。"
-                "可能是服务器重装或中间人攻击，请确认后再使用该连接。"
+                "已拒绝连接并保留原指纹；请核实服务器身份后更新受信任主机记录。"
             )
-            hosts[key] = {
-                "fingerprint": fingerprint,
-                "previous_fingerprint": previous_fingerprint,
-                "changed_at": _now(),
-                "host": host,
-                "port": port,
-            }
         elif not previous_fingerprint:
             hosts[key] = {
                 "fingerprint": fingerprint,
@@ -1021,7 +1016,12 @@ class SSHManager:
                 client.load_system_host_keys()
             except Exception:
                 pass
-            client.set_missing_host_key_policy(paramiko_mod.AutoAddPolicy())
+            expected = self.known_fingerprint(host, port)
+            class PinnedHostPolicy(paramiko_mod.MissingHostKeyPolicy):
+                def missing_host_key(policy, ssh_client, hostname, key):
+                    if expected and _fingerprint_of(key) != expected:
+                        raise SSHError("SSH 主机指纹与受信任记录不符，已在认证前拒绝连接")
+            client.set_missing_host_key_policy(PinnedHostPolicy())
             kwargs: dict[str, Any] = {
                 "hostname": host,
                 "port": port,
@@ -1037,6 +1037,8 @@ class SSHManager:
                 if not key_path:
                     raise SSHValidationError("私钥认证缺少 key_path")
                 kwargs["pkey"] = self._load_private_key(key_path)
+            elif auth == AUTH_AGENT:
+                kwargs["allow_agent"] = True
             else:
                 if not password:
                     raise SSHValidationError(
@@ -1047,6 +1049,7 @@ class SSHManager:
             transport = client.get_transport()
             if transport is None or not transport.is_active():
                 raise SSHError("SSH 连接建立失败：传输层未激活")
+            transport.set_keepalive(15)
             server_key = transport.get_remote_server_key()
             fingerprint = _fingerprint_of(server_key)
             warning = self._remember_host(profile, fingerprint)
@@ -1088,17 +1091,22 @@ class SSHManager:
     def _get_client(self, profile: dict[str, Any]) -> Any:
         pid = _as_text(profile.get("id"))
         with self._lock:
-            pooled = self._pool.get(pid)
-            if pooled is not None and pooled.is_alive() and pooled.host == _as_text(profile.get("host")):
-                pooled.last_used = time.time()
-                return pooled.client
-            self._drop_locked(pid)
-        password = self._resolve_password(profile)
-        pooled = self._connect(profile, password=password)
-        with self._lock:
-            self._drop_locked(pid)
-            self._pool[pid] = pooled
-        return pooled.client
+            connection_lock = self._connect_locks.setdefault(pid, threading.RLock())
+        # Single flight per profile. Network I/O must not hold the global lock:
+        # a slow host must not block other hosts, and concurrent acquisitions
+        # must never replace/close a transport already returned to another tool.
+        with connection_lock:
+            with self._lock:
+                pooled = self._pool.get(pid)
+                if pooled is not None and pooled.is_alive() and pooled.host == _as_text(profile.get("host")):
+                    pooled.last_used = time.time()
+                    return pooled.client
+                self._drop_locked(pid)
+            password = self._resolve_password(profile)
+            pooled = self._connect(profile, password=password)
+            with self._lock:
+                self._pool[pid] = pooled
+            return pooled.client
 
     def close(self) -> None:
         with self._lock:
@@ -1117,6 +1125,18 @@ class SSHManager:
         pid = _as_text(profile.get("id"))
         try:
             explicit = _as_text(password)
+            effective = self._resolve_password(profile, explicit)
+            # Test the supplied credential without destroying channels used by
+            # active tools/terminals. Failed credentials must not replace the
+            # last working session credential or trusted fingerprint.
+            pooled = self._connect(profile, password=effective)
+            with self._lock:
+                existing = self._pool.get(pid)
+                if existing is not None and existing.is_alive():
+                    self._close_client(pooled.client)
+                else:
+                    self._drop_locked(pid)
+                    self._pool[pid] = pooled
             if explicit:
                 if remember:
                     self._apply_password(profile, explicit, remember=True)
@@ -1126,13 +1146,6 @@ class SSHManager:
                     profile["credential_backend"] = self._credentials.backend
                     self._session_passwords[pid] = explicit
                     self._credentials.remember(cid, explicit)
-            effective = self._resolve_password(profile, explicit)
-            with self._lock:
-                self._drop_locked(pid)
-            pooled = self._connect(profile, password=effective)
-            with self._lock:
-                self._drop_locked(pid)
-                self._pool[pid] = pooled
             latency_ms = int((time.perf_counter() - started) * 1000)
             result = {
                 "ok": True,
@@ -1184,7 +1197,7 @@ class SSHManager:
         profile["id"] = new_id("probe")
         profile["created_at"] = _now()
         profile["updated_at"] = _now()
-        if clean["auth"] != AUTH_KEY:
+        if clean["auth"] == AUTH_PASSWORD:
             self._apply_password(profile, _as_text(password), remember=remember)
         result = self._test_profile(profile, password, remember)
         return result

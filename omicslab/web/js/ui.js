@@ -134,6 +134,7 @@ function initBusy() {
 
 let modalLayer = 0;
 const modalStack = [];
+const closingModals = new Set();
 let modalEscHandler = null;
 
 function ensureModalRoot() {
@@ -150,7 +151,7 @@ function ensureModalRoot() {
 /** Modal root only intercepts pointer events while a dialog is attached (T01). */
 function pruneModalRoot(root) {
   if (!root) root = document.getElementById('modal-root');
-  if (!root || modalStack.length) return;
+  if (!root || modalStack.length || closingModals.size) return;
   if (!root.children.length) root.remove();
 }
 
@@ -182,7 +183,7 @@ function unbindModalEsc() {
 
 /** Close every open dialog (route unmount / emergency cleanup). */
 export function closeAllModals({ immediate = true } = {}) {
-  for (const entry of [...modalStack]) {
+  for (const entry of new Set([...modalStack, ...closingModals])) {
     try {
       if (immediate) entry.finishNow();
       else entry.requestClose();
@@ -194,6 +195,13 @@ export function closeAllModals({ immediate = true } = {}) {
 
 export function hasOpenModal() {
   return modalStack.length > 0;
+}
+
+/** Remove dialogs already running their exit animation before opening a new layer. */
+function finishClosingModals() {
+  for (const entry of [...closingModals]) {
+    try { entry.finishNow(); } catch { /* already handled by the layer's close lifecycle */ }
+  }
 }
 
 /**
@@ -215,6 +223,9 @@ export function openModal(opts = {}) {
     dismissable = true,
   } = opts;
 
+  // A user can submit a form and immediately open the next one. Finish any
+  // exiting layer first so its backdrop cannot overlap the new dialog.
+  finishClosingModals();
   const root = ensureModalRoot();
   const layerId = ++modalLayer;
   const previousFocus = document.activeElement;
@@ -263,6 +274,7 @@ export function openModal(opts = {}) {
     clearTimeout(closeTimer);
     const idx = modalStack.indexOf(entry);
     if (idx >= 0) modalStack.splice(idx, 1);
+    closingModals.delete(entry);
     if (backdrop.isConnected) backdrop.remove();
     if (!modalStack.length) unbindModalEsc();
     pruneModalRoot(root);
@@ -281,11 +293,12 @@ export function openModal(opts = {}) {
     closing = true;
     const idx = modalStack.indexOf(entry);
     if (idx >= 0) modalStack.splice(idx, 1);
+    closingModals.add(entry);
     backdrop.classList.add('is-closing');
     closeTimer = setTimeout(finish, 140);
   };
 
-  const entry = { id: layerId, requestClose, finishNow: finish };
+  const entry = { id: layerId, requestClose, finishNow: finish, isClosing: () => closing };
   modalStack.push(entry);
   bindModalEsc();
 

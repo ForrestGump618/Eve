@@ -171,7 +171,7 @@ function refresh({ silent = true } = {}) {
       const list = extractList(data)
         .map(normalizeApproval)
         .filter(Boolean);
-      if (list.length || !silent) {
+      {
         pending.clear();
         for (const item of list) pending.set(item.id, item);
         renderDock();
@@ -191,17 +191,9 @@ function refresh({ silent = true } = {}) {
 function addPending(raw) {
   const approval = normalizeApproval(raw);
   if (!approval) return null;
-  const isNew = !pending.has(approval.id);
   pending.set(approval.id, approval);
   renderDock();
   renderPanelBody();
-  if (isNew && !document.getElementById('modal-root')?.querySelector('.modal')) {
-    toastWarn(`有新的${approval.agentTaskId ? '子任务' : ''}工具调用待批准：${approval.tool}`, {
-      title: '需要你的批准',
-      timeout: 8000,
-      action: { label: '查看', onClick: () => openPanel() },
-    });
-  }
   return approval;
 }
 
@@ -221,8 +213,6 @@ async function decide(approval, decision, buttons) {
     await api.approvals.decide(approval.id, decision);
     removePending(approval.id);
     emit('approval:resolved', { id: approval.id, decision });
-    if (decision === 'approve') toastWarn(`已批准：${approval.tool}`);
-    else toastWarn(`已拒绝：${approval.tool}`);
   } catch (err) {
     btnList.forEach((btn) => {
       btn.disabled = false;
@@ -298,7 +288,7 @@ export function initApprovalCenter() {
   on('approval:request', (payload) => addPending(payload));
   on('approval:resolved', (payload) => removePending(payload?.id));
   refresh({ silent: true });
-  if (!pollTimer) pollTimer = setInterval(() => refresh({ silent: true }), POLL_MS);
+  if (!pollTimer) pollTimer = setInterval(() => {if(!document.hidden)refresh({ silent: true });}, POLL_MS);
   return { refresh, open: openPanel };
 }
 

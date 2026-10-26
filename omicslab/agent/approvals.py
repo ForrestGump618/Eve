@@ -212,6 +212,14 @@ class Approver:
 
         Returns True when approved, False when denied/timed out/cancelled.
         """
+        mode = getattr(ctx, "permission_mode", None)
+        if mode is not None:
+            from .permissions import needs_approval
+            ask, review_reason = needs_approval(mode, tool, arguments)
+            if not ask:
+                return True
+            reason = review_reason + "；" + reason
+            force_ask = True
         if self.policy != "ask" and not force_ask:
             return True
 

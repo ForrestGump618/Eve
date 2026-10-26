@@ -32,6 +32,46 @@ async def desktop_skills(p):
     return adapter,(await adapter.rpc('skill.list')).get('skills',[])
 
 
+async def sync_desktop_mcp(p,server):
+    """Mirror one UI-managed MCP into the unified desktop Harness registry.
+
+    Python retains the legacy Capability Center and its health/details view,
+    while the TypeScript registry remains the single MCP registry consumed by
+    the unified Agent loop. Secret values move only through the authenticated,
+    in-process named pipe and are never persisted by the desktop daemon.
+    """
+    adapter=getattr(p.state.loop,'desktop_harness',None)
+    if not adapter or not isinstance(server,dict):return
+    env_refs=server.get('env_refs') if isinstance(server.get('env_refs'),dict) else {}
+    header_refs=server.get('header_refs') if isinstance(server.get('header_refs'),dict) else {}
+    references=[str(ref) for ref in (*env_refs.values(),*header_refs.values()) if ref]
+    refs={ref:p.vault.get(ref) for ref in references if p.vault.get(ref)}
+    if refs:await adapter.rpc('secrets.set',refs=refs)
+    payload={
+        'id':server.get('id'),
+        'name':server.get('name') or 'MCP server',
+        'transport':'http' if server.get('transport')=='http' else 'stdio',
+        'enabled':bool(server.get('enabled')),
+        'readOnly':server.get('read_only',True) is not False,
+        'projects':[str(item) for item in server.get('workspaces',[])],
+        'env':[{'name':str(name),'ref':str(ref)} for name,ref in env_refs.items()],
+        'headers':[{'name':str(name),'ref':str(ref)} for name,ref in header_refs.items()],
+    }
+    if payload['transport']=='http':payload['url']=server.get('url')
+    else:
+        payload['command']=server.get('command')
+        payload['args']=[str(item) for item in server.get('args',[])]
+    await adapter.rpc('mcp.add',**payload)
+
+
+async def remove_desktop_mcp(p,id):
+    adapter=getattr(p.state.loop,'desktop_harness',None)
+    if not adapter:return
+    listed=await adapter.rpc('mcp.list')
+    if any(item.get('id')==id for item in listed.get('servers',[])):
+        await adapter.rpc('mcp.remove',id=id)
+
+
 async def body(request):
     raw=await request.body()
     if len(raw)>4_000_000:raise HTTPException(413,'请求超过 4MB')
@@ -52,7 +92,7 @@ def guarded(fn):
 @router.get('/bootstrap')
 async def bootstrap(request:Request,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope)
-    return {'brand':'素问 Suwen','version':'2.1.1','schema_version':2,'scope':scope,
+    return {'brand':'素问 Suwen','version':'1.0.0','schema_version':2,'scope':scope,
         'settings':{key:p.config.get(key,scope) for key in DEFAULTS},
         'sections':list(DEFAULTS),'migration':redact(p.store.get('migration','v2')),
         'scientific':SCIENTIFIC,'capabilities':{'persistent_tasks':True,'mcp':['stdio','http'],'knowledge':['text','markdown','docx','pdf_optional'],
@@ -151,7 +191,9 @@ async def registry_list(request:Request,kind:str,scope:str='ws_main'):
         items.extend(dict(item,runtime='desktop',status='installed' if item['enabled'] else 'disabled') for item in native)
         return {'items':items,'scientific':SCIENTIFIC}
     items=p.store.list(kind,'global' if kind in {'mcp','channel','agent'} else scope)
-    if kind=='mcp':items=[dict(r,status=p.store.get('mcp_status',r['id'])) for r in items]
+    if kind=='mcp':
+        items=[dict(r,status=p.store.get('mcp_status',r['id'])) for r in items]
+        for row in items:await sync_desktop_mcp(p,row)
     if kind=='channel':items=[dict(r,connection=p.store.get('channel_status',r['id'])) for r in items if r.get('workspace')==scope]
     return {'items':redact(items)}
 
@@ -159,7 +201,10 @@ async def registry_list(request:Request,kind:str,scope:str='ws_main'):
 @router.post('/registry/{kind}')
 async def registry_create(request:Request,kind:str,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope);data=await body(request)
-    if kind=='mcp':return guarded(lambda:p.mcp.save(data))
+    if kind=='mcp':
+        row=guarded(lambda:p.mcp.save(data))
+        await sync_desktop_mcp(p,row)
+        return row
     if kind=='channel':return guarded(lambda:p.channels.save(data))
     if kind=='agent':return guarded(lambda:p.save_agent(data))
     if kind=='workflow':
@@ -186,7 +231,10 @@ async def registry_update(request:Request,kind:str,id:str,scope:str='ws_main'):
     old=p.store.get(kind,id,store_scope)
     if not old:raise HTTPException(404,'记录不存在')
     value=dict(old,**data)
-    if kind=='mcp':return guarded(lambda:p.mcp.save(value,id))
+    if kind=='mcp':
+        row=guarded(lambda:p.mcp.save(value,id))
+        await sync_desktop_mcp(p,row)
+        return row
     if kind=='channel':return guarded(lambda:p.channels.save(value,id))
     if kind=='agent':return guarded(lambda:p.save_agent(value,id))
     if kind=='workflow':guarded(lambda:validate_workflow(value));return p.store.put(kind,id,value,scope)
@@ -203,6 +251,7 @@ async def registry_delete(request:Request,kind:str,id:str,scope:str='ws_main'):
     if kind=='skill':
         adapter,native=await desktop_skills(p)
         if any(item['id']==id for item in native):return await adapter.rpc('skill.remove',id=id)
+    if kind=='mcp':await remove_desktop_mcp(p,id)
     if kind not in {'mcp','channel','agent','skill','workflow','schedule','evidence','source','artifact'}:raise HTTPException(400,'记录不可通过此接口删除')
     return guarded(lambda:p.store.delete(kind,id,'global' if kind in {'mcp','channel','agent'} else scope))
 
@@ -216,7 +265,7 @@ async def registry_history(request:Request,kind:str,id:str,scope:str='ws_main'):
 
 @router.post('/skills/install')
 async def skill_install(request:Request,scope:str='ws_main'):
-    p=platform(request);p.require_workspace(scope);data=await body(request)
+    p=platform(request);workspace=p.require_workspace(scope);data=await body(request)
     adapter=getattr(p.state.loop,'desktop_harness',None)
     if not adapter:return await p.skills.install(scope,data)
     if data.get('trusted') is not True:raise HTTPException(400,'请审核来源并确认安装')
@@ -226,7 +275,18 @@ async def skill_install(request:Request,scope:str='ws_main'):
         if source.endswith('.git'):
             source=source[:-4]+'/tree/'+str(data.get('ref') or 'main')+'/'+str(data.get('subpath') or '.')
         return await adapter.rpc('skill.import',url=source)
-    root=Path(source).expanduser().resolve()
+    source_path=Path(source).expanduser()
+    # The desktop bridge runs from its isolated runtime directory. Relative
+    # paths in the Capability Center therefore resolve against the selected
+    # workspace, matching file tools and chat rather than the bridge CWD.
+    if not source_path.is_absolute():
+        if workspace.backend!='local' or workspace.root is None:
+            raise HTTPException(400,'远程工作区的 UI 技能安装需要绝对路径；Agent 可使用 skill_install 从远端目录安装')
+        workspace_root=Path(workspace.root).expanduser().resolve()
+        source_path=(workspace_root/source_path).resolve()
+        if not source_path.is_relative_to(workspace_root):
+            raise HTTPException(400,'相对技能路径不能越过当前工作区')
+    root=source_path.resolve()
     directory=(root/str(data.get('subpath') or '.')).resolve()
     if not directory.is_relative_to(root) or not (directory/'skill.json').is_file():raise HTTPException(400,'本地技能目录需要 skill.json 与 SKILL.md；Codex 技能可使用 GitHub tree 目录链接安装')
     return await adapter.rpc('skill.import',path=str(directory))
@@ -432,9 +492,11 @@ async def mcp_import(request:Request,scope:str='ws_main'):
             ref=f'{key}_env_{len(refs)}';p.vault.put(ref,str(secret));refs[env]=ref
         for header,secret in value.get('headers',{}).items():
             ref=f'{key}_header_{len(headers)}';p.vault.put(ref,str(secret));headers[header]=ref
-        records.append(p.mcp.save({'name':name,'transport':'http' if value.get('url') else 'stdio',
+        row=p.mcp.save({'name':name,'transport':'http' if value.get('url') else 'stdio',
             'url':value.get('url'),'command':value.get('command'),'args':value.get('args',[]),
-            'env_refs':refs,'header_refs':headers,'enabled':False,'workspaces':[scope]},key))
+            'env_refs':refs,'header_refs':headers,'enabled':False,'workspaces':[scope]},key)
+        await sync_desktop_mcp(p,row)
+        records.append(row)
     return {'items':records,'enabled':False}
 
 

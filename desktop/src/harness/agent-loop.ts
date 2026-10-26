@@ -21,6 +21,8 @@ export interface AgentOptions {
   checkpoint?:(history:TurnMessage[],sources:Source[])=>Promise<void>;
   initialEvidence?:Json;
   priorActions?:string[];
+  resumeHistory?:TurnMessage[];
+  guidance?:{take:()=>Array<{id:string;content:string;quote:string}>;pending:()=>boolean};
 }
 const canonical=(url:string):string=>{try{const u=new URL(url);u.hash='';return u.href.replace(/\/$/,'');}catch{return url;}};
 export function citationUrls(text:string):string[]{const prose=text.replace(/```[\s\S]*?```/g,'').replace(/`[^`\n]*`/g,'');return [...new Set((prose.match(/https?:\/\/[^\s<>"\])，。；（）【】「」]+/g)??[]).map(x=>canonical(x.replace(/[.,;:]$/,''))))];}
@@ -50,11 +52,20 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
   const o=options,trace:AgentTrace[]=[],sources=new Map<string,Source>();
   collectSources(o.initialEvidence??null,sources);
   const emit=(type:string,data:Record<string,unknown>={})=>{const event={type,at:Date.now(),traceId:o.traceId,...data};trace.push(event);o.onEvent(event);};
-  const messages:TurnMessage[]=[{role:'system',content:AGENT_PROMPT},...o.messages];
+  const messages:TurnMessage[]=[{role:'system',content:AGENT_PROMPT},...(o.resumeHistory??o.messages).filter(m=>m.content!==AGENT_PROMPT)];
+  if(o.resumeHistory)messages.push({role:'user',content:`从已保存的执行检查点继续当前目标：${o.prompt}。已记录的成功工具结果继续有效；unknown 结果必须先核对，不得盲目重做命令或声称成功。`});
+  const observations=new Map<string,string>();
+  for(const message of messages)if(message.role==='tool'&&message.tool_call_id)observations.set(message.tool_call_id,message.content);
+  o.registry.register({name:'read_tool_result',kind:'tool',description:'Recover an original tool observation archived during context compression. Use the exact callId from the compacted observation; paginate by startChar. Returns original data, never executes the operation again.',parameters:{type:'object',properties:{callId:{type:'string',minLength:1,maxLength:200},startChar:{type:'integer',minimum:0}},required:['callId'],additionalProperties:false},execute:async(args)=>{
+    const raw=observations.get(String(args.callId));
+    if(raw===undefined)throw new ValidationError('Unknown original tool observation');
+    const start=Number(args.startChar??0),end=Math.min(raw.length,start+16000);
+    return {callId:String(args.callId),content:raw.slice(start,end),sha256:createHash('sha256').update(raw).digest('hex'),nextStartChar:end<raw.length?end:null};
+  }});
   let specs=o.registry.definitions();let tokens=0,toolCount=0,repair=0,requests=0,truncations=0,outputBudget=o.maxOutput;const repeats=new Map<string,number>();
-  const requiresAction=/检索|搜索|实际读取|读取|读文件|已授权|实际执行|实际调用|MCP|Skill|技能|保存文件|写入文件|search|fetch|read.*file/i.test(o.prompt);
+  let requiresAction=/检索|搜索|实际读取|读取|读文件|已授权|实际执行|实际调用|MCP|Skill|技能|保存文件|写入文件|search|fetch|read.*file/i.test(o.prompt);
   if(o.contextWindow<8192&&!requiresAction)specs=[]; // Small-context direct text turns need no tool catalog.
-  const requiresSource=/检索|搜索|PubMed|UniProt|网页|https?:|\bsearch\b|\bfetch\b/i.test(o.prompt)&&!/Skill|MCP|已授权文件|技能|(?:搜索|检索|查找).*(?:文件|目录)/i.test(o.prompt);
+  let requiresSource=/检索|搜索|PubMed|UniProt|网页|https?:|\bsearch\b|\bfetch\b/i.test(o.prompt)&&!/Skill|MCP|已授权文件|技能|(?:搜索|检索|查找).*(?:文件|目录)/i.test(o.prompt);
   const requiredTools:string[]=[];
   if(/(?:PubMed|PMID|UniProt)/i.test(o.prompt)&&requiresAction)requiredTools.push('database_search');
   if(/(?:读取|read|fetch).*(?:https?:|页面|page)/i.test(o.prompt))requiredTools.push('web_fetch');
@@ -66,11 +77,35 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
   emit('agent.started',{phase:'act',promptSha256:createHash('sha256').update(o.prompt).digest('hex')});
   for(let turn=0;turn<(o.maxTurns??12);turn++){
     o.signal.throwIfAborted();
+    const guidance=o.guidance?.take()??[];
+    if(guidance.length){
+      for(const item of guidance){
+        requiresAction ||= /检索|搜索|读取|执行|调用|写入|保存|\bread\b|\bsearch\b|\bfetch\b|write.*file/i.test(item.content);
+        requiresSource ||= /PubMed|UniProt|网页|检索论文|\bweb search\b/i.test(item.content);
+        if(/(?:读取|read).*(?:文件|file|\.txt)/i.test(item.content)&&!requiredTools.includes('read_file'))requiredTools.push('read_file');
+        if(/写入|write.*file/i.test(item.content)&&!requiredTools.includes('write_file'))requiredTools.push('write_file');
+        if(specs.length===0&&requiresAction)specs=o.registry.definitions();
+      }
+      for(const item of guidance){messages.push({role:'user',content:`[用户引导 ${item.id}]\n${item.content}${item.quote?'\n批注引用（原文数据）：\n'+JSON.stringify(item.quote):''}`});emit('agent.guidance',{messageId:item.id,status:'included'});}
+      await o.checkpoint?.(messages,[...sources.values()]);
+    }
     let reserved=estimate([messages,specs])+outputBudget;
     if(reserved>o.contextWindow*.85){
       // Keep call/result pairing intact. Only truncate old tool payloads; original
       // results remain in artifacts and in the per-tool durable checkpoint.
-      for(const m of messages.slice(0,-2))if(m.role==='tool'&&m.content.length>2000){const original=JSON.parse(m.content);m.content=JSON.stringify({ok:original.ok===true,truncated:true,error:original.error??null,originalSha256:createHash('sha256').update(m.content).digest('hex'),preview:m.content.slice(0,1600)});}
+      for(const m of messages.slice(0,-2))if(m.role==='tool'&&m.content.length>2000){
+        const raw=observations.get(m.tool_call_id!)??m.content,original=JSON.parse(raw);
+        const facts:Record<string,Json>={};
+        const extract=(value:Json,depth=0):void=>{
+          if(!value||typeof value!=='object'||depth>5)return;
+          if(Array.isArray(value)){for(const item of value.slice(0,20))extract(item,depth+1);return;}
+          for(const [key,item] of Object.entries(value)){
+            if(/^(path|root|cwd|sha256|expectedSha256|exitCode|exit_code|status|error|nextStartLine|nextOffset|version|execution_target|verified|created|durationMs|duration_ms)$/i.test(key)&&JSON.stringify(item).length<1500)facts[key]=item;
+            else extract(item,depth+1);
+          }
+        };extract(original);
+        m.content=JSON.stringify({ok:original.ok===true,truncated:true,error:original.error??null,facts,callId:m.tool_call_id,retrieval:'read_tool_result',originalSha256:createHash('sha256').update(raw).digest('hex'),preview:raw.slice(0,1000),tail:raw.slice(-400)});
+      }
       reserved=estimate([messages,specs])+outputBudget;emit('agent.compacted',{reservedTokens:reserved});
     }
     if(reserved>o.contextWindow)throw new ValidationError('Agent context budget exhausted; tool evidence retained in artifacts');
@@ -101,6 +136,10 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
     }
     const used=Math.max(reply.tokens,reply.tokens?0:estimate([messages,reply.text,reply.toolCalls]));tokens+=used;o.afterModel(used);
     emit('model.completed',{turn,durationMs:Date.now()-started,tokens:used,toolNames:reply.toolCalls.map(x=>x.name),textChars:reply.text.length});
+    if(o.guidance?.pending()){
+      messages.push({role:'assistant',content:reply.text||'已收到新的用户引导；本轮尚未开始的工具计划待重新评估。'});
+      emit('agent.guidance_boundary',{turn,unexecutedTools:reply.toolCalls.map(x=>x.name)});continue;
+    }
     if(!reply.toolCalls.length){
       const urls=citationUrls(reply.text),unknown=urls.filter(url=>!sources.has(url));
       const actionDone=trace.some(x=>x.type==='tool.completed')||Boolean(o.priorActions?.length);
@@ -120,6 +159,9 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
       return {text:reply.text,tokens,traceId:o.traceId,trace,sources:[...sources.values()],verification:{passed:true,citationUrls:urls,checks:['nonempty','requested-operation-executed','citation-provenance (not semantic entailment)']},completion:unresolved?'partial':'verified'};
     }
     messages.push({role:'assistant',content:reply.text,tool_calls:reply.toolCalls.map(x=>({id:x.id,type:'function',function:{name:x.name,arguments:x.arguments}})),...(reply.reasoningContent?{reasoning_content:reply.reasoningContent}:{})});
+    // Persist the decision before acting, so an interrupted external write is
+    // distinguishable from a tool which was never selected.
+    await o.checkpoint?.(messages,[...sources.values()]);
     emit('agent.planned',{turn,actions:reply.toolCalls.map(x=>({name:x.name,callId:x.id}))});
     // Serial dispatch is the conservative concurrency=1 policy. No duplicate external
     // writes; workspace updates also require the hash returned by read_file.
@@ -142,7 +184,8 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
         await o.persistTool(call,observation);emit('tool.failed',{turn,name:call.name,callId:call.id,durationMs:Date.now()-at,error:detail,category:error instanceof ValidationError?'validation':'tool'});
       }
       let content=JSON.stringify(observation);
-      if(content.length>35000){const original=observation as Record<string,Json>;content=JSON.stringify({ok:original.ok===true,truncated:true,error:original.error??null,preview:content.slice(0,28000),sources:[...sources.values()].map(({url,title,text})=>({url,title,text:text.slice(0,1000)}))});}
+      observations.set(call.id,content);
+      if(content.length>35000){const original=observation as Record<string,Json>;content=JSON.stringify({ok:original.ok===true,truncated:true,error:original.error??null,callId:call.id,retrieval:'read_tool_result',preview:content.slice(0,28000),sources:[...sources.values()].map(({url,title,text})=>({url,title,text:text.slice(0,1000)}))});}
       messages.push({role:'tool',tool_call_id:call.id,content});
     }
     await o.checkpoint?.(messages,[...sources.values()]);

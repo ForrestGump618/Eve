@@ -1,0 +1,24 @@
+{
+  "kind": "SuWen 1.0 automated test summary",
+  "verifiedAt": "2026-10-26",
+  "typescript": {
+    "total": 252,
+    "passed": 251,
+    "skipped": 1,
+    "failed": 0,
+    "skipReason": "Windows denied symbolic-link creation for one platform-specific test."
+  },
+  "python": {
+    "passed": 560,
+    "failed": 0,
+    "dependencyWarning": "One upstream dependency deprecation warning; no test failure."
+  },
+  "checks": [
+    "TypeScript typecheck",
+    "Desktop build",
+    "JavaScript syntax checks",
+    "Python unit and integration tests",
+    "Installer build"
+  ],
+  "rawLogsNote": "Machine-local raw logs are intentionally excluded from the source release."
+}

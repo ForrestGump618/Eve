@@ -18,6 +18,8 @@ import {
   type ToolActivityServices, type ToolServices,
 } from '../src/activities/tools.js';
 import type { EvalCase, EvalRunner } from '../src/domain/rsi.js';
+import { createAgentTools } from '../src/agent-tools.js';
+import { SearchService } from '../src/search.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -170,14 +172,17 @@ test('mcp validation rejects unsafe commands, urls and env names', () => {
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'stdio', command: 'node', env: [{ name: 'LD_PRELOAD', ref: 'lib' }] }), /LD_PRELOAD/);
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'stdio', command: 'node', env: [{ name: 'lower_case', ref: 'x' }] }), /env/i);
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'stdio', command: 'node', env: [{ name: 'GITHUB_TOKEN', value: 'raw-secret' }] }), /ref/i);
+  assert.throws(() => validateMcpServer({ name: 'bad', transport: 'stdio', command: 'node', headers: [{ name: 'Authorization', ref: 'mcp.auth' }] }), /stdio.*headers/i);
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'http', url: 'ftp://example.com/mcp' }), /http or https/);
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'http', url: 'http://user:pass@example.com/mcp' }), /credentials/);
+  assert.throws(() => validateMcpServer({ name: 'bad', transport: 'http', url: 'https://example.com/mcp', headers: [{ name: 'Mcp-Session-Id', ref: 'mcp.auth' }] }), /reserved/i);
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'stdio', command: 'node', url: 'http://example.com/mcp' }), /must not define url/);
   assert.throws(() => validateMcpServer({ name: 'bad', transport: 'http', url: 'http://example.com/mcp', command: 'node' }), /must not define command/);
   const defaults = validateMcpServer({ name: 'ok', transport: 'stdio', command: 'node' });
   assert.equal(defaults.readOnly, true);
   assert.equal(defaults.enabled, true);
   assert.deepEqual(defaults.env, []);
+  assert.deepEqual(defaults.headers, []);
   assert.deepEqual(defaults.projects, []);
 });
 
@@ -200,11 +205,15 @@ test('mcp registry persists secret references only and enforces per-project enab
   const data = record.data as unknown as McpServerRecordData;
   assert.equal(mcp.isEnabledFor(data, 'proj-a'), true);
   assert.equal(mcp.isEnabledFor(data, 'proj-b'), false);
+  assert.deepEqual(mcp.list('proj-a').map(server => server.id), [view.id]);
+  assert.deepEqual(mcp.list('proj-c'), []);
   await mcp.enable(view.id, true, 'proj-b');
   const afterEnable = store.getRecord(view.id);
   assert.ok(afterEnable);
   assert.deepEqual([...(afterEnable.data as unknown as McpServerRecordData).projects].sort(), ['proj-a', 'proj-b']);
   await mcp.enable(view.id, false, 'proj-a');
+  assert.deepEqual(mcp.list('proj-a'), []);
+  assert.deepEqual(mcp.list('proj-b').map(server => server.id), [view.id]);
   await mcp.enable(view.id, true);
   assert.equal(mcp.get(view.id).enabled, true);
   assert.equal(mcp.list().length, 1);
@@ -255,6 +264,30 @@ test('mcp stdio probe performs a real initialize/tools-list child-process round 
   await assert.rejects(mcp.callTool(view.id, 'write_note', { note: 'x' }), /read-only/);
   await mcp.update(view.id, { readOnly: false });
   assert.deepEqual(await mcp.callTool(view.id, 'write_note', { note: 'x' }), { tool: 'write_note', args: { note: 'x' } });
+});
+
+test('write-enabled MCP calls pass through the task approval channel', { timeout: 30_000 }, async t => {
+  const { store, home, services } = createServices(t);
+  const mcp = new McpRegistry({ store, home, clock: () => Date.now() });
+  const server = await mcp.add({ name: 'approved-writer', transport: 'stdio', command: process.execPath, args: [fixtureServerPath()], readOnly: false });
+  assert.equal((await mcp.health(server.id)).health.status, 'ok');
+  const authorizations: Array<{ tool: string; arguments: Record<string, Json> }> = [];
+  const environment = {
+    kind: 'local' as const,
+    call: async (operation: string, args: Record<string, Json>): Promise<Json> => {
+      assert.equal(operation, 'authorize');
+      authorizations.push(args as { tool: string; arguments: Record<string, Json> });
+      return { approved: true };
+    },
+  };
+  const registry = createAgentTools({ ...services.tools, mcp }, new SearchService(), [], undefined, [], environment, 'ask');
+  const result = await registry.execute('mcp_call', {
+    serverId: server.id,
+    name: 'write_note',
+    arguments: { note: 'approved' },
+  }, AbortSignal.timeout(10_000));
+  assert.deepEqual(result, { tool: 'write_note', args: { note: 'approved' } });
+  assert.deepEqual(authorizations, [{ tool: 'mcp_call', arguments: { serverId: server.id, name: 'write_note', arguments: { note: 'approved' } } }]);
 });
 
 // ---------------------------------------------------------------------------

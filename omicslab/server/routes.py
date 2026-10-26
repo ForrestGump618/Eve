@@ -53,6 +53,8 @@ async def create_conversation(request: Request) -> dict[str, Any]:
         conv = state.store.create(agent=agent, title=title)
     except Exception as exc:
         raise _error(f"创建会话失败：{exc}", "store_error", 500) from exc
+    from .chat import _workspace_binding
+    _workspace_binding(state, conv, str(payload.get("workspace_id") or "").strip() or None)
     return conv.to_dict()
 
 
@@ -77,6 +79,32 @@ async def rename_conversation(cid: str, request: Request) -> dict[str, Any]:
         conv = state.store.rename(cid, title)
     except Exception as exc:
         raise _error(f"重命名失败：{exc}", "not_found", 404) from exc
+    return conv.to_dict()
+
+
+@router.patch("/api/conversations/{cid}/execution")
+async def conversation_execution(cid: str, request: Request) -> dict[str, Any]:
+    state = _state(request)
+    conv = state.store.get(cid)
+    runs = getattr(state, "runs", None)
+    if runs is not None:
+        handle = next((h for h in runs._handles.values() if h.session_id == cid), None)
+        if handle is not None:
+            conv = handle.conversation
+    payload = await _json(request)
+    provider = str(payload.get("provider") or "").strip()
+    model = str(payload.get("model") or "").strip()
+    from ..agent.permissions import validate_mode
+    try:
+        mode = validate_mode(payload.get("permission_mode", "ask"))
+        if len(model) > 160 or any(ord(c) < 32 for c in model):
+            raise ValueError("模型名称无效")
+        if provider or model:
+            state.settings.resolve_llm(provider or None, model or None)
+    except (ValueError, ConfigError) as exc:
+        raise _error(str(exc), "invalid_execution", 400)
+    conv.meta["execution"] = {"provider": provider, "model": model, "permission_mode": mode}
+    state.store.save(conv)
     return conv.to_dict()
 
 

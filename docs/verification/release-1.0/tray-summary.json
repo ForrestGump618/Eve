@@ -1,0 +1,18 @@
+{
+  "kind": "sanitized packaged Windows tray E2E summary",
+  "packaged": true,
+  "checks": 8,
+  "passed": 8,
+  "errors": 0,
+  "checkNames": [
+    "native-tray-created",
+    "cancel-keeps-window-visible",
+    "close-hides-to-tray",
+    "tray-keeps-daemon-and-task-alive",
+    "remember-choice-is-persisted",
+    "tray-show-restores-same-window",
+    "unfinished-task-exit-can-continue-in-tray",
+    "exit-drains-runtime-and-closes-app"
+  ],
+  "notes": "Native close dialog choices were injected by the test; Tray creation, task continuity and shutdown cleanup were exercised in the packaged application."
+}

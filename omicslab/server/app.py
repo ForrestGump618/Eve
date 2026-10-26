@@ -24,6 +24,7 @@ from .routes_runtime import router as runtime_router
 from .routes_workspaces import router as workspaces_router
 from .state import AppState
 from .routes_platform import router as platform_router
+from .routes_harness import router as harness_router
 from .terminal import run_terminal
 
 logger = logging.getLogger("omicslab.server")
@@ -121,6 +122,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if request.url.path.startswith('/api/') and origin and origin not in origins:
             return JSONResponse(_error_payload('来自未授权网页的请求已拒绝', 'origin_denied'), status_code=403)
         response = await call_next(request)
+        if request.url.path.startswith('/api/'):
+            response.headers['Cache-Control'] = 'no-store'
         if not request.url.path.startswith('/api/') and (request.url.path=='/' or request.url.path.endswith(('.js','.css','.html','.svg'))):
             response.headers['Cache-Control']='no-cache, must-revalidate'
         return response
@@ -133,6 +136,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(runtime_router)
     app.include_router(workspaces_router)
     app.include_router(platform_router)
+    app.include_router(harness_router)
     for optional_router in _load_optional_routers():
         app.include_router(optional_router)
 

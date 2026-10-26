@@ -9,6 +9,7 @@ import { ensureHome, readConnection, safeError, type Connection } from './securi
 import { validateModelConfig } from './providers.js';
 import { RPC_METHODS } from './shared/contract.js';
 import { WorkbenchManager } from './workbench.js';
+import {WindowLifecycle} from './window-lifecycle.js';
 
 const here=dirname(fileURLToPath(import.meta.url));
 app.setName('SuWen');
@@ -26,6 +27,10 @@ function daemonPythonPath():string{try{const value=JSON.parse(readFileSync(join(
 /** Managed, pinned Python dependency set for the legacy web workbench (never bundled credentials). */
 const workbenchDeps=process.env.SUWEN_WORKBENCH_DEPS?resolve(process.env.SUWEN_WORKBENCH_DEPS):join(app.getPath('userData'),'python-env');
 const workbench=new WorkbenchManager({home,depsDir:workbenchDeps,python:daemonPythonPath});
+export const lifecycle=new WindowLifecycle({path:join(app.getPath('userData'),'desktop-window.json'),icon:app.isPackaged?join(process.resourcesPath,'suwen.ico'):resolve(here,'../../assets/suwen.ico'),window:()=>researchWindow&&!researchWindow.isDestroyed()?researchWindow:win,
+ active:async()=>{if(!connection)return 0;const snapshot=await rpc(connection,'snapshot');return snapshot.tasks.filter((t:any)=>!['completed','failed','cancelled'].includes(t.status)).length;},
+ shutdown:async()=>{workbench.cancel();if(!connection)return;const old=connection;await rpc(old,'shutdown');for(let i=0;i<250;i++){await new Promise(r=>setTimeout(r,100));const current=readConnection(home);if(!current||current.pid!==old.pid){connection=null;return;}}throw new Error('运行时未在 25 秒内完成资源清理，请检查任务状态');},
+ quit:()=>{quitting=true;app.quit();}});
 async function connectDaemon():Promise<void>{
  const old=readConnection(home);
  if(old){
@@ -57,7 +62,7 @@ async function connectDaemon():Promise<void>{
 }
 /** Push incremental daemon events to the renderer; see docs/architecture/streaming-events.md. */
 async function pumpEvents():Promise<void>{
- if(quitting||pumpBusy||!win||win.isDestroyed())return;
+ if(quitting||pumpBusy||!win||win.isDestroyed()||!win.isVisible())return;
  if(!connection){scheduleReconnect();return;}
  pumpBusy=true;
  try{
@@ -75,8 +80,12 @@ async function pumpEvents():Promise<void>{
 }
 function startEventPump():void{
  if(pumpTimer)return;
- pumpTimer=setInterval(()=>{void pumpEvents();},100);
- pumpTimer.unref?.();
+ const next=()=>{
+  if(quitting)return;
+  pumpTimer=setTimeout(async()=>{pumpTimer=null;await pumpEvents();next();},win&&!win.isDestroyed()&&win.isVisible()?150:2000);
+  pumpTimer.unref?.();
+ };
+ next();
 }
 /** Renderer-facing connection state for streaming UI recovery. */
 function notifyConnection(state:'reconnecting'|'restored'|'lost'):void{
@@ -133,24 +142,29 @@ const exposed=new Set<string>([...RPC_METHODS.filter(method=>!MAIN_ONLY.has(meth
 /** The full research workspace is the default product window. The native console
  * remains available with --native for diagnostics and deterministic shell E2E. */
 async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
- const owner=win;
- if(quitting||!owner||owner.isDestroyed())return {ok:false};
+ if(quitting)return {ok:false};
  if(researchWindow&&!researchWindow.isDestroyed()){researchWindow.show();researchWindow.focus();return {ok:true};}
+ const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
+ const window=new BrowserWindow({width:1600,height:1000,minWidth:980,minHeight:680,title:'素问 · SuWen',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},backgroundColor:'#eef1f6',show:!process.argv.includes('--background'),webPreferences:{preload:join(here,'desktop-preload.cjs'),session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ researchWindow=window;
+ lifecycle.attach(window);
+ const startupPage=(message:string,failed=false)=>'data:text/html;charset=utf-8,'+encodeURIComponent(`<!doctype html><html lang="zh"><meta charset="utf-8"><style>body{margin:0;background:#eef1f6;color:#555;font:14px "Segoe UI",sans-serif}header{height:36px;-webkit-app-region:drag}main{margin:32px;padding:32px;border:1px solid #dfe3e9;border-radius:18px;background:#fff}h1{color:#303238;font-size:20px}p{white-space:pre-wrap;line-height:1.8}button{padding:8px 16px;border:1px solid #ddd;background:#f5f5f5;border-radius:6px;cursor:pointer}</style><header></header><main><h1>素问 Suwen</h1><p id="startup-status"></p>${failed?'<button onclick="window.suwenDesktop.retryStartup()">重试启动</button>':''}</main><script>document.getElementById('startup-status').textContent=${JSON.stringify(message).replaceAll('<','\\u003c')}</script></html>`);
+ isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
+ window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+ window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);if(researchWindow===window)researchWindow=null;});
+ try{
+ await window.loadURL(startupPage('正在准备工作台…'));
  let runtime=await workbench.runtime();
  if(!runtime.ready){
-  if(primary&&!owner.isDestroyed()){owner.show();await owner.webContents.executeJavaScript("document.getElementById('health').textContent='正在准备素问运行环境，完成后自动进入科研工作台…'");}
-  const installed=await workbench.install(progress=>{try{win?.webContents.send('suwen:workbench',progress);}catch{}});
+  const installed=await workbench.install(progress=>{if(!window.isDestroyed())void window.webContents.executeJavaScript(`document.getElementById('startup-status').textContent=${JSON.stringify('正在安装独立运行环境，完成后自动进入工作台…\n'+String(progress.message||'')).replaceAll('<','\\u003c')}`).catch(()=>{});});
   if(!installed.installed)throw new Error(installed.error||'科研工作台运行环境未就绪，请在设置中检查 Python');
   runtime={ready:true,depsDir:installed.depsDir};
  }
  const cfg=readConfig();
  const modelConfig=cfg&&cfg.apiKey?{provider:cfg.provider==='anthropic'?'custom-anthropic':'custom-openai',model:cfg.model,apiBase:cfg.baseUrl,apiKey:cfg.apiKey}:undefined;
  await ensureConnected();const result=await rpc(connection!,'legacyStart',{...(runtime.depsDir?{deps:runtime.depsDir}:{}),...(modelConfig?{config:modelConfig}:{})});
- if(quitting||owner.isDestroyed())return {ok:false};
+ if(quitting||window.isDestroyed())return {ok:false};
  const origin=`http://127.0.0.1:${result.port}`;
- const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
- const window=new BrowserWindow({width:1600,height:1000,title:'素问 · SuWen 科研工作台',show:false,webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
- researchWindow=window;
  const contentsId=window.webContents.id;
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
  isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
@@ -158,15 +172,30 @@ async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  });
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  window.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
- window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);if(researchWindow===window)researchWindow=null;if(primary&&!quitting&&!owner.isDestroyed())owner.close();});
- try {await window.loadURL(origin);if(quitting||window.isDestroyed())return {ok:false};window.show();if(primary&&!owner.isDestroyed())owner.hide();return {ok:true};}
- catch(error){if(!window.isDestroyed())window.destroy();throw error;}
+ await window.loadURL(origin);if(quitting||window.isDestroyed())return {ok:false};if(!process.argv.includes('--background'))window.show();if(primary&&win&&!win.isDestroyed())win.hide();return {ok:true};
+ }catch(error){if(!quitting&&!window.isDestroyed()){window.webContents.removeAllListeners('will-navigate');await window.loadURL(startupPage('工作台启动失败：'+safeError(error),true));}return {ok:false};}
 }
 app.whenReady().then(async()=>{
+ lifecycle.install();
+ ipcMain.handle('suwen:desktop',(event,method:unknown,value:unknown)=>{
+  const target=researchWindow;
+  if(!target||target.isDestroyed()||event.sender!==target.webContents||event.senderFrame!==target.webContents.mainFrame)throw new Error('Untrusted desktop sender');
+  if(method==='getCloseAction')return lifecycle.getCloseAction();
+  if(method==='setCloseAction')return lifecycle.setCloseAction(value);
+  if(method==='retryStartup'&&target.webContents.getURL().startsWith('data:text/html')){target.destroy();researchWindow=null;void openResearchWorkspace(true);return {ok:true};}
+  throw new Error('Unsupported desktop operation');
+ });
  ensureHome(home);let startupError='';try{await connectDaemon();const c=readConfig();if(c&&connection)await rpc(connection,'configure',c);if(connection)await pushSecrets();}catch(err){startupError=safeError(err);}
  if(quitting)return;
- win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'素问 · SuWen',show:process.argv.includes('--native'),backgroundColor:'#f6f7fa',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ if(!process.argv.includes('--native')){
+  await openResearchWorkspace(true);
+  app.on('second-instance',()=>{lifecycle.show();});
+  return;
+ }
+ win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'素问 · SuWen',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},show:process.argv.includes('--native'),backgroundColor:'#eef1f6',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  const shell=win;
+ lifecycle.attach(shell);
+ shell.on('show',()=>{void pumpEvents();});
  shell.on('closed',()=>{if(win===shell)win=null;});
  win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  win.webContents.on('will-navigate',(event,url)=>{if(url!==pathToFileURL(uiFile).href)event.preventDefault();});
@@ -220,12 +249,8 @@ app.whenReady().then(async()=>{
  try{await shell.loadFile(uiFile);}catch(error){if(quitting||shell.isDestroyed())return;throw error;}
  if(quitting||shell.isDestroyed())return;
  startEventPump();
- if(!process.argv.includes('--native')&&!process.argv.includes('--background')){
-  try{await openResearchWorkspace(true);}catch(error){if(!quitting&&!shell.isDestroyed()){shell.show();await shell.webContents.executeJavaScript(`document.getElementById('error').hidden=false;document.getElementById('error').textContent=${JSON.stringify('科研工作台启动失败：'+safeError(error))}`);}}
- }
  if(process.argv.includes('--background')&&!shell.isDestroyed())shell.hide();
  app.on('second-instance',()=>{const target=researchWindow&&!researchWindow.isDestroyed()?researchWindow:win&&!win.isDestroyed()?win:BrowserWindow.getAllWindows()[0];target?.show();target?.focus();});
 });
-app.on('before-quit',()=>{quitting=true;workbench.cancel();if(pumpTimer)clearInterval(pumpTimer);if(reconnectTimer)clearTimeout(reconnectTimer);});
-app.on('window-all-closed',()=>app.quit());
-// UI exit deliberately leaves the detached daemon alive; explicit shutdown pauses work.
+app.on('before-quit',event=>{if(!quitting){event.preventDefault();void lifecycle.quit();return;}workbench.cancel();lifecycle.dispose();if(pumpTimer)clearInterval(pumpTimer);if(reconnectTimer)clearTimeout(reconnectTimer);});
+app.on('window-all-closed',()=>{if(quitting)app.quit();});

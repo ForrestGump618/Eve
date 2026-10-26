@@ -17,7 +17,7 @@ export async function launchLegacy(python: string, script: string, source: strin
   const env: NodeJS.ProcessEnv = {};
   // OS and installed-Python dependency discovery only; API/SSH/model and
   // PYTHONPATH/PYTHONSTARTUP/legacy configuration variables are never inherited.
-  for (const key of ['SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA']) if (process.env[key]) env[key] = process.env[key];
+  for (const key of ['SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA','SSH_AUTH_SOCK']) if (process.env[key]) env[key] = process.env[key];
   env.HOME = resolve(home);
   env.SUWEN_BRIDGE_TOKEN = token;
   if (harness) env.SUWEN_HARNESS_CONNECTION = JSON.stringify(harness);

@@ -1,101 +1,46 @@
-# 素问 / SuWen desktop 3.4.0
+# 素问 / SuWen Desktop 1.0.0
 
-默认直接打开完整科研工作台。运行 `./启动素问.ps1`（或 `npm ci; npm run build; npm start`）；原生诊断控制台使用 `-NativeConsole` / `--native`。本版本包含工作目录文件访问、折叠工具过程、8 个基础技能及有限输出接续。
+素问桌面端是一个面向真实科研与开发任务的 Windows Agent 工作台。Electron 窗口负责交互，独立守护进程持久执行任务，Python 工作台继续承载既有科研页面和 Worker。
 
-本清理目录重新通过 typecheck、243 项单元测试（1 项跳过）与 520 项 Python 测试；已验证的 3.4.0 安装包在交付文件夹中的 `Windows/`（与 Source/ 同级）。当前版本真实模型 22 项任务被供应商 HTTP 429 阻断，不能声明达到真实模型验收门槛。见 [3.4.0 原始交付报告](../docs/verification/product-340-20261026/README.md) 和 [清理记录](../CLEAN-RELEASE.md)。
+## 开发与验证
 
-以下为 **3.3.0 历史记录**，不能当作本轮最终代码的验收声明。
-
-New Electron/TypeScript client plus an independent authenticated user-level daemon. The original
-Python research workbench remains in the parent repository and can be opened as an optional,
-isolated compatibility window. **This is an evidence-tested incremental release, not completion of
-the full vNext acceptance matrix and not a published release.**
-
-## Build & verify (Windows, Node 24.14+, npm)
+需要 Node.js 24.14+、npm 和 Python 3.10+：
 
 ```powershell
 npm ci
-npx tsc -p tsconfig.json --noEmit     # typecheck
-npm test                              # build + node --test dist/test/*.test.js
-node scripts/e2e-rpc.mjs --dist dist --live
-$env:SUWEN_SMOKE_PACKAGED=1; node scripts/electron-smoke.mjs
-node scripts/ui-dom-qa.mjs
-node scripts/streaming-ui-e2e.mjs --mode=final
-npm run dist:win                      # NSIS x64 installer into release/
+npm test
+npm start
 ```
 
-Measured on this machine (final 3.3.0 build, 2026-10-25, branch `suwen-vnext-durable`):
+构建未签名 Windows 安装包：
 
-| Check | Result |
-|---|---|
-| `npm test` | **222 tests / 220 pass / 0 fail / 2 skipped**, 86 s, exit 0 |
-| `e2e-rpc.mjs --live` (real detached daemon over authenticated pipe) | **42 passed / 0 failed**, ~7 s, incl. real Europe PMC/PubMed (PMID 42878939) + UniProt (Q9Y2B4) calls |
-| packaged `electron-smoke.mjs` (final build, hosted workbench deps) | **10/10 checks, passed**, incl. hosted legacy SPA window (12 nav items / 12 routes) |
-| `ui-dom-qa.mjs` | **18 passed / 0 failed / 13 warnings** (main-process bridge methods); 148 actions, 84 RPC-contract entries + main bridge |
-| hosted workbench E2E | **34/34 checks**, 12/12 legacy routes, 0 page/console errors, 0 CSP violations, 19 screenshots |
-| runtime smoke / config injection | **27/27** / **13/13** (managed Python runtime, isolated bridge, model config handoff) |
-| markdown unit tests | **32/32** (progressive streaming, KaTeX, Mermaid, tables, degradation) |
-| chaos (short window) | 12/12 scenarios, 53.4 s (worker/daemon SIGKILL, idempotency, cancel, provider 429→500→200 with approvals) |
-| installer | `release/SuWen-Setup-3.3.0-win-x64.exe`, **131,011,183 B**, SHA-256 `0B55D5BDFBA86C6C1CF2C4D4EB378E113BABDC02C9D6C16F8043F7D7171DAE03`, **UNSIGNED**; host lifecycle 12/12 + upgrade from 3.0.0-preview.1 (clean VM NOT run) |
+```powershell
+npm run dist:win -- --config.directories.output=release/product-100
+```
 
-Skip reasons: Windows symlink `EPERM` in one research-worker test; optional legacy Python workbench
-dependencies missing on the build machine. Full results: `../docs/verification/integration-and-e2e.md`,
-`../docs/verification/e2e-results.md`, `../docs/verification/ui-e2e.md`,
-`../docs/release/final-acceptance-report.md`.
+最终产物位于 `release/product-100/SuWen-Setup-1.0.0-win-x64.exe`。构建目录被 `.gitignore` 排除，发布资产上传到 GitHub Release。
 
-## What works without Python
+## 核心能力
 
-- Five workspaces (chat / projects / tasks / tools / settings), zh/en labels, typed streaming chat
-  (`events.stream` protocol, incremental render, composer/scroll stability, connection banner and
-  bounded auto-reconnect), evidence panel, import wizard, task DAG/events/checkpoints/costs.
-- Configure your own OpenAI-compatible or Anthropic endpoint/key in Settings. Keys are encrypted by
-  Electron `safeStorage`; no cleartext fallback. Provider protocols are verified against **local HTTP
-  fixtures only** — no external paid-account success is claimed.
-- Detached daemon with authenticated current-user named pipe; closing the UI keeps it alive;
-  Settings can quit it safely. Login recovery is opt-in user-level startup; **no Windows Service**.
-- SQLite WAL state: durable DAG, leases/fencing/heartbeat, durable timers, outbox/idempotency,
-  checkpoints, budgets, cancel/pause/resume, unknown-side-effect reconciliation.
-- Independent ContextManager/CompactionService: known-model tokenizer + conservative estimate,
-  structured source-linked summaries, versions/manual compaction/rollback. Ten ~201k-token rounds
-  reduced to ~2.0–2.8k; explicit constraints/evidence/user text retained 100% — **not a claim of
-  semantic losslessness**.
-- Read-only MCP registries and real public Europe PMC/PubMed + UniProt queries; research workflows
-  (knowledge/hypothesis/debate/methods/analysis/discovery/autonomy), RSI loop, channels adapter
-  (read-only default, safeStorage credential refs) as durable typed workflows.
-- Optional Python research worker (`worker/research_worker.py` v2.0.0, pure stdlib): fixed numeric
-  analyses plus a `runScript` sandbox with timeouts/output caps/env allowlist/file digests. It is
-  **not** an OS sandbox and does not bundle scientific stacks.
+- 默认进入浅色、灰阶、一体化正式工作台；项目文件与最近会话共享单侧栏，正常启动只创建一个窗口。
+- 文件、搜索、编辑、Shell、Python、Skills 与工具调用遵循当前本地或 SSH 工作区；连接失败不会静默切换成本机。
+- 提供“请求批准 / 帮我审核 / 完全权限”，同一轮审批合并显示，权限和模型配置按会话隔离。
+- Agent Loop 支持 Plan → Act → Observe → Verify、有限重试、取消、Trace ID、结构化工具结果、上下文压缩、检查点恢复与运行中引导。
+- 能力中心可安装、导入、启停和删除 MCP；测试会实际发现并调用工具，而不只检查连接状态。
+- Skill 按需发现与加载，支持在正式 UI 中安装，也允许 Agent 创建、安装和执行技能；远程 Skill 在选定 SSH 主机执行。
+- 长会话使用有界窗口渲染，流式事件去重并支持断线恢复；工具过程可折叠，输入区位置保持稳定。
+- 关闭窗口可选择退出、最小化到托盘或取消；托盘可恢复窗口、查看任务状态并彻底退出。
 
-## Legacy compatibility / data
+## 验收与边界
 
-New data lives in Electron's userData `SuWen/runtime` (shown in Settings), separate from the old
-Python data (`%LOCALAPPDATA%/OmicsLab`, `~/.omicslab`). Legacy packages, env vars, storage keys and
-data dirs are intentionally retained as compatibility identifiers (see
-`../docs/research/branding-exceptions.md`). The importer is explicit and backup-first:
-`import.inspect` is read-only, `import.apply` backs up then applies idempotently, `import.rollback`
-is unit-tested. **Nothing is imported automatically.** The full legacy workbench can be opened from
-Tools in an authenticated isolated window; on this host it is unavailable because the optional
-Python environment lacks `fastapi` — that is reported, not claimed as a pass.
+最终测试为 560 项 Python 测试通过，249 项 TypeScript 测试中 248 项通过、1 项因 Windows 符号链接权限跳过；固定 22 项真实模型任务最终 22/22。正式页面、打包程序、托盘和实际 SSH 工作区均有自动化证据。
 
-## Not complete (explicit)
+安装包未签名，SmartScreen 可能提示。干净 Windows VM 安装、8/24/72 小时连续耐久、断电/休眠、跨系统重启恢复、实际 SSH 私钥/系统 SSH Agent、第二台物理主机与远程 stdio MCP 尚未真实验收。Python 子进程隔离不等于操作系统安全沙箱。
 
-- Clean-Windows-VM install/upgrade/uninstall lifecycle: **NOT RUN**. Host probe passed 12/12
-  (install, version metadata, running app, authenticated daemon attach, daemon survives UI close,
-  reinstall, uninstall, user data preserved) and the upgrade source `3.0.0-preview.1` installed
-  successfully — but that is **not a clean machine**.
-- Installer is **UNSIGNED** (SmartScreen warning expected); `SHA256SUMS` is present in
-  `release/SHA256SUMS` (mirrored at `../docs/release/SHA256SUMS.txt`); Windows CI workflow exists but
-  was **not executed**.
-- No 8/24/72-hour endurance, reboot, sleep/hibernate, power-loss or disk-full tests.
-- Real external model accounts, code signing and full OS-level sandbox/quotas: **not verified /
-  blocked by environment**. No OS-level CPU/memory/disk quotas.
-- Paper2Agent/Biomni/ERA/Robin/Kosmos integrations, the 23 legacy scientific skills inside the new
-  registry, SSH/terminal/kernel/workspaces, trajectories UI, model routing, vision — **not started**.
-- T2 post-fix SIGKILL/reconnect re-run and the visual acceptance matrix (`ui-visual-audit.md`) were
-  not published; those requirement rows remain UNVERIFIED.
-- GitHub MIT publication/Release assets: **BLOCKED_EXTERNAL** (`gh` absent, no token) — not performed.
+完整结果、同条件前后指标、Trace 范围和未解决问题见 [1.0 验收报告](../docs/verification/release-1.0/REPORT.md) 与 [测试矩阵](../docs/verification/release-1.0/test-matrix.json)。
 
-See `../docs/progress.md`, `acceptance-matrix.md`, `../docs/migration/feature-parity-matrix.md`,
-`../docs/release/release-gates.md` and `../docs/requirements/master-requirements.csv` for row-level
-evidence. Do not describe 3.2.0 as a production-ready, clean-machine-verified or fully vNext-complete
-release.
+## 数据与许可
+
+开发与测试使用独立的 `SUWEN_TEST_HOME`，不覆盖现有会话或用户配置。模型密钥由 Electron `safeStorage` 保护，SSH 凭据通过系统凭据库与引用传递，均不写入日志或源码。
+
+桌面原创代码使用 MIT；保留的 Python 工作台使用 Apache-2.0。第三方许可见 `NOTICE` 与 `third-party-licenses/`。

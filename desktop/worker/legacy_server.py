@@ -117,15 +117,15 @@ async def run(source: Path, home: Path, deps: "Path | None", token: str, wire) -
         settings.provider = "mock"
         settings.model = "mock-model"
     settings.approval_policy = "ask"
-    # Desktop-hosted workspace defaults to the dark research theme required by the
-    # product spec; the legacy SPA would otherwise resolve `system` against a light
-    # host OS. Only seed on first run so user changes in the workbench persist.
+    # Light by default. Only migrate the exact one-field seed from earlier
+    # desktop builds; full appearance settings are user choices and stay intact.
     try:
         from omicslab.suwen.store import PlatformStore
         seed_store = PlatformStore(home)
         try:
-            if not seed_store.get("config", "appearance"):
-                seed_store.put("config", "appearance", {"value": {"theme": "dark"}})
+            appearance = seed_store.get("config", "appearance")
+            if not appearance or appearance.get("value") == {"theme": "dark"}:
+                seed_store.put("config", "appearance", {"value": {"theme": "light"}})
         finally:
             seed_store.close()
     except Exception:
@@ -133,6 +133,8 @@ async def run(source: Path, home: Path, deps: "Path | None", token: str, wire) -
     # The hosted workspace is trusted local code but receives model messages and
     # research data, so constrain the document like the native renderer does.
     legacy_app = create_app(settings)
+    # Available only to authenticated daemon-to-backend execution requests.
+    legacy_app.state.harness_token = token
 
     @legacy_app.middleware("http")
     async def security_headers(request, call_next):

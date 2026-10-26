@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import type {SkillRegistry} from './domain/tools.js';
 import type {WorkspaceFiles} from './workspace-files.js';
 import {ValidationError,type Json} from './harness/types.js';
+import type {ExecutionEnvironment} from './execution-environment.js';
 async function staging<T>(run:(root:string)=>Promise<T>):Promise<T>{
  const root=await mkdtemp(join(tmpdir(),'suwen-skill-'));
  try{return await run(root);}finally{if(resolve(root).startsWith(resolve(tmpdir())+sep))await rm(root,{recursive:true,force:true});}
@@ -28,8 +29,30 @@ async function githubJson(path:string,signal:AbortSignal):Promise<any>{
  for await(const chunk of response.body){text+=Buffer.from(chunk).toString('utf8');if(text.length>2_000_000)throw Error('GitHub skill metadata exceeds limit');}
  return JSON.parse(text);
 }
-export async function installSkill(registry:SkillRegistry,workspace:WorkspaceFiles,args:Record<string,Json>,signal:AbortSignal):Promise<Json>{
+export async function installSkill(registry:SkillRegistry,workspace:WorkspaceFiles,args:Record<string,Json>,signal:AbortSignal,environment?:ExecutionEnvironment):Promise<Json>{
  signal.throwIfAborted();
+ if(args.path&&!args.url&&environment?.kind==='ssh')return staging(async root=>{
+  let count=0,bytes=0;
+  const copy=async(remote:string,local:string,depth=0):Promise<void>=>{
+   if(depth>6)throw new ValidationError('Remote skill nesting exceeds limit');
+   const listing=await environment.call('list_directory',{path:remote},signal) as Record<string,Json>;
+   if(listing.nextOffset!==null)throw new ValidationError('Remote skill directory exceeds entry limit');
+   for(const raw of listing.entries as Record<string,Json>[]){
+    const name=String(raw.name);
+    if(!/^[\w.-]+$/.test(name)||['.','..'].includes(name)||++count>100)throw new ValidationError('Invalid or oversized remote skill tree');
+    const target=join(local,name),source=remote.replace(/\/$/,'')+'/'+name;
+    if(raw.is_dir){await mkdir(target,{recursive:true});await copy(source,target,depth+1);}
+    else {
+     const result=await environment.call('read_file',{path:source,startLine:1,limit:2000},signal) as Record<string,Json>;
+     if(result.truncated)throw new ValidationError('Remote skill file exceeds complete-text limit');
+     const content=String(result.content);bytes+=Buffer.byteLength(content);if(bytes>2_000_000)throw new ValidationError('Remote skill exceeds size limit');
+     await writeFile(target,content);
+    }
+   }
+  };
+  await copy(String(args.path),root);
+  return {installed:true,executed:false,sourceEnvironment:'ssh',skill:await registry.install({path:root,confirm:true}) as unknown as Json};
+ });
  if(args.path&&!args.url)return {installed:true,executed:false,skill:await registry.install({path:await workspace.path(String(args.path)),confirm:true}) as unknown as Json};
  if(!args.url||args.path)throw new ValidationError('Supply exactly one local path or GitHub tree URL');
  const url=new URL(String(args.url));

@@ -146,8 +146,9 @@ class MCPManager:
         if data['transport']=='http' and not str(data.get('url','')).startswith(('http://','https://')):
             raise ValueError('HTTP 服务需要有效 URL')
         if data.get('auth')=='oauth':data['authorization_status']='requires_external_authorization'
-        data={k:v for k,v in data.items() if k in {'name','transport','command','args','url','timeout','enabled','workspaces','agents','tools','auth','authorization_status','env_refs','header_refs'}}
-        data.setdefault('enabled',False);data.setdefault('workspaces',[]);data.setdefault('agents',[])
+        data={k:v for k,v in data.items() if k in {'name','transport','command','args','url','timeout','enabled','read_only','workspaces','agents','tools','auth','authorization_status','env_refs','header_refs'}}
+        if not isinstance(data.get('read_only',True),bool):raise ValueError('read_only 必须是布尔值')
+        data.setdefault('enabled',False);data.setdefault('read_only',True);data.setdefault('workspaces',[]);data.setdefault('agents',[])
         return self.store.put('mcp',id or uid('mcp'),data)
 
     def allowed(self,server,scope,agent=''):

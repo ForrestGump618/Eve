@@ -99,3 +99,7 @@ desktop/dist-*/
 *.sqlite-wal
 /Windows/
 /Validation/
+
+# Raw live model traces are machine-local
+/docs/verification/harness-20261025/release-*.json
+/docs/verification/harness-20261025/quota-check.json

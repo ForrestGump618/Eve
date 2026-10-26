@@ -17,7 +17,7 @@ from omicslab.agent.tools import build_registry,ToolContext
 from omicslab.agent.types import ToolResult
 from omicslab.agent.templates import load_agents
 from omicslab.agent.approvals import Approver
-from omicslab.server.routes_platform import router
+from omicslab.server.routes_platform import router,sync_desktop_mcp
 from omicslab.server import files
 from omicslab.suwen.service import Platform
 from omicslab.suwen.store import Conflict,redact
@@ -35,6 +35,14 @@ class FilesBackend:
         return target.read_bytes(),target.name,files.guess_mime(target)
     async def save_upload(self,parent,name,data):return files.save_upload(self.settings,parent,name,data,root=self.workspace.root)
     def describe(self):return {'kind':'local','root':str(self.workspace.root)}
+
+
+class DesktopAdapter:
+    def __init__(self):self.calls=[]
+    async def rpc(self,method,**params):
+        self.calls.append((method,params))
+        if method=='mcp.list':return {'servers':[{'id':item[1].get('id')} for item in self.calls if item[0]=='mcp.add']}
+        return {'ok':True}
 
 
 @pytest.fixture
@@ -240,6 +248,36 @@ def test_permission_denial_and_channel_restriction_happen_before_execution(p):
     ctx.restricted_channel=True
     with pytest.raises(Exception,match='只读'):p.permissions(ctx,p.state.registry.get('run_python_code'))
     assert p.permissions(ctx,p.state.registry.get('list_files'))=='allow'
+
+
+@pytest.mark.asyncio
+async def test_desktop_mcp_sync_preserves_project_and_secret_references(p):
+    adapter=DesktopAdapter();p.state.loop.desktop_harness=adapter
+    p.vault.put('mcp.header','sensitive-value')
+    server=p.mcp.save({'name':'shared','transport':'http','url':'https://mcp.example/rpc',
+        'enabled':True,'read_only':False,'workspaces':['ws_main'],'header_refs':{'Authorization':'mcp.header'}})
+    await sync_desktop_mcp(p,server)
+    methods=[item[0] for item in adapter.calls]
+    assert methods==['secrets.set','mcp.add']
+    payload=adapter.calls[1][1]
+    assert payload['id']==server['id'] and payload['projects']==['ws_main']
+    assert payload['readOnly'] is False
+    assert payload['headers']==[{'name':'Authorization','ref':'mcp.header'}]
+    assert 'sensitive-value' not in json.dumps(payload)
+
+
+@pytest.mark.asyncio
+async def test_formal_skill_install_rejects_workspace_traversal(p,client_app,tmp_path):
+    adapter=DesktopAdapter();p.state.loop.desktop_harness=adapter
+    outside=tmp_path/'outside-skill';outside.mkdir()
+    (outside/'skill.json').write_text('{}')
+    (outside/'SKILL.md').write_text('# Outside\n')
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        response=await client.post('/api/platform/skills/install',
+            json={'source':'../outside-skill','trusted':True})
+    assert response.status_code==400
+    assert '越过当前工作区' in response.text
+    assert not any(method=='skill.import' for method,_ in adapter.calls)
 
 
 @pytest.mark.asyncio

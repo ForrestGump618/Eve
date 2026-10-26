@@ -102,6 +102,7 @@ const SAFE_BASE_ENV = [
 ];
 
 export interface McpEnvRef { name: string; ref: string }
+export interface McpHeaderRef { name: string; ref: string }
 
 export interface McpToolDescriptor {
   name: string;
@@ -126,6 +127,7 @@ export interface McpServerInput {
   args?: string[];
   url?: string;
   env: McpEnvRef[];
+  headers: McpHeaderRef[];
   readOnly: boolean;
   enabled: boolean;
   projects: string[];
@@ -134,6 +136,7 @@ export interface McpServerInput {
 /** Persisted data for kind `mcpServer`; extends the frozen view with env refs and tool annotations. */
 export interface McpServerRecordData extends McpServerView {
   env: McpEnvRef[];
+  headers: McpHeaderRef[];
   projects: string[];
   toolAnnotations: Array<{ name: string; annotations: McpToolAnnotations }>;
 }
@@ -166,6 +169,30 @@ function envRefEntries(value: unknown): McpEnvRef[] {
   });
 }
 
+const MCP_HEADER_NAME = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+const RESERVED_MCP_HEADER_NAMES: ReadonlySet<string> = new Set([
+  'accept', 'connection', 'content-length', 'content-type', 'host', 'mcp-protocol-version', 'mcp-session-id',
+  'transfer-encoding', 'upgrade',
+]);
+
+function headerRefEntries(value: unknown): McpHeaderRef[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) throw new ValidationError('headers must be an array of {name, ref} entries');
+  if (value.length > 32) throw new ValidationError('headers supports at most 32 entries');
+  const seen = new Set<string>();
+  return value.map((entry, index) => {
+    const item = plainObject(entry, `headers[${index}]`);
+    const name = requireString(item.name, `headers[${index}].name`, 1, 128);
+    if (!MCP_HEADER_NAME.test(name)) throw new ValidationError(`headers[${index}].name is not a valid HTTP header name`);
+    if (RESERVED_MCP_HEADER_NAMES.has(name.toLowerCase())) throw new ValidationError(`headers[${index}].name ${name} is reserved`);
+    const ref = requireString(item.ref, `headers[${index}].ref`, 1, 160);
+    if (!/^[A-Za-z][A-Za-z0-9._-]{0,159}$/.test(ref)) throw new ValidationError(`headers[${index}].ref must be a secret reference name`);
+    if (seen.has(name.toLowerCase())) throw new ValidationError(`header name ${name} is duplicated`);
+    seen.add(name.toLowerCase());
+    return { name, ref };
+  });
+}
+
 function validatedArgs(value: unknown): string[] | undefined {
   if (value === undefined) return undefined;
   if (!Array.isArray(value) || value.length > 64) throw new ValidationError('args must be an array with at most 64 entries');
@@ -188,8 +215,9 @@ export function validateMcpServer(input: Json, existing?: McpServerRecordData): 
   const readOnly = bool(value.readOnly, 'readOnly', existing?.readOnly ?? true);
   const enabled = bool(value.enabled, 'enabled', existing?.enabled ?? true);
   const env = value.env === undefined ? (existing?.env ?? []) : envRefEntries(value.env);
+  const headers = value.headers === undefined ? (existing?.headers ?? []) : headerRefEntries(value.headers);
   const projects = value.projects === undefined ? (existing?.projects ?? []) : projectIds(value.projects);
-  const out: McpServerInput = { name, transport, readOnly, enabled, env, projects };
+  const out: McpServerInput = { name, transport, readOnly, enabled, env, headers, projects };
   if (existing?.id) out.id = existing.id;
   if (typeof value.id === 'string') out.id = requireString(value.id, 'id', 1, 200);
   if (transport === 'stdio') {
@@ -198,6 +226,7 @@ export function validateMcpServer(input: Json, existing?: McpServerRecordData): 
       throw new ValidationError('command must be a bare executable or absolute path without shell metacharacters');
     }
     if (typeof value.url === 'string') throw new ValidationError('stdio servers must not define url');
+    if (headers.length) throw new ValidationError('stdio servers must not define HTTP headers');
     out.command = command;
     out.args = validatedArgs(value.args) ?? existing?.args ?? [];
   } else {
@@ -227,6 +256,17 @@ function mcpEnv(server: McpServerRecordData, secrets: SecretResolver | undefined
     env[entry.name] = resolved;
   }
   return env;
+}
+
+function mcpHeaders(server: McpServerRecordData, secrets: SecretResolver | undefined): Record<string, string> {
+  const headers: Record<string, string> = {};
+  for (const entry of server.headers) {
+    const resolved = secrets?.(entry.ref);
+    if (resolved instanceof Promise) throw new ValidationError(`secret reference ${entry.ref} must resolve synchronously for HTTP headers`);
+    if (typeof resolved !== 'string' || !resolved.length) throw new ValidationError(`MCP secret reference unavailable: ${entry.ref}`);
+    headers[entry.name] = resolved;
+  }
+  return headers;
 }
 
 interface StdioSession {
@@ -301,7 +341,7 @@ export function createMcpProbe(options: { secrets?: SecretResolver; timeoutMs?: 
       }
     }
     const fetchImpl = options.fetch ?? ((url: string, init?: RequestInit) => globalThis.fetch(url, init));
-    const session=new McpHttpSession(server.url!,fetchImpl as typeof fetch,timeoutMs);
+    const session=new McpHttpSession(server.url!,fetchImpl as typeof fetch,timeoutMs,mcpHeaders(server,options.secrets));
     try{await session.initialize(signal);return {tools:(await session.listTools(signal)).map((tool:unknown)=>probeTool(tool)),serverInfo:null};}finally{await session.close();}
   };
 }
@@ -321,7 +361,7 @@ export function createMcpToolCaller(options: { secrets?: SecretResolver; timeout
       }
     }
     const fetchImpl = options.fetch ?? ((url: string, init?: RequestInit) => globalThis.fetch(url, init));
-    const session=new McpHttpSession(server.url!,fetchImpl as typeof fetch,timeoutMs);
+    const session=new McpHttpSession(server.url!,fetchImpl as typeof fetch,timeoutMs,mcpHeaders(server,options.secrets));
     try{await session.initialize(signal);return await session.callTool(tool,args,signal);}finally{await session.close();}
   };
 }
@@ -363,6 +403,7 @@ export class McpRegistry {
       health: data.health && typeof data.health === 'object' ? data.health as unknown as McpServerView['health'] : { status: 'unknown', at: 0 },
       tools: Array.isArray(data.tools) ? data.tools as unknown as McpServerView['tools'] : [],
       env: Array.isArray(data.env) ? data.env as unknown as McpEnvRef[] : [],
+      headers: Array.isArray(data.headers) ? data.headers as unknown as McpHeaderRef[] : [],
       projects: Array.isArray(data.projects) ? data.projects.map(String) : [],
       toolAnnotations: Array.isArray(data.toolAnnotations) ? data.toolAnnotations as unknown as McpServerRecordData['toolAnnotations'] : [],
     };
@@ -386,8 +427,15 @@ export class McpRegistry {
   }
 
   list(projectId?: string | null): McpServerView[] {
-    const rows = this.store.listRecords('mcpServer', projectId === undefined ? { limit: 500 } : { limit: 500, projectId });
-    return rows.map(row => this.toView(row));
+    const rows = this.store.listRecords('mcpServer', { limit: 500 });
+    if (projectId === undefined) return rows.map(row => this.toView(row));
+    if (projectId === null) return rows.filter(row => this.data(row).projects.length === 0).map(row => this.toView(row));
+    return rows
+      .filter(row => {
+        const projects = this.data(row).projects;
+        return projects.length === 0 || projects.includes(projectId);
+      })
+      .map(row => this.toView(row));
   }
 
   get(id: string): McpServerView { return this.toView(this.row(id)); }
@@ -415,6 +463,7 @@ export class McpRegistry {
       health: existing?.health ?? { status: 'unknown', at: 0 },
       tools: existing?.tools ?? [],
       env: validated.env,
+      headers: validated.headers,
       projects: validated.projects,
       toolAnnotations: existing?.toolAnnotations ?? [],
     };
@@ -834,13 +883,13 @@ export class SkillRegistry {
     const end=Math.min(file.text.length,start+28000);
     return {id,path,startChar:start,content:file.text.slice(start,end),nextStartChar:end<file.text.length?end:null,sha256:file.sha256};
   }
-  async run(id:string,input:Json,signal:AbortSignal):Promise<Json> {
+  async run(id:string,input:Json,signal:AbortSignal,execute?: (input:Record<string,Json>,signal:AbortSignal)=>Promise<Json>):Promise<Json> {
     signal.throwIfAborted();this.load(id);
     const data=recordData(this.row(id)),manifest=data.manifest as unknown as SkillManifest;
     if(!manifest.run)throw new ValidationError('Skill declares no executable run entry; tests are not task execution');
     if(manifest.permissions.length)throw new ValidationError('Chat skill execution only permits reviewed skills without host/network permissions');
-    if(!this.worker)throw new ValidationError('Skill Python worker unavailable');
-    mkdirSync(this.sandboxRoot,{recursive:true});
+    if(!execute&&!this.worker)throw new ValidationError('Skill Python worker unavailable');
+    if(!execute)mkdirSync(this.sandboxRoot,{recursive:true});
     const files=this.installedFiles(id),script=files.find(x=>x.path===manifest.run!.script);
     if(!script?.text)throw new ValidationError('Skill run script missing');
     let source=script.text;
@@ -848,7 +897,8 @@ export class SkillRegistry {
       if(manifest.run.language!=='python')throw new ValidationError('Node dependency preflight is unsupported');
       source=`import importlib.util\nfor _module in ${JSON.stringify(manifest.dependencies)}:\n    if importlib.util.find_spec(_module) is None: raise RuntimeError('Missing dependency: '+_module)\n`+source;
     }
-    const result=await this.worker.call('runScript',{language:manifest.run.language,source,args:[JSON.stringify(input)],timeoutMs:manifest.run.timeoutMs??30000,sandboxRoot:this.sandboxRoot,files:files.filter(x=>x.text!==null).map(x=>({name:x.path,text:x.text!}))},signal);
+    const request={language:manifest.run.language,source,args:[JSON.stringify(input)],timeoutMs:manifest.run.timeoutMs??30000,files:files.filter(x=>x.text!==null).map(x=>({name:x.path,text:x.text!}))};
+    const result=execute?await execute(request,signal):await this.worker!.call('runScript',{...request,sandboxRoot:this.sandboxRoot},signal);
     const shaped=plainObject(result,'skill run result');
     if(shaped.timedOut===true||shaped.exitCode!==0)throw new Error(`Skill execution failed (exit=${shaped.exitCode}, timedOut=${shaped.timedOut===true})`);
     if(typeof shaped.stdout!=='string'||!shaped.stdout.trim())throw new Error('Skill produced no result');

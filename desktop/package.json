@@ -1,6 +1,6 @@
 {
   "name": "suwen-desktop",
-  "version": "3.4.0",
+  "version": "1.0.0",
   "private": true,
   "description": "SuWen local research workspace with durable task execution",
   "main": "dist/main.js",
@@ -13,7 +13,7 @@
     "test": "npm run build && node --test dist/test/*.test.js",
     "dist:win": "npm run build && electron-builder --win nsis --x64",
     "pack": "npm run build && electron-builder --dir",
-    "sbom": "npm sbom --sbom-format cyclonedx > release/sbom.cdx.json",
+    "sbom": "node -e \"import('node:fs').then(({mkdirSync})=>mkdirSync('release',{recursive:true}))\" && npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > release/sbom.cdx.json",
     "smoke": "node scripts/electron-smoke.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:integration": "node scripts/e2e-rpc.mjs --live",
@@ -72,6 +72,10 @@
           "!**/__pycache__/**",
           "!**/*.pyc"
         ]
+      },
+      {
+        "from": "assets/suwen.ico",
+        "to": "suwen.ico"
       }
     ],
     "win": {

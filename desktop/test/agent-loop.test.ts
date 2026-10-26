@@ -11,6 +11,29 @@ import {ModelTruncatedError} from '../src/providers.js';
 const parameters={type:'object',properties:{query:{type:'string',minLength:1}},required:['query'],additionalProperties:false} as const;
 function runtime(turn:(messages:TurnMessage[])=>Promise<ModelTurn>):ModelRuntime {const m=new ModelRuntime();m.turn=async(messages)=>turn(messages);return m;}
 const reply=(text:string):ModelTurn=>({text,tokens:20,toolCalls:[]});
+test('in-flight model is not aborted by guidance and its unstarted tool plan is reconsidered',async()=>{
+ let pending=false,turns=0,executions=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executions++;return {value:42};}});
+ const signal=new AbortController().signal;
+ const model=runtime(async messages=>{
+  if(turns++===0){pending=true;await new Promise(r=>setTimeout(r,10));assert.equal(signal.aborted,false);return call();}
+  assert.ok(messages.some(m=>m.role==='user'&&m.content.includes('new instruction')));return reply('Revised response');
+ });
+ const result=await runAgent({...options(model,registry),signal,guidance:{pending:()=>pending,take:()=>{if(!pending)return [];pending=false;return [{id:'guidance',content:'new instruction',quote:'quoted output'}];}}});
+ assert.equal(executions,0);assert.equal(turns,2);assert.equal(result.text,'Revised response');assert.ok(result.trace.some(e=>e.type==='agent.guidance'));
+});
+
+test('archived tool data is recoverable without repeating the operation',async()=>{
+ let turns=0,executions=0;
+ const payload='x'.repeat(38000)+'FINAL_FACT=42';
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executions++;return {payload};}});
+ const model=runtime(async messages=>{
+  if(turns++===0)return call();
+  if(turns===2){const compacted=JSON.parse(messages.at(-1)!.content);assert.equal(compacted.retrieval,'read_tool_result');return {text:'',tokens:10,toolCalls:[{id:'recover',name:'read_tool_result',arguments:JSON.stringify({callId:'call1',startChar:37500})}]};}
+  const recovered=JSON.parse(messages.at(-1)!.content);assert.match(recovered.result.content,/FINAL_FACT=42/);return reply('The original fact is 42.');
+ });
+ const result=await runAgent(options(model,registry));assert.equal(result.verification.passed,true);assert.equal(executions,1);
+});
 test('truncated answers continue from the breakpoint without repeating completed tools and account for both calls',async()=>{
  let calls=0,used=0;const model=runtime(async messages=>{if(!calls++)throw new ModelTruncatedError('第一部分。',41,false);assert.equal(messages.at(-2)?.content,'第一部分。');return reply('第二部分。');});
  const result=await runAgent({...options(model),afterModel:n=>{used+=n;}});

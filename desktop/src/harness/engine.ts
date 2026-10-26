@@ -39,6 +39,9 @@ export class Engine implements DurableWorkflowEngine {
   }
   async tick(): Promise<number> {
     if (this.stopped) return 0;
+    // The scheduler is intentionally durable, but an idle application must
+    // not open two SQLite write transactions four times per second forever.
+    if (!this.store.hasPendingWork()) return 0;
     this.store.reclaimExpired();
     for (const value of this.active.values()) if (!this.store.isLeaseValid(value.lease)) value.controller.abort(new Error('Lease invalidated'));
     let count = 0;

@@ -2,6 +2,8 @@
 // tool cards, approval prompts, figures, retry/stop and the composer.
 
 import { renderMarkdown } from '../markdown.js?v=2.1.1';
+import {mountProjectFiles} from '../project-files.js?v=2.1.1';
+import {mountGuidance} from '../guidance-ui.js?v=2.1.1';
 import { icon, brandMark } from '../icons.js?v=2.1.1';
 import {
   esc,
@@ -237,12 +239,16 @@ function childTaskHtml(task) {
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = chatLayout();
+  const sidebarRoot=ctx.shellSidebar||root;
+  if(ctx.shellSidebar){root.querySelector('.chat-sidebar')?.remove();root.querySelector('.chat-view').classList.add('has-shell-sidebar');}
+  const sidebarController=new AbortController();
+  const sidebarListen=(node,type,handler)=>node.addEventListener(type,handler,{signal:sidebarController.signal});
   const el = {
     view: root.querySelector('.chat-view'),
-    sidebar: root.querySelector('.chat-sidebar'),
-    convList: root.querySelector('#conv-list'),
-    convFilter: root.querySelector('#conv-filter'),
-    newBtn: root.querySelector('#new-conv'),
+    sidebar: (ctx.shellSidebar||root.querySelector('.chat-sidebar')),
+    convList: sidebarRoot.querySelector('#conv-list'),
+    convFilter: sidebarRoot.querySelector('#conv-filter'),
+    newBtn: sidebarRoot.querySelector('#new-conv'),
     splitter: root.querySelector('.chat-splitter'),
     drawerBtn: root.querySelector('#chat-drawer-toggle'),
     drawerScrim: root.querySelector('.chat-drawer-scrim'),
@@ -296,12 +302,14 @@ export async function mount(root, ctx = {}) {
   function applySidebarWidth(width) {
     const w = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, Number(width) || SIDEBAR_DEFAULT));
     el.view.style.setProperty('--chat-sidebar-w', `${w}px`);
+    if(ctx.shellSidebar)document.documentElement.style.setProperty('--sidebar-w',`${w}px`);
     return w;
   }
   applySidebarWidth(getPref('chatSidebarWidth', SIDEBAR_DEFAULT));
   el.view.classList.toggle('sidebar-collapsed',Boolean(getPref('chatSidebarCollapsed',false)));
 
   function openDrawer(open) {
+    if(ctx.shellSidebar){ctx.toggleNav?.(open);return;}
     el.view.classList.toggle('drawer-open', Boolean(open));
   }
 
@@ -436,15 +444,28 @@ export async function mount(root, ctx = {}) {
     }
   }
 
+  let observerEpoch=0;
+  function detachActiveView(){
+    observerEpoch++;
+    if(local.run){local.run.detached=true;clearWatchdog(local.run);local.run.ctrl.abort();}
+    local.abort?.abort();local.run=null;pendingDraft=null;setStreaming(false);
+    local.guidanceRunId=null;guidanceUI.clear();
+  }
   async function createConversation() {
+    if(local.creatingConversation)return null;
+    local.creatingConversation=true;el.input.disabled=true;el.sendBtn.disabled=true;el.newBtn.disabled=true;root.querySelector('#chat-permission-mode').disabled=true;
     try {
       const payload = {};
+      if(getState().workspaceId)payload.workspace_id=getState().workspaceId;
       if (local.agentId) payload.agent = local.agentId;
       const conv = await api.conversations.create(payload);
       const record = conv?.conversation || conv;
       if (!record || !record.id) throw new Error('后端未返回新会话');
+      detachActiveView();
       local.conversations = [record, ...local.conversations.filter((c) => c.id !== record.id)];
       local.activeId = record.id;
+      setPref('activeConversationId', record.id);
+      applyTaskSelection(record);
       setState({ conversations: local.conversations, activeConversationId: record.id });
       renderConversationList();
       local.messages = [];
@@ -455,15 +476,16 @@ export async function mount(root, ctx = {}) {
     } catch (err) {
       toastError(`新建会话失败：${errorMessage(err)}`);
       return null;
+    } finally {
+      local.creatingConversation=false;el.input.disabled=false;el.sendBtn.disabled=local.streaming;el.newBtn.disabled=false;root.querySelector('#chat-permission-mode').disabled=false;
     }
   }
 
   async function selectConversation(id, { scroll = true } = {}) {
-    if (!id || local.streaming) {
-      if (local.streaming) toastInfo('当前回复进行中，请先停止或等待完成');
-      return;
-    }
+    if (!id) return;
+    detachActiveView();
     local.activeId = id;
+    setPref('activeConversationId', id);
     const loadEpoch=local.loadEpoch=(local.loadEpoch||0)+1;
     local.historyEnd=null;
     setState({ activeConversationId: id });
@@ -475,6 +497,14 @@ export async function mount(root, ctx = {}) {
       const raw = await api.conversations.get(id);
       if(local.loadEpoch!==loadEpoch||local.activeId!==id)return;
       const conv = raw?.conversation || raw;
+      applyTaskSelection(conv);
+      const boundWorkspace=conv?.meta?.workspace_id;
+      if(boundWorkspace && boundWorkspace!==getState().workspaceId){
+        const data=await api.workspaces.get(boundWorkspace);
+        if(local.loadEpoch!==loadEpoch||local.activeId!==id)return;
+        const workspace=data.workspace||data;setWorkspace(workspace);
+        const chip=root.querySelector('#chat-workspace');if(chip){chip.querySelector('span').textContent=workspace.name;chip.title=workspace.backend==='ssh'?`SSH · ${workspace.remote?.root||''}`:workspace.local_path;}
+      }
       if (conv?.title || conv?.agent) {
         const idx = local.conversations.findIndex((c) => c.id === id);
         if (idx >= 0) {
@@ -544,6 +574,7 @@ export async function mount(root, ctx = {}) {
       setState({ conversations: local.conversations });
       if (local.activeId === id) {
         local.activeId = null;
+        removePref('activeConversationId');
         local.messages = [];
         setState({ activeConversationId: null });
         renderMessages();
@@ -894,9 +925,14 @@ export async function mount(root, ctx = {}) {
         autoScroll();
       },
       addApproval(data) {
+        if(node.querySelector(`.approval-card[data-approval-id="${cssEscape(data.id || '')}"]`))return;
+        let group=node.querySelector('.approval-run');
+        if(!group){group=h('<details class="approval-run" open><summary>待审批操作</summary><div class="approval-run-items"></div></details>');refs.bubble.appendChild(group);}
         const card = h(approvalCardHtml(data));
         bindApprovalCard(card, data);
-        refs.bubble.appendChild(card);
+        group.querySelector('.approval-run-items').appendChild(card);
+        group.open=true;
+        updateApprovalGroup(group);
         autoScroll();
       },
       upsertChild(raw) {
@@ -1043,6 +1079,13 @@ export async function mount(root, ctx = {}) {
   }
 
   /** Paint the approval card as resolved (used by local click and approval_resolved frames). */
+  function updateApprovalGroup(group){
+    if(!group)return;
+    const all=group.querySelectorAll('.approval-card').length;
+    const waiting=group.querySelectorAll('.approval-card:not(.is-approved):not(.is-denied)').length;
+    group.querySelector('summary').textContent=waiting?`待审批操作 · ${waiting} 项待处理`:`审批记录 · ${all} 项已处理`;
+    if(!waiting)group.open=false;
+  }
   function resolveApprovalCard(approvalId, decision) {
     if (!approvalId) return;
     const cards = [...document.querySelectorAll(`.approval-card[data-approval-id="${cssEscape(approvalId)}"]`)];
@@ -1055,6 +1098,7 @@ export async function mount(root, ctx = {}) {
         }</span>`;
       }
       card.classList.add(decision === 'deny' ? 'is-denied' : 'is-approved');
+      updateApprovalGroup(card.closest('.approval-run'));
       card.querySelectorAll('button').forEach((btn) => {
         btn.disabled = true;
       });
@@ -1078,7 +1122,6 @@ export async function mount(root, ctx = {}) {
         }
         resolveApprovalCard(data.id, decision);
         emit('approval:resolved', { id: data.id, decision });
-        toastSuccess(decision === 'approve' ? '已批准该工具调用' : '已拒绝该工具调用');
       } catch (err) {
         buttons.forEach((b) => {
           b.disabled = false;
@@ -1338,8 +1381,11 @@ export async function mount(root, ctx = {}) {
 
   function setStreaming(on) {
     local.streaming = on;
-    el.sendBtn.disabled = on;
-    el.sendBtn.classList.toggle('is-hidden', on);
+    el.sendBtn.disabled = false;
+    el.sendBtn.classList.remove('is-hidden');
+    el.sendBtn.querySelector('span').textContent=on?'发送引导':'发送';
+    root.querySelector('#guidance-queue-add').hidden=!on;
+    root.querySelector('#guidance-annotate').hidden=!on;
     el.stopBtn.classList.toggle('is-hidden', !on);
     el.resendBtn.disabled = on || !local.messages.some((m) => m.role === 'user');
     el.input.disabled = false;
@@ -1404,6 +1450,9 @@ export async function mount(root, ctx = {}) {
     turn.firstEvent = true;
     const data = ev.data || {};
     switch (type) {
+      case 'guidance_status':
+        void refreshGuidance();
+        break;
       case 'connected':
         if (data.message_id) local.live?.setMeta('生成中');
         if (!local.run) setStatus('已连接');
@@ -1506,7 +1555,7 @@ export async function mount(root, ctx = {}) {
   }
 
   function armWatchdog(flow) {
-    if (!flow) return;
+    if (!flow || flow.detached) return;
     clearWatchdog(flow);
     flow.watchdog = setTimeout(() => {
       flow.watchdog = 0;
@@ -1529,6 +1578,7 @@ export async function mount(root, ctx = {}) {
   }
 
   function dispatchRunEvent(flow, ev) {
+    if(flow.detached)return;
     clearWatchdog(flow);
     if (ev?.type === 'heartbeat') {
       armWatchdog(flow);
@@ -1581,7 +1631,7 @@ export async function mount(root, ctx = {}) {
     let preferTrace = !flow.runId;
     let triedRunStream = false;
     let triedTrace = false;
-    while (!flow.terminal && !flow.stopped) {
+    while (!flow.terminal && !flow.stopped && !flow.detached) {
       const url = runEventsUrl(flow, preferTrace);
       if (!url) return { error: new Error('缺少运行或追踪标识，无法恢复订阅') };
       if (url.includes('/api/runs/')) triedRunStream = true;
@@ -1593,6 +1643,7 @@ export async function mount(root, ctx = {}) {
         onEvent: (ev) => dispatchRunEvent(flow, ev),
       });
       clearWatchdog(flow);
+      if(flow.detached)return {detached:true};
       if (flow.stopped) return { aborted: true };
       if (flow.terminal) return { ok: true };
       // Endpoint mismatch between backend generations: switch transport once.
@@ -1639,7 +1690,9 @@ export async function mount(root, ctx = {}) {
   }
 
   async function createRunOrResume(message, attachments) {
-    const payload = { message, client_request_id: uid('req') };
+    const payload = { message, client_request_id: uid('req'), permission_mode: root.querySelector('#chat-permission-mode')?.value || 'ask' };
+    if(local.taskSelection?.provider)payload.provider=local.taskSelection.provider;
+    if(local.taskSelection?.model)payload.model=local.taskSelection.model;
     if (local.agentId) payload.agent = local.agentId;
     const workspaceId = getState().workspaceId;
     if (workspaceId) payload.workspace_id = workspaceId;
@@ -1676,6 +1729,7 @@ export async function mount(root, ctx = {}) {
     if (attachments.length) payload.attachments = attachments.map((a) => ({ path: a.path, name: a.name }));
     else delete payload.attachments;
     payload.client_request_id = uid('req');
+    payload.permission_mode = root.querySelector('#chat-permission-mode')?.value || 'ask';
     const flow = createFlow('', '', 'preparing');
     local.run = flow;
     local.abort = flow.ctrl;
@@ -1770,9 +1824,11 @@ export async function mount(root, ctx = {}) {
   /** Re-attach to a run that outlived the previous page/route (T03). */
   async function resumeRunIfAny() {
     if (local.streaming || !local.activeId) return false;
-    const saved = loadRememberedRun(local.activeId);
+    const epoch=observerEpoch,conversationId=local.activeId;
+    const saved = loadRememberedRun(conversationId);
     if (!saved?.runId) return false;
     const run = await fetchRun(saved.runId);
+    if(epoch!==observerEpoch)return false;
     if (!run || RUN_TERMINAL_STATUSES.has(run.status)) {
       forgetActiveRun(local.activeId);
       return false;
@@ -1782,19 +1838,23 @@ export async function mount(root, ctx = {}) {
     local.live = createLiveBubble();
     const flow = createFlow(run.runId, run.traceId || saved.traceId, run.status);
     local.run = flow;
+    local.guidanceRunId=flow.runId;void refreshGuidance();
     local.abort = flow.ctrl;
     setStreaming(true);
     setStatus(runStatusLabel(run.status));
-    let result = null;
+    void (async()=>{let result = null;
     try {
       result = await driveRun(flow);
     } catch (err) {
+      if(epoch!==observerEpoch)return;
       turn.fatalError = { message: errorMessage(err) };
       local.live?.setError(errorMessage(err));
     } finally {
       clearWatchdog(flow);
-      forgetActiveRun(local.activeId);
+      if(epoch!==observerEpoch)return;
+      forgetActiveRun(conversationId);
       await refreshChildren(flow.runId);
+      if(epoch!==observerEpoch)return;
       local.run = null;
       finishLive(result, flow.status);
       local.live?.setRun(flow.runId, flow.traceId);
@@ -1804,12 +1864,13 @@ export async function mount(root, ctx = {}) {
       local.live = null;
       await refreshAfterTurn();
     }
+    })();
     return true;
   }
 
   async function sendMessage({ text = null, resend = false } = {}) {
     if (local.streaming) {
-      toastInfo('当前任务仍在运行，可点击停止后再发送');
+      await sendGuidance('send');
       return;
     }
     const inputValue = text != null ? text : el.input.value;
@@ -1847,8 +1908,10 @@ export async function mount(root, ctx = {}) {
     // A new turn owns its own child-task list; drop cards rendered for a previous run.
     el.messages.querySelectorAll('.msg-children').forEach((node) => node.remove());
     pendingDraft = draft;
+    local.guidanceRunId=null;guidanceUI.clear();
     local.live = createLiveBubble();
     local.abort = new AbortController();
+    const epoch=observerEpoch,conversationId=local.activeId;
     setStreaming(true);
     scrollToBottom(true);
 
@@ -1865,7 +1928,10 @@ export async function mount(root, ctx = {}) {
       }
       if (run) {
         flow = createFlow(run.runId, run.traceId, run.status);
+        rememberActiveRun(conversationId, { runId: flow.runId, traceId: flow.traceId });
+        if(epoch!==observerEpoch){flow.detached=true;flow.ctrl.abort();return;}
         local.run = flow;
+        local.guidanceRunId=flow.runId;void refreshGuidance();
         local.abort = flow.ctrl;
         rememberActiveRun(local.activeId, { runId: flow.runId, traceId: flow.traceId });
         setStatus(runStatusLabel(run.status));
@@ -1876,16 +1942,19 @@ export async function mount(root, ctx = {}) {
         flow = local.run;
       }
     } catch (err) {
+      if(epoch!==observerEpoch)return;
       const msg = errorMessage(err);
       turn.fatalError = { message: msg };
       local.live?.setError(msg, err?.detail && typeof err.detail === 'string' ? err.detail : '');
       toastError(msg);
       restoreDraft();
     } finally {
+      if(epoch!==observerEpoch){if(flow)clearWatchdog(flow);return;}
       if (flow) {
         clearWatchdog(flow);
         forgetActiveRun(local.activeId);
         await refreshChildren(flow.runId);
+        if(epoch!==observerEpoch)return;
       }
       const finalStatus = flow?.status || '';
       local.run = null;
@@ -1986,12 +2055,13 @@ export async function mount(root, ctx = {}) {
     }
     if (!el.modelChip) return;
     el.modelChip.hidden = false;
-    const { configured, provider, model } = local.llm;
+    const { configured }=local.llm;
+    const provider=local.taskSelection?.provider||local.llm.provider,model=local.taskSelection?.model||local.llm.model;
     if (configured) {
       const label = [provider, model].filter(Boolean).join(' / ') || '已配置';
       el.modelChip.className = 'chat-model-chip is-ok';
       el.modelChip.textContent = label;
-      el.modelChip.title = `当前默认模型：${label}（可在「设置 → 模型与供应商」中修改）`;
+      el.modelChip.title = `此会话后续任务使用：${label}。点击单独配置；运行中的任务保持原模型。`;
     } else {
       el.modelChip.className = 'chat-model-chip is-warn';
       el.modelChip.textContent = '模型未配置';
@@ -2066,20 +2136,16 @@ export async function mount(root, ctx = {}) {
   /* Event binding                                                     */
   /* ---------------------------------------------------------------- */
 
-  el.newBtn.addEventListener('click', () => {
-    if (local.streaming) {
-      toastInfo('请先停止当前生成');
-      return;
-    }
+  sidebarListen(el.newBtn,'click', () => {
     createConversation();
   });
 
-  el.convFilter.addEventListener('input', () => {
+  sidebarListen(el.convFilter,'input', () => {
     local.filter = el.convFilter.value;
     renderConversationList();
   });
 
-  el.convList.addEventListener('click', (evt) => {
+  sidebarListen(el.convList,'click', (evt) => {
     const renameBtn = evt.target.closest('.conv-rename');
     if (renameBtn) {
       evt.stopPropagation();
@@ -2096,12 +2162,12 @@ export async function mount(root, ctx = {}) {
     if (item && item.dataset.id !== local.activeId) selectConversation(item.dataset.id);
   });
 
-  el.convList.addEventListener('dblclick', (evt) => {
+  sidebarListen(el.convList,'dblclick', (evt) => {
     const item = evt.target.closest('.conv-item');
     if (item) renameConversation(item.dataset.id);
   });
 
-  el.convList.addEventListener('keydown', (evt) => {
+  sidebarListen(el.convList,'keydown', (evt) => {
     if (evt.key !== 'Enter' && evt.key !== ' ') return;
     const item = evt.target.closest('.conv-item');
     if (item) {
@@ -2139,7 +2205,7 @@ export async function mount(root, ctx = {}) {
     }
     if (!evt.shiftKey) {
       evt.preventDefault();
-      sendMessage();
+      if(local.streaming)void sendGuidance('candidate');else sendMessage();
     }
   });
 
@@ -2284,11 +2350,39 @@ export async function mount(root, ctx = {}) {
 
   el.drawerBtn.addEventListener('click', () => {
     if(window.innerWidth<=900){openDrawer(!el.view.classList.contains('drawer-open'));return;}
-    const collapsed=el.view.classList.toggle('sidebar-collapsed');setPref('chatSidebarCollapsed',collapsed);el.drawerBtn.setAttribute('aria-expanded',String(!collapsed));
+    const collapsed=el.view.classList.toggle('sidebar-collapsed');setPref('chatSidebarCollapsed',collapsed);if(ctx.shellSidebar)document.body.classList.toggle('workspace-sidebar-collapsed',collapsed);el.drawerBtn.setAttribute('aria-expanded',String(!collapsed));
   });
   root.querySelector('#chat-skills-open')?.addEventListener('click',()=>navigate('skills'));
+  const permissionSelect = root.querySelector('#chat-permission-mode');
+  const guidanceUI=mountGuidance({root,context:()=>({runId:local.run?.runId||local.guidanceRunId,epoch:observerEpoch,running:local.streaming}),clearInput:()=>{el.input.value='';autoGrow();},startTask:content=>void sendMessage({text:content})});
+  function refreshGuidance(){return guidanceUI.refresh();}
+  function sendGuidance(action){return guidanceUI.send(action);}
+  permissionSelect?.addEventListener('change',async()=>{
+    if(!local.activeId)return;
+    const id=local.activeId;
+    try{const conv=await api.request(`/api/conversations/${encodeURIComponent(id)}/execution`,{method:'PATCH',body:{...local.taskSelection,permission_mode:permissionSelect.value}});if(local.activeId===id)local.taskSelection=conv.meta.execution;}catch(error){toastError(errorMessage(error));}
+  });
+  function applyTaskSelection(conv){
+    local.taskSelection=conv?.meta?.execution||{};
+    local.guidanceRunId=conv?.meta?.last_run_id||null;if(local.guidanceRunId)void refreshGuidance();
+    const mode=local.taskSelection.permission_mode||'ask';
+    root.querySelector('#chat-permission-mode').value=mode;
+    renderModelChip();
+  }
+  el.modelChip?.addEventListener('click',async()=>{
+    try{
+      const settings=await api.settings.get(),catalog=Object.values(settings.providers||{}).filter(p=>p.configured&&p.id!=='mock');
+      const selected=local.taskSelection||{};
+      const modal=openModal({title:'此会话的模型与权限',html:`<div class="task-selection-form"><p>只用于此会话的后续任务。正在执行的任务保持原配置。</p><label>模型连接<select id="task-provider"><option value="">沿用工作区路由</option>${catalog.map(p=>`<option value="${escAttr(p.id)}" ${selected.provider===p.id?'selected':''}>${esc(p.label||p.id)}</option>`).join('')}</select></label><label>模型名称<input id="task-model" list="task-model-options" value="${escAttr(selected.model||'')}" placeholder="留空沿用默认模型"/><datalist id="task-model-options">${catalog.flatMap(p=>p.models||[]).map(m=>`<option value="${escAttr(typeof m==='string'?m:m.id||m.name||'')}"></option>`).join('')}</datalist></label><label>工具权限<select id="task-permission"><option value="ask">请求批准</option><option value="review">帮我审核</option><option value="full">完全权限</option></select></label></div>`,actions:[{label:'取消',kind:'ghost'},{label:'保存任务配置',kind:'primary',onClick:async()=>{
+        if(!local.activeId&&!await createConversation())return false;
+        const execution={provider:modal.body.querySelector('#task-provider').value,model:modal.body.querySelector('#task-model').value.trim(),permission_mode:modal.body.querySelector('#task-permission').value};
+        const conv=await api.request(`/api/conversations/${encodeURIComponent(local.activeId)}/execution`,{method:'PATCH',body:execution});
+        applyTaskSelection(conv);return true;
+      }}]});
+      modal.body.querySelector('#task-permission').value=permissionSelect.value;
+    }catch(error){toastError(errorMessage(error));}
+  });
   root.querySelector('#chat-workspace')?.addEventListener('click',async()=>{
-    if(local.streaming){toastInfo('请等待当前任务结束后更换目录');return;}
     const value=await promptDialog({title:'选择工作目录 · 更换后开始新会话',placeholder:'输入本机文件夹的完整路径',value:getState().workspace?.local_path||getState().workspace?.root||'',confirmText:'使用此目录'});
     if(value===null||!value.trim())return;
     try{const data=await api.workspaces.create({name:value.split(/[\\/]/).filter(Boolean).at(-1)||'工作目录',local_path:value.trim()});const workspace=data.workspace;const probe=await api.workspaces.probe(workspace.workspace_id);if(probe.ok===false)throw new Error('目录不可访问');setWorkspace(workspace);await createConversation();root.querySelector('#chat-workspace').title=value;root.querySelector('#chat-workspace span').textContent=workspace.name||'工作目录';}catch(error){toastError(errorMessage(error));}
@@ -2469,11 +2563,11 @@ export async function mount(root, ctx = {}) {
       updateHeader();
     }
     el.input.focus();
+    autoGrow();
   }
 
   const offNewConversation = on('chat:new-conversation', () => {
-    if (!local.streaming) createConversation();
-    else toastInfo('请先停止当前生成');
+    void createConversation();
   });
   const offPrefill = on('chat:prefill', (payload) => {
     const text = typeof payload === 'string' ? payload : payload?.text;
@@ -2490,19 +2584,28 @@ export async function mount(root, ctx = {}) {
     if (payload?.id) resolveApprovalCard(payload.id, payload.decision || 'approve');
   });
   const offChatSelect = on('chat:select', (conversationId) => {
-    if (!conversationId || local.streaming) return;
+    if (!conversationId) return;
     void selectConversation(String(conversationId));
   });
   await boot();
+  const disposeProjectFiles=await mountProjectFiles(sidebarRoot,{busy:()=>local.streaming,changed:async workspace=>{
+    await createConversation();
+    const chip=root.querySelector('#chat-workspace');
+    if(chip){chip.querySelector('span').textContent=workspace.name;chip.title=workspace.backend==='ssh'?`SSH · ${workspace.remote?.root||''}`:workspace.local_path;}
+  }});
   if(root.isConnected){
     el.view.classList.add('is-mounted');
     el.view.dataset.ready='true';
     el.input.disabled=false;
-    el.sendBtn.disabled=local.streaming;
+    el.sendBtn.disabled=false;
   }
 
   return {
     destroy() {
+      guidanceUI.dispose();
+      detachActiveView();
+      sidebarController.abort();
+      disposeProjectFiles();
       dragging = false;
       document.removeEventListener('mousemove', onSplitMove);
       document.removeEventListener('mouseup', onSplitUp);
@@ -2534,16 +2637,19 @@ function chatLayout() {
   return (
     '<div class="chat-view">' +
     '<aside class="chat-sidebar" aria-label="会话列表">' +
+    '<div class="chat-brand">素问 <span>Suwen</span><span class="brand-chevron">⌄</span></div>' +
     '<div class="chat-sidebar-head">' +
-    `<button type="button" class="btn btn-primary btn-block" id="new-conv">${icon('plus', { size: 16 })}<span>新建会话</span></button>` +
+    `<button type="button" class="btn btn-primary btn-block" id="new-conv">${icon('edit', { size: 17 })}<span>新聊天</span></button>` +
     '<div class="conv-search">' +
     icon('search', { size: 14 }) +
     '<input type="search" id="conv-filter" placeholder="搜索会话" aria-label="搜索会话" />' +
     '</div>' +
     '</div>' +
+    '<section class="project-files" aria-label="项目文件"><div class="sidebar-section-label"><span>项目文件</span><button type="button" class="icon-btn" id="project-refresh" aria-label="刷新项目文件">↻</button></div><select id="project-workspace" aria-label="当前项目工作区"></select><div id="project-file-tree" class="project-file-tree"></div></section>' +
+    '<div class="sidebar-section-label">最近会话</div>' +
     '<div class="conv-list" id="conv-list"></div>' +
     '<div class="chat-sidebar-foot">' +
-    `${icon('command', { size: 13 })}<span>Ctrl / ⌘ + K 打开命令面板</span>` +
+    '<a href="#/workbench" title="工作台">工作台</a><a href="#/extensions" title="技能与工具">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/settings">设置</a>' +
     '</div>' +
     '</aside>' +
     '<div class="chat-splitter" role="separator" aria-orientation="vertical" title="拖动调整宽度"></div>' +
@@ -2552,7 +2658,7 @@ function chatLayout() {
     '<header class="chat-header">' +
     `<button type="button" class="icon-btn chat-drawer-btn" id="chat-drawer-toggle" aria-label="显示会话列表">${icon('panelLeft', { size: 18 })}</button>` +
     '<div class="chat-heading">' +
-    '<div class="chat-title-row"><h1 class="chat-title" id="chat-title">新对话</h1><span class="chat-status" id="chat-status" hidden></span><span class="chat-model-chip" id="chat-model-chip" hidden></span></div>' +
+    '<div class="chat-title-row"><h1 class="chat-title" id="chat-title">新对话</h1><span class="chat-status" id="chat-status" hidden></span><button type="button" class="chat-model-chip" id="chat-model-chip" aria-label="选择任务模型" hidden></button></div>' +
     `<div class="chat-subtitle" id="chat-subtitle"></div>` +
     '</div>' +
     '<div class="chat-header-actions">' +
@@ -2576,13 +2682,16 @@ function chatLayout() {
     '<input type="file" id="chat-file-input" multiple hidden />' +
     `<button type="button" class="btn btn-ghost btn-sm workspace-chip" id="chat-workspace" title="选择模型可访问的工作目录">${icon('folder',{size:14})}<span>工作目录</span></button>` +
     `<button type="button" class="btn btn-ghost btn-sm" id="chat-skills-open" title="查看已安装技能">${icon('skills',{size:14})}<span>技能</span></button>` +
+    `<label class="permission-control" title="本次任务的工具权限；不会改变运行中任务">${icon('shield',{size:14})}<select id="chat-permission-mode" class="permission-mode" aria-label="任务权限"><option value="ask">请求批准</option><option value="review">帮我审核</option><option value="full">完全权限</option></select>${icon('chevronDown',{size:12})}</label>` +
     '<span class="composer-hint" id="composer-hint">Enter 发送 · Shift+Enter 换行</span>' +
     '</div>' +
     '<div class="composer-right">' +
+    '<button type="button" class="btn btn-ghost btn-sm" id="guidance-annotate" hidden>批注反馈</button><button type="button" class="btn btn-ghost btn-sm" id="guidance-queue-add" hidden>候选排队</button>' +
     `<button type="button" class="btn btn-danger btn-sm stop-btn is-hidden" id="stop-btn">${icon('stop', { size: 14 })}<span>停止</span></button>` +
     `<button type="button" class="btn btn-primary send-btn" id="send-btn" title="发送">${icon('send', { size: 17 })}<span>发送</span></button>` +
     '</div></div></div>' +
     '<div class="attach-list" id="attach-list" hidden></div>' +
+    '<div id="guidance-queue" aria-live="polite"></div>' +
     '</div>' +
     '</section>' +
     '</div>'

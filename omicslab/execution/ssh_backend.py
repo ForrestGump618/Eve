@@ -134,6 +134,10 @@ class _WorkerClient:
                             break
                         got = True
                         buffer.extend(chunk)
+                        if len(buffer) > 8_000_000:
+                            self._fail("远端 worker 协议帧超过 8 MB，已停止读取")
+                            self.channel.close()
+                            return
                 except Exception as exc:  # noqa: BLE001 - 读循环必须兜底
                     self._fail(f"读取远端 worker 输出失败：{type(exc).__name__}: {exc}")
                     return
@@ -145,6 +149,8 @@ class _WorkerClient:
                 try:
                     if self.channel.recv_stderr_ready():
                         self._stderr.extend(self.channel.recv_stderr(8192))
+                        if len(self._stderr) > 64_000:
+                            del self._stderr[:-64_000]
                 except Exception:
                     pass
                 try:
@@ -186,6 +192,8 @@ class _WorkerClient:
             return
         with self._lock:
             self._responses[str(request_id)] = message
+            while len(self._responses) > 64:
+                self._responses.pop(next(iter(self._responses)))
             self._lock.notify_all()
 
     # -- 请求 ---------------------------------------------------------
@@ -525,7 +533,7 @@ class SSHExecutionBackend(ExecutionBackend):
     def _open_worker_channel(self) -> _WorkerClient:
         manager = self._manager()
         worker_remote = posixpath.join(self._resolved_root, WORKER_DIR, WORKER_FILENAME)
-        payload = (Path(__file__).with_name(WORKER_FILENAME)).read_bytes()
+        payload = (Path(__file__).resolve().parent.parent / "ssh" / WORKER_FILENAME).read_bytes()
         manager.mkdir(self.profile_id, posixpath.dirname(worker_remote), parents=True)
         manager.write_bytes(self.profile_id, worker_remote, payload, mkdir=True)
         python = self._detect_python()
@@ -738,6 +746,9 @@ class SSHExecutionBackend(ExecutionBackend):
         if isinstance(result, dict):
             result = dict(result)
             result.setdefault("path", target)
+            # SFTP stat reports a canonical path after REALPATH. A symlink
+            # inside the workspace must not grant a file outside it.
+            self._resolve_path(result["path"])
             result["rel"] = self._relative_of(target)
         return result
 
@@ -745,6 +756,7 @@ class SSHExecutionBackend(ExecutionBackend):
         await self.start()
         manager = self._manager()
         target = self._resolve_path(rel)
+        await self.stat(rel)
         try:
             listing = await self._call(manager.list_dir, self.profile_id, target)
         except BackendError:
@@ -780,7 +792,7 @@ class SSHExecutionBackend(ExecutionBackend):
         manager = self._manager()
         target = self._resolve_path(rel)
         limit = max(1, min(int(max_bytes or 0), MAX_READ_TEXT_BYTES))
-        info = await self._call(manager.stat, self.profile_id, target)
+        info = await self.stat(rel)
         if not info.get("exists"):
             raise BackendError(f"远端文件不存在：{rel}")
         if info.get("is_dir"):
@@ -801,6 +813,8 @@ class SSHExecutionBackend(ExecutionBackend):
     async def write_text(self, rel: str, content: str) -> dict[str, Any]:
         await self.start()
         target = self._resolve_path(rel)
+        await self.stat(rel)
+        await self.stat(posixpath.dirname(target))
         data = str(content if content is not None else "").encode("utf-8")
         await self._call(self._manager().write_bytes, self.profile_id, target, data)
         return {"ok": True, "path": self._normalize_rel(rel), "bytes": len(data), "backend": self.kind}

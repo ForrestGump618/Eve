@@ -88,18 +88,21 @@ def _sse_response(frames: AsyncIterator[dict[str, Any]], *, request: Request) ->
 
 def _workspace_binding(state: Any, conversation: Any, workspace_id: str | None) -> Any:
     if state.workspaces is None:
+        if workspace_id or (conversation.meta or {}).get("workspace_id"):
+            raise HTTPException(503, "工作区服务不可用；禁止回退默认目录")
         return None
-    try:
-        if workspace_id:
-            workspace = state.workspaces.get(workspace_id)
-        else:
-            workspace = state.workspaces.workspace_for_conversation(conversation.id)
-        if workspace is None:
-            workspace = state.workspaces.default()
-        state.workspaces.bind_conversation(conversation.id, workspace.workspace_id)
-        return workspace
-    except Exception:
-        return state.workspaces.default()
+    bound = (conversation.meta or {}).get("workspace_id")
+    if bound and workspace_id and bound != workspace_id and conversation.messages:
+        raise HTTPException(409, "会话已绑定其他工作区，请新建会话后切换执行环境")
+    requested = workspace_id or bound
+    workspace = state.workspaces.get(requested) if requested else state.workspaces.workspace_for_conversation(conversation.id)
+    if requested and workspace is None:
+        raise HTTPException(404, "绑定的工作区不存在；禁止回退默认目录")
+    workspace = workspace or state.workspaces.default()
+    state.workspaces.bind_conversation(conversation.id, workspace.workspace_id)
+    conversation.meta["workspace_id"] = workspace.workspace_id
+    state.store.save(conversation)
+    return workspace
 
 
 @router.post("/api/chat")
@@ -140,6 +143,11 @@ async def chat(request: Request) -> StreamingResponse:
         conversation.agent = agent_id
 
     workspace = _workspace_binding(state, conversation, str(body.get("workspace_id") or "").strip() or None)
+    from ..agent.permissions import validate_mode
+    try:
+        permission_mode = validate_mode(body.get("permission_mode", "ask"))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     attachments = body.get("attachments") or []
     if not isinstance(attachments, list):
         attachments = []
@@ -151,6 +159,7 @@ async def chat(request: Request) -> StreamingResponse:
             agent_id=agent_id,
             client_request_id=str(body.get("client_request_id") or "").strip() or None,
             workspace_id=getattr(workspace, "workspace_id", None),
+            permission_mode=permission_mode,
             provider=str(body.get("provider") or "").strip() or None,
             model=str(body.get("model") or "").strip() or None,
             attachments=[a for a in attachments if isinstance(a, dict)],
@@ -280,6 +289,45 @@ async def session_runs(request: Request, session_id: str, limit: int = 50) -> di
     }
 
 
+@router.post("/api/runs/{run_id}/resume")
+async def resume_run(request: Request, run_id: str) -> dict[str, Any]:
+    state = _state(request)
+    row = state.events.get_run(run_id)
+    if not row:
+        raise HTTPException(404, "运行不存在")
+    if row["status"] not in {"interrupted", "failed", "cancelled", "unknown"}:
+        raise HTTPException(409, "只能从已停止的运行恢复")
+    body = await _json(request)
+    if body.get("confirm_unknown") is not True:
+        raise HTTPException(400, "需先确认未知操作已核对；恢复后高风险工具重新请求批准")
+    task_id = (row.get("meta") or {}).get("harness_task_id")
+    harness = getattr(state.runs.loop, "desktop_harness", None)
+    if not task_id or harness is None:
+        raise HTTPException(409, "没有可恢复的统一 Harness 检查点")
+    workspace = row.get("workspace") or {}
+    workspace_id = (row.get("meta") or {}).get("workspace_id") or workspace.get("workspace_id")
+    current = state.workspaces.get(workspace_id)
+    current_root = (str(current.root) if current.root else str((current.remote or {}).get("root") or "~")) if current else None
+    if not current or current.backend != workspace.get("backend", "local") or (current.remote or {}) != (workspace.get("remote") or {}) or current_root != workspace.get("resolved_path", workspace.get("local_path", "")):
+        raise HTTPException(409, "原工作区已变化或不存在，不能自动换环境恢复")
+    previous = await harness.rpc("task.snapshot", id=task_id)
+    if previous["status"] not in {"completed", "failed", "cancelled"}:
+        await harness.rpc("control", id=task_id, action="cancel")
+    checkpoint = next((e for e in reversed(previous.get("events", [])) if e["type"] == "agent.checkpoint"), None)
+    if not checkpoint:
+        raise HTTPException(409, "运行在检查点提交前中断，不能声称已恢复执行")
+    prompt = (previous["steps"][-1].get("input") or {}).get("prompt")
+    if not prompt:
+        raise HTTPException(409, "原始任务目标不可恢复")
+    try:
+        return await state.runs.submit(session_id=row["session_id"], message=prompt,
+                                       agent_id=row.get("agent_id"), workspace_id=workspace_id,
+                                       provider=(row.get("meta") or {}).get("provider"), model=(row.get("meta") or {}).get("model"),
+                                       permission_mode="ask", resume_task_id=task_id)
+    except RunConflict as exc:
+        raise HTTPException(409, "会话已有运行中的任务，请先结束该任务") from exc
+
+
 @router.post("/api/runs/{run_id}/cancel")
 async def cancel_run(request: Request, run_id: str) -> dict[str, Any]:
     state = _state(request)
@@ -308,12 +356,46 @@ async def cancel_run(request: Request, run_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail={"error": {"message": "运行不存在", "code": "run_not_found"}})
 
 
+async def _guidance_call(state: Any, run_id: str, method: str, **params: Any) -> dict[str, Any]:
+    row = state.events.get_run(run_id)
+    if not row:
+        raise HTTPException(404, "运行不存在")
+    task_id = (row.get("meta") or {}).get("harness_task_id")
+    harness = getattr(state.runs.loop, "desktop_harness", None)
+    if not task_id or harness is None:
+        raise HTTPException(409, "此运行尚未进入支持引导队列的统一 Harness")
+    try:
+        return await harness.rpc(method, id=task_id, **params)
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc)[:500]) from exc
+
+
+@router.get("/api/runs/{run_id}/guidance")
+async def list_guidance(request: Request, run_id: str) -> dict[str, Any]:
+    return await _guidance_call(_state(request), run_id, "task.guidance.list")
+
+
+@router.patch("/api/runs/{run_id}/guidance/{message_id}")
+async def change_guidance(request: Request, run_id: str, message_id: str) -> dict[str, Any]:
+    body = await _json(request)
+    result = await _guidance_call(_state(request), run_id, "task.guidance.change", messageId=message_id,
+                                  action=body.get("action"), expectedVersion=body.get("expectedVersion"),
+                                  **({"content": body["content"]} if "content" in body else {}),
+                                  **({"quote": body["quote"]} if "quote" in body else {}))
+    return {"ok": True, **result}
+
+
 @router.post("/api/runs/{run_id}/messages")
 async def steer_run(request: Request, run_id: str) -> dict[str, Any]:
     """Append a user message to a live run (steering; never restarts it)."""
     state = _state(request)
     body = await _json(request)
     content = str(body.get("content") or body.get("message") or "").strip()
+    row = state.events.get_run(run_id)
+    if row and (row.get("meta") or {}).get("harness_task_id"):
+        result = await _guidance_call(state, run_id, "task.guidance.change", content=content,
+                                      quote=str(body.get("quote") or ""), action=body.get("action", "send"))
+        return {"ok": True, **result}
     try:
         result = await state.runs.append_user_message(run_id, content)
     except RunNotFound:
@@ -402,7 +484,17 @@ async def create_session_run(request: Request, session_id: str) -> dict[str, Any
         raise HTTPException(status_code=404, detail={"error": {"message": "会话不存在", "code": "session_not_found"}})
     agent_id = str(body.get("agent") or "").strip() or state.default_agent_info()["agent_id"]
     workspace = _workspace_binding(state, conversation, str(body.get("workspace_id") or "").strip() or None)
+    from ..agent.permissions import validate_mode
+    try:
+        permission_mode = validate_mode(body.get("permission_mode", "ask"))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     attachments = body.get("attachments") or []
+    selection = conversation.meta.get("execution") or {}
+    provider = str(body.get("provider") or selection.get("provider") or "").strip() or None
+    model = str(body.get("model") or selection.get("model") or "").strip() or None
+    conversation.meta["execution"] = {"provider": provider or "", "model": model or "", "permission_mode": permission_mode}
+    state.store.save(conversation)
     try:
         result = await state.runs.submit(
             session_id=conversation.id,
@@ -410,8 +502,9 @@ async def create_session_run(request: Request, session_id: str) -> dict[str, Any
             agent_id=agent_id,
             client_request_id=str(body.get("client_request_id") or "").strip() or None,
             workspace_id=getattr(workspace, "workspace_id", None),
-            provider=str(body.get("provider") or "").strip() or None,
-            model=str(body.get("model") or "").strip() or None,
+            permission_mode=permission_mode,
+            provider=provider,
+            model=model,
             attachments=[a for a in attachments if isinstance(a, dict)] if isinstance(attachments, list) else [],
             conversation=conversation,
         )

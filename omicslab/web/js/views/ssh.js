@@ -79,7 +79,7 @@ function parentRemote(path) {
 }
 
 function authLabel(auth) {
-  return auth === AUTH_KEY ? '密钥' : '密码';
+  return auth === AUTH_KEY ? '密钥' : auth === 'agent' ? '系统 Agent' : '密码';
 }
 
 function profileStatus(profile) {
@@ -439,8 +439,9 @@ function createView(root) {
       )}"></div>` +
       '<div class="field"><label class="field-label" for="ssh-auth">认证方式</label>' +
       `<select class="input" id="ssh-auth">` +
-      `<option value="password"${isKey ? '' : ' selected'}>密码认证</option>` +
+      `<option value="password"${model.auth === AUTH_PASSWORD ? ' selected' : ''}>密码认证</option>` +
       `<option value="key"${isKey ? ' selected' : ''}>私钥认证</option>` +
+      `<option value="agent"${model.auth === 'agent' ? ' selected' : ''}>系统 SSH Agent</option>` +
       '</select></div>' +
       `<div class="field ssh-auth-key"${isKey ? '' : ' hidden'}><label class="field-label" for="ssh-key">私钥路径（服务器本机路径）</label>` +
       `<input class="input" id="ssh-key" placeholder="例如：~/.ssh/id_ed25519" value="${esc(
@@ -534,7 +535,7 @@ function createView(root) {
         node.hidden = !keyMode;
       });
       modal.body.querySelectorAll('.ssh-auth-password').forEach((node) => {
-        node.hidden = keyMode;
+        node.hidden = authSelect?.value !== AUTH_PASSWORD;
       });
     };
     if (authSelect) authSelect.addEventListener('change', syncAuthFields);

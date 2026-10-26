@@ -18,7 +18,8 @@ import {
   closeAllModals,
   h,
 } from './ui.js?v=2.1.1';
-import { on } from './bus.js?v=2.1.1';
+import { on, emit } from './bus.js?v=2.1.1';
+import {workspaceSidebarHtml,mountSidebarNavigation} from './workspace-sidebar.js?v=2.1.1';
 import { initApprovalCenter } from './approvals.js?v=2.1.1';
 import {
   ROUTES,
@@ -150,22 +151,9 @@ function shellHtml() {
     '<button type="button" class="btn btn-ghost btn-sm offline-retry" id="offline-retry">重试连接</button>' +
     '</div>' +
     '<div class="app-shell" id="app-shell">' +
-    '<aside class="app-sidebar" id="app-sidebar" aria-label="主导航">' +
-    '<div class="brand">' +
-    `<span class="brand-logo">${brandMark(34, 'shell')}</span>` +
-    '<span class="brand-text"><span class="brand-name">素问 Suwen</span><span class="brand-sub">你的智能研究工作室</span></span>' +
-    '</div>' +
-    `<nav class="app-nav" id="app-nav">${navItems}</nav>` +
-    '<div class="sidebar-footer">' +
-    `<button type="button" class="sidebar-kernel" id="sidebar-kernel" title="查看内核变量">` +
-    '<span class="status-dot is-off"></span><span class="sidebar-kernel-label">内核状态检测中…</span>' +
-    '</button>' +
-    '<div class="sidebar-actions">' +
-    `<button type="button" class="icon-btn" id="theme-toggle" title="切换浅色 / 深色主题" aria-label="切换主题">${icon('moon', { size: 17 })}</button>` +
-    `<button type="button" class="icon-btn" id="palette-open" title="命令面板（Ctrl/⌘ + K）" aria-label="打开命令面板">${icon('command', { size: 17 })}</button>` +
-    '</div>' +
-    '<div class="sidebar-version" id="sidebar-version">素问 Suwen · 本地运行</div>' +
-    '</div>' +
+    '<aside class="app-sidebar chat-sidebar workspace-sidebar" id="app-sidebar" aria-label="项目与最近会话">' +
+    workspaceSidebarHtml() +
+    `<details class="workspace-menu"><summary>更多功能</summary><nav class="app-nav" id="app-nav">${navItems}</nav></details>` +
     '</aside>' +
     '<div class="app-scrim" id="app-scrim"></div>' +
     '<div class="app-body">' +
@@ -336,10 +324,12 @@ function stopHealthPolling() {
 /* ------------------------------------------------------------------ */
 
 async function renderRoute(route, { force = false } = {}) {
+  document.body.dataset.route = route;
   const target = ROUTES.some((r) => r.id === route) ? route : 'chat';
   if (!force && app.current && state.route === target) return;
   // T01: dialogs are view-owned; leave no stale layer behind on route change.
   closeAllModals();
+  app.sidebarDispose?.();app.sidebarDispose=null;
   if (app.current) {
     try {
       app.current.destroy?.();
@@ -371,12 +361,16 @@ async function renderRoute(route, { force = false } = {}) {
       refreshShell: requestShellRefresh,
       getState,
       setState,
+      shellSidebar:document.querySelector('#app-sidebar'),
+      toggleNav,
     });
     if (token !== app.mountToken) {
       instance?.destroy?.();
       return;
     }
     app.current = instance || null;
+    if(!['workbench','chat'].includes(target))app.sidebarDispose=await mountSidebarNavigation(document.querySelector('#app-sidebar'),action=>{app.pendingChatAction=action;navigate('workbench');});
+    if(app.pendingChatAction&&['workbench','chat'].includes(target)){const action=app.pendingChatAction;app.pendingChatAction=null;emit(action.type==='new'?'chat:new-conversation':'chat:select',action.id);}
   } catch (err) {
     if (token !== app.mountToken) return;
     console.error('[app] view failed', err);
@@ -671,6 +665,15 @@ async function boot() {
     return;
   }
   buildShell(root);
+  if(window.suwenDesktop){
+    document.documentElement.classList.add('desktop-hosted');
+    const titlebar=document.createElement('div');titlebar.className='desktop-titlebar';
+    titlebar.innerHTML=`<button type="button" class="desktop-history" id="desktop-back" aria-label="返回">←</button><button type="button" class="desktop-history" id="desktop-forward" aria-label="前进">→</button><span class="desktop-app-label">素问</span>`;
+    titlebar.querySelector('#desktop-back').addEventListener('click',()=>history.back());titlebar.querySelector('#desktop-forward').addEventListener('click',()=>history.forward());
+    const rail=document.createElement('nav');rail.className='desktop-rail';rail.setAttribute('aria-label','快捷导航');
+    rail.innerHTML=[['chat','chat','聊天'],['workbench','layers','工作台'],['tasks2','clock','任务'],['extensions','skills','技能'],['ssh','terminal','SSH'],['settings','settings','设置']].map(([route,name,label])=>`<a href="#/${route}" title="${label}" aria-label="${label}">${icon(name,{size:22})}</a>`).join('');
+    document.body.prepend(titlebar,rail);
+  }
   initUi();
   initApprovalCenter();
   bindGlobalKeys();
@@ -688,6 +691,7 @@ async function boot() {
   await renderRoute(bootRoute);
   const { initPlatform } = await import("./suwen.js?v=2.1.1");
   await initPlatform();
+  document.documentElement.dataset.ready='true';
   window.addEventListener('beforeunload', () => {
     try {
       app.current?.destroy?.();

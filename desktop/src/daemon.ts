@@ -7,10 +7,11 @@
  * the UI never stops this process.
  */
 import { createServer } from 'node:net';
-import { readFileSync, writeFileSync, openSync, closeSync, unlinkSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, openSync, closeSync, unlinkSync, existsSync,appendFileSync,statSync,renameSync } from 'node:fs';
 import { join, resolve, dirname, isAbsolute } from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { performance } from 'node:perf_hooks';
 import { launchLegacy, type LegacyModelConfig } from './legacy-worker.js';
 import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
@@ -26,6 +27,7 @@ import { createToolServices } from './activities/tools.js';
 import {installBundledSkills} from './bundled-skills.js';
 import { createAllActivities } from './activities/index.js';
 import { createCoreHandlers } from './rpc/core.js';
+import {listGuidance,changeGuidance} from './guidance.js';
 import { createCapabilityHandlers } from './rpc/capabilities.js';
 import { collectStreamEvents } from './stream-events.js';
 import type { ActivityServices, DatabaseQuery, ModelMessage, StreamBuffer, WorkerClient, WorkerHealth } from './shared/contract.js';
@@ -36,6 +38,16 @@ const homeArg = process.argv.indexOf('--home');
 if (homeArg < 0 || !process.argv[homeArg + 1]) throw new Error('Explicit --home required');
 const home = resolve(process.argv[homeArg + 1]);
 ensureHome(home);
+const stderr=console.error.bind(console);
+console.error=(...values:unknown[])=>{
+  const text=values.map(safeError).join(' ');
+  try{
+    const path=join(home,'daemon.log');
+    if(existsSync(path)&&statSync(path).size>2_000_000){const previous=path+'.previous';if(existsSync(previous))unlinkSync(previous);renameSync(path,previous);}
+    appendFileSync(path,JSON.stringify({at:new Date().toISOString(),error:text})+'\n',{mode:0o600});
+  }catch{/* Logging must never take the execution loop down. */}
+  stderr(text);
+};
 const lockPath = join(home, 'daemon.lock');
 function lock(): void {
   try { const fd = openSync(lockPath, 'wx', 0o600); writeFileSync(fd, String(process.pid)); closeSync(fd); }
@@ -172,7 +184,20 @@ const databases: DatabaseQuery = {
 const services: ActivityServices = { store, model: modelRuntime, worker, databases, home, clock: () => Date.now() };
 
 const activities = createAllActivities(services, {
-  model: { home, store, model: modelRuntime, streams, pythonPath: () => pythonPath, modelForTask:id=>taskModels.get(id) },
+  model: { home, store, model: modelRuntime, streams, pythonPath: () => pythonPath, modelForTask:id=>taskModels.get(id),environment:input=>{
+    if(typeof input.originRunId!=='string')return undefined;
+    const runId=input.originRunId;
+    if(!/^run_[a-zA-Z0-9_-]+$/.test(runId))throw new ValidationError('Invalid execution owner');
+    const owner=legacy;
+    if(!owner)throw new ValidationError('Workspace process unavailable; cannot change execution environment');
+    return {kind:input.environment==='ssh'?'ssh':'local',call:async(operation,args,signal)=>{
+      if(legacy!==owner)throw new ValidationError('Workspace process restarted; reconcile the original task before resuming');
+      const response=await fetch(`http://127.0.0.1:${owner.port}/api/harness/runs/${encodeURIComponent(runId)}/tool`,{method:'POST',redirect:'error',headers:{Authorization:'Bearer '+owner.token,'Content-Type':'application/json'},body:JSON.stringify({operation,arguments:args}),signal});
+      const data=await response.json() as Record<string,Json>;
+      if(!response.ok)throw new ValidationError(String(data.detail??data.error??'Workspace operation failed').slice(0,3000));
+      return data;
+    }};
+  } },
   databases: { home },
   toolServices,
 });
@@ -247,14 +272,26 @@ function healthPayload(): Json {
     serviceInstalled: false,
     legacy: legacy ? { pid: legacy.pid, port: legacy.port, mode: 'python-compatibility' } : null,
     runtimeVersions: { node: process.versions.node, electron: process.versions.electron ?? null, sqlite: process.versions.sqlite ?? null },
+    cpuUsageMs: Object.fromEntries(Object.entries(process.cpuUsage()).map(([key, value]) => [key, value / 1000])),
+    eventLoopUtilization: performance.eventLoopUtilization(),
+    rpcCalls: { ...rpcCalls },
+    scheduler: { pending: store.hasPendingWork(), active: engine.runningCount, pollMs: 250, concurrency: 2 },
     ready: true,
   } as unknown as Json;
 }
 
 type Dispatch = (params: Record<string, Json>) => Promise<Json> | Json;
 const handlers: Record<string, Dispatch> = { ...core, ...capabilities };
+const rpcCalls: Record<string, number> = Object.create(null) as Record<string, number>;
 
 handlers['health'] = () => healthPayload();
+handlers['task.snapshot'] = params => {
+  if(typeof params.id!=='string')throw new ValidationError('Task id required');
+  const task=store.getTask(params.id);if(!task)throw new ValidationError('Task not found');
+  const after=Number(params.after??0);
+  if(!Number.isSafeInteger(after)||after<0)throw new ValidationError('Invalid trace cursor');
+  return {...task,steps:store.getSteps(task.id),events:store.events(task.id,after),stream:streams.get(task.id)??null} as unknown as Json;
+};
 handlers['snapshot'] = () => ({
   health: healthPayload(),
   tasks: store.listTasks().slice(-100).reverse().map(task => ({
@@ -382,8 +419,11 @@ handlers['legacyStart'] = async (params: Record<string, Json>) => {
   try { legacy = await legacyStarting; return { port: legacy.port, pid: legacy.pid, token: legacy.token }; } finally { legacyStarting = null; }
 };
 handlers['shutdown'] = () => { setTimeout(() => void shutdown(), 100); return { ok: true }; };
+handlers['task.guidance.list']=params=>({items:listGuidance(store,String(params.id))} as unknown as Json);
+handlers['task.guidance.change']=params=>({items:changeGuidance(store,String(params.id),params)} as unknown as Json);
 
 async function dispatch(method: string, params: Record<string, Json>): Promise<Json> {
+  rpcCalls[method] = (rpcCalls[method] ?? 0) + 1;
   const handler = handlers[method];
   if (!handler) throw new ValidationError('Unsupported RPC method');
   return handler(params ?? {});
@@ -435,3 +475,4 @@ async function shutdown(): Promise<void> {
 process.on('SIGTERM', () => void shutdown());
 process.on('SIGINT', () => void shutdown());
 process.on('unhandledRejection', reason => console.error('unhandledRejection', safeError(reason)));
+process.on('uncaughtException',error=>{console.error('uncaughtException',safeError(error));void shutdown();});

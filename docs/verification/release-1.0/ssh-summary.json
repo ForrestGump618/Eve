@@ -1,0 +1,29 @@
+{
+  "kind": "sanitized real SSH transport acceptance summary",
+  "generatedAt": "2026-10-26T23:38:37+08:00",
+  "target": "one user-provided physical SSH host; connection coordinates redacted",
+  "checks": 16,
+  "passed": 16,
+  "success": true,
+  "p50Ms": 226.52,
+  "p95Ms": 777.33,
+  "checkNames": [
+    "password authentication",
+    "create and read-back verify",
+    "remote read never reads local twin",
+    "remote text search",
+    "stale hash rejects overwrite",
+    "hash guarded edit",
+    "scoped shell working directory",
+    "remote Python worker",
+    "remote skill actual execution",
+    "SFTP reconnect reuses in-memory credential",
+    "dead transport replaced",
+    "worker recreates after transport loss",
+    "second host profile is independent",
+    "second profile does not close first profile",
+    "workspace traversal rejected",
+    "local twin remains untouched"
+  ],
+  "notes": "Two profiles target the same physical host. Private-key and system-SSH-agent login are not claimed as live-tested."
+}

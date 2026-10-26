@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "omicslab"
-version = "2.1.1"
+version = "1.0.0"
 description = "Suwen - local-first AI agent workspace with persistent tasks, skills, remote workspaces and scientific evidence gates."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -54,6 +54,7 @@ dependencies = [
   "prompt_toolkit>=3.0",
   "websockets>=12.0",
   "paramiko>=3.4",
+  "keyring>=25.7,<26",
   "qrcode>=8.0,<9",
 ]
 

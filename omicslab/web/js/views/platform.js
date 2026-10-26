@@ -3,7 +3,7 @@ import { api, errorMessage } from '../api.js?v=2.1.1';
 import { getState, navigate } from '../store.js?v=2.1.1';
 import { esc, escAttr, getPref, setPref } from '../util.js?v=2.1.1';
 import { icon } from '../icons.js?v=2.1.1';
-import { openModal, toastError, toastSuccess, toastWarn, confirmDialog, spinnerHtml } from '../ui.js?v=2.1.1';
+import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, spinnerHtml } from '../ui.js?v=2.1.1';
 import { applyAppearance } from '../suwen.js?v=2.1.1';
 import { renderChannels } from './channel-setup.js?v=2.1.1';
 
@@ -73,6 +73,11 @@ export async function mount(root){
   if(key==='budget')html=`<div class="sw-notice">每轮自动管理步骤、工具调用和 Token 用量。接近限制时缩减输出与工具结果；连续无进展会提前停止。无需填写费用上限、用量额度或迭代次数，停止原因保存在运行记录中。</div><div class="sw-form-grid">${field('任务并发数','budget-concurrency',c.concurrency,'','number')}</div><details><summary>费用统计价格（可选，不影响自动停止策略）</summary>${area('模型名 → 每百万输入 / 输出 Token 价格','budget-prices',c.prices)}</details>`;
   if(key==='vision')html=`<label class="sw-check"><input type="checkbox" id="vision-enabled" ${c.enabled?'checked':''}/>启用独立视觉复核</label><label class="sw-check"><input type="checkbox" id="vision-auto" ${c.auto_review?'checked':''}/>图表生成后自动复核</label><div class="sw-form-grid">${field('视觉模型','vision-model',c.model)}${field('API Base URL','vision-base',c.api_base)}${field('加密凭据引用','vision-ref',c.credential_ref,'例如 vision')}${field('最多修正轮次','vision-repairs',c.max_repairs,'','number')}</div>${button('credential','保存视觉 API Key')}<p class="sw-muted">视觉模型可检查布局与文字；不能仅凭图片确认科学事实。缺少原始数据会标记人工复核。</p>`;
   if(key==='memory')html=`<label class="sw-check"><input type="checkbox" id="memory-enabled" ${c.enabled?'checked':''}/>启用当前工作区记忆</label><label class="sw-check"><input type="checkbox" id="memory-auto" ${c.auto_capture?'checked':''}/>选择性保存较长的任务结论（默认关闭）</label>${select('检索方式','memory-embedding',[['keyword','本地关键词与中文二元词检索'],['api','关键词 + 独立嵌入 API']],c.embedding)}<div class="sw-form-grid">${field('Embedding API Base URL','memory-url',c.embedding_url)}${field('Embedding 模型','memory-model',c.embedding_model)}${field('检索条数','memory-top',c.top_k,'','number')}${field('记忆有效天数','memory-retention',c.retention_days,'','number')}</div>${button('embedding-key','保存 Embedding API Key')}${button('reembed','重新嵌入当前工作区')}<p class="sw-muted">API 嵌入会向指定服务发送文本；敏感凭据会被筛出。默认本地检索不会传出知识正文。</p>`;
+  if(key==='appearance' && window.suwenDesktop){
+   const closeAction=await window.suwenDesktop.getCloseAction();
+   html+=`<div class="sw-field"><label>关闭窗口时</label><select class="input" id="desktop-close-action"><option value="ask">每次询问</option><option value="tray">最小化到系统托盘</option><option value="quit">退出程序</option></select><p class="sw-muted">退出前会提示未完成任务；托盘保持后台任务和 SSH 连接。</p></div>`;
+   queueMicrotask(()=>{const node=content.querySelector('#desktop-close-action');if(node){node.value=closeAction;node.addEventListener('change',async()=>{try{await window.suwenDesktop.setCloseAction(node.value);toastSuccess('关闭方式已保存');}catch(error){toastError(errorMessage(error));}});}});
+  }
   content.innerHTML=`<section class="sw-card"><h2>${esc(groups.find(g=>g[0]===key)?.[1]||key)}</h2>${html}<div class="sw-form-footer">${button('save-'+key,'保存并应用','btn-primary')}${button('reset-config','恢复默认值')}</div></section>`;
  }
  async function advanced(){
@@ -86,7 +91,7 @@ export async function mount(root){
  async function registry(kind){
   const data=await request(`/registry/${kind}`);items=data.items;
   const names={mcp:'MCP 服务',skill:'Skills',agent:'Agent',channel:'消息渠道',schedule:'自动化',artifact:'产物快照',review:'视觉检查'};
-  const create=kind==='review'?'':button('new-'+kind,kind==='artifact'?'登记文件快照':kind==='skill'?'安装技能':'添加'+(names[kind]||kind),'btn-primary');
+  const create=kind==='review'?'':button('new-'+kind,kind==='artifact'?'登记文件快照':kind==='skill'?'安装技能':kind==='mcp'?'安装 MCP 服务':'添加'+(names[kind]||kind),'btn-primary');
   content.innerHTML=`<div class="sw-toolbar"><div><h2>${names[kind]||kind}</h2><p>${kind==='mcp'?'stdio / Streamable HTTP，服务故障与平台隔离。':kind==='channel'?'WebChat、Telegram 可用；其他平台需外部协议或适配器。':kind==='artifact'?'记录文件摘要、任务来源与可恢复版本。':'真实安装与运行状态，依赖不足会明确显示。'}</p></div>${create}${kind==='mcp'?button('import-mcp','导入 JSON'):''}${button('reload','刷新')}</div><div class="sw-grid">${items.map(item=>`<article class="sw-card"><header><div><span class="sw-overline">${esc(item.transport||item.adapter||item.version||item.id)}</span><h3>${esc(item.name||item.title||item.path||item.id)}</h3></div>${badge(typeof item.status==='object'?item.status?.status:item.status||(!item.enabled&&['mcp','channel','skill'].includes(kind)?'disabled':item.enabled?'configured':'snapshot'))}</header>${item.description?`<p>${esc(item.description)}</p>`:''}${item.status?.error?`<p class="sw-error">${esc(item.status.error)}</p>`:''}${kind==='channel'&&item.capabilities?.reason?`<p class="sw-muted">${esc(item.capabilities.reason)}</p>`:''}${kind==='schedule'?`<p>下次执行：${new Date(item.next_run*1000).toLocaleString()}</p>`:''}${kind==='artifact'?`<p>${esc(item.bytes)} bytes · ${esc(item.digest?.slice(0,16))}</p>`:''}<div class="sw-inline">${kind==='mcp'?button('mcp-discover','测试并发现工具','',item.id)+button('mcp-test','工具测试','',item.id):''}${kind==='channel'?button('channel-test','测试连接','',item.id)+button('channel-message','收发测试','',item.id):''}${['mcp','channel','skill','schedule'].includes(kind)?button('toggle-record',item.enabled?'停用':'启用','',item.id):''}${['mcp','channel','agent'].includes(kind)?button('edit-record','编辑','',item.id):''}${(['skill','artifact'].includes(kind)&&item.runtime!=='desktop')?button('record-history','版本历史','',item.id):''}${kind==='artifact'?`<a class="btn btn-ghost btn-sm" target="_blank" href="/api/workspaces/${encodeURIComponent(scope())}/files/raw?path=${encodeURIComponent(item.path)}">预览文件</a>`:''}${kind!=='review'?button('remove-record','移除','',item.id):''}</div><details><summary>${kind==='mcp'?'能力、权限与诊断':'详细记录'}</summary>${code(item)}</details></article>`).join('')}</div>${!items.length?blank('尚未添加'+(names[kind]||kind),'添加后可以检测、启停和查看详细状态。'):''}`;
   if(kind==='skill')content.innerHTML+=`<section class="sw-card"><h2>Scientific Agent 方法技能</h2><p>预装的是带来源的操作方法；上游组件与 API 的安装状态单独显示。</p><div class="sw-grid">${data.scientific.map(s=>`<article class="sw-method"><h3>${esc(s.name)}</h3>${badge(s.status)}<p>${esc(s.description)}</p><span class="sw-muted">上游：${esc(s.upstream_status)} · ${esc(s.version)}</span><p><a target="_blank" rel="noopener" href="${escAttr(s.source)}">查看原始来源 ↗</a></p><details><summary>依赖与运行要求</summary>${code(s.dependencies)}</details></article>`).join('')}</div></section>`;
  }
@@ -116,19 +121,28 @@ export async function mount(root){
  function modalValue(body,id){return body.querySelector('#'+id)?.value??'';}
  function modalJSON(body,id){return JSON.parse(modalValue(body,id)||'{}');}
  async function newRecord(kind,item={}){
+  // Capability installation flows replace one another. A completed request may
+  // render its new card a moment before the previous modal's exit animation
+  // finishes, so an immediate second click must not create two backdrops.
+  closeAllModals();
   let html='';
-  if(kind==='mcp')html=field('服务名称','record-name',item.name)+select('连接方式','record-transport',[['stdio','stdio 本地进程'],['http','Streamable HTTP']],item.transport||'stdio')+field('命令（stdio）','record-command',item.command,'python / node')+area('参数数组（stdio）','record-args',item.args||[],3)+field('服务 URL（HTTP）','record-url',item.url,'https://server.example/mcp')+area('允许工作区 ID 数组','record-workspaces',item.workspaces||[scope()],2)+area('允许 Agent ID 数组（空数组表示当前已授权工作区内所有 Agent）','record-agents',item.agents||[],2)+area('高级：env_refs / header_refs / tools','record-extra',{env_refs:item.env_refs||{},header_refs:item.header_refs||{},tools:item.tools||[]},3);
+  if(kind==='mcp')html=field('服务名称','record-name',item.name)+select('连接方式','record-transport',[['stdio','stdio 本地进程'],['http','Streamable HTTP']],item.transport||'stdio')+select('工具权限','record-read-only',[['true','只读：仅调用标注为 readOnlyHint 的工具'],['false','可写：每次调用遵循请求批准 / 帮我审核 / 完全权限']],String(item.read_only!==false))+field('命令（stdio，仅填写可执行文件）','record-command',item.command,'python / node')+area('参数数组（stdio）','record-args',item.args||[],3)+field('服务 URL（HTTP）','record-url',item.url,'https://server.example/mcp')+area('允许工作区 ID 数组','record-workspaces',item.workspaces||[scope()],2)+area('允许 Agent ID 数组（空数组表示当前已授权工作区内所有 Agent）','record-agents',item.agents||[],2)+area('高级：env_refs / header_refs / 工具白名单','record-extra',{env_refs:item.env_refs||{},header_refs:item.header_refs||{},tools:item.tools||[]},3)+'<label class="sw-check"><input type="checkbox" id="record-verify" checked/>安装后立即连接服务并发现真实工具；只有验证成功才显示安装成功。</label><p class="sw-muted">stdio 命令必须已在本机安装；HTTP 凭据通过 env_refs 或 header_refs 引用加密凭据。安装不会自动执行任何工具。</p>';
   if(kind==='agent')html=field('Agent 名称','record-name',item.name)+field('角色描述','record-description',item.description)+area('角色指令','record-instructions',item.instructions||'',5)+area('工具组','record-toolsets',item.toolsets||['files','python','skills','system','research','network','mcp'],3)+area('允许技能名称（空数组不限制）','record-skills',item.skills||[],2)+field('独立模型（留空沿用路由）','record-model',item.model)+field('独立 Provider（留空沿用默认）','record-provider',item.provider);
   if(kind==='channel')html=field('渠道名称','record-name',item.name)+select('适配器','record-adapter',[['webchat','WebChat 本地消息'],['telegram','Telegram Bot'],['wechat','微信：需外部适配器'],['wecom','企业微信：需外部适配器'],['feishu','飞书：需外部适配器'],['qq','QQ：需外部适配器'],['openclaw','OpenClaw：需桥接适配器']],item.adapter||'webchat')+field('绑定工作区','record-workspace',item.workspace||scope())+field('绑定 Agent','record-agent',item.agent||'lead')+area('授权联系人 ID 数组（默认拒绝陌生人）','record-contacts',item.contacts||[],2)+field('Token 的加密凭据引用','record-credential',item.credential_ref)+field('Webhook 共享密钥的凭据引用','record-webhook',item.webhook_ref)+'<p class="sw-muted">默认只读，禁止主动发送。需要更高权限时，在确认配置后单独启用。</p>'+area('高级权限','record-extra',{read_only:item.read_only!==false,allow_send:!!item.allow_send},2);
   if(kind==='schedule')html=field('自动化名称','record-name',item.name)+field('执行间隔（分钟，至少 1）','record-interval',(item.interval||3600)/60,'','number')+area('任务参数（prompt / workflow_id）','record-task',item.task||{prompt:'汇总当前项目的待解决问题'},4);
-  modalForm(item.id?'编辑配置':'添加'+kind,html,async body=>{
+  modalForm(item.id?'编辑配置':kind==='mcp'?'安装 MCP 服务':'添加'+kind,html,async body=>{
     const get=id=>modalValue(body,'record-'+id);let data;
-    if(kind==='mcp')data={name:get('name'),transport:get('transport'),command:get('command'),args:modalJSON(body,'record-args'),url:get('url'),workspaces:modalJSON(body,'record-workspaces'),agents:modalJSON(body,'record-agents'),...modalJSON(body,'record-extra'),enabled:item.enabled||false};
+    if(kind==='mcp')data={name:get('name'),transport:get('transport'),read_only:get('read-only')!=='false',command:get('command'),args:modalJSON(body,'record-args'),url:get('url'),workspaces:modalJSON(body,'record-workspaces'),agents:modalJSON(body,'record-agents'),...modalJSON(body,'record-extra'),enabled:item.id?item.enabled!==false:true};
     if(kind==='agent')data={name:get('name'),description:get('description'),instructions:get('instructions'),toolsets:modalJSON(body,'record-toolsets'),skills:modalJSON(body,'record-skills'),model:get('model'),provider:get('provider')};
     if(kind==='channel')data={name:get('name'),adapter:get('adapter'),workspace:get('workspace'),agent:get('agent'),contacts:modalJSON(body,'record-contacts'),credential_ref:get('credential'),webhook_ref:get('webhook'),enabled:item.enabled||false,...modalJSON(body,'record-extra')};
     if(kind==='schedule')data={name:get('name'),interval:Number(get('interval'))*60,task:modalJSON(body,'record-task'),enabled:item.enabled||false};
-    await request('/registry/'+kind+(item.id?'/'+encodeURIComponent(item.id):''),item.id?'PUT':'POST',data);toastSuccess('已保存');await load();
-  });
+    const saved=await request('/registry/'+kind+(item.id?'/'+encodeURIComponent(item.id):''),item.id?'PUT':'POST',data);
+    if(kind==='mcp'&&body.querySelector('#record-verify')?.checked){
+      try{const result=await request(`/mcp/${encodeURIComponent(saved.id)}/discover`,'POST',{});toastSuccess(`MCP 已安装并验证，发现 ${result.tools.length} 个工具`);}
+      catch(err){await load();throw new Error(`配置已保存，但 MCP 安装验证失败：${errorMessage(err)}`);}
+    }else toastSuccess(kind==='mcp'?'MCP 配置已保存，尚未验证':'已保存');
+    await load();
+  },kind==='mcp'?'安装并验证':'保存');
  }
  function editNode(node={id:'step'+(flow.nodes.length+1),type:'model',prompt:'',depends_on:[]}){
   modalForm('工作流节点',field('节点 ID','node-id',node.id)+select('类型','node-type',[['model','模型 / Agent'],['tool','工具'],['condition','条件判断'],['verify','独立指标验证'],['approval','人工审批'],['output','结果输出']],node.type)+area('依赖节点 ID 数组','node-deps',node.depends_on||[],2)+area('配置（prompt / agent / tool / arguments / contains / text / when）','node-data',Object.fromEntries(Object.entries(node).filter(([k])=>!['id','type','depends_on','position'].includes(k))),5),async body=>{
@@ -137,7 +151,7 @@ export async function mount(root){
   });
  }
  listen('click',async event=>{
-  const nav=event.target.closest('[data-section]');if(nav){section=nav.dataset.section;root.querySelectorAll('[data-section]').forEach(n=>n.classList.toggle('is-active',n===nav));await load();return;}
+  const nav=event.target.closest('[data-section]');if(nav){closeAllModals();section=nav.dataset.section;root.querySelectorAll('[data-section]').forEach(n=>n.classList.toggle('is-active',n===nav));await load();return;}
   const target=event.target.closest('[data-action]');if(!target)return;
   const action=target.dataset.action,id=target.dataset.id,item=items.find(r=>r.id===id);
   target.disabled=true;

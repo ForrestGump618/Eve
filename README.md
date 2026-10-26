@@ -3,7 +3,9 @@
 > 面向真实科研任务的 Windows 桌面科研 Agent：可持久运行、可追溯、可恢复、可诊断。
 > A desktop research agent for Windows built around durable execution, evidence provenance, and reproducible research workflows.
 
-- 当前版本 / Version: **3.4.0**
+- 当前版本 / Version: **1.0.0**（本次产品版本重新定为 1.0，原 3.4 历史保留）
+- 1.0 验收与限制：[实际测试报告](docs/verification/release-1.0/REPORT.md)
+- 默认入口：浅色完整工作台，项目文件与最近会话共用侧栏；正常启动只创建一个窗口。
 - 桌面应用 / Desktop app: `desktop/` (Electron + TypeScript, MIT)
 - 旧版 Python 工作台 / Legacy Python workbench: `omicslab/` (Apache-2.0, 保留用于兼容与迁移)
 - 清理说明 / Clean source: [CLEAN-RELEASE.md](CLEAN-RELEASE.md)
@@ -42,14 +44,15 @@ npm start           # 开发模式启动 Electron
 
 ```powershell
 cd desktop
-npm run dist:win    # -> release/SuWen-Setup-3.4.0-win-x64.exe
+npm run dist:win
+# -> release/v1.0.0/SuWen-Setup-1.0.0-win-x64.exe
 ```
 
 - 默认进入正式科研工作台；需要可用 Python，缺少依赖时会准备受管依赖环境并显示进度。
 - 在项目根目录运行 `./启动工作台.ps1`，或在 `desktop` 中运行 `./启动素问.ps1`；`-NativeConsole` 保留原生诊断控制台入口。
 - 用户数据目录为 Electron `userData` 下的独立运行时目录；现有历史与密钥不包含在源码中。
-- 本清理副本包含桌面 3.4.0 与独立 DSH 插件 0.3.0 源码；Python 工作台包版本仍为 2.1.1。DSH 插件并未包含在上一轮已经验收的 Windows 安装包中。
-- 最新验证与限制见 [3.4.0 交付记录](docs/verification/product-340-20261026/README.md)；固定 22 项真实模型重测被供应商 HTTP 429 阻断，不能视为通过。
+- 本版本统一桌面与 Python 工作台包版本为 1.0.0；DSH 插件 0.3.0 作为独立兼容插件保留，不冒充桌面安装包的一部分。
+- 最新验证、性能观察与未验证边界见 [1.0 交付记录](docs/verification/release-1.0/REPORT.md) 和 [固定 22 项任务矩阵](docs/verification/release-1.0/test-matrix.json)。
 
 ## 架构 / Architecture
 
@@ -76,13 +79,14 @@ SuWen Harness Daemon (detached Node process)
 - **Markdown 补齐**：流式过程中逐步排版已闭合内容（表格/代码块/公式/图表），未闭合区域保持纯文本尾部；
   离线内置 KaTeX 与 Mermaid，失败时降级为标注代码块，不阻塞主线程。
 - 注意：安装包未签名；干净 Windows 虚拟机安装、8/24/72 小时耐久与重启/断电测试**未执行**；
-  当前版本真实厂商模型验收被 HTTP 429 阻断，SSH/消息渠道完整实测范围见相应验证记录。
+  固定 22 项真实厂商模型任务已在本轮验收中完成，单主机 SSH、远程文件/命令/Skill 与断线重连已实测；
+  私钥与系统 SSH Agent、第二台物理主机、跨系统重启和远程 stdio MCP 仍未完成真实验收。
 
 ## DeepSeek Harness 插件 / DSH integration
 
 - 仓库 [`integrations/dsh`](integrations/dsh/) 将科研能力封装为 DSH 原生工具与 [`suwen-research`](integrations/dsh/skills/suwen-research/SKILL.md) 技能。DSH 自己规划、调用模型并协调多代理；`python -m omicslab.integrations.science` 仅执行显式计算与数据操作，不加载 LLM、AppState 或 AgentLoop。
 - 十一个工具覆盖状态、文献检索、蛋白查询、序列检查、Python、变量、notebook、证据、实验、知识和按需技能读取；方法正文沿用 [`omicslab/skills`](omicslab/skills/)。推荐流程为需求发现 → 查技能 → 数据审计 → 显式分析 → 证据/指标验证 → 报告；执行成功不等于科学验证。
-- 使用 `plugin_manager` 安装仓库内 bundle，不手工修改 profile。安装、配置、工具契约与旧桥接迁移见 [DSH 插件集成说明](docs/integrations/dsh-plugin.md)。该 bundle 0.3.0 已安装并通过 11 个工具的真实调用验证，Python 侧 `tests/test_dsh_science.py` 等合计 44 passed；完整科研任务与干净虚拟机验证未执行，详见集成说明「验证记录」。旧九工具桥接不再作为推荐方式。桌面版本为 3.4.0，Python 包版本为 2.1.1；DSH 插件版本为 0.3.0。
+- 使用 `plugin_manager` 安装仓库内 bundle，不手工修改 profile。安装、配置、工具契约与旧桥接迁移见 [DSH 插件集成说明](docs/integrations/dsh-plugin.md)。该 bundle 0.3.0 已安装并通过 11 个工具的真实调用验证，Python 侧 `tests/test_dsh_science.py` 等合计 44 passed；完整科研任务与干净虚拟机验证未执行，详见集成说明「验证记录」。旧九工具桥接不再作为推荐方式。当前产品版本为 1.0.0，DSH 插件版本仍为 0.3.0。
 
 ## 测试与验证 / Testing and verification
 
@@ -99,7 +103,7 @@ SuWen Harness Daemon (detached Node process)
 
 结果与原始数据见 [`docs/verification/`](docs/verification/)；当前测试数量、安装包 SHA256、缺陷与阻塞项以该目录下的机器可读报告为准。
 
-**已明确未验证的项**（不得当作通过）：8/24/72 小时连续耐久与断电/休眠/磁盘满；干净 Windows 虚拟机安装；代码签名（当前未签名，SmartScreen 可能提示）；真实厂商 API 账号；GitHub Release API 自动发布（本机无 `gh`/token）。详见 [`docs/release/release-gates.md`](docs/release/release-gates.md)。
+**已明确未验证的项**（不得当作通过）：8/24/72 小时连续耐久与断电/休眠/磁盘满；干净 Windows 虚拟机安装；代码签名（当前未签名，SmartScreen 可能提示）；实际 SSH 私钥与系统 SSH Agent 登录；第二台物理 SSH 主机；远程 stdio MCP；跨系统重启的长任务交接。详见 [`docs/verification/release-1.0/REPORT.md`](docs/verification/release-1.0/REPORT.md)。
 
 ## 安全 / Security
 

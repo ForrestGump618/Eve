@@ -54,6 +54,9 @@ def run_snapshot(row: dict[str, Any], *, children: list[dict[str, Any]] | None =
         "status": status,
         "agent_id": row.get("agent_id"),
         "workspace": row.get("workspace") or {},
+        "permission_mode": (row.get("meta") or {}).get("permission_mode", "ask"),
+        "provider": (row.get("meta") or {}).get("provider"),
+        "model": (row.get("meta") or {}).get("model"),
         "created_at": row.get("created_at"),
         "started_at": row.get("started_at"),
         "ended_at": row.get("ended_at"),
@@ -67,7 +70,8 @@ def run_snapshot(row: dict[str, Any], *, children: list[dict[str, Any]] | None =
         "client_request_id": row.get("client_request_id"),
         "children": children or [],
         "approvals": approvals or [],
-        "actions": {"cancel": status in ACTIVE_STATUSES},
+        "actions": {"cancel": status in ACTIVE_STATUSES,
+                    "resume": status in {"interrupted", "failed", "cancelled", "unknown"} and bool((row.get("meta") or {}).get("harness_task_id"))},
     }
 
 
@@ -95,6 +99,8 @@ class RunHandle:
         self.cancel_requested = False
         self.backend: Any = None
         self.workspace: Any = None
+        self.permission_mode = (run.get("meta") or {}).get("permission_mode", "ask")
+        self.resume_task_id = (run.get("meta") or {}).get("resume_task_id")
         self.started_monotonic = time.monotonic()
 
     def broadcast(self, event: dict[str, Any]) -> None:
@@ -208,7 +214,11 @@ class RunService:
         model: str | None = None,
         attachments: list[dict[str, Any]] | None = None,
         conversation: Conversation | None = None,
+        permission_mode: str = "ask",
+        resume_task_id: str | None = None,
     ) -> dict[str, Any]:
+        from ..agent.permissions import validate_mode
+        validate_mode(permission_mode)
         if client_request_id:
             existing = self.events.find_by_client_request(client_request_id)
             if existing:
@@ -249,10 +259,12 @@ class RunService:
                 "agent_id": agent_id or conversation.agent,
                 "workspace": workspace_public,
                 "created_at": utc_now(),
-                "meta": {"workspace_id": ws.workspace_id if ws is not None else None},
+                "meta": {"workspace_id": ws.workspace_id if ws is not None else None, "permission_mode": permission_mode, "resume_task_id": resume_task_id, "provider": provider, "model": model},
             }
         )
         cancel_event = asyncio.Event()
+        conversation.meta["last_run_id"] = run["run_id"]
+        self.store.save(conversation)
         handle = RunHandle(
             run=run,
             conversation=conversation,
@@ -759,6 +771,7 @@ class RunService:
                 "created_at": utc_now(),
                 "meta": {
                     "role": "child",
+                    "permission_mode": parent_handle.permission_mode,
                     "depth": depth,
                     "parent_run_id": parent_handle.run_id,
                 },

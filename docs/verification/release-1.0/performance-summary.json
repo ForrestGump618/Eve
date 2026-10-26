@@ -1,0 +1,90 @@
+{
+  "kind": "sanitized formal desktop performance comparison",
+  "environment": "Same Windows host, hidden formal workbench, 12.5-second idle window; short observation only.",
+  "runs": [
+    {
+      "label": "before",
+      "scope": "paired real formal workbench, daemon, legacy bridge and renderers; hidden idle for 10 seconds",
+      "startupMs": 9506,
+      "windowCount": 2,
+      "trackedWorkingSetMB": 612,
+      "fullSnapshotBytes": 114194,
+      "fullSnapshotLatencyMs": [
+        2.143499999998312,
+        3.785700000000361,
+        2.2927999999992608,
+        1.8942999999999302,
+        4.038099999999758
+      ],
+      "singleTaskSnapshotMs": null,
+      "daemonEventLoopUtilization": 0.007704721281369526,
+      "daemonThreadSamples": [
+        {
+          "cpuMs": 4078.125,
+          "module": "LHShield64.dll",
+          "company": "奇安信集团",
+          "product": "奇安信天擎",
+          "version": "1.0.0.1852"
+        },
+        {
+          "cpuMs": 62.5,
+          "module": "electron.exe",
+          "company": "GitHub, Inc.",
+          "product": "Electron",
+          "version": "45.0.0"
+        }
+      ],
+      "scheduler": null
+    },
+    {
+      "label": "after",
+      "scope": "paired real formal workbench, daemon, legacy bridge and renderers; hidden idle for 10 seconds",
+      "startupMs": 9675,
+      "windowCount": 1,
+      "trackedWorkingSetMB": 525.5,
+      "fullSnapshotBytes": 114345,
+      "fullSnapshotLatencyMs": [
+        1.7353999999977532,
+        3.2119000000020606,
+        1.778200000000652,
+        1.615799999999581,
+        3.223599999997532
+      ],
+      "singleTaskSnapshotMs": 0.7696999999971013,
+      "daemonEventLoopUtilization": 0.0009236157545153321,
+      "daemonThreadSamples": [
+        {
+          "cpuMs": 4078.125,
+          "module": "LHShield64.dll",
+          "company": "奇安信集团",
+          "product": "奇安信天擎",
+          "version": "1.0.0.1852"
+        },
+        {
+          "cpuMs": 31.25,
+          "module": "electron.exe",
+          "company": "GitHub, Inc.",
+          "product": "Electron",
+          "version": "45.0.0"
+        }
+      ],
+      "scheduler": {
+        "pending": false,
+        "active": 0,
+        "pollMs": 250,
+        "concurrency": 2
+      }
+    }
+  ],
+  "findings": {
+    "memoryReductionPercent": 14.13,
+    "startupChangePercent": 1.78,
+    "externalCpuSource": "LHShield64.dll (Qi An Xin), attributed through Win32 thread samples outside SuWen source",
+    "schedulerAfter": "pending=false, active=0, poll=250ms, concurrency=2"
+  },
+  "limitations": [
+    "Startup time increased in this single paired observation.",
+    "The external security module CPU attribution does not prove SuWen itself is CPU-free under all workloads.",
+    "Long-duration endurance and leak testing are incomplete."
+  ]
+}

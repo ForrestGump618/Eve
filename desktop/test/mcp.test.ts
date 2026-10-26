@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { PassThrough } from 'node:stream';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { createMcpServer, DATABASE_TOOLS, MCP_VERSION } from '../src/mcp-server.js';
-import { McpClientSession, createDatabaseMcpClient, queryViaMcp } from '../src/mcp-client.js';
+import { McpClientSession, McpHttpSession, createDatabaseMcpClient, queryViaMcp } from '../src/mcp-client.js';
 import type { McpServerOptions } from '../src/mcp-server.js';
 
 function pair(options: McpServerOptions = {}, requestTimeoutMs = 1000) {
@@ -95,6 +95,24 @@ test('pre-aborted and invalid database requests are rejected before launching a 
   await assert.rejects(queryViaMcp('pubmed', 'offline', controller.signal), /already cancelled/);
   await assert.rejects(queryViaMcp('pubmed', '', new AbortController().signal), /Invalid/);
   await assert.rejects(queryViaMcp('arbitrary-command' as any, 'offline', new AbortController().signal), /Invalid/);
+});
+test('streamable HTTP MCP applies resolved authentication headers without exposing protocol overrides', async () => {
+  const seen: Array<{ method: string; authorization: string | null; protocol: string | null }> = [];
+  const fetcher = async (_url: string, init?: RequestInit): Promise<Response> => {
+    const method=String(init?.method??'GET'),headers=new Headers(init?.headers);
+    seen.push({method,authorization:headers.get('authorization'),protocol:headers.get('mcp-protocol-version')});
+    if(method==='DELETE')return new Response(null,{status:204});
+    const request=JSON.parse(String(init?.body));
+    if(request.method==='notifications/initialized')return new Response(null,{status:202});
+    return new Response(JSON.stringify({jsonrpc:'2.0',id:request.id,result:{
+      protocolVersion:MCP_VERSION,capabilities:{tools:{}},serverInfo:{name:'header-fixture'},
+    }}),{status:200,headers:{'content-type':'application/json','mcp-session-id':'header-session'}});
+  };
+  const session=new McpHttpSession('https://mcp.example/rpc',fetcher as typeof fetch,1000,{Authorization:'Bearer synthetic-secret'});
+  try{await session.initialize(new AbortController().signal);}finally{await session.close();}
+  assert.ok(seen.length>=2);
+  assert.ok(seen.every(item=>item.authorization==='Bearer synthetic-secret'));
+  assert.ok(seen.every(item=>item.protocol===MCP_VERSION));
 });
 test('initialization cancellation closes cleanly without a forbidden initialize cancellation notification', async () => {
   const source = new PassThrough(); const sink = new PassThrough(); const frames: any[] = [];

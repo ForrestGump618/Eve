@@ -1,29 +1,24 @@
-# 3.4.0 清理副本与 Git 上传记录
+# 素问 1.0.0 源码与发布边界
 
-本目录由已提交的 `9dff54c` 独立克隆，再复制原工作区尚未提交的 19 个 DSH 源码、测试及文档文件。原目录的文件、Git 分支和暂存区没有修改。
+本分支从已提交的历史基线继续开发，产品版本统一为 1.0.0。Git 历史中的 3.4.0、2.1.1 和更早版本作为历史记录保留，不能与本轮验收声明混用。
 
-## 内容
+## 源码范围
 
-- `desktop/`：3.4.0 桌面源码、内置技能、测试与构建脚本。
-- `omicslab/`：Python 工作台 2.1.1、科学能力及 DSH 后端源码。
-- `integrations/dsh/`：独立 DSH bundle 0.3.0；并未包含在此前已验收的 Windows 安装包中。
-- `tests/`、`docs/`：回归测试、许可证、开发文档和保留的历史验收证据。历史记录不当作当前版本通过声明。
+- `desktop/`：Electron、TypeScript Agent Harness、MCP/Skill 客户端、托盘生命周期、打包脚本与自动化测试。
+- `omicslab/`：既有科研工作台、Python Worker、SSH 执行后端、科研 Skills、科研页面与兼容接口。
+- `integrations/dsh/`：独立 DSH 兼容插件，作为可选集成保留，不声称包含在当前 Windows 安装包内。
+- `tests/`：Python 单元、集成与安全回归。
+- `docs/verification/release-1.0/`：面向公开复核的精炼证据；机器专属原始日志不进入 Git。
 
-不包含 `.omicslab`、个人会话、API Key、用户配置、数据库、node_modules、编译 dist、缓存或旧安装包。普通 Git 只上传源码；132MB 安装包保留在交付文件夹的 Windows/ 中。
+## 不进入源码包
 
-## 本清理副本重新验证
+源码发布不包含 API Key、SSH 密码或私钥、用户会话、数据库、缓存、`node_modules`、编译产物、安装目录或机器专属 Trace。安装包作为 GitHub Release 二进制资产单独上传。
 
-- `desktop/npm run typecheck`：通过。
-- `desktop/npm test`：244 项，243 通过、1 跳过、0 失败。
-- `python -m pytest tests -q -p no:cacheprovider`：520 通过。
-- `node --check integrations/dsh/index.js` 及 `science-client.js`：通过。
+## 发布前验证
 
-测试使用临时依赖链接，结束后已移除；本机原始日志在交付文件夹 Validation/，不作为源码提交。已发布前一轮的正式 UI、RPC、文件/技能和窗口验收证据保留在 docs/verification/product-340-20261026/。
+- Python 与 TypeScript 全量测试、类型检查和差异格式检查通过。
+- 固定 22 项真实模型任务使用同一任务集与模型完成前后对照。
+- 正式页面、打包应用与托盘运行真实 Electron E2E；MCP 测试实际发现并调用工具，Skill 测试实际安装和执行。
+- 实际 SSH 主机覆盖文件、搜索、编辑、Shell、Python、Skill、断线重连、凭据复用与本地隔离。
 
-真实模型验收仍受 HTTP 429 阻断；此次整理没有新增真实厂商成功结果。Windows 安装包仍是此前已验收的 3.4.0：SHA-256 `5ade11a8e56f031ea8493ac0e263a477f74d05cd75e2f8dc7d4e494e7767ddc3`。
-
-## 从源码运行
-
-需要 Python 3.10+、Node 24.14+ 和 npm。项目根目录运行 `python -m pip install -e .`，随后在 desktop 执行 `npm ci`、`npm run build`，最后运行项目根目录 `./启动工作台.ps1`。运行产生的依赖与用户数据受 .gitignore 排除，不应提交凭据。
-
-上传目标为既有仓库 ForrestGump618/suwen 的 `codex/clean-release-3.4.0` 分支；没有覆盖 main 或强制改写远程历史。
+准确计数、安装包 SHA-256、性能结果和未验证项见 [1.0 验收报告](docs/verification/release-1.0/REPORT.md)。安装包未签名；干净虚拟机、长期耐久、跨重启/休眠、实际私钥/系统 SSH Agent、第二台物理主机与远程 stdio MCP 不作为本版本的已通过项。

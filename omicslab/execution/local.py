@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import shlex
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -83,36 +85,73 @@ class LocalExecutionBackend(ExecutionBackend):
             if not candidate.is_dir():
                 raise BackendError(f"工作目录不存在：{cwd}")
             workdir = candidate
-        return await asyncio.to_thread(self._run_shell_sync, command, workdir, timeout_s)
+        return await self._run_shell_async(command, workdir, timeout_s)
 
-    def _run_shell_sync(self, command: str, workdir: Path, timeout_s: float | None) -> dict[str, Any]:
+    async def _run_shell_async(
+        self, command: str, workdir: Path, timeout_s: float | None
+    ) -> dict[str, Any]:
         timeout = float(timeout_s or self.settings.shell_timeout_s or 120)
+        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+        process = await asyncio.create_subprocess_shell(
+            command,
+            cwd=str(workdir),
+            stdin=asyncio.subprocess.DEVNULL,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            creationflags=creationflags,
+            start_new_session=sys.platform != "win32",
+        )
         try:
-            proc = subprocess.run(
-                command,
-                shell=True,
-                cwd=str(workdir),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=timeout,
-            )
-        except subprocess.TimeoutExpired as exc:
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+        except asyncio.TimeoutError:
+            await self._terminate_process(process)
             return {
                 "ok": False,
                 "exit_code": -1,
-                "stdout": (exc.stdout or "") if isinstance(exc.stdout, str) else "",
+                "stdout": "",
                 "stderr": f"命令超时（>{timeout:.0f}s）",
                 "timed_out": True,
             }
+        except asyncio.CancelledError:
+            await self._terminate_process(process)
+            raise
+        stdout_text = stdout.decode("utf-8", errors="replace")
+        stderr_text = stderr.decode("utf-8", errors="replace")
         return {
-            "ok": proc.returncode == 0,
-            "exit_code": proc.returncode,
-            "stdout": proc.stdout or "",
-            "stderr": proc.stderr or "",
+            "ok": process.returncode == 0,
+            "exit_code": process.returncode,
+            "stdout": stdout_text,
+            "stderr": stderr_text,
             "timed_out": False,
         }
+
+    async def _terminate_process(self, process: asyncio.subprocess.Process) -> None:
+        """Stop the owned shell tree without joining the bridge's event loop."""
+        if process.returncode is not None:
+            return
+        if sys.platform == "win32":
+            killer = await asyncio.create_subprocess_exec(
+                "taskkill", "/PID", str(process.pid), "/T", "/F",
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.DEVNULL,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+            try:
+                await asyncio.wait_for(killer.wait(), timeout=5)
+            except (asyncio.TimeoutError, ProcessLookupError):
+                if killer.returncode is None:
+                    killer.kill()
+        else:
+            try:
+                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+        if process.returncode is None:
+            try:
+                process.kill()
+            except ProcessLookupError:
+                pass
+        await asyncio.wait_for(process.wait(), timeout=5)
 
     # -- files -------------------------------------------------------------
     async def list_dir(self, rel: str = ".", *, show_hidden: bool = False) -> dict[str, Any]:

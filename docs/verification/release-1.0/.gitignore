@@ -1,0 +1,13 @@
+# Raw live traces, screenshots, process samples and console logs contain
+# machine-local paths or transient task data. Only curated evidence is public.
+*
+!.gitignore
+!REPORT.md
+!SHA256SUMS.txt
+!performance-summary.json
+!product-ui-summary.json
+!sbom.cdx.json
+!ssh-summary.json
+!test-matrix.json
+!test-summary.json
+!tray-summary.json

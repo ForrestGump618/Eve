@@ -12,7 +12,9 @@ type Row = Record<string, any>;
 export interface StoreOptions { now?: () => number; maxTasks?: number; retryBaseMs?: number; random?: () => number }
 function redact(value: any): Json {
   if (Array.isArray(value)) return value.map(redact);
-  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, /token|secret|password|authorization|api.?key/i.test(k) ? '[REDACTED]' : redact(v)]));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k,
+    typeof v==='number'&&/^(?:tokens|maxTokens|reservedTokens|inputTokens|outputTokens|totalTokens|prompt_tokens|completion_tokens|total_tokens|beforeTokens|afterTokens)$/i.test(k)
+      ? v : /token|secret|password|authorization|api.?key/i.test(k) ? '[REDACTED]' : redact(v)]));
   if (typeof value === 'string') return value.replace(/Bearer\s+[^\s"',;]+/gi, 'Bearer [REDACTED]').replace(/((?:api[_-]?key|access[_-]?token|password|secret)\s*[=:]\s*)[^\s,;]+/gi, '$1[REDACTED]');
   return value === undefined ? null : value;
 }
@@ -154,6 +156,16 @@ export class Store {
   private step(row: Row): StepRun { return { taskId: row.task_id, id: row.id, kind: row.kind, input: JSON.parse(row.input_json), dependsOn: JSON.parse(row.dependencies_json), sideEffect: !!row.side_effect, maxAttempts: row.max_attempts, timeoutMs: row.timeout_ms, status: row.status, version: row.version, operationId: row.operation_id, attempts: row.attempts, owner: row.owner, fence: row.fence, leaseUntil: row.lease_until, dueAt: row.due_at, output: row.output_json === null ? undefined : JSON.parse(row.output_json), error: row.error }; }
   getTask(id: string): TaskRun | undefined { const row = this.db.prepare('SELECT * FROM tasks WHERE id=?').get(id) as Row | undefined; return row && this.task(row); }
   listTasks(): TaskRun[] { return (this.db.prepare('SELECT * FROM tasks ORDER BY created_at,rowid').all() as Row[]).map(r => this.task(r)); }
+  /** Cheap idle probe: avoid opening write transactions when every task is settled. */
+  hasPendingWork(): boolean {
+    const row = this.db.prepare(`SELECT 1 AS pending
+      FROM steps s JOIN tasks t ON t.id=s.task_id
+      WHERE t.status NOT IN ('completed','failed','cancelled','paused','waiting_approval')
+        AND s.status IN ('queued','running','retry_scheduled','waiting_external')
+      LIMIT 1`).get() as Row | undefined;
+    return row !== undefined;
+  }
+  private runnableTasks(): TaskRun[] {return (this.db.prepare("SELECT * FROM tasks WHERE status NOT IN ('completed','failed','cancelled','paused') ORDER BY created_at,rowid").all() as Row[]).map(r=>this.task(r));}
   getSteps(taskId: string): StepRun[] { return (this.db.prepare('SELECT * FROM steps WHERE task_id=? ORDER BY rowid').all(taskId) as Row[]).map(r => this.step(r)); }
   getStep(taskId: string, stepId: string): StepRun | undefined { const row = this.db.prepare('SELECT * FROM steps WHERE task_id=? AND id=?').get(taskId, stepId) as Row | undefined; return row && this.step(row); }
   events(taskId: string, after = 0): RunEvent[] { return (this.db.prepare('SELECT * FROM events WHERE task_id=? AND sequence>? ORDER BY sequence').all(taskId, after) as Row[]).map(r => ({ sequence: r.sequence, taskId: r.task_id, stepId: r.step_id, type: r.type, version: 1, at: r.at, data: JSON.parse(r.data_json) })); }
@@ -238,7 +250,7 @@ export class Store {
   claim(owner: string, leaseMs = 30000, canRun?: (step: StepRun, task: TaskRun) => boolean): Lease | undefined {
     if (!owner) throw new ValidationError('Lease owner is required'); validNumber(leaseMs, 'leaseMs');
     return this.tx(() => {
-      for (const task of this.listTasks()) {
+      for (const task of this.runnableTasks()) {
         if (terminal.has(task.status) || task.status === 'paused') continue;
         const steps = this.getSteps(task.id); const running = steps.filter(s => s.status === 'running').length;
         if (running >= (task.limits.concurrency ?? 4)) continue;
@@ -356,7 +368,7 @@ export class Store {
       const rows = this.db.prepare("SELECT s.* FROM steps s JOIN tasks t ON t.id=s.task_id WHERE s.status='running' AND s.lease_until<=? AND t.status NOT IN ('paused','cancelled','completed','failed')").all(this.now()) as Row[];
       for (const row of rows) { const s = this.step(row); this.failure(s, 'Lease expired; worker lost', {}); this.refresh(s.taskId); this.checkpoint(s.taskId, 'lease.reclaimed'); }
       // Wall time is enforced even while a task waits on a timer or approval.
-      for (const t of this.listTasks()) if (!terminal.has(t.status) && t.status !== 'paused' && t.limits.maxWallMs !== undefined && this.now() - t.createdAt >= t.limits.maxWallMs && !this.db.prepare("SELECT 1 FROM events WHERE task_id=? AND type='task.budget_exhausted' LIMIT 1").get(t.id)) this.failTaskBudget(t.id, 'Task wall-time budget exhausted');
+      for (const t of this.runnableTasks()) if (t.limits.maxWallMs !== undefined && this.now() - t.createdAt >= t.limits.maxWallMs && !this.db.prepare("SELECT 1 FROM events WHERE task_id=? AND type='task.budget_exhausted' LIMIT 1").get(t.id)) this.failTaskBudget(t.id, 'Task wall-time budget exhausted');
       return rows.length;
     });
   }

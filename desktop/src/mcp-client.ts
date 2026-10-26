@@ -111,11 +111,16 @@ export class McpClientSession {
  * No tool call is automatically replayed: a transport failure may hide side effects. */
 export class McpHttpSession {
   private sessionId:string|undefined;private nextId=1;
-  constructor(private readonly url:string,private readonly fetcher:typeof fetch=fetch,private readonly timeoutMs=10000){}
+  constructor(
+    private readonly url:string,
+    private readonly fetcher:typeof fetch=fetch,
+    private readonly timeoutMs=10000,
+    private readonly configuredHeaders:Readonly<Record<string,string>>={},
+  ){}
   private async send(method:string,params:unknown,signal:AbortSignal,notification=false):Promise<any>{
     signal.throwIfAborted();const id=notification?undefined:this.nextId++;
     const deadline=AbortSignal.any([signal,AbortSignal.timeout(this.timeoutMs)]);
-    const headers:Record<string,string>={'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':VERSION};
+    const headers:Record<string,string>={...this.configuredHeaders,'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':VERSION};
     if(this.sessionId)headers['mcp-session-id']=this.sessionId;
     const r=await this.fetcher(this.url,{method:'POST',headers,body:JSON.stringify({jsonrpc:'2.0',...(id===undefined?{}:{id}),method,params}),signal:deadline,redirect:'error'});
     if(!r.ok){await r.body?.cancel();throw new Error(`MCP HTTP ${method} failed with status ${r.status}`);}
@@ -133,7 +138,7 @@ export class McpHttpSession {
   async initialize(signal:AbortSignal):Promise<void>{const result=await this.send('initialize',{protocolVersion:VERSION,capabilities:{},clientInfo:{name:'suwen-harness',version:'1.0.0'}},signal);if(result?.protocolVersion!==VERSION||!result?.capabilities?.tools)throw new Error('Incompatible MCP version or missing tools capability');await this.send('notifications/initialized',{},signal,true);}
   async listTools(signal:AbortSignal):Promise<any[]>{const tools:any[]=[];let cursor:string|undefined;const seen=new Set<string>();do{const r=await this.send('tools/list',cursor?{cursor}:{},signal);if(!Array.isArray(r?.tools))throw new Error('Malformed MCP tools/list result');tools.push(...r.tools);if(tools.length>500)throw new Error('MCP tool discovery limit exceeded');cursor=r.nextCursor;if(cursor){if(typeof cursor!=='string'||seen.has(cursor))throw new Error('Invalid MCP discovery cursor');seen.add(cursor);}}while(cursor);return tools;}
   async callTool(name:string,args:Record<string,Json>,signal:AbortSignal):Promise<Json>{return parseMcpResult(await this.send('tools/call',{name,arguments:args},signal));}
-  async close():Promise<void>{if(!this.sessionId)return;try{await this.fetcher(this.url,{method:'DELETE',headers:{'mcp-session-id':this.sessionId,'mcp-protocol-version':VERSION},signal:AbortSignal.timeout(1000),redirect:'error'}).then(r=>r.body?.cancel());}catch{}this.sessionId=undefined;}
+  async close():Promise<void>{if(!this.sessionId)return;try{await this.fetcher(this.url,{method:'DELETE',headers:{...this.configuredHeaders,'mcp-session-id':this.sessionId,'mcp-protocol-version':VERSION},signal:AbortSignal.timeout(1000),redirect:'error'}).then(r=>r.body?.cancel());}catch{}this.sessionId=undefined;}
 }
 
 let children = 0;

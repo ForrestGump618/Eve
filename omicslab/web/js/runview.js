@@ -8,8 +8,10 @@
 
 import { api, errorMessage } from './api.js?v=2.1.1';
 import { icon } from './icons.js?v=2.1.1';
-import { esc, escAttr, cleanValue, fmtClock, fmtDuration, truncate } from './util.js?v=2.1.1';
-import { openModal, spinnerHtml, toastError, toastSuccess, toastWarn } from './ui.js?v=2.1.1';
+import { esc, escAttr, cleanValue, fmtClock, fmtDuration, truncate, setPref } from './util.js?v=2.1.1';
+import { openModal, spinnerHtml, toastError, toastSuccess, toastWarn, confirmDialog } from './ui.js?v=2.1.1';
+import {navigate,setState} from './store.js?v=2.1.1';
+import {emit} from './bus.js?v=2.1.1';
 
 const RUN_LABELS = {
   queued: '排队中',
@@ -187,6 +189,20 @@ export function openRunDetail(opts = {}) {
     actions: [
       { label: '刷新', kind: 'ghost', onClick: () => { void refresh(); return false; } },
       { label: '回放', kind: 'ghost', onClick: () => { void toggleReplay(); return false; } },
+      { label: '从检查点恢复', kind: 'ghost', onClick: async () => {
+        if(state.loading)await refresh();
+        if(!state.run?.actions?.resume){toastWarn('该运行没有可恢复的检查点，或尚未停止');return false;}
+        const confirmed=await confirmDialog({title:'从检查点恢复',message:'已提交的工具结果会复用。请先核对中断时结果未知的命令；恢复后修改文件、执行代码和安装技能会重新请求批准。',confirmText:'已核对，继续恢复',cancelText:'取消'});
+        if(!confirmed)return false;
+        try{
+          const result=await api.request(`/api/runs/${encodeURIComponent(runId)}/resume`,{method:'POST',body:{confirm_unknown:true}});
+          const id=state.run.session_id,run=result.run||result;
+          setPref('activeRun.'+id,JSON.stringify({runId:run.run_id,traceId:run.trace_id,status:run.status}));
+          setPref('activeConversationId',id);setState({activeConversationId:id});
+          if(location.hash==='#/workbench')emit('chat:select',id);else navigate('workbench');
+          toastSuccess('已从检查点创建恢复任务');return true;
+        }catch(error){toastError(errorMessage(error));return false;}
+      } },
       { label: '取消运行', kind: 'danger', onClick: () => { void cancelRun(); return false; } },
       { label: '关闭', kind: 'ghost' },
     ],

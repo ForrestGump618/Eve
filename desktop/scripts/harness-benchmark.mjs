@@ -58,7 +58,7 @@ try {
   for (const item of tasks.filter(x => !arg('only','') || arg('only','').split(',').includes(x.id))) {
     const started = Date.now(); let entry = { id:item.id, category:item.category, prompt:item.prompt, status:'unverified' };
     try {
-      const task = await rpc(connection, 'create', { name:item.id, steps:[{ id:'reply', kind:'model', input:{prompt:item.prompt, allowedFiles:[notes]}, sideEffect:true, maxAttempts:1, timeoutMs:240000 }], limits:{maxCalls:24, maxTokens:160000, maxWallMs:270000} });
+      const task = await rpc(connection, 'create', { name:item.id, steps:[{ id:'reply', kind:'model', input:{prompt:item.prompt, allowedFiles:[notes],permissionMode:'full'}, sideEffect:true, maxAttempts:1, timeoutMs:240000 }], limits:{maxCalls:24, maxTokens:160000, maxWallMs:270000} });
       entry.taskId = task.id;
       let snapshot;
       while (Date.now() - started < 265000) {

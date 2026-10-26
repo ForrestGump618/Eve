@@ -309,6 +309,9 @@ class FakeTransport:
     def get_remote_server_key(self) -> FakePKey:
         return self.remote_key
 
+    def set_keepalive(self, interval: int) -> None:
+        self.keepalive = interval
+
     def open_session(self, timeout=None):
         return self.client.next_channel()
 
@@ -525,7 +528,7 @@ def test_legacy_b64_password_is_migrated(manager, settings):
     assert "legacy-secret" not in text
 
 
-def test_known_hosts_fingerprint_change_warns(manager, fake_ssh):
+def test_known_hosts_fingerprint_change_is_rejected(manager, fake_ssh):
     created = _add_profile(manager, password="pw")
     first = manager.test_connection(created["id"])
     assert first["ok"] is True
@@ -534,9 +537,9 @@ def test_known_hosts_fingerprint_change_warns(manager, fake_ssh):
     FakeSSHClient.fingerprint = FINGERPRINT_B
     manager._drop(created["id"])
     second = manager.test_connection(created["id"])
-    assert second["ok"] is True
-    assert "指纹" in second["warning"]
-    assert "变化" in second["warning"]
+    assert second["ok"] is False
+    assert "指纹" in second["error"]
+    assert manager.known_fingerprint("cluster.example.org") == first["fingerprint"]
 
 
 def test_test_connection_auth_failure_returns_error(manager, fake_ssh):
@@ -1241,3 +1244,33 @@ def test_api_temp_files_cleaned_after_transfer(api_client, fake_ssh):
     api_client.get("/api/ssh/download", params={"profile_id": pid, "remote_path": remote_path})
     tmp_dir = Path(api_client.app.state.omicslab.settings.home) / "tmp"
     assert list(tmp_dir.iterdir()) == []
+
+
+def test_concurrent_acquisition_does_not_close_another_call_connection(manager, fake_ssh, monkeypatch):
+    import concurrent.futures
+    import threading
+    import time
+    profile = _add_profile(manager, password="fixture-password")
+    raw = manager._get_profile_raw(profile["id"])
+    connect = manager._connect
+    barrier = threading.Barrier(2)
+    def slow_connect(*args, **kwargs):
+        time.sleep(.1)
+        return connect(*args, **kwargs)
+    monkeypatch.setattr(manager, "_connect", slow_connect)
+    def acquire():
+        barrier.wait(timeout=3)
+        return manager._get_client(raw)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        first, second = list(pool.map(lambda _: acquire(), range(2)))
+    assert first is second
+    assert not first.closed
+    assert first.transport.keepalive == 15
+
+
+def test_system_agent_authentication_needs_no_password_or_private_key_path(manager, fake_ssh):
+    profile = _add_profile(manager, auth="agent")
+    client = manager._get_client(manager._get_profile_raw(profile["id"]))
+    assert client.connect_kwargs["allow_agent"] is True
+    assert "password" not in client.connect_kwargs
+    assert client.transport.keepalive == 15

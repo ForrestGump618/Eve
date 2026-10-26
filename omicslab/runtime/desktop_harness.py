@@ -21,7 +21,16 @@ class DesktopHarness:
     def _request(self, method: str, params: dict[str, Any]) -> Any:
         wire = json.dumps({"token": self._connection["token"], "method": method, "params": params}).encode() + b"\n"
         if os.name == "nt":
-            stream = open(self._connection["pipe"], "r+b", buffering=0)
+            # Named-pipe instances can briefly be busy while another client is
+            # accepted. Retry connection only: never replay an already sent RPC.
+            for attempt in range(5):
+                try:
+                    stream = open(self._connection["pipe"], "r+b", buffering=0)
+                    break
+                except (FileNotFoundError, PermissionError):
+                    if attempt == 4:
+                        raise
+                    time.sleep(.05 * 2**attempt)
         else:
             sock = socket.socket(socket.AF_UNIX)
             sock.settimeout(15)
@@ -60,12 +69,31 @@ class DesktopHarness:
         # in the full UI remain authoritative and are passed only over the pipe.
         settings = loop.settings
         selected = settings.resolve_llm(provider=kwargs.get("provider"), model=kwargs.get("model"))
+        context_window = 65536
+        capability = {}
+        platform = getattr(loop.registry, "platform", None)
+        if platform is not None:
+            backend = kwargs.get("backend")
+            scope = getattr(getattr(backend, "workspace", None), "workspace_id", "ws_main")
+            config = platform.config.get("models", scope)["value"]
+            _, _, selected = platform.models.prepare(settings, kwargs.get("provider"), kwargs.get("model"),
+                                                     loop._resolve_agent(conv.agent or "lead"), backend, user_text)
+            capability = config.get("capabilities", {}).get(selected.model, {})
+            context_window = int(capability.get("context_window", config.get("context_window", context_window)))
         # Configuration validation and API-key lookup stay in the existing provider layer.
         key = selected.api_key
+        from ..config import ConfigError
+        if selected.provider == "mock":
+            raise ConfigError("统一桌面任务不使用演示模型，请为此任务选择已配置的真实或本地模型连接")
+        if not key:
+            catalog = settings.provider_catalog_map().get(selected.provider, {})
+            if not catalog.get("no_key_required"):
+                raise ConfigError("所选任务模型缺少凭据，不会切换到其他模型")
+            key = "local-no-key-required"
         model_config = None
         if selected.provider != "mock" and key:
-            requested_output = int(settings.max_tokens or 8192)
-            model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=65536, maxOutput=max(128, min(requested_output, 32767)))
+            requested_output = int(capability.get("max_output", settings.max_tokens or 8192))
+            model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=context_window, maxOutput=max(128, min(requested_output, 32767, context_window//2-1)))
         messages = [{"role": m.role, "content": m.content} for m in conv.messages[-40:] if m.role in ("user", "assistant") and m.content]
         conv.messages.append(ChatMessage(role="user", content=user_text))
         if not conv.title or conv.title == "新会话":
@@ -73,26 +101,55 @@ class DesktopHarness:
         conv.updated_at = time.time()
         loop._save(conv)
         files = []
-        workspace = Path(kwargs.get("workspace") or settings.workspace).resolve()
+        handle = kwargs.get("run_ctx")
+        backend = kwargs.get("backend")
+        remote = getattr(backend, "kind", "local") == "ssh"
+        if remote and (handle is None or getattr(handle, "workspace", None) is None):
+            raise RuntimeError("SSH workspace context is missing; local fallback is forbidden")
+        workspace = None if remote else Path(kwargs.get("workspace") or settings.workspace).resolve()
+        roots = [str(backend.root)] if remote else [str(workspace)]
         for attachment in kwargs.get("attachments") or []:
+            if remote:
+                continue  # Remote attachments are resolved by the selected backend only.
             candidate = (workspace / str(attachment.get("path") or "")).resolve()
             if candidate.is_file() and candidate.is_relative_to(workspace):
                 files.append(str(candidate))
-        task = await self.rpc("create", name=user_text[:120], steps=[{"id":"reply","kind":"model","input":{"prompt":user_text,"messages":messages,"allowedFiles":files,"workspaceRoots":[str(workspace)]},"sideEffect":True,"maxAttempts":1,"timeoutMs":360000}], limits={"maxCalls":32,"maxTokens":240000,"maxWallMs":390000}, **({"modelConfig":model_config} if model_config else {}))
+        task_input = {"prompt": user_text, "messages": messages, "allowedFiles": files, "conversationId": conv.id,
+                      "workspaceRoots": roots, "environment": "ssh" if remote else "local",
+                      "permissionMode": getattr(handle, "permission_mode", "ask")}
+        if handle is not None:
+            task_input["originRunId"] = handle.run_id
+            if getattr(handle, "resume_task_id", None):
+                task_input["resumeTaskId"] = handle.resume_task_id
+        workspace_id = getattr(getattr(backend, "workspace", None), "workspace_id", None)
+        if isinstance(workspace_id, str) and workspace_id:
+            task_input["projectId"] = workspace_id
+        task = await self.rpc("create", name=user_text[:120], steps=[{"id":"reply","kind":"model","input":task_input,"sideEffect":True,"maxAttempts":1,"timeoutMs":600000}], limits={"maxCalls":32,"maxTokens":240000,"maxWallMs":630000}, **({"modelConfig":model_config} if model_config else {}))
         task_id = task["id"]
+        run_service = getattr(loop.registry, "run_service", None)
+        if run_service is not None and handle is not None:
+            record = run_service.events.get_run(handle.run_id)
+            run_service.events.update_run(handle.run_id, meta=dict(record.get("meta") or {}, harness_task_id=task_id, provider=selected.provider, model=selected.model))
         await event("status", {"text":"正在执行 · 统一 Harness", "task_id":task_id})
         seen = set()
         tool_results = {}
         last_text = ""
+        traces = []
+        trace_cursor = 0
         try:
             while True:
+                steering = kwargs.get("steer")
+                for instruction in (steering() if steering else []):
+                    await self.rpc("task.guidance.change", id=task_id, action="send", content=instruction)
                 if cancel.is_set():
                     await self.rpc("control", id=task_id, action="cancel")
                     return {"finish_reason":"cancelled", "text":""}
-                snapshot = await self.rpc("snapshot")
-                current = next((x for x in snapshot["tasks"] if x["id"] == task_id), None)
-                if current is None:
-                    raise RuntimeError("Desktop task disappeared")
+                current = await self.rpc("task.snapshot", id=task_id, after=trace_cursor)
+                new_traces = current.get("events", [])
+                traces.extend(new_traces)
+                if new_traces:
+                    trace_cursor = max(trace_cursor, max(x["sequence"] for x in new_traces))
+                current["events"] = traces
                 stream_text = (current.get("stream") or {}).get("text", "")
                 if stream_text != last_text:
                     last_text = stream_text
@@ -120,6 +177,13 @@ class DesktopHarness:
                         await event("status", {"text":"正在验证结果与引用"})
                     elif kind == "model.continuing":
                         await event("status", {"text":"正在接续长回答"})
+                    elif kind == "agent.guidance":
+                        queued = await self.rpc("task.guidance.list", id=task_id)
+                        item = next((x for x in queued.get("items", []) if x["id"] == data.get("messageId")), None)
+                        if item and not any(m.meta.get("guidance_id") == item["id"] for m in conv.messages):
+                            conv.messages.append(ChatMessage(role="user", content=item["content"], meta={"guidance_id": item["id"], "quote": item.get("quote", "")}))
+                            loop._save(conv)
+                        await event("guidance_status", {"message_id": data.get("messageId"), "status": "included"})
                 status = current["status"]
                 if status == "completed":
                     output = current["steps"][-1].get("output") or {}
