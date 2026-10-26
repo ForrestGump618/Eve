@@ -1,0 +1,255 @@
+{
+  "schema": "suwen.ui-streaming-e2e/1",
+  "mode": "final",
+  "label": "deterministic local fixture",
+  "stamp": "20261026-022248",
+  "startedAt": "2026-10-26T02:22:48.155Z",
+  "commands": {
+    "node": "D:\\Develop\\nodejs\\node.exe",
+    "script": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\scripts\\streaming-ui-e2e.mjs",
+    "argv": [
+      "--mode=final",
+      "--runs=1",
+      "--only=concurrent,persist"
+    ]
+  },
+  "env": {
+    "platform": "win32 10.0.26200",
+    "osVersion": "Windows 11 Home China",
+    "cpu": "Intel(R) Core(TM) i7-14700HX",
+    "cores": 28,
+    "totalMemGb": 31.8,
+    "node": "v24.14.0",
+    "electronPackage": "45.0.0",
+    "playwrightCore": "1.64.1",
+    "hostTime": "2026-10-26T02:22:48.158Z"
+  },
+  "fixture": {
+    "kind": "local OpenAI-compatible SSE server",
+    "host": "127.0.0.1",
+    "notes": "no vendor API; SSE chunks are deterministic w00000..wNNNNN tokens",
+    "baseUrl": "http://127.0.0.1:11570/v1"
+  },
+  "phases": [
+    {
+      "at": "2026-10-26T02:22:48.173Z",
+      "phase": "fixture",
+      "msg": "listening http://127.0.0.1:11570/v1"
+    },
+    {
+      "at": "2026-10-26T02:22:52.250Z",
+      "phase": "boot",
+      "msg": "daemon ready pid=32868 configured=false electron=45.0.0"
+    },
+    {
+      "at": "2026-10-26T02:22:52.396Z",
+      "phase": "boot",
+      "msg": "model configured=true"
+    },
+    {
+      "at": "2026-10-26T02:22:52.396Z",
+      "phase": "scenario",
+      "msg": "concurrent run isolation"
+    },
+    {
+      "at": "2026-10-26T02:22:59.974Z",
+      "phase": "concurrent",
+      "msg": "bodies=2 bothFinal=true contamination=false bothVisibleSamples=28"
+    },
+    {
+      "at": "2026-10-26T02:22:59.977Z",
+      "phase": "scenario",
+      "msg": "conversation persistence duplicate check"
+    },
+    {
+      "at": "2026-10-26T02:23:04.368Z",
+      "phase": "persist",
+      "msg": "conversation=4633ae4b-ce89-4af6-909b-9898e3b959e9 assistants=1 taskAssistants=1"
+    }
+  ],
+  "scenarios": {
+    "concurrent": {
+      "label": "concurrent model runs isolation (same conversation, two tasks)",
+      "tags": {
+        "a": "CA",
+        "b": "CB"
+      },
+      "taskA": {
+        "id": "12526cd6-1aac-42f5-9101-ad4414c994b0",
+        "status": "completed",
+        "text": "[CA]w00000 w00001 w00002"
+      },
+      "taskB": {
+        "id": "d9782450-ca02-448c-830b-ff20481b0ad2",
+        "status": "completed"
+      },
+      "expectedA": {
+        "len": 1404,
+        "sha256": "ac310257491f4b343f0569c7d4ca0ff068178a3e26b00834b60dffeb8b420543"
+      },
+      "expectedB": {
+        "len": 1054,
+        "sha256": "57faa3d6a66f3c4ea4c14d34e600c718fe938dbfe00aee69dc6720a133a6f60d"
+      },
+      "renderedBodies": [
+        {
+          "len": 1054,
+          "sha256": "57faa3d6a66f3c4ea4c14d34e600c718fe938dbfe00aee69dc6720a133a6f60d",
+          "isA": false,
+          "isB": true,
+          "head": "[CB]w00000 w0000"
+        },
+        {
+          "len": 1404,
+          "sha256": "ac310257491f4b343f0569c7d4ca0ff068178a3e26b00834b60dffeb8b420543",
+          "isA": true,
+          "isB": false,
+          "head": "[CA]w00000 w0000"
+        }
+      ],
+      "bothFinalTextsRendered": true,
+      "crossContamination": false,
+      "duplicatesA": 1,
+      "duplicatesB": 1,
+      "streamingVisibility": {
+        "aVisibleSamples": 137,
+        "bVisibleSamples": 28,
+        "bothVisibleSamples": 28,
+        "aHiddenAfterBStarted": null,
+        "bFirstVisibleAt": 1792981378491
+      },
+      "assistantBodyPeak": 2,
+      "streamingBubblePeak": 1,
+      "sampledMs": 7057,
+      "domMutations": 57,
+      "pass": {
+        "bothFinalTextsExact": true,
+        "noCrossContamination": true,
+        "noDuplicates": true,
+        "bothStreamsVisibleTogether": true
+      }
+    },
+    "persistence": {
+      "label": "conversation persistence after one model run (duplicate assistant bookkeeping)",
+      "conversation": {
+        "id": "4633ae4b-ce89-4af6-909b-9898e3b959e9",
+        "messageCount": 2,
+        "messages": [
+          {
+            "id": "fb382d29-6ce1-4216-b7ad-c094df2a6a96",
+            "role": "user",
+            "taskId": null,
+            "at": 1792981380257,
+            "len": 30,
+            "text": "E2E SIZE=60 TAG=PERSIST1 持久化检查"
+          },
+          {
+            "id": "a-06f7cd3eb4637b9491d7ac9c48f0a72f75a7e596ad91ef8e3ba2185a9b1117fb",
+            "role": "assistant",
+            "taskId": "782e6657-f12e-4074-98b9-b784c74b9aff",
+            "at": 1792981382302,
+            "len": 430,
+            "text": "[PERSIST1]w00000 w00001 w00002 w00003 w00004 w00005 w00006 w00007 w00008 w00009 w00010 w00011 w00012 w00013 w00014 w00015 w00016 w00017 w00018 w00019 w00020 w00021 w00022 w00023 w00024 w00025 w00026 w00027 w00028 w00029 w00030 w00031 w00032 w00033 w00034 w00035 w00036 w00037 w00038 w00039 w00040 w00041 w00042 w00043 w00044 w00045 w00046 w00047 w00048 w00049 w00050 w00051 w00052 w00053 w00054 w00055 w00056 w00057 w00058 w00059 "
+          }
+        ]
+      },
+      "assistantCount": 1,
+      "assistantMessagesWithTaskId": 1,
+      "pass": {
+        "exactlyOneAssistant": true,
+        "exactlyOneTaskAssistant": true
+      }
+    }
+  },
+  "findings": [],
+  "profile": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-e2e-m9xnjI",
+  "app": {
+    "appPath": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop",
+    "userData": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-e2e-m9xnjI",
+    "version": "3.3.2",
+    "electron": "45.0.0",
+    "chrome": "156.0.8078.48",
+    "node": "24.22.0"
+  },
+  "initialHealth": {
+    "pid": 32868,
+    "version": "3.3.2",
+    "uptime": 1.4252411,
+    "startedAt": 1792981371600,
+    "mode": "user-background",
+    "configured": false,
+    "python": "python",
+    "serviceInstalled": false,
+    "legacy": null,
+    "runtimeVersions": {
+      "node": "24.22.0",
+      "electron": "45.0.0",
+      "sqlite": "3.53.4"
+    },
+    "ready": true
+  },
+  "configure": {
+    "ok": true,
+    "result": {
+      "ok": true
+    }
+  },
+  "configuredHealth": {
+    "pid": 32868,
+    "version": "3.3.2",
+    "uptime": 1.5720173,
+    "startedAt": 1792981371600,
+    "mode": "user-background",
+    "configured": true,
+    "python": "python",
+    "serviceInstalled": false,
+    "legacy": null,
+    "runtimeVersions": {
+      "node": "24.22.0",
+      "electron": "45.0.0",
+      "sqlite": "3.53.4"
+    },
+    "ready": true
+  },
+  "transport": "push (window.suwen.onEvent -> main pump -> events.stream batches)",
+  "partial": true,
+  "finishedAt": "2026-10-26T02:23:04.371Z",
+  "durationMs": 16216,
+  "phaseLog": [
+    {
+      "at": "2026-10-26T02:22:48.173Z",
+      "phase": "fixture",
+      "msg": "listening http://127.0.0.1:11570/v1"
+    },
+    {
+      "at": "2026-10-26T02:22:52.250Z",
+      "phase": "boot",
+      "msg": "daemon ready pid=32868 configured=false electron=45.0.0"
+    },
+    {
+      "at": "2026-10-26T02:22:52.396Z",
+      "phase": "boot",
+      "msg": "model configured=true"
+    },
+    {
+      "at": "2026-10-26T02:22:52.396Z",
+      "phase": "scenario",
+      "msg": "concurrent run isolation"
+    },
+    {
+      "at": "2026-10-26T02:22:59.974Z",
+      "phase": "concurrent",
+      "msg": "bodies=2 bothFinal=true contamination=false bothVisibleSamples=28"
+    },
+    {
+      "at": "2026-10-26T02:22:59.977Z",
+      "phase": "scenario",
+      "msg": "conversation persistence duplicate check"
+    },
+    {
+      "at": "2026-10-26T02:23:04.368Z",
+      "phase": "persist",
+      "msg": "conversation=4633ae4b-ce89-4af6-909b-9898e3b959e9 assistants=1 taskAssistants=1"
+    }
+  ]
+}

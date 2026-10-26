@@ -1019,6 +1019,7 @@ function renderSessionFilterOptions() {
   if (current && projectsById.has(current)) select.value = current;
 }
 async function loadConversations() {
+  const epoch=S.conversationEpoch||0;
   let apiList = [];
   try {
     const result = await call('conversation.list', {});
@@ -1031,7 +1032,7 @@ async function loadConversations() {
   for (const conversation of apiList) merged.set(conversation.id, conversation);
   S.conversations = [...merged.values()].sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
   renderSessions();
-  if (!S.conversationId && S.conversations.length) {
+  if (!S.conversationId && S.conversations.length && !S.conversationSelectionTouched && epoch===(S.conversationEpoch||0)) {
     const first = S.conversations[0];
     S.conversationId = first.id;
     S.conversation = first.messages.length ? first : null;
@@ -1040,8 +1041,10 @@ async function loadConversations() {
 }
 async function refreshConversationRecord() {
   if (!S.conversationId) return;
+  const id=S.conversationId,epoch=S.conversationEpoch||0;
   try {
-    const result = await call('conversation.get', { id: S.conversationId });
+    const result = await call('conversation.get', { id });
+    if(id!==S.conversationId||epoch!==(S.conversationEpoch||0))return;
     const conversation = conversationOf(result);
     if (conversation) {
       S.conversation = conversation;
@@ -1064,6 +1067,8 @@ function conversationOf(result) {
 }
 async function openConversation(id) {
   if (!id) { newConversation(); return; }
+  S.conversationSelectionTouched=true;
+  const epoch=S.conversationEpoch=(S.conversationEpoch||0)+1;
   S.conversationId = id;
   S.conversation = null;
   S.chatNotice = null;
@@ -1073,14 +1078,20 @@ async function openConversation(id) {
   scheduleChatRender();
   renderSessions();
   await refreshConversationRecord();
+  if(epoch!==S.conversationEpoch||S.conversationId!==id)return;
   if (!S.conversation) S.chatNotice = t('conversationLoadFailed');
   renderChatNotice();
 }
 function newConversation() {
+  S.conversationSelectionTouched=true;
+  S.conversationEpoch=(S.conversationEpoch||0)+1;
   S.conversationId = null;
   S.conversation = null;
   S.chatNotice = null;
   S.selectedTaskId = null;
+  S.stream.userIntent='down';
+  S.stream.scrollPinned=true;
+  closeEvidence();
   restoreDraft();
   renderChatNotice();
   scheduleChatRender();
@@ -1381,6 +1392,9 @@ function renderChat() {
     }
   }
   timeline.replaceChildren(...nodes);
+  // Structural events may be the last event before a provider pauses. Render
+  // already received text now instead of waiting for another token or poll.
+  applyStreamTextPatches();
   if (previousFollow) scrollTimelineToBottom();
   else restoreTimelineScroll(previousTop);
   updateJumpLatest();
@@ -3671,7 +3685,9 @@ function applyStreamTextPatches() {
     if (!ref) continue;
     if (FINAL_STATUS.has(statusFor(task))) continue;
     const text = streamTextFor(task);
-    if (!text || text === ref.painted) continue;
+    // A throttled closed block still needs its scheduled flush even when the
+    // provider sends no additional text during the interval.
+    if (!text || (text === ref.painted && !(ref.plan && ref.plan.stableChars !== ref.stableChars))) continue;
     ref.painted = text;
     changed = true;
     let plan = null;

@@ -1,0 +1,26 @@
+
+> suwen-desktop@3.3.2 dist:win
+> npm run build && electron-builder --win nsis --x64
+
+
+> suwen-desktop@3.3.2 build
+> tsc && node scripts/copy-assets.mjs
+
+  • electron-builder  version=26.18.0 os=10.0.26200
+  • loaded configuration  file=package.json ("build" field)
+  • executing @electron/rebuild  electronVersion=45.0.0 arch=x64 buildFromSource=false workspaceRoot=C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=win32 arch=x64 electron=45.0.0 appOutDir=release\win-unpacked
+  ⨯ connect ETIMEDOUT 20.205.243.166:443  failedTask=build stackTrace=RequestError: connect ETIMEDOUT 20.205.243.166:443
+    at ClientRequest.<anonymous> (C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\node_modules\got\dist\source\core\index.js:970:111)
+    at Object.onceWrapper (node:events:623:26)
+    at ClientRequest.emit (node:events:520:35)
+    at ClientRequest.origin.emit (C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\node_modules\@szmarczak\http-timer\dist\source\index.js:43:20)
+    at emitErrorEvent (node:_http_client:108:11)
+    at TLSSocket.socketErrorListener (node:_http_client:575:5)
+    at TLSSocket.emit (node:events:508:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1645:16)

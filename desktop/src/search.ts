@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import type { Json } from './harness/types.js';
 import { ValidationError } from './harness/types.js';
 
-export interface Source { url:string; title:string; text:string; retrievedAt:string; provider:string; sha256:string; fetched:boolean }
+export interface Source { url:string; title:string; text:string; retrievedAt:string; provider:string; sha256:string; fetched:boolean; retrievedUrl?:string }
 type Fetcher = typeof fetch;
 function privateAddress(ip:string):boolean {
   if(isIP(ip)===4){const [a,b]=ip.split('.').map(Number);return a===0||a===10||a===127||a>=224||(a===169&&b===254)||(a===172&&b>=16&&b<=31)||(a===192&&b===168)||(a===100&&b>=64&&b<=127);}
@@ -20,6 +20,27 @@ export function publicUrl(value:string):URL {
 export function decodeEntities(s:string):string {return s.replace(/&#x([\da-f]+);/gi,(_,x)=>{const n=parseInt(x,16);return n<=0x10ffff?String.fromCodePoint(n):'';}).replace(/&#(\d+);/g,(_,x)=>Number(x)<=0x10ffff?String.fromCodePoint(Number(x)):'').replace(/&(?:amp|lt|gt|quot|apos|nbsp);/g,x=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&apos;':"'",'&nbsp;':' '}[x]??x));}
 export function extractText(html:string):string {return decodeEntities(html.replace(/<(script|style|nav|footer|header)\b[^>]*>[\s\S]*?<\/\1>/gi,' ').replace(/<!--[^]*?-->/g,' ').replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();}
 const source=(url:string,title:string,text:string,provider:string,fetched=false):Source=>({url:publicUrl(url).href,title:extractText(title).slice(0,300),text:text.slice(0,14000),retrievedAt:new Date().toISOString(),provider,sha256:createHash('sha256').update(text).digest('hex'),fetched});
+
+/** A repository API response is an authoritative representation of its web page.
+ * Only accept the exact matching html_url returned by GitHub, never arbitrary
+ * links mentioned in a body or an unrelated server's canonical claims. */
+export function fetchedSource(page:{url:string;text:string}):Source {
+  const text=extractText(page.text);
+  if(text.length<80||/^(?:.{0,100})(?:Just a moment|Access Denied|Checking your browser)/i.test(text))throw new Error('Source body is empty or blocked');
+  const title=page.text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]??page.url;
+  const endpoint=publicUrl(page.url);
+  const repository=endpoint.pathname.match(/^\/repos\/([^/]+)\/([^/]+)\/?$/);
+  if(endpoint.origin==='https://api.github.com'&&repository){
+    try{
+      const metadata=JSON.parse(page.text);
+      const expected=`https://github.com/${repository[1]}/${repository[2]}`;
+      if(metadata.html_url===expected&&metadata.full_name===`${repository[1]}/${repository[2]}`){
+        return {...source(expected,metadata.full_name,text,'github-api',true),retrievedUrl:page.url};
+      }
+    }catch{} // Non-JSON content remains evidence only for the actual fetched URL.
+  }
+  return source(page.url,title,text,'http',true);
+}
 
 /** Two public providers; no paid search key is assumed. Responses are bounded and
  * cached only after nonempty, parsed results. Every fallback is observable. */
@@ -48,10 +69,7 @@ export class SearchService {
   }
   async fetch(url:string,signal:AbortSignal):Promise<Source> {
     const page=await this.request(url,signal);
-    const text=extractText(page.text);
-    if(text.length<80||/^(?:.{0,100})(?:Just a moment|Access Denied|Checking your browser)/i.test(text))throw new Error('Source body is empty or blocked');
-    const title=page.text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]??page.url;
-    return source(page.url,title,text,'http',true);
+    return fetchedSource(page);
   }
   async search(query:string,signal:AbortSignal,provider:'auto'|'bing'|'duckduckgo'='auto'):Promise<Json> {
     const q=query.trim().replace(/\s+/g,' ');

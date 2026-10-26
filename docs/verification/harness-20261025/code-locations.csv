@@ -1,18 +1,18 @@
-﻿file,line,symbol
+file,line,symbol
 desktop/src/providers.ts,76,export async function modelTurn
 desktop/src/harness/agent-loop.ts,47,export async function runAgent
 desktop/src/harness/tool-registry.ts,37,export class ToolRegistry
 desktop/src/agent-tools.ts,11,export function createAgentTools
-desktop/src/search.ts,26,export class SearchService
+desktop/src/search.ts,47,export class SearchService
 desktop/src/mcp-client.ts,112,export class McpHttpSession
 desktop/src/domain/tools.ts,826,async run(id:string
 desktop/src/harness/store.ts,287,activityProgress(
 desktop/src/harness/store.ts,301,complete(
 desktop/src/activities/model.ts,36,export function createModelActivity
-desktop/src/main.ts,122,async function openResearchWorkspace
+desktop/src/main.ts,123,async function openResearchWorkspace
 desktop/worker/legacy_server.py,103,provider = {
 omicslab/runtime/desktop_harness.py,17,class DesktopHarness
 omicslab/agent/loop.py,92,desktop_harness =
 omicslab/web/js/app.js,366,const mountRoot=
 omicslab/web/js/views/chat.js,565,function renderMessages()
-desktop/ui/app.js,3651,painted: null
+desktop/ui/app.js,3665,painted: null

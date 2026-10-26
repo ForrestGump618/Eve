@@ -1,0 +1,19 @@
+{
+  "kind": "real Electron window lifecycle, no model requests",
+  "packaged": true,
+  "phase": "reproduced",
+  "at": "2026-10-26T02:21:14.326Z",
+  "results": [
+    {
+      "scenario": "owner-first",
+      "errors": [
+        {
+          "kind": "uncaughtException",
+          "message": "TypeError: Object has been destroyed\n    at BrowserWindow.<anonymous> (file:///C:/Users/Qingyuan%20Zhuang/Documents/Codex/SuWen/desktop-vnext/desktop/release/win-unpacked/resources/app/dist/src/main.js:246:14)\n    at BrowserWindow.emit (node:events:526:24)"
+        }
+      ],
+      "exitCode": 0,
+      "ok": false
+    }
+  ]
+}

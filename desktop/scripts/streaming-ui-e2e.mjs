@@ -764,8 +764,8 @@ async function scenarioConcurrent(ctx) {
   const t1 = Date.now();
   while (Date.now() - t1 < 120000) {
     const tasks = await snapshotTasks(page).catch(() => []);
-    const a = tasks.find(t => t.name?.includes(`TAG=${tagA}`) || t.name?.includes(`SIZE=${sizeA}`));
-    const b = tasks.find(t => t.name?.includes(`TAG=${tagB}`));
+    const a = tasks.find(t => t.id===taskA?.id);
+    const b = tasks.find(t => t.id===createdB?.id);
     const terminal = t => ['completed', 'failed', 'cancelled', 'waiting_approval'].includes(t?.status);
     if (a && b && terminal(a) && terminal(b)) { finalTasks = { a, b }; break; }
     await sleep(300);
@@ -1472,6 +1472,7 @@ async function main() {
 
     // Aggregate findings from scenario passes.
     const findings = [];
+    for(const [name,scenario] of Object.entries(report.scenarios))if(scenario?.error)findings.push({severity:'P0',area:'test-execution',evidence:name,detail:String(scenario.error)});
     const sizes = Array.isArray(report.scenarios.sizes) ? report.scenarios.sizes : [];
     for (const s of sizes) {
       if (!s.pass.streamIntegrity) findings.push({ severity: 'P0', area: 'stream-integrity', evidence: s.label, detail: `sha ${s.shaMatch} exact ${s.exactTextMatch} len ${s.actualLen}/${s.expectedLen}` });
@@ -1518,6 +1519,7 @@ async function main() {
       if (k.interruptedTask?.status === 'waiting_approval') findings.push({ severity: 'P2', area: 'reconnect', evidence: k.label, detail: 'interrupted side-effect model step requires explicit reconciliation (waiting_approval) — by design, but recovery is not automatic' });
     }
     report.findings = findings;
+    if(findings.length)process.exitCode=1;
     report.finishedAt = nowIso();
     report.durationMs = Date.now() - startedAt;
     report.phaseLog = phaseLog;

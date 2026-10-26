@@ -67,12 +67,14 @@ try {
         await sleep(250);
       }
       const step = snapshot?.steps?.[0]; const output = step?.output;
-      const toolTrace = output?.trace ?? [];
+      // Failed activities have no final output, but retain fenced trace events.
+      // Count those calls as well; otherwise failures misleadingly erase tools.
+      const toolTrace = output?.trace ?? (snapshot?.events ?? []).filter(x => /^(agent\.|model\.|tool\.)/.test(x.type) && x.data?.traceId).map(x => ({ ...x.data, type:x.type, at:x.at }));
       const completedTools = toolTrace.filter(x => x.type === 'tool.completed').map(x => x.name);
       const missingTools = item.tools.filter(name => !completedTools.includes(name));
       const text = output?.text ?? '';
       const missingContent = item.contains.filter(x => !text.toLowerCase().includes(x.toLowerCase()));
-      entry = { ...entry, runStatus:snapshot?.status, answer:text, traceId:output?.traceId ?? null, trace:toolTrace, events:snapshot?.events ?? [], sources:output?.sources ?? [], verification:output?.verification ?? null, tokens:snapshot?.tokens ?? 0, calls:snapshot?.calls ?? 0, missingTools, missingContent, error:step?.error ?? null, status:snapshot?.status === 'completed' && text.trim() && !missingTools.length && !missingContent.length && output?.verification?.passed !== false ? 'passed' : 'failed' };
+      entry = { ...entry, runStatus:snapshot?.status, answer:text, traceId:output?.traceId ?? toolTrace.find(x=>x.traceId)?.traceId ?? null, trace:toolTrace, events:snapshot?.events ?? [], sources:output?.sources ?? [], verification:output?.verification ?? null, tokens:snapshot?.tokens ?? 0, calls:snapshot?.calls ?? 0, missingTools, missingContent, error:step?.error ?? null, status:snapshot?.status === 'completed' && text.trim() && !missingTools.length && !missingContent.length && output?.verification?.passed !== false ? 'passed' : 'failed' };
     } catch (e) { entry.error = redact(e.message); entry.status='failed'; }
     entry.latencyMs = Date.now() - started; report.results.push(entry); save();
     console.log(`${phase} ${item.id}: ${entry.status} (${entry.latencyMs} ms) ${entry.error ?? ''}`);

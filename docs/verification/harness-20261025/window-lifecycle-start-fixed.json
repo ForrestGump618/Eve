@@ -1,0 +1,14 @@
+{
+  "kind": "real Electron window lifecycle, no model requests",
+  "packaged": false,
+  "phase": "start-fixed",
+  "at": "2026-10-26T02:25:44.206Z",
+  "results": [
+    {
+      "scenario": "during-start",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    }
+  ]
+}

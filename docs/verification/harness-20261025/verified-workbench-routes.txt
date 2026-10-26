@@ -1,0 +1,93 @@
+[10:04:07] runtime      deps=C:\Users\QINGYU~1\AppData\Local\Temp\suwen-formal-ui-6F4epw\python-env
+[10:04:07] runtime      marker hash match=true python=3.12.11 size=124.1MB files=11867
+[10:04:07] launch       Electron C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\node_modules\electron\dist\electron.exe
+[10:04:07] launch       SUWEN_TEST_HOME=C:\Users\QINGYU~1\AppData\Local\Temp\suwen-wb-e2e-Sc5sk9
+[10:04:07] launch       SUWEN_WORKBENCH_DEPS=C:\Users\QINGYU~1\AppData\Local\Temp\suwen-formal-ui-6F4epw\python-env
+[10:04:07] fixture      markdown SSE fixture http://127.0.0.1:9384/v1 (deterministic local)
+[10:04:09] launch       electron pid=38044
+[10:04:11] native       daemon connection ready (后台运行)
+[10:04:11] native       app=SuWen 3.3.2 electron=45.0.0 chrome=156.0.8078.48 node=24.22.0
+[10:04:11] check        PASS    native.rail.sixWorkspaces — buttons=[chat,projects,tasks,tools,workbench,settings]
+[10:04:11] check        PASS    native.rail.workbenchPresent — data-page="workbench"
+[10:04:20] native       #wb-state: 工作台运行时已就绪 · Python 3.12.11 | Python: python (3.12.11) | 依赖目录: C:\Users\QINGYU~1\AppData\Local\Temp\suwen-formal-ui-6F4epw\python-env | 占用大小: 124.1 MB | 检查时间: 2026/10/25 21:09:42
+[10:04:26] check        PASS    native.workbench.stateReady — 工作台运行时已就绪 · Python 3.12.11
+[10:04:26] check        PASS    native.workbench.openEnabled — #wb-open enabled
+[10:04:26] check        PASS    native.workbench.installed — installed=true python=3.12.11 bytes=130160649
+[10:04:26] check        PASS    native.workbench.depsDir — C:\Users\QINGYU~1\AppData\Local\Temp\suwen-formal-ui-6F4epw\python-env
+[10:04:41] legacy       window event received url=http://127.0.0.1:2800/
+[10:04:42] check        PASS    legacy.onboarding.visibleOnFirstBoot — "欢迎来到素问" buttons=[先看看, 配置模型连接]
+[10:04:43] check        PASS    legacy.onboarding.dismissed — dismissed via 先看看
+[10:04:43] legacy       title="工作台 · 素问 Suwen" nav=12 theme=dark brand="素问 Suwen"
+[10:04:43] check        PASS    legacy.window.event — url=http://127.0.0.1:2800/
+[10:04:43] check        PASS    legacy.title.contains素问 — 工作台 · 素问 Suwen
+[10:04:43] check        PASS    legacy.shell.navItems>=12 — 12 nav items: workbench,chat,tasks2,research,knowledge,workflow,artifacts,extensions,discovery,ssh,settings,diagnostics
+[10:04:43] check        PASS    legacy.shell.brand — 素问 Suwen
+[10:04:43] check        PASS    legacy.theme.darkDefault — data-theme=dark (requirement: dark by default; storedPref="dark"; prefersLight=true; static index.html fallback is dark, but platform appearance default "system" resolves from OS)
+[10:04:43] check        PASS    legacy.isolated.session — origin=http://127.0.0.1:2800
+[10:04:43] check        PASS    legacy.renderer.noNode — window.require undefined
+[10:04:43] check        PASS    legacy.renderer.noBridge — window.suwen undefined
+[10:04:44] check        PASS    legacy.theme.toggleWorks — dark -> light -> dark
+[10:04:44] daemon       pid=38396 legacy={"pid":21864,"port":2800,"mode":"python-compatibility"}
+[10:04:45] route:workbench PASS title="工作台 · 素问 Suwen" textLen=782 children=1 consoleErrors=0
+[10:04:45] route:chat   PASS title="对话 · 素问 Suwen" textLen=492 children=1 consoleErrors=0
+[10:04:46] route:tasks2 PASS title="任务中心 · 素问 Suwen" textLen=162 children=1 consoleErrors=0
+[10:04:47] route:research PASS title="科研与证据 · 素问 Suwen" textLen=273 children=1 consoleErrors=0
+[10:04:47] route:knowledge PASS title="知识与记忆 · 素问 Suwen" textLen=178 children=1 consoleErrors=0
+[10:04:48] route:workflow PASS title="工作流 · 素问 Suwen" textLen=206 children=1 consoleErrors=0
+[10:04:49] route:artifacts PASS title="产物中心 · 素问 Suwen" textLen=138 children=1 consoleErrors=0
+[10:04:49] route:extensions PASS title="能力中心 · 素问 Suwen" textLen=191 children=1 consoleErrors=0
+[10:04:50] route:discovery PASS title="发现 · 素问 Suwen" textLen=179 children=1 consoleErrors=0
+[10:04:51] route:ssh    PASS title="SSH · 素问 Suwen" textLen=209 children=1 consoleErrors=0
+[10:04:51] route:settings PASS title="设置 · 素问 Suwen" textLen=398 children=1 consoleErrors=0
+[10:04:52] route:diagnostics PASS title="系统诊断 · 素问 Suwen" textLen=286 children=1 consoleErrors=0
+[10:04:52] check        PASS    legacy.routes.all12 — 12/12 routes rendered
+[10:04:52] native       page chat visible=true title="对话"
+[10:04:52] native       page projects visible=true title="科研项目"
+[10:04:52] native       page tasks visible=true title="任务执行"
+[10:04:52] native       page tools visible=true title="工具 / 技能"
+[10:04:52] native       page settings visible=true title="设置 / 诊断"
+[10:04:52] native       page workbench visible=true title="实验工作台"
+[10:04:52] check        PASS    native.pages.noRegression — all native pages open
+[10:04:52] check        PASS    native.electron.alive — exitCode=null
+[10:04:53] check        PASS    native.markdown.configure — local fixture http://127.0.0.1:9384/v1 model=fixture
+[10:04:58] check        FAIL    native.markdown.streamingProgressive — bodyClass="body" tailPresent=false tailTextLen=0 typesetWhileStreaming={katex:0,tables:0,codeBlocks:0} firstSeenMs=140 shot=
+[10:04:58] check        PASS    native.markdown.streamingPartialConstructsDeferred — diagrams=0 tables=0 codeBlocks=0 (partial constructs are never typeset; Mermaid deferred until completion)
+[10:04:58] check        PASS    native.markdown.katex — renderedMath=2 displayMath=1 katexNodes=2
+[10:04:58] check        PASS    native.markdown.mermaidSvg — renderedDiagrams=1 svg=1 svgPerContainer=[1]
+[10:04:58] check        PASS    native.markdown.table — tables=1 tableScroll=1
+[10:04:58] check        PASS    native.markdown.codeBlock — pre=1 codeBlocks=1
+[10:04:58] check        PASS    native.markdown.noFailedPlaceholders — failedPlaceholders=0 fallbackText=false
+[10:05:00] check        PASS    native.markdown.screenshot.light — resolvedTheme=light katex=2 diagramSvg=1 shot=screenshots/markdown-light.png
+[10:05:02] check        PASS    native.markdown.screenshot.dark — resolvedTheme=dark katex=2 diagramSvg=1 shot=screenshots/markdown-dark.png
+[10:05:03] check        PASS    native.markdown.noDuplicateContainers — before: diagrams=1 svgPerContainer=[1]; after: diagrams=1 svgPerContainer=[1]
+[10:05:03] check        PASS    native.markdown.noPageErrors — 0 page errors, 1 fixture request(s)
+[10:05:03] check        PASS    native.markdown.noCspViolations — 0 CSP violation(s) while rendering markdown/mermaid
+[10:05:03] check        PASS    native.markdown.noUnexpectedConsoleErrors — no non-CSP console errors
+[10:05:03] markdown     katex=2 diagrams=1 tables=1 pre=1 reqs=1 theme="light"->"dark" cspViolations=0
+[10:05:03] cleanup      starting
+[10:05:17] report       C:\Users\Qingyuan Zhuang\Documents\Codex\SuWen\desktop-vnext\desktop\release\workbench-e2e\20261026-100358\report.json
+
+=== workbench UI E2E summary ===
+{
+  "status": "FAIL",
+  "checks": {
+    "PASS": 33,
+    "FAIL": 1
+  },
+  "routes": "12/12",
+  "markdown": {
+    "katex": 2,
+    "diagrams": 1,
+    "tables": 1,
+    "pageErrors": 0,
+    "fixtureRequests": 1,
+    "cspViolations": 0,
+    "themes": {
+      "light": "light",
+      "dark": "dark"
+    }
+  },
+  "legacyErrors": 0,
+  "pageErrors": 0,
+  "report": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\workbench-e2e\\20261026-100358\\report.json"
+}

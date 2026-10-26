@@ -23,13 +23,13 @@ export interface AgentOptions {
   priorActions?:string[];
 }
 const canonical=(url:string):string=>{try{const u=new URL(url);u.hash='';return u.href.replace(/\/$/,'');}catch{return url;}};
-export function citationUrls(text:string):string[]{const prose=text.replace(/```[\s\S]*?```/g,'').replace(/`[^`\n]*`/g,'');return [...new Set((prose.match(/https?:\/\/[^\s<>"\])，。；]+/g)??[]).map(x=>canonical(x.replace(/[.,;:]$/,''))))];}
+export function citationUrls(text:string):string[]{const prose=text.replace(/```[\s\S]*?```/g,'').replace(/`[^`\n]*`/g,'');return [...new Set((prose.match(/https?:\/\/[^\s<>"\])，。；（）【】「」]+/g)??[]).map(x=>canonical(x.replace(/[.,;:]$/,''))))];}
 function collectSources(value:Json,sources:Map<string,Source>):void {
   if(!value||typeof value!=='object')return;
   if(Array.isArray(value)){for(const item of value)collectSources(item,sources);return;}
   if(typeof value.url==='string'&&/^https?:/.test(value.url)&&typeof (value.title??value.protein??value.name)==='string'){
     const title=String(value.title??value.protein??value.name),text=String(value.text??value.abstract??title);
-    const item:Source={url:value.url,title,text:text.slice(0,14000),retrievedAt:typeof value.retrievedAt==='string'?value.retrievedAt:new Date().toISOString(),provider:typeof value.provider==='string'?value.provider:'database',sha256:createHash('sha256').update(text).digest('hex'),fetched:value.fetched===true||(typeof value.abstract==='string'&&value.abstract.trim().length>80)};
+    const item:Source={url:value.url,title,text:text.slice(0,14000),retrievedAt:typeof value.retrievedAt==='string'?value.retrievedAt:new Date().toISOString(),provider:typeof value.provider==='string'?value.provider:'database',sha256:createHash('sha256').update(text).digest('hex'),fetched:value.fetched===true||(typeof value.abstract==='string'&&value.abstract.trim().length>80),...(typeof value.retrievedUrl==='string'?{retrievedUrl:value.retrievedUrl}:{})};
     sources.set(canonical(item.url),item);
   }
   for(const item of Object.values(value))collectSources(item,sources);

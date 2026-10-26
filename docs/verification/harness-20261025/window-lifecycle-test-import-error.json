@@ -1,0 +1,14 @@
+{
+  "kind": "real Electron window lifecycle, no model requests",
+  "packaged": true,
+  "phase": "reproduced",
+  "at": "2026-10-26T02:20:43.319Z",
+  "results": [
+    {
+      "scenario": "owner-first",
+      "errors": [],
+      "error": "electronApplication.evaluate: TypeError: A dynamic import callback was not specified.\n    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:280:9)\n    at eval (eval at evaluate (:370:30), <anonymous>:2:13)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+      "ok": false
+    }
+  ]
+}

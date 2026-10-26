@@ -16,6 +16,7 @@ if(process.env.SUWEN_TEST_HOME)app.setPath('userData',resolve(process.env.SUWEN_
 if(!app.requestSingleInstanceLock())app.quit();
 let win:BrowserWindow|null=null,connection:Connection|null=null;
 let researchWindow:BrowserWindow|null=null;
+let quitting=false;
 let streamCursor=0,pumpTimer:NodeJS.Timeout|null=null,pumpBusy=false;
 let reconnectTimer:NodeJS.Timeout|null=null,reconnecting=false;
 const home=join(app.getPath('userData'),'runtime');
@@ -44,7 +45,7 @@ async function connectDaemon():Promise<void>{
 }
 /** Push incremental daemon events to the renderer; see docs/architecture/streaming-events.md. */
 async function pumpEvents():Promise<void>{
- if(pumpBusy||!win||win.isDestroyed())return;
+ if(quitting||pumpBusy||!win||win.isDestroyed())return;
  if(!connection){scheduleReconnect();return;}
  pumpBusy=true;
  try{
@@ -71,7 +72,7 @@ function notifyConnection(state:'reconnecting'|'restored'|'lost'):void{
 }
 /** Re-establish the detached daemon without losing the renderer; bounded exponential backoff. */
 function scheduleReconnect():void{
- if(reconnecting||reconnectTimer)return;
+ if(quitting||reconnecting||reconnectTimer)return;
  reconnecting=true;
  notifyConnection('reconnecting');
  let attempt=0;
@@ -120,10 +121,12 @@ const exposed=new Set<string>([...RPC_METHODS.filter(method=>!MAIN_ONLY.has(meth
 /** The full research workspace is the default product window. The native console
  * remains available with --native for diagnostics and deterministic shell E2E. */
 async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
+ const owner=win;
+ if(quitting||!owner||owner.isDestroyed())return {ok:false};
  if(researchWindow&&!researchWindow.isDestroyed()){researchWindow.show();researchWindow.focus();return {ok:true};}
  let runtime=await workbench.runtime();
  if(!runtime.ready){
-  if(primary&&win){win.show();await win.webContents.executeJavaScript("document.getElementById('health').textContent='正在准备素问运行环境，完成后自动进入科研工作台…'");}
+  if(primary&&!owner.isDestroyed()){owner.show();await owner.webContents.executeJavaScript("document.getElementById('health').textContent='正在准备素问运行环境，完成后自动进入科研工作台…'");}
   const installed=await workbench.install(progress=>{try{win?.webContents.send('suwen:workbench',progress);}catch{}});
   if(!installed.installed)throw new Error(installed.error||'科研工作台运行环境未就绪，请在设置中检查 Python');
   runtime={ready:true,depsDir:installed.depsDir};
@@ -131,28 +134,33 @@ async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  const cfg=readConfig();
  const modelConfig=cfg&&cfg.apiKey?{provider:cfg.provider==='anthropic'?'custom-anthropic':'custom-openai',model:cfg.model,apiBase:cfg.baseUrl,apiKey:cfg.apiKey}:undefined;
  await ensureConnected();const result=await rpc(connection!,'legacyStart',{...(runtime.depsDir?{deps:runtime.depsDir}:{}),...(modelConfig?{config:modelConfig}:{})});
+ if(quitting||owner.isDestroyed())return {ok:false};
  const origin=`http://127.0.0.1:${result.port}`;
  const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
  const window=new BrowserWindow({width:1600,height:1000,title:'素问 · SuWen 科研工作台',show:false,webPreferences:{session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  researchWindow=window;
+ const contentsId=window.webContents.id;
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
  isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
-  if(details.webContentsId===window.webContents.id)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
+  if(!quitting&&!window.isDestroyed()&&details.webContentsId===contentsId)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
  });
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  window.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
- window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);researchWindow=null;if(primary)win?.close();});
- try {await window.loadURL(origin);window.show();if(primary)win?.hide();return {ok:true};}
- catch(error){window.destroy();throw error;}
+ window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);if(researchWindow===window)researchWindow=null;if(primary&&!quitting&&!owner.isDestroyed())owner.close();});
+ try {await window.loadURL(origin);if(quitting||window.isDestroyed())return {ok:false};window.show();if(primary&&!owner.isDestroyed())owner.hide();return {ok:true};}
+ catch(error){if(!window.isDestroyed())window.destroy();throw error;}
 }
 app.whenReady().then(async()=>{
  ensureHome(home);let startupError='';try{await connectDaemon();const c=readConfig();if(c&&connection)await rpc(connection,'configure',c);if(connection)await pushSecrets();}catch(err){startupError=safeError(err);}
+ if(quitting)return;
  win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'素问 · SuWen',show:process.argv.includes('--native'),backgroundColor:'#f6f7fa',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ const shell=win;
+ shell.on('closed',()=>{if(win===shell)win=null;});
  win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  win.webContents.on('will-navigate',(event,url)=>{if(url!==pathToFileURL(uiFile).href)event.preventDefault();});
  win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
  ipcMain.handle('suwen:call',async(event,method:unknown,params:any)=>{
-  if(!win||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==pathToFileURL(uiFile).href)throw new Error('Untrusted sender');
+  if(!win||win.isDestroyed()||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==pathToFileURL(uiFile).href)throw new Error('Untrusted sender');
   if(typeof method!=='string'||JSON.stringify(params??{}).length>1_000_000)throw new Error('Invalid request');
   try{
    if(method==='settings') {const c=readConfig();return {provider:c?.provider??'openai',baseUrl:c?.baseUrl??'https://api.openai.com/v1',model:c?.model??'gpt-4o-mini',contextWindow:c?.contextWindow??128000,maxOutput:c?.maxOutput??4096,hasKey:!!c?.apiKey,encrypted:safeStorage.isEncryptionAvailable(),launchAtLogin:app.getLoginItemSettings().openAtLogin,startupError,home};}
@@ -197,13 +205,15 @@ app.whenReady().then(async()=>{
    if(!exposed.has(method))throw new Error('Unsupported method');await ensureConnected();if(!connection)throw new Error('后台未连接，请在设置中重连');return await rpc(connection,method,params??{});
   }catch(err){throw new Error(safeError(err));}
  });
- await win.loadFile(uiFile);
+ try{await shell.loadFile(uiFile);}catch(error){if(quitting||shell.isDestroyed())return;throw error;}
+ if(quitting||shell.isDestroyed())return;
  startEventPump();
  if(!process.argv.includes('--native')&&!process.argv.includes('--background')){
-  try{await openResearchWorkspace(true);}catch(error){win.show();await win.webContents.executeJavaScript(`document.getElementById('error').hidden=false;document.getElementById('error').textContent=${JSON.stringify('科研工作台启动失败：'+safeError(error))}`);}
+  try{await openResearchWorkspace(true);}catch(error){if(!quitting&&!shell.isDestroyed()){shell.show();await shell.webContents.executeJavaScript(`document.getElementById('error').hidden=false;document.getElementById('error').textContent=${JSON.stringify('科研工作台启动失败：'+safeError(error))}`);}}
  }
- if(process.argv.includes('--background'))win.hide();
+ if(process.argv.includes('--background')&&!shell.isDestroyed())shell.hide();
  app.on('second-instance',()=>{const target=researchWindow&&!researchWindow.isDestroyed()?researchWindow:win&&!win.isDestroyed()?win:BrowserWindow.getAllWindows()[0];target?.show();target?.focus();});
 });
+app.on('before-quit',()=>{quitting=true;workbench.cancel();if(pumpTimer)clearInterval(pumpTimer);if(reconnectTimer)clearTimeout(reconnectTimer);});
 app.on('window-all-closed',()=>app.quit());
 // UI exit deliberately leaves the detached daemon alive; explicit shutdown pauses work.

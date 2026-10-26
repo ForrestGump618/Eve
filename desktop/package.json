@@ -1,6 +1,6 @@
 {
   "name": "suwen-desktop",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "private": true,
   "description": "SuWen local research workspace with durable task execution",
   "main": "dist/main.js",

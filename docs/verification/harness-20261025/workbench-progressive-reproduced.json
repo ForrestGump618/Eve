@@ -1,0 +1,1080 @@
+{
+  "schema": "suwen-workbench-e2e/v1",
+  "startedAt": "2026-10-26T02:03:58.166Z",
+  "finishedAt": "2026-10-26T02:05:17.327Z",
+  "durationMs": 79161,
+  "environment": {
+    "host": {
+      "platform": "win32",
+      "release": "10.0.26200",
+      "version": "Windows 11 Home China",
+      "arch": "x64",
+      "cpuModel": "Intel(R) Core(TM) i7-14700HX",
+      "cpuCores": 28,
+      "totalMemGiB": 31.8,
+      "hostNode": "v24.14.0"
+    },
+    "electronPackage": "45.0.0",
+    "playwrightCore": "1.64.1",
+    "appVersion": "3.3.2",
+    "runtimeVersions": {
+      "electron": "45.0.0",
+      "chrome": "156.0.8078.48",
+      "node": "24.22.0",
+      "v8": "15.6.75.19-electron.0"
+    },
+    "appName": "SuWen"
+  },
+  "runtimeValidation": {
+    "depsDir": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env",
+    "markerPath": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env\\.suwen-workbench.json",
+    "markerSha256": "64321d0b81b3991c81ca48f2e74d8c271a8bff928986b0f68abc081dfab621a4",
+    "markerSchema": 1,
+    "markerRequirementsHash": "3887b118f877fbb2c9be61d9b46264fa16f7bf620e622c64fbc0533b8af256ab",
+    "expectedRequirementsHash": "3887b118f877fbb2c9be61d9b46264fa16f7bf620e622c64fbc0533b8af256ab",
+    "markerHashMatch": true,
+    "markerPython": "3.12.11",
+    "detectedPythonVersion": "3.12.11",
+    "pythonPath": "C:\\ProgramData\\miniconda3\\python.exe",
+    "pythonMinorMatch": true,
+    "bytes": 130160649,
+    "files": 11867,
+    "markerInstalledAt": 1792933782615
+  },
+  "profileDir": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-wb-e2e-Sc5sk9",
+  "native": {
+    "checks": [],
+    "workbench": {
+      "screenshot": "screenshots/native-workbench.png",
+      "stateText": "工作台运行时已就绪 · Python 3.12.11\nPython: python (3.12.11)\n依赖目录: C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env\n占用大小: 124.1 MB\n检查时间: 2026/10/25 21:09:42",
+      "openEnabled": true,
+      "status": {
+        "ok": true,
+        "python": "python",
+        "pythonVersion": "3.12.11",
+        "pip": true,
+        "depsDir": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env",
+        "installed": true,
+        "installing": false,
+        "bytes": 130160649,
+        "downloadMb": 130,
+        "requirementsHash": "3887b118f877fbb2c9be61d9b46264fa16f7bf620e622c64fbc0533b8af256ab",
+        "markerPython": "3.12.11",
+        "installedAt": 1792933782615,
+        "missing": [],
+        "error": null
+      }
+    },
+    "railButtons": [
+      "chat",
+      "projects",
+      "tasks",
+      "tools",
+      "workbench",
+      "settings"
+    ],
+    "pages": [
+      {
+        "page": "chat",
+        "visible": true,
+        "title": "对话",
+        "error": null
+      },
+      {
+        "page": "projects",
+        "visible": true,
+        "title": "科研项目",
+        "error": null
+      },
+      {
+        "page": "tasks",
+        "visible": true,
+        "title": "任务执行",
+        "error": null
+      },
+      {
+        "page": "tools",
+        "visible": true,
+        "title": "工具 / 技能",
+        "error": null
+      },
+      {
+        "page": "settings",
+        "visible": true,
+        "title": "设置 / 诊断",
+        "error": null
+      },
+      {
+        "page": "workbench",
+        "visible": true,
+        "title": "实验工作台",
+        "error": null
+      }
+    ],
+    "pageErrors": [],
+    "console": [],
+    "markdownFixture": {
+      "url": "http://127.0.0.1:9384/v1",
+      "port": 9384,
+      "deterministic": true,
+      "plainHttpOnly": true
+    },
+    "daemon": {
+      "pid": 38396,
+      "legacy": {
+        "pid": 21864,
+        "port": 2800,
+        "mode": "python-compatibility"
+      },
+      "runtimeVersions": {
+        "node": "24.22.0",
+        "electron": "45.0.0",
+        "sqlite": "3.53.4"
+      }
+    },
+    "afterLegacyScreenshot": "screenshots/native-after-legacy.png",
+    "markdown": {
+      "fixture": {
+        "url": "http://127.0.0.1:9384/v1",
+        "endpoint": "/v1/chat/completions",
+        "textSha256": "93a49888764434bbb320e4acd4bf080693bbab2bee87e7eafe0cc14b0a5f1dfc",
+        "textLen": 235
+      },
+      "generatedAt": "2026-10-26T02:04:53.136Z",
+      "configure": {
+        "ok": true,
+        "result": {
+          "ok": true
+        }
+      },
+      "sentAt": "2026-10-26T02:04:53.958Z",
+      "streamingWatch": {
+        "startedAt": "2026-10-26T02:04:53.958Z",
+        "samples": 10,
+        "seenStreaming": true,
+        "firstSeenMs": 140,
+        "progressiveSeen": false,
+        "classes": [
+          " body= progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant streaming body=body progressive=false tail=false",
+          "message user|message assistant body= progressive=false tail=false"
+        ],
+        "timelineMessages": [
+          {
+            "at": 1792980293960,
+            "messages": 0,
+            "classes": [],
+            "bodyClass": "",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 0,
+            "taskList": []
+          },
+          {
+            "at": 1792980294095,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 7,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980294232,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 7,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980294357,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 7,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980294483,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 85,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980294608,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 85,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980294731,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 85,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980294869,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 85,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980298263,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant streaming"
+            ],
+            "bodyClass": "body",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 85,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:queued"
+            ]
+          },
+          {
+            "at": 1792980298409,
+            "messages": 2,
+            "classes": [
+              "message user",
+              "message assistant"
+            ],
+            "bodyClass": "",
+            "progressive": false,
+            "tailPresent": false,
+            "textLen": 0,
+            "taskList": [
+              "0bda7a33-3496-4259-be17-a9ef06ae39c4:completed"
+            ]
+          }
+        ],
+        "notes": null
+      },
+      "streaming": {
+        "found": true,
+        "bodyClass": "body",
+        "markdownClass": false,
+        "progressiveClass": false,
+        "tailPresent": false,
+        "tailTextLen": 0,
+        "textLen": 85,
+        "katex": 0,
+        "tables": 0,
+        "codeBlocks": 0,
+        "diagrams": 0,
+        "bannerHidden": true,
+        "bannerText": ""
+      },
+      "domBefore": {
+        "hasBody": true,
+        "counts": {
+          "bodyTextLen": 3766,
+          "mathPlaceholders": 2,
+          "mathRendered": 2,
+          "displayMath": 1,
+          "katex": 2,
+          "mermaidPlaceholders": 1,
+          "mermaidRendered": 1,
+          "diagramSvg": 1,
+          "diagramSvgPerContainer": [
+            1
+          ],
+          "table": 1,
+          "tableScroll": 1,
+          "codeBlocks": 1,
+          "pre": 1,
+          "failed": 0,
+          "fallbackText": false,
+          "renderedStates": 3
+        }
+      },
+      "themes": {
+        "light": {
+          "requested": "light",
+          "resolved": "light",
+          "dom": {
+            "bodyTextLen": 3766,
+            "mathPlaceholders": 2,
+            "mathRendered": 2,
+            "displayMath": 1,
+            "katex": 2,
+            "mermaidPlaceholders": 1,
+            "mermaidRendered": 1,
+            "diagramSvg": 1,
+            "diagramSvgPerContainer": [
+              1
+            ],
+            "table": 1,
+            "tableScroll": 1,
+            "codeBlocks": 1,
+            "pre": 1,
+            "failed": 0,
+            "fallbackText": false,
+            "renderedStates": 3
+          }
+        },
+        "dark": {
+          "requested": "dark",
+          "resolved": "dark",
+          "dom": {
+            "bodyTextLen": 3900,
+            "mathPlaceholders": 2,
+            "mathRendered": 2,
+            "displayMath": 1,
+            "katex": 2,
+            "mermaidPlaceholders": 1,
+            "mermaidRendered": 1,
+            "diagramSvg": 1,
+            "diagramSvgPerContainer": [
+              1
+            ],
+            "table": 1,
+            "tableScroll": 1,
+            "codeBlocks": 1,
+            "pre": 1,
+            "failed": 0,
+            "fallbackText": false,
+            "renderedStates": 3
+          }
+        }
+      },
+      "screenshots": {
+        "light": "screenshots/markdown-light.png",
+        "dark": "screenshots/markdown-dark.png"
+      },
+      "domAfterRerender": {
+        "hasBody": true,
+        "counts": {
+          "bodyTextLen": 3900,
+          "mathPlaceholders": 2,
+          "mathRendered": 2,
+          "displayMath": 1,
+          "katex": 2,
+          "mermaidPlaceholders": 1,
+          "mermaidRendered": 1,
+          "diagramSvg": 1,
+          "diagramSvgPerContainer": [
+            1
+          ],
+          "table": 1,
+          "tableScroll": 1,
+          "codeBlocks": 1,
+          "pre": 1,
+          "failed": 0,
+          "fallbackText": false,
+          "renderedStates": 3
+        }
+      },
+      "newPageErrors": [],
+      "fixtureRequests": [
+        {
+          "at": "2026-10-26T02:04:54.334Z",
+          "url": "/v1/chat/completions",
+          "model": "fixture",
+          "stream": true,
+          "maxTokens": 512,
+          "includeUsage": true,
+          "authorization": "Bearer fixture",
+          "messages": [
+            {
+              "role": "system",
+              "contentLen": 389,
+              "contentHead": "你是素问 SuWen，使用已注册的工具完成当前用户任务。简单任务直接执行，不必写计划或调用多 Agent。\n需要检索、读取、计算或执行时必须真实调用相应工具；不"
+            },
+            {
+              "role": "system",
+              "contentLen": 33,
+              "contentHead": "你是严谨的科研助手。区分事实、推断与未知，不编造文献、数据或结论。"
+            },
+            {
+              "role": "user",
+              "contentLen": 45,
+              "contentHead": "E2E Markdown 渲染审计（KaTeX + Mermaid + 表格 + 代码块）"
+            }
+          ],
+          "lastUserHead": "E2E Markdown 渲染审计（KaTeX + Mermaid + 表格 + 代码块）"
+        }
+      ],
+      "fixtureRequestCount": 1,
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "cspViolations": 0,
+        "cspSamples": [],
+        "errorSamples": []
+      }
+    }
+  },
+  "legacy": {
+    "opened": true,
+    "checks": [],
+    "pageErrors": [],
+    "console": [],
+    "window": {
+      "innerWidth": 1586,
+      "innerHeight": 938,
+      "dpr": 1.5
+    },
+    "shell": {
+      "title": "工作台 · 素问 Suwen",
+      "url": "http://127.0.0.1:2800/",
+      "origin": "http://127.0.0.1:2800",
+      "pathname": "/",
+      "hash": "",
+      "theme": "dark",
+      "themeMode": "",
+      "storedTheme": "\"dark\"",
+      "prefersLight": true,
+      "lang": "zh-CN",
+      "brand": "素问 Suwen",
+      "navCount": 12,
+      "navRoutes": [
+        "workbench",
+        "chat",
+        "tasks2",
+        "research",
+        "knowledge",
+        "workflow",
+        "artifacts",
+        "extensions",
+        "discovery",
+        "ssh",
+        "settings",
+        "diagnostics"
+      ],
+      "navLabels": [
+        "工作台",
+        "对话",
+        "任务中心",
+        "科研与证据",
+        "知识与记忆",
+        "工作流",
+        "产物中心",
+        "能力中心",
+        "发现",
+        "SSH",
+        "设置",
+        "系统诊断"
+      ],
+      "bootSplashPresent": false,
+      "window": {
+        "innerWidth": 1586,
+        "innerHeight": 938,
+        "dpr": 1.5
+      },
+      "bodyTextLen": 888
+    },
+    "onboarding": {
+      "present": true,
+      "title": "欢迎来到素问",
+      "bodyLen": 137,
+      "buttons": [
+        "先看看",
+        "配置模型连接"
+      ]
+    },
+    "firstBootScreenshot": "screenshots/legacy-first-boot.png",
+    "shellScreenshot": "screenshots/legacy-shell.png",
+    "themeToggle": {
+      "before": "dark",
+      "after": "light",
+      "restored": "dark"
+    }
+  },
+  "routes": [
+    {
+      "index": 1,
+      "route": "workbench",
+      "label": "工作台",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 674,
+      "title": "工作台 · 素问 Suwen",
+      "hash": "#/workbench",
+      "viewTextLen": 782,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 主工作区 C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-wb-e2e-Sc5sk9\\runtime\\legacy\\workspace 后端 本机 主机 本机 目录 C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\s",
+      "screenshot": "screenshots/route-01-workbench.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 2,
+      "route": "chat",
+      "label": "对话",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 676,
+      "title": "对话 · 素问 Suwen",
+      "hash": "#/chat",
+      "viewTextLen": 492,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 新建会话 暂无会话，点击下方按钮新建 Ctrl / ⌘ + K 打开命令面板 新对话 mock / mock-model 选择或新建会话开始对话 数据评审员 科研发现总控 证据审查官 实验设计师 图表设计师 流式细胞术专家 假设锻造师 素问助手 · 自动 远程计算工程师 报告作家 研究策略师 单细胞分析师 ",
+      "screenshot": "screenshots/route-02-chat.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 3,
+      "route": "tasks2",
+      "label": "任务中心",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 665,
+      "title": "任务中心 · 素问 Suwen",
+      "hash": "#/tasks2",
+      "viewTextLen": 162,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 任务中心 工作持续运行，过程随时可查。 主工作区 持续任务 自动化 多 Agent 讨论 当前工作区隔离 外部操作由权限控制 任务不会随页面关闭而终止 后端需要保持运行；中断的当前节点需要检查后恢复。 新建任务 刷新 还没有持续任务 创建一个任务，或从工作流模板",
+      "screenshot": "screenshots/route-03-tasks2.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 4,
+      "route": "research",
+      "label": "科研与证据",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 735,
+      "title": "科研与证据 · 素问 Suwen",
+      "hash": "#/research",
+      "viewTextLen": 273,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 科研与证据 结论必须有来源，验证必须可复查。 主工作区 证据与验证 实验比较 生物工具 视觉检查记录 当前工作区隔离 外部操作由权限控制 EVIDENCE BEFORE CONCLUSIONS 让每一项发现，都能回到证据。 文献元数据、代码运行与科学验证是不同层",
+      "screenshot": "screenshots/route-04-research.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 5,
+      "route": "knowledge",
+      "label": "知识与记忆",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 647,
+      "title": "知识与记忆 · 素问 Suwen",
+      "hash": "#/knowledge",
+      "viewTextLen": 178,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 知识与记忆 只检索当前工作区，保留原始来源。 主工作区 记忆与知识库 检索设置 当前工作区隔离 外部操作由权限控制 可检索的项目知识 自动记忆默认关闭；每条信息保留类型与来源。 添加记忆 导入文档 导出 混合检索 当前工作区还没有记忆 添加笔记，或导入 Mark",
+      "screenshot": "screenshots/route-05-knowledge.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 6,
+      "route": "workflow",
+      "label": "工作流",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 633,
+      "title": "工作流 · 素问 Suwen",
+      "hash": "#/workflow",
+      "viewTextLen": 206,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 工作流 把重复工作变成可检查的步骤。 主工作区 工作流编排 当前工作区隔离 外部操作由权限控制 可检查、可恢复的执行步骤 依赖关系控制串行与并行；节点拖动调整画布位置。 新建流程 从目标生成初稿 导入模板 流程名称 添加节点 保存模板 添加第一个步骤 依赖相同前",
+      "screenshot": "screenshots/route-06-workflow.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 7,
+      "route": "artifacts",
+      "label": "产物中心",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 639,
+      "title": "产物中心 · 素问 Suwen",
+      "hash": "#/artifacts",
+      "viewTextLen": 138,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 产物中心 文件、来源和历史版本在一起。 主工作区 产物与版本 当前工作区隔离 外部操作由权限控制 产物快照 记录文件摘要、任务来源与可恢复版本。 登记文件快照 刷新 尚未添加产物快照 添加后可以检测、启停和查看详细状态。",
+      "screenshot": "screenshots/route-07-artifacts.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 8,
+      "route": "extensions",
+      "label": "能力中心",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 638,
+      "title": "能力中心 · 素问 Suwen",
+      "hash": "#/extensions",
+      "viewTextLen": 191,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 能力中心 连接工具、专业技能与消息入口。 主工作区 MCP 服务 Skills Agent 角色 消息渠道 当前工作区隔离 外部操作由权限控制 MCP 服务 stdio / Streamable HTTP，服务故障与平台隔离。 添加MCP 服务 导入 JSON ",
+      "screenshot": "screenshots/route-08-extensions.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 9,
+      "route": "discovery",
+      "label": "发现",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 659,
+      "title": "发现 · 素问 Suwen",
+      "hash": "#/discovery",
+      "viewTextLen": 179,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 发现 递归式科研（RSI）：让智能体提出假设、设计实验、记录证据，并沉淀可复用的研究策略。 0 个项目 刷新 新建项目 全部状态 待运行 运行中 已完成 失败 已取消 还没有发现项目 新建一个项目，让智能体围绕研究目标自主提出假设、执行实验并沉淀策略。 新建项目 选择一个发现项目 从左侧选择项目查看假设、证",
+      "screenshot": "screenshots/route-09-discovery.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 10,
+      "route": "ssh",
+      "label": "SSH",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 630,
+      "title": "SSH · 素问 Suwen",
+      "hash": "#/ssh",
+      "viewTextLen": 209,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SSH 主机 远程执行命令、浏览目录与传输文件。密码默认不落盘，所有操作仅在本机浏览器与目标服务器之间进行。 刷新 SSH 主机 共 0 个档案 新增 还没有 SSH 档案 新增一个主机档案后，即可远程执行命令、上传下载文件。 密码默认仅留在进程内存。记住密码使用可用的系统凭据库；档案只保存引用。 新增第一",
+      "screenshot": "screenshots/route-10-ssh.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 11,
+      "route": "settings",
+      "label": "设置",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 690,
+      "title": "设置 · 素问 Suwen",
+      "hash": "#/settings",
+      "viewTextLen": 398,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 设置 默认简单，需要时再深入。 主工作区 智能模型 外观与交互 权限与执行 资源与用量 视觉复核 版本与迁移 当前工作区隔离 外部操作由权限控制 让素问选择合适的处理方式 你定目标，素问安排执行。 普通使用只需选择思考模式。已有模型连接沿用原配置，可随时修改。 ",
+      "screenshot": "screenshots/route-11-settings.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    },
+    {
+      "index": 12,
+      "route": "diagnostics",
+      "label": "系统诊断",
+      "status": "PASS",
+      "failure": "",
+      "elapsedMs": 641,
+      "title": "系统诊断 · 素问 Suwen",
+      "hash": "#/diagnostics",
+      "viewTextLen": 286,
+      "childCount": 1,
+      "errorCard": null,
+      "bodySample": "素问 Suwen 你的智能研究工作室 工作台 对话 任务中心 科研与证据 知识与记忆 工作流 产物中心 能力中心 发现 SSH 设置 系统诊断 内核运行中 审批 素问 Suwen · v2.1.1 · 本地运行 SUWEN / YOUR WORKSPACE 系统诊断 真实状态、用量和错误，随时可见。 主工作区 系统诊断 当前工作区隔离 外部操作由权限控制 系统运行中 诊断读取真实状态；模型与外部服务测试会独立进行。 健康检查 导出报告 0 队列 0 运行任务 0 异常 0 累计 Token 组件状态 Agent R",
+      "screenshot": "screenshots/route-12-diagnostics.png",
+      "console": {
+        "total": 0,
+        "errors": 0,
+        "benign": 0,
+        "real": []
+      },
+      "pageErrors": []
+    }
+  ],
+  "checks": [
+    {
+      "id": "native.rail.sixWorkspaces",
+      "status": "PASS",
+      "detail": "buttons=[chat,projects,tasks,tools,workbench,settings]",
+      "at": "2026-10-26T02:04:11.353Z"
+    },
+    {
+      "id": "native.rail.workbenchPresent",
+      "status": "PASS",
+      "detail": "data-page=\"workbench\"",
+      "at": "2026-10-26T02:04:11.353Z"
+    },
+    {
+      "id": "native.workbench.stateReady",
+      "status": "PASS",
+      "detail": "工作台运行时已就绪 · Python 3.12.11",
+      "at": "2026-10-26T02:04:26.859Z"
+    },
+    {
+      "id": "native.workbench.openEnabled",
+      "status": "PASS",
+      "detail": "#wb-open enabled",
+      "at": "2026-10-26T02:04:26.859Z"
+    },
+    {
+      "id": "native.workbench.installed",
+      "status": "PASS",
+      "detail": "installed=true python=3.12.11 bytes=130160649",
+      "at": "2026-10-26T02:04:26.860Z"
+    },
+    {
+      "id": "native.workbench.depsDir",
+      "status": "PASS",
+      "detail": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env",
+      "at": "2026-10-26T02:04:26.860Z"
+    },
+    {
+      "id": "legacy.onboarding.visibleOnFirstBoot",
+      "status": "PASS",
+      "detail": "\"欢迎来到素问\" buttons=[先看看, 配置模型连接]",
+      "at": "2026-10-26T02:04:42.045Z"
+    },
+    {
+      "id": "legacy.onboarding.dismissed",
+      "status": "PASS",
+      "detail": "dismissed via 先看看",
+      "at": "2026-10-26T02:04:43.090Z"
+    },
+    {
+      "id": "legacy.window.event",
+      "status": "PASS",
+      "detail": "url=http://127.0.0.1:2800/",
+      "at": "2026-10-26T02:04:43.095Z"
+    },
+    {
+      "id": "legacy.title.contains素问",
+      "status": "PASS",
+      "detail": "工作台 · 素问 Suwen",
+      "at": "2026-10-26T02:04:43.095Z"
+    },
+    {
+      "id": "legacy.shell.navItems>=12",
+      "status": "PASS",
+      "detail": "12 nav items: workbench,chat,tasks2,research,knowledge,workflow,artifacts,extensions,discovery,ssh,settings,diagnostics",
+      "at": "2026-10-26T02:04:43.095Z"
+    },
+    {
+      "id": "legacy.shell.brand",
+      "status": "PASS",
+      "detail": "素问 Suwen",
+      "at": "2026-10-26T02:04:43.095Z"
+    },
+    {
+      "id": "legacy.theme.darkDefault",
+      "status": "PASS",
+      "detail": "data-theme=dark (requirement: dark by default; storedPref=\"dark\"; prefersLight=true; static index.html fallback is dark, but platform appearance default \"system\" resolves from OS)",
+      "at": "2026-10-26T02:04:43.095Z"
+    },
+    {
+      "id": "legacy.isolated.session",
+      "status": "PASS",
+      "detail": "origin=http://127.0.0.1:2800",
+      "at": "2026-10-26T02:04:43.095Z"
+    },
+    {
+      "id": "legacy.renderer.noNode",
+      "status": "PASS",
+      "detail": "window.require undefined",
+      "at": "2026-10-26T02:04:43.217Z"
+    },
+    {
+      "id": "legacy.renderer.noBridge",
+      "status": "PASS",
+      "detail": "window.suwen undefined",
+      "at": "2026-10-26T02:04:43.219Z"
+    },
+    {
+      "id": "legacy.theme.toggleWorks",
+      "status": "PASS",
+      "detail": "dark -> light -> dark",
+      "at": "2026-10-26T02:04:44.533Z"
+    },
+    {
+      "id": "legacy.routes.all12",
+      "status": "PASS",
+      "detail": "12/12 routes rendered",
+      "at": "2026-10-26T02:04:52.471Z"
+    },
+    {
+      "id": "native.pages.noRegression",
+      "status": "PASS",
+      "detail": "all native pages open",
+      "at": "2026-10-26T02:04:52.916Z"
+    },
+    {
+      "id": "native.electron.alive",
+      "status": "PASS",
+      "detail": "exitCode=null",
+      "at": "2026-10-26T02:04:52.916Z"
+    },
+    {
+      "id": "native.markdown.configure",
+      "status": "PASS",
+      "detail": "local fixture http://127.0.0.1:9384/v1 model=fixture",
+      "at": "2026-10-26T02:04:53.145Z"
+    },
+    {
+      "id": "native.markdown.streamingProgressive",
+      "status": "FAIL",
+      "detail": "bodyClass=\"body\" tailPresent=false tailTextLen=0 typesetWhileStreaming={katex:0,tables:0,codeBlocks:0} firstSeenMs=140 shot=",
+      "at": "2026-10-26T02:04:58.411Z"
+    },
+    {
+      "id": "native.markdown.streamingPartialConstructsDeferred",
+      "status": "PASS",
+      "detail": "diagrams=0 tables=0 codeBlocks=0 (partial constructs are never typeset; Mermaid deferred until completion)",
+      "at": "2026-10-26T02:04:58.411Z"
+    },
+    {
+      "id": "native.markdown.katex",
+      "status": "PASS",
+      "detail": "renderedMath=2 displayMath=1 katexNodes=2",
+      "at": "2026-10-26T02:04:58.987Z"
+    },
+    {
+      "id": "native.markdown.mermaidSvg",
+      "status": "PASS",
+      "detail": "renderedDiagrams=1 svg=1 svgPerContainer=[1]",
+      "at": "2026-10-26T02:04:58.987Z"
+    },
+    {
+      "id": "native.markdown.table",
+      "status": "PASS",
+      "detail": "tables=1 tableScroll=1",
+      "at": "2026-10-26T02:04:58.987Z"
+    },
+    {
+      "id": "native.markdown.codeBlock",
+      "status": "PASS",
+      "detail": "pre=1 codeBlocks=1",
+      "at": "2026-10-26T02:04:58.987Z"
+    },
+    {
+      "id": "native.markdown.noFailedPlaceholders",
+      "status": "PASS",
+      "detail": "failedPlaceholders=0 fallbackText=false",
+      "at": "2026-10-26T02:04:58.987Z"
+    },
+    {
+      "id": "native.markdown.screenshot.light",
+      "status": "PASS",
+      "detail": "resolvedTheme=light katex=2 diagramSvg=1 shot=screenshots/markdown-light.png",
+      "at": "2026-10-26T02:05:00.528Z"
+    },
+    {
+      "id": "native.markdown.screenshot.dark",
+      "status": "PASS",
+      "detail": "resolvedTheme=dark katex=2 diagramSvg=1 shot=screenshots/markdown-dark.png",
+      "at": "2026-10-26T02:05:02.073Z"
+    },
+    {
+      "id": "native.markdown.noDuplicateContainers",
+      "status": "PASS",
+      "detail": "before: diagrams=1 svgPerContainer=[1]; after: diagrams=1 svgPerContainer=[1]",
+      "at": "2026-10-26T02:05:03.389Z"
+    },
+    {
+      "id": "native.markdown.noPageErrors",
+      "status": "PASS",
+      "detail": "0 page errors, 1 fixture request(s)",
+      "at": "2026-10-26T02:05:03.389Z"
+    },
+    {
+      "id": "native.markdown.noCspViolations",
+      "status": "PASS",
+      "detail": "0 CSP violation(s) while rendering markdown/mermaid",
+      "at": "2026-10-26T02:05:03.389Z"
+    },
+    {
+      "id": "native.markdown.noUnexpectedConsoleErrors",
+      "status": "PASS",
+      "detail": "no non-CSP console errors",
+      "at": "2026-10-26T02:05:03.389Z"
+    }
+  ],
+  "cleanup": {
+    "legacyWindowClosed": true,
+    "appCloseRequested": true,
+    "appCloseError": "app.close timeout",
+    "daemonPid": 38396,
+    "daemonStopped": true,
+    "legacyPid": 21864,
+    "legacyStopped": true,
+    "legacyPortClosed": true,
+    "electronPid": 38044,
+    "electronExited": true,
+    "profileRemoved": true,
+    "residualProcesses": [
+      {
+        "pid": 32412,
+        "name": "powershell.exe",
+        "cmd": "powershell.exe -NoProfile -Command \"Get-CimInstance Win32_Process | Where-Object { ($_.CommandLine -like '*suwen-wb-e2e-*') -or ($_.CommandLine -like '*C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-formal-ui-6F4epw\\python-env*') } | Select-Object ProcessId,Name,CommandLine | ConvertTo-Json -Compress\""
+      }
+    ],
+    "markdownFixtureClosed": true
+  },
+  "limitations": [
+    "Deterministic local run: no real model provider credentials are configured; legacy chat/research views render unconfigured/empty states. Native markdown rendering is driven by a local loopback OpenAI-compatible SSE fixture (127.0.0.1, fixed payload, ~900 ms pause to observe the streaming state) — not a real provider.",
+    "Only loopback traffic (Electron IPC + 127.0.0.1 Python bridge + in-page /api requests + the local markdown fixture) is exercised; external services (SSH hosts, message channels, model APIs, public databases) are not contacted.",
+    "Route checks assert shell mount, non-fatal render, per-route title, and absence of fatal error cards; they do not validate every legacy feature action (approvals, uploads, kernels, SSH sessions) beyond whatever each view initializes on mount.",
+    "Legacy SPA is Chinese-only (zh-CN). Its shell resolves the appearance default theme=\"system\"; on this light-mode host that resolves to light, so the task-13 expectation \"dark by default\" fails (see checks legacy.theme.darkDefault). Toggle to dark was exercised and is captured in report.legacy.themeToggle.",
+    "The first-boot onboarding modal (欢迎来到素问) is dismissed via its 先看看 button before route checks; the modal screenshot legacy-first-boot.png is retained.",
+    "Native markdown audit assumes the rebuilt UI (app.js) contains the markdown/KaTeX/Mermaid renderer; if the build predates it, native.markdown.* checks fail with explicit reasons.",
+    "The managed Python dependency directory is reused as-is via SUWEN_WORKBENCH_DEPS; installation/repair flows (network + pip) are not exercised.",
+    "Renderer screenshots are viewport captures of the isolated 1600x1000 window; no OS-level DPI / accessibility / contrast measurements are claimed."
+  ],
+  "error": null,
+  "summary": {
+    "checks": {
+      "PASS": 33,
+      "FAIL": 1
+    },
+    "routes": 12,
+    "routesPassed": 12,
+    "routesFailed": 0,
+    "legacyConsoleErrors": 0,
+    "legacyConsoleErrorsReal": 0,
+    "legacyPageErrors": 0,
+    "nativePageErrors": 0,
+    "nativeConsoleErrors": 0,
+    "markdown": {
+      "katex": 2,
+      "diagrams": 1,
+      "tables": 1,
+      "pageErrors": 0,
+      "fixtureRequests": 1,
+      "cspViolations": 0,
+      "themes": {
+        "light": "light",
+        "dark": "dark"
+      }
+    },
+    "status": "FAIL"
+  }
+}

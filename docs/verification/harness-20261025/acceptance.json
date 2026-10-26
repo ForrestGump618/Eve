@@ -1,44 +1,69 @@
 {
-  "status": "INCOMPLETE_EXTERNAL_429",
+  "status": "FIXED_COHORT_AND_CORE_UI_PASSED_WITH_LIMITATIONS",
+  "at": "2026-10-26T02:31:45.420Z",
   "realTasks": {
-    "passed": 19,
+    "passed": 22,
     "total": 22,
-    "target": 20
+    "target": 20,
+    "evidence": "verified-final.json"
   },
   "unit": {
-    "passed": 237,
+    "passed": 239,
     "skipped": 1,
-    "failed": 0
+    "failed": 0,
+    "evidence": "verified-window-unit-tests.txt"
   },
   "python": {
     "passed": 261,
-    "failed": 0
+    "failed": 0,
+    "evidence": "resumed-python-tests.txt"
   },
   "rpcIntegration": {
     "passed": 42,
-    "failed": 0
-  },
-  "workbenchRoutes": {
-    "passed": 34,
     "failed": 0,
-    "routes": 12
+    "evidence": "verified-rpc-integration.txt"
   },
   "formalPackaged": {
     "passed": 8,
     "failed": 0,
-    "model": "local protocol fixture",
-    "data": "real PubMed"
+    "realModel": true,
+    "evidence": "formal-ui.json"
+  },
+  "workbenchRoutes": {
+    "passed": 34,
+    "failed": 0,
+    "evidence": "workbench-routes-verified.json"
+  },
+  "conversationRace": {
+    "passed": 4,
+    "failed": 0,
+    "evidence": "conversation-race-ui.json"
+  },
+  "windowLifecycle": {
+    "passed": true,
+    "evidence": [
+      "window-lifecycle-fixed.json",
+      "window-lifecycle-packaged.json"
+    ]
+  },
+  "streaming": {
+    "passed": true,
+    "findings": [],
+    "evidence": "streaming-ui-verified.json"
   },
   "installer": {
-    "version": "3.3.1",
-    "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.3.1-win-x64.exe",
-    "bytes": 131380397,
-    "sha256": "0c4148d30df3e4dbea75e284082d2f5f6db5b54bf8b994e241b95e940ab34178",
+    "version": "3.3.2",
+    "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.3.2-win-x64.exe",
+    "bytes": 131466519,
+    "sha256": "164ecd86381c342374c65a4545f98e2a9e40e0b8dc2057f2d7fb8aa7930976e7",
     "signed": false,
     "cleanWindowsVmInstall": "NOT_RUN",
     "baselineInstallerRetained": true,
-    "packagedUiE2E": "8/8 controlled-model + real PubMed, formal-ui-packaged.json",
-    "buildProvenance": "Working tree; unrelated concurrent omicslab/cli.py and omicslab/integrations files preserved and not owned by this change."
+    "packagedUiE2E": "8/8 real external model + real PubMed, formal-ui.json",
+    "buildProvenance": "Working tree; unrelated concurrent omicslab/cli.py and omicslab/integrations files preserved and not owned by this change.",
+    "buildCommand": "npx --no-install electron-builder --win nsis --x64 --config.electronDist=node_modules/electron/dist"
   },
-  "finalRealModelRevalidation": "NOT_RUN: credentials remain rate-limited"
+  "finalRealModelRevalidation": "Completed for unchanged final model/tool source; subsequent UI and window-only fixes validated separately.",
+  "allRequestedP0CapabilitiesClosed": false,
+  "remainingScope": "See open-issues.md: continuous virtualization, semantic Skill matching, all scientific routes, broader MCP interoperability and clean Windows install are not fully validated."
 }

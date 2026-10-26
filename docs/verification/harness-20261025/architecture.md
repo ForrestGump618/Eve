@@ -36,3 +36,5 @@ DSH 参考固定为 **0.2.1-rc.3 / `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`**�
 [OpenAI Agents SDK 的运行循环文档](https://developers.openai.com/api/docs/guides/agents/running-agents)用于核对“模型→工具→结果→继续→最终输出”的协议语义。没有直接替换为 SDK runner：本项目已有持久化 Engine、独立 daemon、付费副作用核查和两种模型协议，未经全量迁移验证直接换掉会扩大风险。[Ajv](https://ajv.js.org/guide/getting-started.html)则作为成熟依赖实际集成，版本固定且随包附许可证。
 
 本轮不宣称已迁移 DSH Client 插件系统、完整 MCP 协议版本协商、所有旧科研 Skill 的统一执行、嵌入式语义检索或 OS 沙箱。这些界限见未解决清单。
+
+2026-10-26 增量：为 GitHub 仓库元数据增加有严格 owner/repo 匹配的 API→网页来源 Adapter，同时保留 retrievedUrl；中文引用边界不再吞入括号。没有放宽任意链接引用权限。原生页面补会话 epoch、显式新建状态和结构重建后的流式补丁；Electron 窗口拥有者在异步完成及 closed 回调前检查存活，应用退出时停事件泵与重连。原始失败和最终证据分别保存，报告脚本从真实任务事件恢复失败 Trace，固定任务不变。

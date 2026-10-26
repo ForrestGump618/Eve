@@ -1,0 +1,22 @@
+[
+  {
+    "file": "dist/src/main.js",
+    "matches": true,
+    "sha256": "a4bd19adf10e17487ddcdc0719c6a3109011362958434f3653bf591789debe74"
+  },
+  {
+    "file": "dist/src/search.js",
+    "matches": true,
+    "sha256": "dc7a1eebd6d71fd9b2d33cadb62c8fbdd8b9914c41261796d2e565c20b5873c5"
+  },
+  {
+    "file": "dist/src/harness/agent-loop.js",
+    "matches": true,
+    "sha256": "addf51bc175f9e4bb9e3f03ab5c15b03c08972601fcaf651daf2e21d32769ff1"
+  },
+  {
+    "file": "dist/ui/app.js",
+    "matches": true,
+    "sha256": "8dea3f67206b3d78540153b4a710ca2072789aa90bce609c9b5aac4b7f70a218"
+  }
+]

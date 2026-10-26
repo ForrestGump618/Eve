@@ -1,0 +1,10 @@
+Preparing isolated encrypted model config
+Launching default research workspace
+PASS default-launch-opens-formal-workspace
+PASS single-visible-product-window: [{"title":"工作台 · 素问 Suwen","url":"http://127.0.0.1:6011/"}]
+PASS formal-chat-uses-unified-harness: completed
+PASS formal-chat-executes-real-pubmed
+PASS formal-chat-verified-answer
+PASS tool-card-settled
+PASS formal-composer-stable: {"beforeY":826.6666870117188,"afterY":826.6666870117188}
+PASS no-renderer-errors

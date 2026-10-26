@@ -1,11 +1,12 @@
 {
-  "version": "3.3.1",
-  "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.3.1-win-x64.exe",
-  "bytes": 131380397,
-  "sha256": "0c4148d30df3e4dbea75e284082d2f5f6db5b54bf8b994e241b95e940ab34178",
+  "version": "3.3.2",
+  "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\SuWen-Setup-3.3.2-win-x64.exe",
+  "bytes": 131466519,
+  "sha256": "164ecd86381c342374c65a4545f98e2a9e40e0b8dc2057f2d7fb8aa7930976e7",
   "signed": false,
   "cleanWindowsVmInstall": "NOT_RUN",
   "baselineInstallerRetained": true,
-  "packagedUiE2E": "8/8 controlled-model + real PubMed, formal-ui-packaged.json",
-  "buildProvenance": "Working tree; unrelated concurrent omicslab/cli.py and omicslab/integrations files preserved and not owned by this change."
+  "packagedUiE2E": "8/8 real external model + real PubMed, formal-ui.json",
+  "buildProvenance": "Working tree; unrelated concurrent omicslab/cli.py and omicslab/integrations files preserved and not owned by this change.",
+  "buildCommand": "npx --no-install electron-builder --win nsis --x64 --config.electronDist=node_modules/electron/dist"
 }

@@ -1,0 +1,46 @@
+ok   health ready — pid 32144
+ok   health version matches package.json — 3.3.1
+ok   health reports daemon runtime versions — node 24.14.0
+ok   health reports python path — python
+ok   doctor returns checks — 11 checks
+ok   doctor daemon/store pass
+ok   doctor warns on unconfigured model
+ok   defaults.get shape — preferences,model,pythonPath
+ok   defaults.set persists
+ok   defaults.set round-trips
+ok   project.create — 9dcd9729-a02d-4b22-9f05-a17f3cfd3acb
+ok   project.list contains created project
+ok   conversation.create — 2716635c-eef5-417d-8251-bef801827ba9
+ok   conversation.append — index 0
+ok   conversation.get stores message
+ok   conversation.list filters by project
+ok   import.inspect is read-only inventory — 9 items
+ok   import.jobs starts empty
+ok   evidence.list shape
+ok   artifact.read rejects unknown artifacts
+ok   skill.list
+ok   mcp.list
+ok   channel.list
+ok   rsi.list
+ok   rsi.active
+ok   research.graph returns empty graph view
+ok   research.knowledge states the real model gate — Error: 请先配置并解锁模型；离线后台演示和数据库检索无需模型。
+ok   durable echo task completes — completed
+ok   durable echo output persisted
+ok   delay task is running before cancel — waiting_external
+ok   control cancel transitions task — cancelled
+ok   python research worker executes sandboxed script — status completed, exit 0
+ok   worker.health available — ok
+ok   worker.describe lists ops
+ok   live PubMed/Europe PMC MCP returns a real payload — {"database":"Europe PMC / PubMed","query":"CRISPR base editing","retrievedAt":"2026-10-26T01:55:09.000Z","endpoint":"https://www.ebi.ac.uk/europepmc/webservices/rest/search","resul
+ok   live PubMed/Europe PMC MCP artifact recorded with sha256 — C:\Users\QINGYU~1\AppData\Local\Temp\suwen-e2e-2sH0RF\artifacts\dea18841-f932-45fa-ac98-af0fe1dc888a.artifact
+ok   live UniProt MCP returns a real payload — {"database":"UniProt","query":"TP53","retrievedAt":"2026-10-26T01:55:10.554Z","release":"2026_03","results":[{"id":"Q9Y2B4","name":"T53G5_HUMAN","protein":"TP53-target gene 5 prote
+ok   live UniProt MCP artifact recorded with sha256 — C:\Users\QINGYU~1\AppData\Local\Temp\suwen-e2e-2sH0RF\artifacts\8175b890-5573-4f3f-90b2-26f08551260c.artifact
+live PubMed payload preview: {"database":"Europe PMC / PubMed","query":"CRISPR base editing","retrievedAt":"2026-10-26T01:55:09.000Z","endpoint":"https://www.ebi.ac.uk/europepmc/webservices/rest/search","results":[{"id":"42878939","source":"MED","pmid":"42878939","title":"In-vivo CRISPR/Base-Editing \"One-Shot\" Therapies Targeting PCSK9.","doi":"10.1007/s11883-026-01470-8","year":"2026","authors":"Nelson B, Khera A.","abstra
+live UniProt payload preview: {"database":"UniProt","query":"TP53","retrievedAt":"2026-10-26T01:55:10.554Z","release":"2026_03","results":[{"id":"Q9Y2B4","name":"T53G5_HUMAN","protein":"TP53-target gene 5 protein","organism":"Homo sapiens","url":"https://www.uniprot.org/uniprotkb/Q9Y2B4"},{"id":"Q12888","name":"TP53B_HUMAN","protein":"TP53-binding protein 1","organism":"Homo sapiens","url":"https://www.uniprot.org/uniprotkb/Q1
+ok   snapshot includes task history and events
+ok   shutdown acknowledged
+ok   daemon exited after shutdown — exit 0
+ok   connection file removed
+
+E2E RPC summary: 42 passed, 0 failed, 42 checks

@@ -1,0 +1,37 @@
+{
+  "kind": "real Electron window lifecycle, no model requests",
+  "packaged": false,
+  "phase": "fixed",
+  "at": "2026-10-26T02:21:25.578Z",
+  "results": [
+    {
+      "scenario": "owner-first",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "scenario": "formal-first",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "scenario": "quit-both",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "scenario": "during-start",
+      "errors": [
+        {
+          "kind": "unhandledRejection",
+          "message": "Error: ERR_FAILED (-2) loading 'file:///C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\dist\\ui\\index.html'"
+        }
+      ],
+      "exitCode": 0,
+      "ok": false
+    }
+  ]
+}

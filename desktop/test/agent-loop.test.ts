@@ -5,7 +5,7 @@ import { runAgent, citationUrls } from '../src/harness/agent-loop.js';
 import { parseMcpResult } from '../src/mcp-result.js';
 import { ModelRuntime } from '../src/model-runtime.js';
 import type { ModelTurn, TurnMessage } from '../src/providers.js';
-import { extractText, publicUrl } from '../src/search.js';
+import { extractText, publicUrl, fetchedSource } from '../src/search.js';
 
 const parameters={type:'object',properties:{query:{type:'string',minLength:1}},required:['query'],additionalProperties:false} as const;
 function runtime(turn:(messages:TurnMessage[])=>Promise<ModelTurn>):ModelRuntime {const m=new ModelRuntime();m.turn=async(messages)=>turn(messages);return m;}
@@ -64,4 +64,25 @@ test('public-source URL checks refuse local addresses and extraction removes exe
   for(const url of ['file:///C:/secrets','http://127.0.0.1/','http://[::1]/','http://169.254.169.254/','https://user:pass@example.com/','http://example.com:8080/'])assert.throws(()=>publicUrl(url));
   assert.equal(extractText('<nav>noise</nav><script>inject()</script><h1>Actual &amp; title</h1>'),'Actual & title');
   assert.deepEqual(citationUrls('[paper](https://example.org/path) https://example.org/path.'),['https://example.org/path']);
+});
+
+test('Chinese punctuation delimits retrieved citation URLs without corrupting encoded URL paths',()=>{
+  assert.deepEqual(citationUrls('https://github.com/example/research（官方仓库）及【https://example.org/%EF%BC%88data】'),['https://github.com/example/research','https://example.org/%EF%BC%88data']);
+});
+
+test('repository API evidence preserves both verified canonical URL and actual retrieval URL',async()=>{
+  const endpoint='https://api.github.com/repos/example/research';
+  const metadata=JSON.stringify({full_name:'example/research',html_url:'https://github.com/example/research',description:'Actual repository metadata with enough evidence to read and cite.'});
+  const evidence=fetchedSource({url:endpoint,text:metadata});
+  assert.equal(evidence.url,'https://github.com/example/research');
+  assert.equal(evidence.retrievedUrl,endpoint);
+  assert.equal(evidence.provider,'github-api');
+  let turns=0;
+  const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>evidence as any});
+  const result=await runAgent({...options(runtime(async()=>turns++?reply('https://github.com/example/research（官方）'):call()),registry),prompt:'实际检索 repository'});
+  assert.equal(result.verification.passed,true);
+  assert.equal(result.sources[0].retrievedUrl,endpoint);
+  // Malicious or mismatched canonical claims never expand the citation set.
+  for(const url of ['https://example.org/repos/example/research','https://api.github.com/repos/example/other','https://api.github.com/repos/example/research/issues'])assert.equal(fetchedSource({url,text:metadata}).url,url);
+  assert.equal(fetchedSource({url:endpoint,text:metadata.replace('github.com/example/research','evil.example/forged')}).url,endpoint);
 });

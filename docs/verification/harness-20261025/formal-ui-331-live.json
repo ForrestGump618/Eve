@@ -1,0 +1,187 @@
+{
+  "kind": "real external model and public network; default product launch",
+  "checks": [
+    {
+      "name": "default-launch-opens-formal-workspace",
+      "ok": true
+    },
+    {
+      "name": "single-visible-product-window",
+      "ok": true,
+      "detail": "[{\"title\":\"工作台 · 素问 Suwen\",\"url\":\"http://127.0.0.1:13947/\"}]"
+    },
+    {
+      "name": "formal-chat-uses-unified-harness",
+      "ok": true,
+      "detail": "completed"
+    },
+    {
+      "name": "formal-chat-executes-real-pubmed",
+      "ok": true
+    },
+    {
+      "name": "formal-chat-verified-answer",
+      "ok": true
+    },
+    {
+      "name": "tool-card-settled",
+      "ok": true
+    },
+    {
+      "name": "formal-composer-stable",
+      "ok": true,
+      "detail": "{\"beforeY\":826.6666870117188,\"afterY\":826.6666870117188}"
+    },
+    {
+      "name": "no-renderer-errors",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\docs\\verification\\harness-20261025\\formal-workspace-live.png"
+  ],
+  "task": {
+    "id": "89c73691-accb-47ec-97ee-f473895610fa",
+    "status": "completed",
+    "answer": "**标题**：Induction of pluripotent stem cells from mouse embryonic and adult fibroblast cultures by defined factors  \n**年份**：2006  \n**PMID**：16904174  \n**来源**：https://pubmed.ncbi.nlm.nih.gov/16904174/\n\n作者 Takahashi K, Yamanaka S，发表于 *Cell*，DOI 10.1016/j.cell.2006.07.024（以上信息来自本次检索结果）。",
+    "trace": [
+      {
+        "type": "agent.started",
+        "at": 1792979683731,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "phase": "act",
+        "promptSha256": "ea7316ffea26391146cb39829937e814a9a1a726bcc9f328dbe757abfb32784e"
+      },
+      {
+        "type": "model.started",
+        "at": 1792979683735,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 0,
+        "attempt": 0,
+        "messageCount": 2,
+        "reservedTokens": 4467
+      },
+      {
+        "type": "model.completed",
+        "at": 1792979685420,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 0,
+        "durationMs": 1686,
+        "tokens": 1448,
+        "toolNames": [
+          "database_search"
+        ],
+        "textChars": 0
+      },
+      {
+        "type": "agent.planned",
+        "at": 1792979685422,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 0,
+        "actions": [
+          {
+            "name": "database_search",
+            "callId": "call_00_k9g3hvkp3ex2p5ayb29d2j78"
+          }
+        ]
+      },
+      {
+        "type": "tool.started",
+        "at": 1792979685423,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 0,
+        "name": "database_search",
+        "callId": "call_00_k9g3hvkp3ex2p5ayb29d2j78",
+        "argumentsSha256": "fa6a36eb81492a41e7a65eabb7d24397ea47a76dd4abd586b8aea3455ac29e15"
+      },
+      {
+        "type": "tool.completed",
+        "at": 1792979689141,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 0,
+        "name": "database_search",
+        "callId": "call_00_k9g3hvkp3ex2p5ayb29d2j78",
+        "durationMs": 3718,
+        "resultSha256": "3d414ec33e35e87b2f340fdc4280456ecebec26fcccb815b08fc1759bbc247fb"
+      },
+      {
+        "type": "agent.observed",
+        "at": 1792979689156,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 0,
+        "toolCount": 1,
+        "sourceCount": 1
+      },
+      {
+        "type": "model.started",
+        "at": 1792979689159,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 1,
+        "attempt": 0,
+        "messageCount": 4,
+        "reservedTokens": 5393
+      },
+      {
+        "type": "model.completed",
+        "at": 1792979695282,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 1,
+        "durationMs": 6125,
+        "tokens": 1900,
+        "toolNames": [],
+        "textChars": 262
+      },
+      {
+        "type": "agent.verifying",
+        "at": 1792979695284,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "passed": false,
+        "problems": [
+          "Unverified citation URLs: https://pubmed.ncbi.nlm.nih.gov/16904174/%EF%BC%88Takahashi"
+        ]
+      },
+      {
+        "type": "model.started",
+        "at": 1792979695286,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 2,
+        "attempt": 0,
+        "messageCount": 6,
+        "reservedTokens": 5721
+      },
+      {
+        "type": "model.completed",
+        "at": 1792979697811,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "turn": 2,
+        "durationMs": 2526,
+        "tokens": 2092,
+        "toolNames": [],
+        "textChars": 282
+      },
+      {
+        "type": "agent.verified",
+        "at": 1792979697812,
+        "traceId": "89c73691-accb-47ec-97ee-f473895610fa:reply:1",
+        "passed": true,
+        "citationCount": 1,
+        "toolCount": 1
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/16904174/",
+        "title": "Induction of pluripotent stem cells from mouse embryonic and adult fibroblast cultures by defined factors.",
+        "text": "Differentiated cells can be reprogrammed to an embryonic-like state by transfer of nuclear contents into oocytes or by fusion with embryonic stem (ES) cells. Little is known about factors that induce this reprogramming. Here, we demonstrate induction of pluripotent stem cells from mouse embryonic or adult fibroblasts by introducing four factors, Oct3/4, Sox2, c-Myc, and Klf4, under ES cell culture conditions. Unexpectedly, Nanog was dispensable. These cells, which we designated iPS (induced pluripotent stem) cells, exhibit the morphology and growth properties of ES cells and express ES cell marker genes. Subcutaneous transplantation of iPS cells into nude mice resulted in tumors containing a variety of tissues from all three germ layers. Following injection into blastocysts, iPS cells contributed to mouse embryonic development. These data demonstrate that pluripotent stem cells can be directly generated from fibroblast cultures by the addition of only a few defined factors.",
+        "retrievedAt": "2026-10-26T01:54:49.122Z",
+        "provider": "database",
+        "sha256": "34b40cc1e3914997548f8a15225f42d686a6b027f6eed09d4c9bebdeaf2d305d",
+        "fetched": true
+      }
+    ]
+  },
+  "packaged": true,
+  "at": "2026-10-26T01:55:03.161Z"
+}

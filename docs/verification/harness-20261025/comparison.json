@@ -11,9 +11,18 @@
     "toolFailed": 0,
     "cost": null,
     "costNote": "Provider did not report monetary cost; no invented price estimate.",
-    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review.",
+    "recovery": {
+      "recovered": 0,
+      "failed": 0
+    },
+    "successfulLatency": {
+      "count": 0,
+      "p50Ms": null,
+      "p95Ms": null
+    }
   },
-  "after": {
+  "initialAfter": {
     "passed": 19,
     "total": 22,
     "p50Ms": 7801,
@@ -25,15 +34,58 @@
     "costNote": "Provider did not report monetary cost; no invented price estimate.",
     "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
   },
-  "acceptance": "NOT_MET: 19/22 < 90%; last three blocked by external HTTP 429. Final build must be rerun with recovered credentials.",
-  "toolSuccessRate": 0.8478260869565217,
+  "resumedBeforeCitationFix": {
+    "passed": 21,
+    "total": 22,
+    "p50Ms": 10939,
+    "p95Ms": 39996,
+    "tokens": 221336,
+    "toolCompleted": 57,
+    "toolFailed": 6,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review.",
+    "recovery": {
+      "recovered": 6,
+      "failed": 6
+    },
+    "successfulLatency": {
+      "count": 21,
+      "p50Ms": 10939,
+      "p95Ms": 32893
+    }
+  },
+  "after": {
+    "passed": 22,
+    "total": 22,
+    "p50Ms": 10031,
+    "p95Ms": 38391,
+    "tokens": 186010,
+    "toolCompleted": 48,
+    "toolFailed": 8,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review.",
+    "recovery": {
+      "recovered": 6,
+      "failed": 8
+    },
+    "successfulLatency": {
+      "count": 22,
+      "p50Ms": 10031,
+      "p95Ms": 38391
+    }
+  },
+  "acceptance": "FIXED_COHORT_AND_FORMAL_REAL_MODEL_PASSED",
+  "toolSuccessRate": 0.8571428571428571,
   "toolRecoverySameName": {
-    "recovered": 5,
-    "failed": 7
+    "recovered": 6,
+    "failed": 8
   },
   "citationProvenance": {
-    "verifiedUrlMentions": 14,
+    "verifiedUrlMentions": 15,
     "uniqueUrls": 11,
+    "invalid": [],
     "semanticAccuracy": "not exhaustively validated"
   },
   "uiExceptions": {
@@ -42,17 +94,19 @@
       "scroll-scenario composerDelta=1078px",
       "persistence scenario timed out"
     ],
-    "after": [
-      "scrollUpDrift=0px",
-      "composerDelta=0px",
-      "one persisted assistant",
-      "120 messages rendered in window of 80"
-    ]
-  },
-  "afterSuccessfulOnly": {
-    "count": 19,
-    "p50Ms": 8440,
-    "p95Ms": 60229,
-    "maxMs": 60229
+    "after": {
+      "findings": [],
+      "composer": 0,
+      "scroll": {
+        "followGapMaxPx": 0,
+        "scrollUpDriftMaxPx": 0,
+        "finalBottomGapPx": 14046,
+        "jumpControls": 0
+      },
+      "persistence": {
+        "exactlyOneAssistant": true,
+        "exactlyOneTaskAssistant": true
+      }
+    }
   }
 }

@@ -1,0 +1,22 @@
+{
+  "kind": "real isolated Electron and daemon IPC; no model requests",
+  "checks": [
+    {
+      "name": "late-get-cannot-restore-old-conversation",
+      "ok": true
+    },
+    {
+      "name": "refresh-list-keeps-explicit-new-conversation",
+      "ok": true
+    },
+    {
+      "name": "latest-selection-owns-conversation-data",
+      "ok": true
+    },
+    {
+      "name": "new-conversation-clears-old-inspector-and-scroll-intent",
+      "ok": true
+    }
+  ],
+  "at": "2026-10-26T02:13:24.911Z"
+}
