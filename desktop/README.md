@@ -1,6 +1,8 @@
-# 素问 / SuWen desktop 3.3.1
+# 素问 / SuWen desktop 3.4.0
 
-3.3.1 默认直接打开完整科研工作台。运行 `./启动素问.ps1`（或 `npm run build; npm start`）；原生诊断控制台使用 `--native`。模型工具循环、正式页面配置兼容和聊天稳定性已做实质修复；真实固定任务 **19/22**，其余被供应商 HTTP 429 阻断，**尚未完整验收**。完整证据、运行命令和未解决问题见 [本轮报告](../docs/verification/harness-20261025/README.md)。
+默认直接打开完整科研工作台。运行 `./启动素问.ps1`（或 `npm ci; npm run build; npm start`）；原生诊断控制台使用 `-NativeConsole` / `--native`。本版本包含工作目录文件访问、折叠工具过程、8 个基础技能及有限输出接续。
+
+本清理目录重新通过 typecheck、243 项单元测试（1 项跳过）与 520 项 Python 测试；已验证的 3.4.0 安装包在交付文件夹中的 `Windows/`（与 Source/ 同级）。当前版本真实模型 22 项任务被供应商 HTTP 429 阻断，不能声明达到真实模型验收门槛。见 [3.4.0 原始交付报告](../docs/verification/product-340-20261026/README.md) 和 [清理记录](../CLEAN-RELEASE.md)。
 
 以下为 **3.3.0 历史记录**，不能当作本轮最终代码的验收声明。
 

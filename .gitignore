@@ -91,3 +91,11 @@ ssh_known_hosts.json
 /desktop/release/
 
 desktop/dist-*/
+
+# Clean delivery: local installers, reports and backend state
+.suwen-dsh/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+/Windows/
+/Validation/

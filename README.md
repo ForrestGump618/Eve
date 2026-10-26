@@ -3,9 +3,10 @@
 > 面向真实科研任务的 Windows 桌面科研 Agent：可持久运行、可追溯、可恢复、可诊断。
 > A desktop research agent for Windows built around durable execution, evidence provenance, and reproducible research workflows.
 
-- 当前版本 / Version: **3.3.0**
+- 当前版本 / Version: **3.4.0**
 - 桌面应用 / Desktop app: `desktop/` (Electron + TypeScript, MIT)
 - 旧版 Python 工作台 / Legacy Python workbench: `omicslab/` (Apache-2.0, 保留用于兼容与迁移)
+- 清理说明 / Clean source: [CLEAN-RELEASE.md](CLEAN-RELEASE.md)
 - 发布证据 / Release evidence: [`docs/release/`](docs/release/) · [`docs/verification/`](docs/verification/) · [`docs/progress.md`](docs/progress.md)
 
 ---
@@ -41,12 +42,14 @@ npm start           # 开发模式启动 Electron
 
 ```powershell
 cd desktop
-npm run dist:win    # -> release/SuWen-Setup-3.3.0-win-x64.exe
+npm run dist:win    # -> release/SuWen-Setup-3.4.0-win-x64.exe
 ```
 
-- 无 Python 也可使用基础聊天与数据库检索；Python 科研 Worker 作为受管子进程按需启动。
-- 旧版 Python 工作台可用时，应用内“工具 → 兼容工作台”会以隔离窗口打开；本机未安装依赖时会明确显示不可用，而不是假装成功。
-- 用户数据目录为 Electron `userData` 下的独立运行时目录；旧版 `~/.omicslab` 数据不会被自动覆盖，导入前会先备份。
+- 默认进入正式科研工作台；需要可用 Python，缺少依赖时会准备受管依赖环境并显示进度。
+- 在项目根目录运行 `./启动工作台.ps1`，或在 `desktop` 中运行 `./启动素问.ps1`；`-NativeConsole` 保留原生诊断控制台入口。
+- 用户数据目录为 Electron `userData` 下的独立运行时目录；现有历史与密钥不包含在源码中。
+- 本清理副本包含桌面 3.4.0 与独立 DSH 插件 0.3.0 源码；Python 工作台包版本仍为 2.1.1。DSH 插件并未包含在上一轮已经验收的 Windows 安装包中。
+- 最新验证与限制见 [3.4.0 交付记录](docs/verification/product-340-20261026/README.md)；固定 22 项真实模型重测被供应商 HTTP 429 阻断，不能视为通过。
 
 ## 架构 / Architecture
 
@@ -65,15 +68,21 @@ SuWen Harness Daemon (detached Node process)
 - 关键文档：[架构审计](docs/architecture/current.md) · [流式事件协议](docs/architecture/streaming-events.md) · [需求追溯](docs/requirements/traceability.md) · [能力对照](docs/migration/feature-parity-matrix.csv) · [UI 动作覆盖](docs/verification/ui-action-coverage.csv)。
 - 旧版 Python 能力清单与迁移证据见 [`docs/migration/`](docs/migration/)。
 
-## 实验工作台与 Markdown（3.3.0）
+## 正式工作台与 Markdown
 
-- **实验工作台**：第六个原生工作区页面。按需安装固定版本的 Python 运行时（约 130 MB，可取消），
-  随后在隔离的 Electron 窗口中托管**现有素问网页版**（同一套 HTML/CSS/JS，12 个可导航路由），
-  桌面端模型/凭据配置会注入托管桥接；页面本身不获得 Node/preload 能力。
+- **正式页面默认启动**：完整工作台直接打开；首次缺依赖时自动准备并显示进度。保留原生诊断控制台与兼容接口。
+- **工具与文件**：工具步骤默认折叠；输入区可选择真实工作目录，支持文本读取、搜索与带内容哈希的更新；预装 8 个基础技能，支持按需参考资料、自主创建/安装和有入口时实际执行。
+- **长输出恢复**：遵循配置的输出预算，有限接续截断文本；不完整工具参数不会执行。受控协议和真实工具界面验收与真实供应商验收分别记录。
 - **Markdown 补齐**：流式过程中逐步排版已闭合内容（表格/代码块/公式/图表），未闭合区域保持纯文本尾部；
   离线内置 KaTeX 与 Mermaid，失败时降级为标注代码块，不阻塞主线程。
 - 注意：安装包未签名；干净 Windows 虚拟机安装、8/24/72 小时耐久与重启/断电测试**未执行**；
-  真实厂商模型账号/SSH/消息渠道未配置。
+  当前版本真实厂商模型验收被 HTTP 429 阻断，SSH/消息渠道完整实测范围见相应验证记录。
+
+## DeepSeek Harness 插件 / DSH integration
+
+- 仓库 [`integrations/dsh`](integrations/dsh/) 将科研能力封装为 DSH 原生工具与 [`suwen-research`](integrations/dsh/skills/suwen-research/SKILL.md) 技能。DSH 自己规划、调用模型并协调多代理；`python -m omicslab.integrations.science` 仅执行显式计算与数据操作，不加载 LLM、AppState 或 AgentLoop。
+- 十一个工具覆盖状态、文献检索、蛋白查询、序列检查、Python、变量、notebook、证据、实验、知识和按需技能读取；方法正文沿用 [`omicslab/skills`](omicslab/skills/)。推荐流程为需求发现 → 查技能 → 数据审计 → 显式分析 → 证据/指标验证 → 报告；执行成功不等于科学验证。
+- 使用 `plugin_manager` 安装仓库内 bundle，不手工修改 profile。安装、配置、工具契约与旧桥接迁移见 [DSH 插件集成说明](docs/integrations/dsh-plugin.md)。该 bundle 0.3.0 已安装并通过 11 个工具的真实调用验证，Python 侧 `tests/test_dsh_science.py` 等合计 44 passed；完整科研任务与干净虚拟机验证未执行，详见集成说明「验证记录」。旧九工具桥接不再作为推荐方式。桌面版本为 3.4.0，Python 包版本为 2.1.1；DSH 插件版本为 0.3.0。
 
 ## 测试与验证 / Testing and verification
 

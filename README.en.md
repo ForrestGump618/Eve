@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/assets/banner.svg" alt="SuWen" width="880"></p>
 
-> **Windows desktop preview 3.0.0-preview.1:** the new Electron client and durable daemon are under [desktop/](desktop/README.md). The existing Python workbench remains compatible. See [actual acceptance status](docs/progress.md); the full vNext requirements have not all passed.
+> **Windows desktop 3.4.0:** the default launch opens the formal research workspace. This clean source copy also includes the separate DSH plugin 0.3.0; the Python package remains 2.1.1. See [clean release notes](CLEAN-RELEASE.md) and [current acceptance evidence](docs/verification/product-340-20261026/README.md). Current real-model acceptance is blocked by provider HTTP 429.
 
 <h1 align="center">SuWen (素问)</h1>
 
@@ -82,6 +82,14 @@ SuWen is aimed at individual researchers, students, and small teams who repeated
 - MCP over stdio subprocesses and Streamable HTTP (protocol `2025-06-18`), with Tools/Resources/Prompts discovery, connection tests, timeouts, and serialized concurrency.
 - Extension points are files or small amounts of Python: agents and skills are Markdown, tools are `ToolSpec` registrations, and execution backends implement `ExecutionBackend`.
 - Skills can be installed, enabled/disabled, and rolled back. Sources are local directories or HTTPS git repositories; versions are the first 16 characters of the content digest, and **new installs are disabled by default**.
+
+### DeepSeek Harness plugin
+
+The repository [DSH bundle](integrations/dsh/) packages research capabilities as native DSH tools and a [suwen-research skill](integrations/dsh/skills/suwen-research/SKILL.md). DSH handles planning, model calls, and multi-agent coordination. The `python -m omicslab.integrations.science` backend executes explicit computations and data operations without loading an LLM, AppState, or AgentLoop.
+
+Eleven tools cover status, literature, proteins, sequences, Python, variables, notebook export, evidence, experiments, knowledge, and on-demand skill reading. Original method instructions remain in [omicslab/skills](omicslab/skills/). The main skill guides requirements discovery → method retrieval → data audit → explicit analysis → evidence/metric verification → reporting. Successful execution does not establish scientific validity; external data and tool outputs are untrusted content.
+
+Install the repository bundle with `plugin_manager`, without manually changing the DSH profile. See the [DSH plugin integration guide](docs/integrations/dsh-plugin.md) for configuration, tool contracts, and migration from the old nine-tool Agent bridge, which is no longer recommended. Bundle 0.3.0 is installed and was validated by real calls to all eleven tools; the Python backend suite reports 44 passed (`tests/test_dsh_science.py` and friends). Full research runs and clean-VM validation were not executed — see the verification record in the guide. Desktop is **3.4.0**, Python workbench is **2.1.1**, and the separate DSH bundle is **0.3.0**.
 
 ### Research evidence gates
 
@@ -224,6 +232,7 @@ A full description, including a reviewable metrics-file example, is in [Research
 | [Architecture](docs/ARCHITECTURE.md) | Components, request lifecycle, storage layout, concurrency, security boundaries |
 | [API reference](docs/API.md) | REST and SSE endpoints, error codes, run recovery |
 | [Extending](docs/EXTENDING.md) | Custom agents, skills, memory, tools, execution backends, LLM endpoints |
+| [DSH plugin integration](docs/integrations/dsh-plugin.md) | Native research tools and skills, repository bundle installation, explicit analysis and evidence validation limits |
 | [Skill library](docs/SKILLS.md) | Skill catalog, triggers, and output checks |
 | [Implementation checklist](docs/SUWEN-V2-CHECKLIST.md) | Per-item status of the 24 requirements, the single source of truth |
 | [Validation record](docs/VALIDATION-2.1.1.txt) | Automated regression and real-environment test scope |

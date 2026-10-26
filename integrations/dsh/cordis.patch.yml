@@ -1,0 +1,21 @@
+# DeepSeek Harness bundle patch for the SuWen science plugin.
+#
+# This file is appended as one extra Loader layer, so it only inserts a row and never
+# edits profile files. `config` replaces the row config wholesale; omit a key to keep
+# the plugin default.
+#
+# pythonPath: interpreter that can import `omicslab` (empty → $SUWEN_PYTHON → `python`).
+# repoPath:   SuWen source root containing `omicslab`; added to PYTHONPATH and used as
+#             the backend child working directory. Empty → auto-detected from this
+#             bundle's location (it lives at <repo>/integrations/dsh).
+# workspace:  optional fixed analysis workspace; empty → the working directory of the
+#             Agent that makes each tool call.
+# home:       backend data directory; empty → "<workspace>/.suwen-dsh".
+- insert:
+    - id: suwen-science
+      name: '@local/suwen'
+      config:
+        pythonPath: ''
+        repoPath: ''
+        workspace: ''
+        home: ''

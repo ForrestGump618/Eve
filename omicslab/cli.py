@@ -141,6 +141,23 @@ def build_parser() -> argparse.ArgumentParser:
     agents.add_argument("--json", action="store_true")
     agents.set_defaults(handler=cmd_agents)
 
+    dsh = sub.add_parser("dsh", help="以 DSH 插件桥接模式运行（stdio NDJSON，供 DeepSeek Harness 调用）")
+    _add_common(dsh)
+    dsh.add_argument("--stdio", action="store_true", help="使用 stdio NDJSON 协议（当前唯一模式，默认即启用）")
+    dsh.add_argument(
+        "--approval",
+        default="auto",
+        choices=["auto", "client", "deny"],
+        help="工具审批策略：auto 自动批准（默认）、client 交由宿主 UI 决策、deny 全部拒绝",
+    )
+    dsh.add_argument(
+        "--log-level",
+        default="WARNING",
+        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        help="stderr 日志级别（默认 WARNING）",
+    )
+    dsh.set_defaults(handler=cmd_dsh)
+
     discovery = sub.add_parser("discovery", help="RSI 科研发现项目（假设→实验→证据→报告）")
     _add_common(discovery)
     dsub = discovery.add_subparsers(dest="discovery_action")
@@ -279,6 +296,21 @@ def cmd_serve(args: argparse.Namespace) -> int:
         console.print(f"提示：端口 {port} 可能已被占用，可尝试 `suwen serve --port {port + 1}`。")
         return 2
     return 0
+
+
+# ---------------------------------------------------------------------------
+# dsh bridge (host-plugin integration)
+# ---------------------------------------------------------------------------
+def cmd_dsh(args: argparse.Namespace) -> int:
+    """运行与 DeepSeek Harness 插件通信的无头桥接（stdout 为 NDJSON 协议流）。"""
+    from .integrations.dsh import serve_stdio
+
+    return serve_stdio(
+        workspace=getattr(args, "workspace", None),
+        home=getattr(args, "home", None),
+        approval=getattr(args, "approval", "auto"),
+        log_level=getattr(args, "log_level", "WARNING"),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -734,7 +766,7 @@ async def _discovery_run_cli(settings: Settings, store: Any, project_id: str, ma
             project_id,
             emit=emit,
             cancel_event=None,
-            approver=CliApprover(policy="auto"),
+            approver=CliApprover(policy="auto", interactive=False),
         )
     except KeyboardInterrupt:
         _paint(console, "已取消", "yellow")
@@ -858,14 +890,32 @@ def cmd_discovery(args: argparse.Namespace) -> int:
 class CliApprover:
     """Terminal approver for the CLI (no browser round-trip available)."""
 
-    def __init__(self, policy: str = "ask"):
+    def __init__(self, policy: str = "ask", *, interactive: bool | None = None):
         self.policy = policy or "ask"
         self._console = _console()
+        if interactive is None:
+            try:
+                interactive = bool(sys.stdin and sys.stdin.isatty())
+            except Exception:  # pragma: no cover - defensive
+                interactive = False
+        self.interactive = bool(interactive)
 
-    async def request(self, ctx: Any, tool: str, arguments: dict[str, Any], reason: str) -> bool:
+    async def request(
+        self,
+        ctx: Any,
+        tool: str,
+        arguments: dict[str, Any],
+        reason: str,
+        *,
+        force_ask: bool = False,
+    ) -> bool:
         if self.policy == "deny":
             return False
-        if self.policy != "ask":
+        if self.policy != "ask" and not force_ask:
+            return True
+        if force_ask and not self.interactive:
+            # 非交互式运行（`suwen cli -p ...`、管道/自动化）时没有人能回答
+            # 审批提示；直接放行，行为与 auto 策略一致，避免永久挂起。
             return True
         payload = json.dumps(arguments or {}, ensure_ascii=False)
         if len(payload) > 600:
@@ -958,7 +1008,7 @@ async def _repl(settings: Settings, args: argparse.Namespace) -> int:
     console = _console()
     state = await AppState.create(settings)
     printer = CliPrinter(console)
-    approver = CliApprover(settings.approval_policy)
+    approver = CliApprover(settings.approval_policy, interactive=False if args.prompt else None)
     agent_id = args.agent or settings.default_agent or "lead"
 
     try:
