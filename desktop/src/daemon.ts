@@ -23,6 +23,7 @@ import { createResearchWorker, type ResearchWorkerClient } from './research-work
 import { ModelRuntime } from './model-runtime.js';
 import { ImportService } from './import-service.js';
 import { createToolServices } from './activities/tools.js';
+import {installBundledSkills} from './bundled-skills.js';
 import { createAllActivities } from './activities/index.js';
 import { createCoreHandlers } from './rpc/core.js';
 import { createCapabilityHandlers } from './rpc/capabilities.js';
@@ -163,6 +164,7 @@ const rsiRunner: EvalRunner = async (args) => {
 };
 
 const toolServices = createToolServices({ store, home, clock: () => Date.now(), worker, secrets }, { runner: rsiRunner });
+await installBundledSkills(toolServices.skills,resolve(dirname(fileURLToPath(import.meta.url)),'../bundled-skills'));
 
 const databases: DatabaseQuery = {
   query: (kind, query, signal) => queryViaMcp(kind, query, signal) as Promise<Json>,

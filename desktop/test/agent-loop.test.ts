@@ -6,10 +6,21 @@ import { parseMcpResult } from '../src/mcp-result.js';
 import { ModelRuntime } from '../src/model-runtime.js';
 import type { ModelTurn, TurnMessage } from '../src/providers.js';
 import { extractText, publicUrl, fetchedSource } from '../src/search.js';
+import {ModelTruncatedError} from '../src/providers.js';
 
 const parameters={type:'object',properties:{query:{type:'string',minLength:1}},required:['query'],additionalProperties:false} as const;
 function runtime(turn:(messages:TurnMessage[])=>Promise<ModelTurn>):ModelRuntime {const m=new ModelRuntime();m.turn=async(messages)=>turn(messages);return m;}
 const reply=(text:string):ModelTurn=>({text,tokens:20,toolCalls:[]});
+test('truncated answers continue from the breakpoint without repeating completed tools and account for both calls',async()=>{
+ let calls=0,used=0;const model=runtime(async messages=>{if(!calls++)throw new ModelTruncatedError('第一部分。',41,false);assert.equal(messages.at(-2)?.content,'第一部分。');return reply('第二部分。');});
+ const result=await runAgent({...options(model),afterModel:n=>{used+=n;}});
+ assert.equal(result.text,'第一部分。第二部分。');assert.equal(used,61);assert.ok(result.trace.some(x=>x.type==='model.continuing'));
+});
+test('repeated truncation is bounded and incomplete tool parameters never execute',async()=>{
+ let calls=0;await assert.rejects(runAgent(options(runtime(async()=>{calls++;throw new ModelTruncatedError('partial',10,false);}))),/长度上限/);assert.equal(calls,4);
+ let executed=false;const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executed=true;return {ok:true};}});
+ await assert.rejects(runAgent(options(runtime(async()=>{throw new ModelTruncatedError('',10,true);}),registry)),ModelTruncatedError);assert.equal(executed,false);
+});
 const call=(argumentsText='{"query":"science"}'):ModelTurn=>({text:'',tokens:10,toolCalls:[{id:'call1',name:'lookup',arguments:argumentsText}]});
 function options(model:ModelRuntime,registry=new ToolRegistry()) {return {model,registry,signal:new AbortController().signal,traceId:'trace-test',messages:[{role:'user',content:'hello'}] as TurnMessage[],prompt:'hello',contextWindow:32000,maxOutput:512,onText:()=>{},onEvent:()=>{},beforeModel:()=>{},afterModel:()=>{},persistTool:async()=>{}};}
 

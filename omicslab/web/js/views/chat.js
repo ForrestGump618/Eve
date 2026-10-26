@@ -33,7 +33,7 @@ import {
   openLightbox,
   spinnerHtml,
 } from '../ui.js?v=2.1.1';
-import { getState, setState, setAgent, setAgentDefault, navigate } from '../store.js?v=2.1.1';
+import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=2.1.1';
 import { on, emit } from '../bus.js?v=2.1.1';
 import { openRunDetail, openRunList } from '../runview.js?v=2.1.1';
 
@@ -299,6 +299,7 @@ export async function mount(root, ctx = {}) {
     return w;
   }
   applySidebarWidth(getPref('chatSidebarWidth', SIDEBAR_DEFAULT));
+  el.view.classList.toggle('sidebar-collapsed',Boolean(getPref('chatSidebarCollapsed',false)));
 
   function openDrawer(open) {
     el.view.classList.toggle('drawer-open', Boolean(open));
@@ -615,14 +616,15 @@ export async function mount(root, ctx = {}) {
 
     // assistant (default)
     const contentHtml = msg.content ? `<div class="msg-text md">${renderMarkdown(msg.content)}</div>` : '';
-    const toolsHtml = (Array.isArray(msg.tool_calls) ? msg.tool_calls : [])
+    const savedSteps=Array.isArray(msg?.meta?.tool_steps)?msg.meta.tool_steps:[];
+    const toolsHtml = (Array.isArray(msg.tool_calls)&&msg.tool_calls.length ? msg.tool_calls : savedSteps)
       .map((call) => {
         const result = toolResults.get(call.id) || null;
         return toolCardHtml(
           { id: call.id, name: call.name, arguments: call.arguments ?? call.args, agent: call.agent, category: call.category },
-          result
+          call.result || (result
             ? { ok: result?.meta?.ok, preview: result.content, duration_ms: result?.meta?.duration_ms }
-            : null,
+            : null),
         );
       })
       .join('');
@@ -636,14 +638,29 @@ export async function mount(root, ctx = {}) {
       '<div class="msg msg-assistant">' +
         `<div class="msg-avatar">${getPref('agentAvatar','') ? esc(getPref('agentAvatar','')) : brandMark(26, `a-${esc(msg.id || uid('m'))}`)}</div>` +
         '<div class="msg-col">' +
-        (toolsHtml ? `<div class="msg-tools">${toolsHtml}</div>` : '') +
+        (toolsHtml ? toolGroupHtml(toolsHtml) : '') +
         `<div class="msg-bubble">${contentHtml}${figuresHtml}</div>` +
         usageHtml +
         `<div class="msg-meta">${time}<span class="msg-role">${roleLabel(role)}</span></div>` +
         '</div></div>',
     );
     bindMessageContent(node);
+    if(msg?.meta?.run_id){const meta=node.querySelector('.msg-meta');const link=document.createElement('button');link.type='button';link.className='link-btn run-detail-link';link.dataset.runId=msg.meta.run_id;link.innerHTML=`${icon('history',{size:13})}<span>查看运行详情</span>`;meta.appendChild(link);}
+    updateToolGroup(node.querySelector('.tool-run'));
     return node;
+  }
+
+  function toolGroupHtml(content='') {
+    return `<details class="tool-run"${content?'':' hidden'}><summary class="tool-run-summary"><span class="tool-run-state"></span><span class="tool-run-label">执行步骤</span><span class="tool-run-count"></span>${icon('chevronDown',{size:13})}</summary><div class="msg-tools">${content}</div></details>`;
+  }
+  function updateToolGroup(group){
+    if(!group)return;
+    const cards=[...group.querySelectorAll('.tool-card')],running=cards.filter(x=>x.classList.contains('is-running')),failed=cards.filter(x=>x.classList.contains('is-fail'));
+    group.hidden=!cards.length;
+    group.querySelector('.tool-run-state').innerHTML=running.length?'<span class="spinner"></span>':icon(failed.length?'alert':'check',{size:13});
+    const last=running.at(-1);
+    group.querySelector('.tool-run-label').textContent=last?`正在${last.dataset.label||'执行'}`:failed.length?'执行记录 · 含失败步骤':'执行记录';
+    group.querySelector('.tool-run-count').textContent=`${cards.length} 项${failed.length?` · ${failed.length} 失败`:''}`;
   }
 
   function usageLine(usage) {
@@ -679,6 +696,8 @@ export async function mount(root, ctx = {}) {
   }
 
   function toolCardHtml(call, result) {
+    const names={web_search:'搜索网页',web_fetch:'读取网页',database_search:'检索文献',read_file:'读取文件',list_directory:'查看目录',search_files:'搜索文件',write_file:'保存文件',skill_search:'查找技能',skill_load:'加载技能',skill_read_resource:'读取技能参考',skill_run:'运行技能',skill_create:'创建技能',skill_install:'安装技能',workspace_info:'查看工作目录',mcp_tools:'发现 MCP 工具',mcp_call:'调用 MCP 工具'};
+    const label=names[call.name]||call.name||'执行工具';
     const ok = result ? result.ok !== false : null;
     const stateClass = result ? (ok ? 'is-ok' : 'is-fail') : 'is-running';
     const stateIcon = result
@@ -697,10 +716,10 @@ export async function mount(root, ctx = {}) {
       ? `<div class="tool-result-label">${ok ? '结果' : '错误'}</div>${preview ? `<pre class="tool-result">${esc(truncate(preview, 4000))}</pre>` : '<div class="tool-result-empty">无输出</div>'}`
       : '';
     return (
-      `<div class="tool-card ${stateClass}" data-tool-id="${esc(call.id || '')}">` +
+      `<div class="tool-card ${stateClass}" data-label="${esc(label)}" data-tool-id="${esc(call.id || '')}">` +
       `<button type="button" class="tool-head" aria-expanded="false">` +
       `<span class="tool-state">${stateIcon}</span>` +
-      `<span class="tool-name">${esc(call.name || 'tool')}</span>` +
+      `<span class="tool-name">${esc(label)}</span>` +
       (call.agent ? `<span class="tool-agent">${esc(call.agent)}</span>` : '') +
       (call.category ? `<span class="tool-cat">${esc(call.category)}</span>` : '') +
       (duration ? `<span class="tool-dur">${esc(duration)}</span>` : '') +
@@ -741,7 +760,7 @@ export async function mount(root, ctx = {}) {
         `<span class="reasoning-label">${icon('brain', { size: 13 })}<span>推理过程</span></span>` +
         `<span class="reasoning-count"></span>${icon('chevronDown', { size: 13, cls: 'reasoning-chev' })}</summary>` +
         '<div class="reasoning-body md"></div></details>' +
-        '<div class="msg-tools"></div>' +
+        toolGroupHtml() +
         '<div class="msg-children" hidden>' +
         '<div class="msg-children-head">' +
         `${icon('layers', { size: 13 })}<span>子任务</span><span class="msg-children-count"></span>` +
@@ -763,6 +782,7 @@ export async function mount(root, ctx = {}) {
       reasoningBody: node.querySelector('.reasoning-body'),
       reasoningCount: node.querySelector('.reasoning-count'),
       tools: node.querySelector('.msg-tools'),
+      toolGroup: node.querySelector('.tool-run'),
       children: node.querySelector('.msg-children'),
       childrenList: node.querySelector('.msg-children-list'),
       childrenCount: node.querySelector('.msg-children-count'),
@@ -829,9 +849,12 @@ export async function mount(root, ctx = {}) {
         refs.reasoningCount.textContent = `${state.reasoning.length} 字`;
       },
       addToolCall(data) {
+        const existing=refs.tools.querySelector(`[data-tool-id="${cssEscape(data.id||'')}"]`);
+        if(existing)return existing;
         state.tools += 1;
         const frag = h(toolCardHtml({ id: data.id, name: data.name, arguments: data.arguments, agent: data.agent, category: data.category }, null));
         refs.tools.appendChild(frag);
+        updateToolGroup(refs.toolGroup);
         autoScroll();
         return frag;
       },
@@ -839,7 +862,7 @@ export async function mount(root, ctx = {}) {
         const card = refs.tools.querySelector(`[data-tool-id="${cssEscape(data.id || '')}"]`);
         if (!card) return;
         const ok = data.ok !== false;
-        card.classList.remove('is-running');
+        card.classList.remove('is-running','is-ok','is-fail');
         card.classList.add(ok ? 'is-ok' : 'is-fail');
         const stateEl = card.querySelector('.tool-state');
         if (stateEl) {
@@ -853,10 +876,14 @@ export async function mount(root, ctx = {}) {
         const body = card.querySelector('.tool-body');
         if (body) {
           const preview = typeof data.preview === 'string' ? data.preview : previewOf(data.data);
-          body.innerHTML +=
+          body.querySelector('.tool-result-entry')?.remove();
+          const entry=h('<div class="tool-result-entry"></div>');
+          entry.innerHTML =
             `<div class="tool-result-label">${ok ? '结果' : '错误'}</div>` +
             (preview ? `<pre class="tool-result">${esc(truncate(preview, 4000))}</pre>` : '<div class="tool-result-empty">无输出</div>');
+          body.appendChild(entry);
         }
+        updateToolGroup(refs.toolGroup);
         autoScroll();
       },
       addFigure(fig) {
@@ -869,7 +896,7 @@ export async function mount(root, ctx = {}) {
       addApproval(data) {
         const card = h(approvalCardHtml(data));
         bindApprovalCard(card, data);
-        refs.tools.appendChild(card);
+        refs.bubble.appendChild(card);
         autoScroll();
       },
       upsertChild(raw) {
@@ -2205,6 +2232,8 @@ export async function mount(root, ctx = {}) {
 
   // prompt chips in the empty state + child task cards (task tree) + run links
   el.messages.addEventListener('click', (evt) => {
+    const toolHead=evt.target.closest('.tool-head');
+    if(toolHead){const card=toolHead.closest('.tool-card');if(card){const open=card.classList.toggle('is-open');toolHead.setAttribute('aria-expanded',String(open));}return;}
     const runLink = evt.target.closest('.run-detail-link[data-run-id]');
     if (runLink) {
       openRunDetail({ runId: runLink.dataset.runId, traceId: runLink.dataset.traceId || '' });
@@ -2253,7 +2282,17 @@ export async function mount(root, ctx = {}) {
   document.addEventListener('mousemove', onSplitMove);
   document.addEventListener('mouseup', onSplitUp);
 
-  el.drawerBtn.addEventListener('click', () => openDrawer(!el.view.classList.contains('drawer-open')));
+  el.drawerBtn.addEventListener('click', () => {
+    if(window.innerWidth<=900){openDrawer(!el.view.classList.contains('drawer-open'));return;}
+    const collapsed=el.view.classList.toggle('sidebar-collapsed');setPref('chatSidebarCollapsed',collapsed);el.drawerBtn.setAttribute('aria-expanded',String(!collapsed));
+  });
+  root.querySelector('#chat-skills-open')?.addEventListener('click',()=>navigate('skills'));
+  root.querySelector('#chat-workspace')?.addEventListener('click',async()=>{
+    if(local.streaming){toastInfo('请等待当前任务结束后更换目录');return;}
+    const value=await promptDialog({title:'选择工作目录 · 更换后开始新会话',placeholder:'输入本机文件夹的完整路径',value:getState().workspace?.local_path||getState().workspace?.root||'',confirmText:'使用此目录'});
+    if(value===null||!value.trim())return;
+    try{const data=await api.workspaces.create({name:value.split(/[\\/]/).filter(Boolean).at(-1)||'工作目录',local_path:value.trim()});const workspace=data.workspace;const probe=await api.workspaces.probe(workspace.workspace_id);if(probe.ok===false)throw new Error('目录不可访问');setWorkspace(workspace);await createConversation();root.querySelector('#chat-workspace').title=value;root.querySelector('#chat-workspace span').textContent=workspace.name||'工作目录';}catch(error){toastError(errorMessage(error));}
+  });
   el.drawerScrim.addEventListener('click', () => openDrawer(false));
 
   /* ---------------------------------------------------------------- */
@@ -2314,9 +2353,10 @@ export async function mount(root, ctx = {}) {
     if (local.agentId) el.agentSelect.value = local.agentId;
     const defaultId = local.agentDefault?.id;
     el.agentSelect.title = defaultId ? `默认：${agentLabel(defaultId)}` : '选择智能体';
-    const agent = findAgent(local.agentId);
-    if (agent?.description) el.input.placeholder = agent.description;
-    else el.input.placeholder = '向智能体描述你的分析任务…';
+    el.input.placeholder = '描述你的问题，或添加文件开始分析…';
+    const workspace=getState().workspace;
+    const chip=root.querySelector('#chat-workspace');
+    if(chip&&workspace){chip.querySelector('span').textContent=workspace.name||'工作目录';chip.title=workspace.local_path||workspace.root||'选择工作目录';}
   }
 
   function applyEffectiveAgent(id) {
@@ -2410,7 +2450,12 @@ export async function mount(root, ctx = {}) {
   }
 
   async function boot() {
-    await Promise.all([loadAgents(), loadConversations(), loadLlmSettings()]);
+    const restoreWorkspace=async()=>{
+      const current=getState();
+      if(current.workspaceId&&!current.workspace){try{const data=await api.workspaces.get(current.workspaceId);setWorkspace(data.workspace||data);}catch(error){toastError(`无法恢复工作目录：${errorMessage(error)}`);}}
+    };
+    await Promise.all([loadAgents(), loadConversations(), loadLlmSettings(),restoreWorkspace()]);
+    renderAgentOptions();
     const stored = getPref('activeConversationId', '') || getState().activeConversationId;
     const target =
       (stored && local.conversations.find((c) => c.id === stored)) ||
@@ -2529,6 +2574,8 @@ function chatLayout() {
     '<div class="composer-left">' +
     `<button type="button" class="icon-btn" id="attach-btn" title="添加图片或附件（也可粘贴 / 拖拽）">${icon('upload', { size: 17 })}</button>` +
     '<input type="file" id="chat-file-input" multiple hidden />' +
+    `<button type="button" class="btn btn-ghost btn-sm workspace-chip" id="chat-workspace" title="选择模型可访问的工作目录">${icon('folder',{size:14})}<span>工作目录</span></button>` +
+    `<button type="button" class="btn btn-ghost btn-sm" id="chat-skills-open" title="查看已安装技能">${icon('skills',{size:14})}<span>技能</span></button>` +
     '<span class="composer-hint" id="composer-hint">Enter 发送 · Shift+Enter 换行</span>' +
     '</div>' +
     '<div class="composer-right">' +

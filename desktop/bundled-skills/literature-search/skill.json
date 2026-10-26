@@ -1,0 +1,8 @@
+{
+  "name": "literature-search",
+  "description": "Public biomedical literature search and comparison; PubMed 文献 检索 对比 引用",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "permissions": []
+}

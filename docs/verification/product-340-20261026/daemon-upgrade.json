@@ -1,0 +1,20 @@
+{
+  "kind": "real version upgrade; isolated profiles",
+  "oldVersion": "3.3.2",
+  "results": [
+    {
+      "active": false,
+      "actualVersion": "3.4.0",
+      "taskStatus": "completed",
+      "startupError": "",
+      "ok": true
+    },
+    {
+      "active": true,
+      "actualVersion": "3.3.2",
+      "taskStatus": "waiting_approval",
+      "startupError": "后台 3.3.2 有未结束任务。请完成或取消任务后重连，以加载 3.4.0。",
+      "ok": true
+    }
+  ]
+}

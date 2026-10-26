@@ -25,7 +25,7 @@ const env={...process.env,SUWEN_TEST_HOME:profile};delete env.ELECTRON_RUN_AS_NO
 const packaged=args.includes('--packaged');
 const executablePath=packaged?join(root,'release/win-unpacked/SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe');
 const launchArgs=packaged?[]:[root];
-const out=resolve(root,'../docs/verification/harness-20261025');mkdirSync(out,{recursive:true});
+const out=resolve(root,args.find(x=>x.startsWith('--output-dir='))?.slice(13)??'../docs/verification/harness-20261025');mkdirSync(out,{recursive:true});
 const report={kind:fixture?'controlled local model protocol fixture, REAL public PubMed tool, default product launch; NOT real-model acceptance':'real external model and public network; default product launch',checks:[],errors:[],screenshots:[]};
 let app,connection;
 const check=(name,ok,detail)=>{report.checks.push({name,ok:Boolean(ok),detail});console.log(`${ok?'PASS':'FAIL'} ${name}${detail?`: ${detail}`:''}`);};

@@ -1,0 +1,428 @@
+{
+  "kind": "real tools, worker and public GitHub; no model",
+  "at": "2026-10-26T06:49:31.057Z",
+  "checks": [
+    {
+      "name": "actual-file-read",
+      "ok": true
+    },
+    {
+      "name": "actual-file-search",
+      "ok": true
+    },
+    {
+      "name": "actual-file-update",
+      "ok": true
+    },
+    {
+      "name": "created-skill-actually-executes",
+      "ok": true
+    },
+    {
+      "name": "local-skill-installs",
+      "ok": true
+    },
+    {
+      "name": "bundled-json-skill-actually-executes",
+      "ok": true
+    },
+    {
+      "name": "github-skill-pinned-and-hashed",
+      "ok": true
+    },
+    {
+      "name": "install-never-claims-execution",
+      "ok": true
+    }
+  ],
+  "calls": [
+    {
+      "name": "write_file",
+      "args": {
+        "path": "evidence.txt",
+        "content": "WORKSPACE_READ_OK\nvalue=7"
+      },
+      "result": {
+        "path": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\workspace\\evidence.txt",
+        "bytes": 25,
+        "sha256": "bbd178e282562df9708aec51b232232a4f694ac3233d146ba5aacce98281b7fc",
+        "created": true
+      },
+      "durationMs": 22
+    },
+    {
+      "name": "read_file",
+      "args": {
+        "path": "evidence.txt"
+      },
+      "result": {
+        "path": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\workspace\\evidence.txt",
+        "bytes": 25,
+        "sha256": "bbd178e282562df9708aec51b232232a4f694ac3233d146ba5aacce98281b7fc",
+        "startLine": 1,
+        "endLine": 2,
+        "totalLines": 2,
+        "content": "WORKSPACE_READ_OK\nvalue=7",
+        "truncated": false,
+        "nextStartLine": null
+      },
+      "durationMs": 2
+    },
+    {
+      "name": "search_files",
+      "args": {
+        "query": "value=7"
+      },
+      "result": {
+        "query": "value=7",
+        "visited": 2,
+        "limited": false,
+        "matches": [
+          {
+            "path": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\workspace\\evidence.txt",
+            "line": 2,
+            "text": "value=7"
+          }
+        ]
+      },
+      "durationMs": 4
+    },
+    {
+      "name": "write_file",
+      "args": {
+        "path": "evidence.txt",
+        "content": "updated",
+        "expectedSha256": "bbd178e282562df9708aec51b232232a4f694ac3233d146ba5aacce98281b7fc"
+      },
+      "result": {
+        "path": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\workspace\\evidence.txt",
+        "bytes": 7,
+        "sha256": "27eb5e51506c911f6fc4bb345c0d9db6f60415fceab7c18e1e9b862637415777",
+        "created": false
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "skill_create",
+      "args": {
+        "name": "sum-e2e",
+        "description": "Sum input numbers",
+        "instructions": "Execute the declared Python entry with the numbers JSON input and report its actual sum.",
+        "script": "import json,sys\nprint(json.dumps({\"sum\":sum(json.loads(sys.argv[1])[\"numbers\"])}))"
+      },
+      "result": {
+        "installed": true,
+        "executed": false,
+        "skill": {
+          "id": "sum-e2e-4e3de3e2a126",
+          "name": "sum-e2e",
+          "description": "Sum input numbers",
+          "executable": true,
+          "dependencies": [],
+          "version": "1.0.0",
+          "source": "local:C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-skill-SrEZcJ",
+          "license": "MIT",
+          "entry": "SKILL.md",
+          "permissions": [],
+          "enabled": true,
+          "sha256": "4e3de3e2a126cdab383e499082670dadc71e6d9e5409e53054798737aeec3a13",
+          "test": {
+            "status": "not_run",
+            "at": null
+          },
+          "installedAt": 1792997371206
+        }
+      },
+      "durationMs": 24
+    },
+    {
+      "name": "skill_load",
+      "args": {
+        "id": "sum-e2e-4e3de3e2a126"
+      },
+      "result": {
+        "id": "sum-e2e-4e3de3e2a126",
+        "name": "sum-e2e",
+        "version": "1.0.0",
+        "instructions": "\n---\nname: sum-e2e\ndescription: \"Sum input numbers\"\n---\n\nExecute the declared Python entry with the numbers JSON input and report its actual sum.\n",
+        "resources": [
+          {
+            "path": "run.py",
+            "bytes": 82
+          },
+          {
+            "path": "skill.json",
+            "bytes": 186
+          }
+        ],
+        "run": {
+          "language": "python",
+          "script": "run.py",
+          "timeoutMs": 30000
+        },
+        "dependencies": [],
+        "sha256": "4e3de3e2a126cdab383e499082670dadc71e6d9e5409e53054798737aeec3a13"
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "skill_run",
+      "args": {
+        "id": "sum-e2e-4e3de3e2a126",
+        "input": {
+          "numbers": [
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      "result": {
+        "skillId": "sum-e2e-4e3de3e2a126",
+        "version": "1.0.0",
+        "sha256": "4e3de3e2a126cdab383e499082670dadc71e6d9e5409e53054798737aeec3a13",
+        "result": {
+          "language": "python",
+          "sandbox": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\sandbox\\run-bxvpokb1",
+          "script": "main.py",
+          "seed": 1141466741,
+          "timeoutMs": 30000,
+          "durationMs": 156,
+          "exitCode": 0,
+          "signal": null,
+          "timedOut": false,
+          "stdout": "{\"sum\": 12}\r\n",
+          "stderr": "",
+          "stdoutTruncated": false,
+          "stderrTruncated": false,
+          "stdoutBytes": 13,
+          "stderrBytes": 0,
+          "files": [
+            {
+              "path": "SKILL.md",
+              "bytes": 145,
+              "sha256": "9606160be26d9ffb6c0c9ae2c77e9b4e3017ddf2c35c2a67c931d95dca0ce0aa",
+              "input": true
+            },
+            {
+              "path": "run.py",
+              "bytes": 82,
+              "sha256": "12b06d05deb743053bb8b10b3bc40f57ca317d009957980b64ff809d5944816b",
+              "input": true
+            },
+            {
+              "path": "skill.json",
+              "bytes": 186,
+              "sha256": "0ab29c811e3ee118e10f9a91ff6fb0e8b7fc898a789921605d6f4b9fc3b3e3b9",
+              "input": true
+            }
+          ],
+          "inputFiles": [
+            {
+              "name": "SKILL.md",
+              "bytes": 145,
+              "sha256": "9606160be26d9ffb6c0c9ae2c77e9b4e3017ddf2c35c2a67c931d95dca0ce0aa"
+            },
+            {
+              "name": "run.py",
+              "bytes": 82,
+              "sha256": "12b06d05deb743053bb8b10b3bc40f57ca317d009957980b64ff809d5944816b"
+            },
+            {
+              "name": "skill.json",
+              "bytes": 186,
+              "sha256": "0ab29c811e3ee118e10f9a91ff6fb0e8b7fc898a789921605d6f4b9fc3b3e3b9"
+            }
+          ],
+          "artifactsTruncated": false,
+          "versions": {
+            "python": "3.12.11",
+            "node": null
+          },
+          "isolation": "subprocess with a fresh working directory, allowlisted environment and no shell; not an OS security sandbox",
+          "warnings": []
+        }
+      },
+      "durationMs": 380
+    },
+    {
+      "name": "skill_install",
+      "args": {
+        "path": "local-skill"
+      },
+      "result": {
+        "installed": true,
+        "executed": false,
+        "skill": {
+          "id": "local-e2e-91389c6aa3d0",
+          "name": "local-e2e",
+          "description": "Local file instructions",
+          "executable": false,
+          "dependencies": [],
+          "version": "1.0.0",
+          "source": "local:C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\workspace\\local-skill",
+          "license": "MIT",
+          "entry": "SKILL.md",
+          "permissions": [],
+          "enabled": true,
+          "sha256": "91389c6aa3d026af306efd6dc8a20690e005770f4f945c1bb95d63de676af39a",
+          "test": {
+            "status": "not_run",
+            "at": null
+          },
+          "installedAt": 1792997371608
+        }
+      },
+      "durationMs": 13
+    },
+    {
+      "name": "skill_load",
+      "args": {
+        "id": "json-transform-dc64227ed5e8"
+      },
+      "result": {
+        "id": "json-transform-dc64227ed5e8",
+        "name": "json-transform",
+        "version": "1.0.0",
+        "instructions": "\n---\r\nname: json-transform\r\ndescription: \"JSON validation formatting select keys; JSON 校验 格式化 字段 提取\"\r\n---\r\n\r\nRun with {\"value\":object,\"keys\":[\"field\"]} to select keys, or omit keys to validate and pretty-print the whole JSON value. Read existing files first and use write_file with expectedSha256 if the task requests saving the transformed result.\r\n",
+        "resources": [
+          {
+            "path": "run.py",
+            "bytes": 357
+          },
+          {
+            "path": "skill.json",
+            "bytes": 313
+          }
+        ],
+        "run": {
+          "language": "python",
+          "script": "run.py",
+          "timeoutMs": 30000
+        },
+        "dependencies": [],
+        "sha256": "dc64227ed5e891676bf0a93939d9b656702a1b91e3e9d4da2222aa9faf17d344"
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "skill_run",
+      "args": {
+        "id": "json-transform-dc64227ed5e8",
+        "input": {
+          "value": {
+            "keep": 7,
+            "drop": 8
+          },
+          "keys": [
+            "keep"
+          ]
+        }
+      },
+      "result": {
+        "skillId": "json-transform-dc64227ed5e8",
+        "version": "1.0.0",
+        "sha256": "dc64227ed5e891676bf0a93939d9b656702a1b91e3e9d4da2222aa9faf17d344",
+        "result": {
+          "language": "python",
+          "sandbox": "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Temp\\suwen-product-tools-VH6uRY\\sandbox\\run-w95ttsic",
+          "script": "main.py",
+          "seed": 376171802,
+          "timeoutMs": 30000,
+          "durationMs": 140,
+          "exitCode": 0,
+          "signal": null,
+          "timedOut": false,
+          "stdout": "{\"value\": {\"keep\": 7}, \"formatted\": \"{\\n  \\\"keep\\\": 7\\n}\"}\r\n",
+          "stderr": "",
+          "stdoutTruncated": false,
+          "stderrTruncated": false,
+          "stdoutBytes": 60,
+          "stderrBytes": 0,
+          "files": [
+            {
+              "path": "SKILL.md",
+              "bytes": 367,
+              "sha256": "3c9c5c603f1ee15c4dbcdd2255ad1b5cbe99273ded8d0b3420fda5b8b7438e30",
+              "input": true
+            },
+            {
+              "path": "run.py",
+              "bytes": 357,
+              "sha256": "c44aad688049169094d9dffd1438c76ce198eae75964f114216e0e4f9a39c1cb",
+              "input": true
+            },
+            {
+              "path": "skill.json",
+              "bytes": 313,
+              "sha256": "401d0c9ea5d5d2df694ceb42061538cd48b59fd4479332971c103674d7199ce1",
+              "input": true
+            }
+          ],
+          "inputFiles": [
+            {
+              "name": "SKILL.md",
+              "bytes": 367,
+              "sha256": "3c9c5c603f1ee15c4dbcdd2255ad1b5cbe99273ded8d0b3420fda5b8b7438e30"
+            },
+            {
+              "name": "run.py",
+              "bytes": 357,
+              "sha256": "c44aad688049169094d9dffd1438c76ce198eae75964f114216e0e4f9a39c1cb"
+            },
+            {
+              "name": "skill.json",
+              "bytes": 313,
+              "sha256": "401d0c9ea5d5d2df694ceb42061538cd48b59fd4479332971c103674d7199ce1"
+            }
+          ],
+          "artifactsTruncated": false,
+          "versions": {
+            "python": "3.12.11",
+            "node": null
+          },
+          "isolation": "subprocess with a fresh working directory, allowlisted environment and no shell; not an OS security sandbox",
+          "warnings": []
+        }
+      },
+      "durationMs": 143
+    },
+    {
+      "name": "skill_install",
+      "args": {
+        "url": "https://github.com/deepseek-ai/deepseek-harness/tree/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/.agents/skills/dsh-error-handling"
+      },
+      "result": {
+        "installed": true,
+        "executed": false,
+        "revision": "22ddee3792402c3e70ec5f86a63c3e3e895a2f60",
+        "files": [
+          {
+            "path": "/SKILL.md",
+            "sha256": "fcde7e278056263f7b93b6854fe05d0b492bdf09739f4f4f3537e8ffd30a1c2d"
+          }
+        ],
+        "skill": {
+          "id": "dsh-error-handling-d93a0b1664a4",
+          "name": "dsh-error-handling",
+          "description": "Apply error-handling principles when designing or reviewing failures, recovery, retries, background tasks, and user-visible error reports.",
+          "executable": false,
+          "dependencies": [],
+          "version": "git-22ddee379240",
+          "source": "github:https://github.com/deepseek-ai/deepseek-harness/tree/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/.agents/skills/dsh-error-handling",
+          "license": "MIT",
+          "entry": "SKILL.md",
+          "permissions": [],
+          "enabled": true,
+          "sha256": "d93a0b1664a484db6409a0458d1d59685e6d1578189467f2a699874596bce71a",
+          "test": {
+            "status": "not_run",
+            "at": null
+          },
+          "installedAt": 1792997373661
+        }
+      },
+      "durationMs": 1909
+    }
+  ]
+}

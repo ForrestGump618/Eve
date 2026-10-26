@@ -25,6 +25,13 @@ def scope_for(p,scope):
     return scope
 
 
+async def desktop_skills(p):
+    """Use the same installed catalog and toggles as chat's durable harness."""
+    adapter=getattr(p.state.loop,'desktop_harness',None)
+    if not adapter:return None,[]
+    return adapter,(await adapter.rpc('skill.list')).get('skills',[])
+
+
 async def body(request):
     raw=await request.body()
     if len(raw)>4_000_000:raise HTTPException(413,'请求超过 4MB')
@@ -138,7 +145,11 @@ async def model_test(request:Request,scope:str='ws_main'):
 async def registry_list(request:Request,kind:str,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope)
     if kind not in {'mcp','channel','agent','skill','workflow','schedule','artifact','evidence','review','source','trash'}:raise HTTPException(404,'未知注册表')
-    if kind=='skill':return {'items':p.skills.installed(scope),'scientific':SCIENTIFIC}
+    if kind=='skill':
+        adapter,native=await desktop_skills(p)
+        items=p.skills.installed(scope)
+        items.extend(dict(item,runtime='desktop',status='installed' if item['enabled'] else 'disabled') for item in native)
+        return {'items':items,'scientific':SCIENTIFIC}
     items=p.store.list(kind,'global' if kind in {'mcp','channel','agent'} else scope)
     if kind=='mcp':items=[dict(r,status=p.store.get('mcp_status',r['id'])) for r in items]
     if kind=='channel':items=[dict(r,connection=p.store.get('channel_status',r['id'])) for r in items if r.get('workspace')==scope]
@@ -167,6 +178,11 @@ async def registry_create(request:Request,kind:str,scope:str='ws_main'):
 async def registry_update(request:Request,kind:str,id:str,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope);data=await body(request)
     store_scope='global' if kind in {'mcp','channel','agent'} else scope
+    if kind=='skill':
+        adapter,native=await desktop_skills(p)
+        if any(item['id']==id for item in native):
+            if set(data)!={'enabled'} or not isinstance(data['enabled'],bool):raise HTTPException(400,'技能仅可启停')
+            return (await adapter.rpc('skill.enable' if data['enabled'] else 'skill.disable',id=id))['skill']
     old=p.store.get(kind,id,store_scope)
     if not old:raise HTTPException(404,'记录不存在')
     value=dict(old,**data)
@@ -184,6 +200,9 @@ async def registry_update(request:Request,kind:str,id:str,scope:str='ws_main'):
 @router.delete('/registry/{kind}/{id}')
 async def registry_delete(request:Request,kind:str,id:str,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope)
+    if kind=='skill':
+        adapter,native=await desktop_skills(p)
+        if any(item['id']==id for item in native):return await adapter.rpc('skill.remove',id=id)
     if kind not in {'mcp','channel','agent','skill','workflow','schedule','evidence','source','artifact'}:raise HTTPException(400,'记录不可通过此接口删除')
     return guarded(lambda:p.store.delete(kind,id,'global' if kind in {'mcp','channel','agent'} else scope))
 
@@ -197,7 +216,20 @@ async def registry_history(request:Request,kind:str,id:str,scope:str='ws_main'):
 
 @router.post('/skills/install')
 async def skill_install(request:Request,scope:str='ws_main'):
-    p=platform(request);return await p.skills.install(scope,await body(request))
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    adapter=getattr(p.state.loop,'desktop_harness',None)
+    if not adapter:return await p.skills.install(scope,data)
+    if data.get('trusted') is not True:raise HTTPException(400,'请审核来源并确认安装')
+    from pathlib import Path
+    source=str(data.get('source') or '')
+    if source.startswith('https://'):
+        if source.endswith('.git'):
+            source=source[:-4]+'/tree/'+str(data.get('ref') or 'main')+'/'+str(data.get('subpath') or '.')
+        return await adapter.rpc('skill.import',url=source)
+    root=Path(source).expanduser().resolve()
+    directory=(root/str(data.get('subpath') or '.')).resolve()
+    if not directory.is_relative_to(root) or not (directory/'skill.json').is_file():raise HTTPException(400,'本地技能目录需要 skill.json 与 SKILL.md；Codex 技能可使用 GitHub tree 目录链接安装')
+    return await adapter.rpc('skill.import',path=str(directory))
 
 
 @router.post('/skills/{id}/rollback')

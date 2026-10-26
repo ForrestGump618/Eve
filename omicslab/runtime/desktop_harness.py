@@ -64,7 +64,8 @@ class DesktopHarness:
         key = selected.api_key
         model_config = None
         if selected.provider != "mock" and key:
-            model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=65536, maxOutput=2048)
+            requested_output = int(settings.max_tokens or 8192)
+            model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=65536, maxOutput=max(128, min(requested_output, 32767)))
         messages = [{"role": m.role, "content": m.content} for m in conv.messages[-40:] if m.role in ("user", "assistant") and m.content]
         conv.messages.append(ChatMessage(role="user", content=user_text))
         if not conv.title or conv.title == "新会话":
@@ -77,10 +78,11 @@ class DesktopHarness:
             candidate = (workspace / str(attachment.get("path") or "")).resolve()
             if candidate.is_file() and candidate.is_relative_to(workspace):
                 files.append(str(candidate))
-        task = await self.rpc("create", name=user_text[:120], steps=[{"id":"reply","kind":"model","input":{"prompt":user_text,"messages":messages,"allowedFiles":files},"sideEffect":True,"maxAttempts":1,"timeoutMs":240000}], limits={"maxCalls":24,"maxTokens":160000,"maxWallMs":270000}, **({"modelConfig":model_config} if model_config else {}))
+        task = await self.rpc("create", name=user_text[:120], steps=[{"id":"reply","kind":"model","input":{"prompt":user_text,"messages":messages,"allowedFiles":files,"workspaceRoots":[str(workspace)]},"sideEffect":True,"maxAttempts":1,"timeoutMs":360000}], limits={"maxCalls":32,"maxTokens":240000,"maxWallMs":390000}, **({"modelConfig":model_config} if model_config else {}))
         task_id = task["id"]
         await event("status", {"text":"正在执行 · 统一 Harness", "task_id":task_id})
         seen = set()
+        tool_results = {}
         last_text = ""
         try:
             while True:
@@ -112,16 +114,26 @@ class DesktopHarness:
                                 preview = str(raw.get("text") or preview)[:4000]
                             except Exception:
                                 pass
-                        await event("tool_result", {"id":data.get("callId"),"tool_call_id":data.get("callId"),"name":data.get("name"),"ok":kind=="tool.completed","preview":preview, "duration_ms":data.get("durationMs"),"data":data})
+                        tool_results[data.get("callId")] = {"ok":kind=="tool.completed","preview":preview,"duration_ms":data.get("durationMs")}
+                        await event("tool_result", {"id":data.get("callId"),"tool_call_id":data.get("callId"),"name":data.get("name"),**tool_results[data.get("callId")],"data":data})
                     elif kind == "agent.verifying":
                         await event("status", {"text":"正在验证结果与引用"})
+                    elif kind == "model.continuing":
+                        await event("status", {"text":"正在接续长回答"})
                 status = current["status"]
                 if status == "completed":
                     output = current["steps"][-1].get("output") or {}
                     text = output.get("text") or ""
                     if not text.strip() or not output.get("verification",{}).get("passed"):
                         raise RuntimeError("Harness returned an unverified or empty answer")
-                    conv.messages.append(ChatMessage(role="assistant",content=text,meta={"harness_task_id":task_id,"trace_id":output.get("traceId"),"sources":output.get("sources",[])}))
+                    tool_steps = []
+                    for item in current.get("events", []):
+                        if item["type"] != "tool.started":
+                            continue
+                        detail = item.get("data", {})
+                        result = next((x.get("data", {}) for x in reversed(current.get("events", [])) if x["type"] in ("tool.completed", "tool.failed") and x.get("data", {}).get("callId") == detail.get("callId")), {})
+                        tool_steps.append({"id":detail.get("callId"),"name":detail.get("name"),"result":tool_results.get(detail.get("callId")) or ({"ok":not bool(result.get("error")),"duration_ms":result.get("durationMs"),"preview":result.get("error") or "结果已回传模型；原始记录保存在 Harness 产物中"} if result else None)})
+                    conv.messages.append(ChatMessage(role="assistant",content=text,meta={"run_id":kwargs.get("run_id"),"harness_task_id":task_id,"trace_id":output.get("traceId"),"sources":output.get("sources",[]),"tool_steps":tool_steps}))
                     conv.updated_at=time.time();loop._save(conv)
                     # Emit only verified final text; interim model preambles may be
                     # replaced between tool rounds and must not duplicate in this UI.

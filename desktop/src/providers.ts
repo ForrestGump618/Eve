@@ -13,6 +13,9 @@ export interface FunctionSpec { name:string; description:string; parameters:Reco
 export interface ToolCall { id:string; name:string; arguments:string }
 export interface TurnMessage { role:'system'|'user'|'assistant'|'tool'; content:string; tool_calls?: Array<{id:string;type:'function';function:{name:string;arguments:string}}>; tool_call_id?:string; reasoning_content?:string }
 export interface ModelTurn { text:string; tokens:number; toolCalls:ToolCall[]; reasoningContent?:string }
+export class ModelTruncatedError extends Error {
+ constructor(readonly partialText:string,readonly tokens:number,readonly hasToolCalls:boolean){super('模型输出达到长度上限（截断），尚未完成');this.name='ModelTruncatedError';}
+}
 export class ModelApiError extends Error {
  readonly definitive:boolean;readonly retryable:boolean;
  constructor(readonly status:number,readonly retryAfterMs=2000){super(`模型 API HTTP ${status}; provider request rejected${status===429?'（限流或额度不足）':''}`);this.name='ModelApiError';this.definitive=[400,401,403,404,409,422,429].includes(status);this.retryable=status===429;}
@@ -66,7 +69,8 @@ async function streamReply(c:ModelConfig,messages:TurnMessage[],signal:AbortSign
  }
  pending+=decoder.decode();if(pending)line(pending.replace(/\r$/,''));processEvent();
  if(!complete)throw new Error('模型流意外中断；已收到的片段尚未确认为最终结果');
- if(['length','max_tokens','content_filter'].includes(finishReason))throw new Error('模型输出被截断或过滤，未确认为完成');
+ if(['length','max_tokens'].includes(finishReason))throw new ModelTruncatedError(text,tokens,calls.size>0);
+ if(finishReason==='content_filter')throw new Error('模型输出被过滤，未确认为完成');
  const toolCalls=[...calls.values()];
  if(toolCalls.some(x=>!x.id||!x.name))throw new Error('模型工具调用缺少 ID 或名称');
  for(const call of toolCalls)if(!call.arguments)call.arguments='{}';
@@ -76,7 +80,7 @@ async function streamReply(c:ModelConfig,messages:TurnMessage[],signal:AbortSign
 export async function modelTurn(c:ModelConfig,messages:TurnMessage[],signal:AbortSignal,onText:(text:string)=>void,tools:FunctionSpec[]=[]):Promise<ModelTurn> {
  try {return await streamReply(validateModelConfig(c),messages,signal,onText,tools);}
  catch(error) {
-  if(error instanceof ModelApiError)throw error;
+  if(error instanceof ModelApiError||error instanceof ModelTruncatedError)throw error;
   // Never persist arbitrary transport/SDK exceptions, which can echo enterprise credentials.
   const message=error instanceof Error?error.message:'';
   const safe=/^(?:模型|单个流事件)/.test(message)&&!message.includes(c.apiKey||'\u0000');

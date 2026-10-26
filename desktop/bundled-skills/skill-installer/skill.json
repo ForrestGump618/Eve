@@ -1,0 +1,16 @@
+{
+  "name": "skill-installer",
+  "description": "OpenAI skill-installer: discover install repository skills; \u5b89\u88c5 \u5bfc\u5165 GitHub \u6280\u80fd",
+  "version": "2026.10.26",
+  "entry": "SKILL.md",
+  "license": "Apache-2.0",
+  "permissions": [
+    "network",
+    "exec"
+  ],
+  "upstream": "https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.system/skill-installer",
+  "excludedNonRuntimeAssets": [
+    "assets\\skill-installer.png"
+  ],
+  "upstreamCommit": "49f948faa9258a0c61caceaf225e179651397431"
+}

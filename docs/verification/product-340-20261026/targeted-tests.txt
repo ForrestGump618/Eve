@@ -1,0 +1,31 @@
+✔ truncated answers continue from the breakpoint without repeating completed tools and account for both calls (7.9835ms)
+✔ repeated truncation is bounded and incomplete tool parameters never execute (2.2143ms)
+✔ real tool observations, including errors, are returned with matching call ids before final output (43.4157ms)
+✔ retrieval without tools is never marked successful, even when the model writes a plausible citation (0.4649ms)
+✔ completed DAG evidence is reused without repeating an already completed database search (0.4207ms)
+✔ unretrieved citation is rejected after bounded repair (0.6787ms)
+✔ citations cannot bypass verification in ordinary chat; code example URLs are not citations (1.3278ms)
+✔ schema errors are observable by the model and cannot execute a tool (1.2291ms)
+✔ repeated requests stop at the tool budget and never synthesize a success (1.3424ms)
+✔ cancellation and timeout bound an uncooperative tool (31.3484ms)
+✔ registry rejects collisions and validates argument types/required fields/extra keys (2.3124ms)
+✔ MCP supports plain text, multiple blocks and structured results; rejects isError/empty (0.6558ms)
+✔ public-source URL checks refuse local addresses and extraction removes executable/page chrome (6.7963ms)
+✔ Chinese punctuation delimits retrieved citation URLs without corrupting encoded URL paths (0.2423ms)
+✔ repository API evidence preserves both verified canonical URL and actual retrieval URL (2.2099ms)
+(node:640) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real daemon/authenticated pipe survives client exit and forced restart without replaying committed work (8308.8095ms)
+ℹ Actual short fault-injection run: 8218 ms; independent client exit, daemon SIGKILL, lease expiry, durable timer recovery, cancellation; no long-duration claim.
+(node:40004) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ workspace files paginate, search, refuse escape, and protect unseen updates (57.9794ms)
+✔ bundled skills seed idempotently and generated skills actually execute (809.1919ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8478.1276

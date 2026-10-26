@@ -98,6 +98,33 @@ body{font-size:var(--ui-font-size)}
 .sw-onboarding h2{font-size:24px;font-weight:550;letter-spacing:-.03em}
 .sw-onboarding p,.sw-onboarding li{color:var(--text-2);font-size:13px;line-height:1.9}
 .messages{scrollbar-gutter:stable;overflow-anchor:auto}
+/* Quiet, flat chat: tool activity occupies one expandable line per answer. */
+.msg{animation:none}.msg-col{gap:8px}.msg-bubble{box-shadow:none}
+.msg-assistant .msg-bubble{background:transparent;border:0;padding:6px 0;border-radius:0}
+.msg-user .msg-bubble{background:var(--panel-2);color:var(--text);border:1px solid var(--border-soft);box-shadow:none;border-radius:16px;padding:12px 17px}
+[data-theme="light"] .msg-user .msg-bubble{color:var(--text);background:#edf3f2;border-color:#e1e9e7}
+.msg-user .msg-text a{color:var(--accent)}.msg-user .md-inline-code{color:var(--text);background:var(--panel-3);border-color:var(--border)}
+.tool-run{margin:3px 0 8px;max-width:100%;color:var(--text-3);font-size:12px}
+.tool-run[hidden]{display:none}.tool-run-summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;padding:7px 0;user-select:none}
+.tool-run-summary::-webkit-details-marker{display:none}.tool-run-summary>svg:last-child{margin-left:4px;transition:transform .15s}.tool-run[open] .tool-run-summary>svg:last-child{transform:rotate(180deg)}
+.tool-run-state{display:flex;width:14px;align-items:center;justify-content:center;color:var(--accent)}.tool-run-state .spinner{width:12px;height:12px}
+.tool-run-count{font-size:11px;color:var(--text-4);font-variant-numeric:tabular-nums}
+.tool-run>.msg-tools{padding:2px 0 3px 12px;border-left:1px solid var(--border-soft);margin-left:6px;gap:0}
+.tool-run .tool-card{background:transparent;border:0;border-radius:0;box-shadow:none;margin:0}
+.tool-run .tool-card:is(.is-running,.is-ok,.is-fail){border:0;background:transparent}
+.tool-run .tool-head{padding:7px 8px;min-height:30px;font-size:12px;gap:8px}.tool-run .tool-name{font-weight:450}
+.tool-run .tool-body{border:0;background:var(--bg-soft);border-radius:6px;margin:3px 6px 8px;padding:10px 12px}
+.tool-run .tool-result{max-height:220px;font-size:11px}.tool-run .tool-dur{font-size:10px;color:var(--text-4)}
+.composer{box-shadow:none!important;border-radius:16px}.chat-titlebar{box-shadow:none}.msg-avatar{border:0;background:transparent}
+.chat-main{background:var(--bg)}.chat-header{background:var(--bg);backdrop-filter:none;padding:12px 24px}.chat-title{font-weight:550;letter-spacing:-.02em}
+.chat-view .chat-drawer-btn{display:inline-flex}.chat-view.sidebar-collapsed .chat-sidebar,.chat-view.sidebar-collapsed .chat-splitter{display:none}
+.chat-view .messages{padding-left:clamp(24px,5vw,80px);padding-right:clamp(24px,5vw,80px)}
+.chat-view .composer-box{box-shadow:none;border:1px solid var(--border);border-radius:14px;background:var(--panel)}
+.chat-view .composer-input{background:transparent}.chat-view .send-btn{box-shadow:none;background:var(--accent);border-radius:9px}
+.workspace-chip{max-width:180px}.workspace-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-kernel{background:transparent;color:var(--text-2);border:1px solid var(--border-soft);box-shadow:none}
+.sw-card,.sw-hero,.sw-method,.sw-flow-node{box-shadow:none}.sw-hero{background:var(--panel)}
+@media(max-width:900px){.chat-view.sidebar-collapsed .chat-sidebar{display:flex}.chat-view .messages{padding-left:16px;padding-right:16px}.composer-hint{display:none}}
 [data-density="compact"] .sw-card{padding:17px}
 [data-density="compact"] .nav-item{padding-top:7px;padding-bottom:7px}
 [data-mode="minimal"] .nav-item[data-advanced="true"]{display:none}

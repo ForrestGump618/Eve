@@ -1,0 +1,11 @@
+{
+  "name": "skill-creator",
+  "description": "OpenAI skill-creator: design reusable skills; \u521b\u5efa \u8bbe\u8ba1 \u7f16\u5199 \u6280\u80fd",
+  "version": "2026.10.26",
+  "entry": "SKILL.md",
+  "license": "Apache-2.0",
+  "permissions": [],
+  "upstream": "https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.system/skill-creator",
+  "excludedNonRuntimeAssets": [],
+  "upstreamCommit": "49f948faa9258a0c61caceaf225e179651397431"
+}

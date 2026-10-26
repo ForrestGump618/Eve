@@ -788,6 +788,9 @@ export class SkillRegistry {
     return {
       id: row.id,
       name: String(data.name),
+      description: (data.manifest as unknown as SkillManifest)?.description ?? '',
+      executable: Boolean((data.manifest as unknown as SkillManifest)?.run),
+      dependencies: (data.manifest as unknown as SkillManifest)?.dependencies ?? [],
       version: String(data.version),
       source: String(data.source ?? 'local'),
       license: typeof data.license === 'string' ? data.license : null,
@@ -821,7 +824,15 @@ export class SkillRegistry {
     const manifest=data.manifest as unknown as SkillManifest;
     const entry=files.find(file=>file.path===manifest.entry);
     if(!entry?.text)throw new ValidationError('Skill instructions missing');
-    return {id,name:manifest.name,version:manifest.version,instructions:entry.text.slice(0,18000),run:manifest.run as unknown as Json??null,dependencies:manifest.dependencies??[],sha256:String(data.sha256)};
+    const adaptation=manifest.name==='skill-creator'?'SuWen runtime: use skill_create to create/install skills, skill_load then skill_run for execution. Do not install into Codex global configuration.':manifest.name==='skill-installer'?'SuWen runtime: use skill_install with a workspace path or GitHub tree URL. Installation targets the SuWen managed registry, not CODEX_HOME. Then skill_load; execute only when run is declared.':'';
+    return {id,name:manifest.name,version:manifest.version,instructions:(adaptation+'\n'+entry.text).slice(0,32000),resources:files.filter(file=>file.path!==manifest.entry).map(file=>({path:file.path,bytes:file.bytes.length})),run:manifest.run as unknown as Json??null,dependencies:manifest.dependencies??[],sha256:String(data.sha256)};
+  }
+  readResource(id:string,path:string,start=0):Json {
+    this.load(id); // Rechecks enabled state and the complete installed digest.
+    const file=this.installedFiles(id).find(item=>item.path===path);
+    if(!file?.text)throw new ValidationError('Unknown or non-text skill resource');
+    const end=Math.min(file.text.length,start+28000);
+    return {id,path,startChar:start,content:file.text.slice(start,end),nextStartChar:end<file.text.length?end:null,sha256:file.sha256};
   }
   async run(id:string,input:Json,signal:AbortSignal):Promise<Json> {
     signal.throwIfAborted();this.load(id);

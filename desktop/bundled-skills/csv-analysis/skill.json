@@ -1,0 +1,13 @@
+{
+  "name": "csv-analysis",
+  "description": "CSV tabular data inspection numeric summary; CSV 表格 数据 汇总 分析",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "permissions": [],
+  "run": {
+    "language": "python",
+    "script": "run.py",
+    "timeoutMs": 30000
+  }
+}

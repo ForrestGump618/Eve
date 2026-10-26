@@ -1,0 +1,13 @@
+{
+  "name": "descriptive-stats",
+  "description": "Descriptive statistics mean median standard deviation; 均值 中位数 标准差 描述统计",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "permissions": [],
+  "run": {
+    "language": "python",
+    "script": "run.py",
+    "timeoutMs": 30000
+  }
+}

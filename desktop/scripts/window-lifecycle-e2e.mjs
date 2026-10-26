@@ -19,7 +19,7 @@ for(const scenario of ['owner-first','formal-first','quit-both','during-start'].
  let app,connection,child;
  const entry={scenario,errors:[]};
  try{
-  app=await _electron.launch({executablePath:packaged?join(root,'release/win-unpacked/SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe'),args:packaged?[]:[root],env,timeout:60000});
+  app=await _electron.launch({executablePath:packaged?join(root,args.find(x=>x.startsWith('--app-dir='))?.slice(10)??'release/win-unpacked','SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe'),args:packaged?[]:[root],env,timeout:60000});
   child=app.process();
   await app.evaluate(async({dialog},file)=>{
    const fs=process.getBuiltinModule('fs');

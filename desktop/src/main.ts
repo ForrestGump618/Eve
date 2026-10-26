@@ -27,7 +27,19 @@ function daemonPythonPath():string{try{const value=JSON.parse(readFileSync(join(
 const workbenchDeps=process.env.SUWEN_WORKBENCH_DEPS?resolve(process.env.SUWEN_WORKBENCH_DEPS):join(app.getPath('userData'),'python-env');
 const workbench=new WorkbenchManager({home,depsDir:workbenchDeps,python:daemonPythonPath});
 async function connectDaemon():Promise<void>{
- const old=readConnection(home);if(old){try{await rpc(old,'health');connection=old;return;}catch{}}
+ const old=readConnection(home);
+ if(old){
+  let health:any=null;try{health=await rpc(old,'health');}catch{}
+  if(health){
+   if(health.version===app.getVersion()){connection=old;return;}
+   const snapshot:any=await rpc(old,'snapshot');
+   if(snapshot.tasks.some((task:any)=>!['completed','failed','cancelled'].includes(task.status)))throw new Error(`后台 ${health.version} 有未结束任务。请完成或取消任务后重连，以加载 ${app.getVersion()}。`);
+   await rpc(old,'shutdown');
+   let stopped=false;
+   for(let i=0;i<60;i++){await new Promise(r=>setTimeout(r,100));try{await rpc(old,'health');}catch{stopped=true;break;}}
+   if(!stopped)throw new Error('旧版后台尚未退出，请稍后重连。');
+  }
+ }
  const script=join(here,'daemon.js');const worker=app.isPackaged?join(process.resourcesPath,'worker','research_worker.py'):resolve(here,'../../worker/research_worker.py');
  const env={...process.env,ELECTRON_RUN_AS_NODE:'1',NODE_USE_ENV_PROXY:'1'} as NodeJS.ProcessEnv;
  // Node fetch does not automatically use Windows' system proxy. Resolve it through Electron.

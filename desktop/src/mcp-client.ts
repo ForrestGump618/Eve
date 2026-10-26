@@ -142,9 +142,12 @@ export function createDatabaseMcpClient(): McpClientSession {
   if (children >= 4) throw new Error('MCP subprocess concurrency limit reached'); children++;
   const child = spawn(process.execPath, [fileURLToPath(new URL('./mcp-server.js', import.meta.url))], { windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'ignore'], env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', NODE_USE_ENV_PROXY: '1' } });
   let finished = false;
-  const closed = new Promise<void>(resolve => child.once('close', () => { finished = true; children--; resolve(); }));
+  // Windows may deliver the process exit before pipe close under load. Track
+  // actual exit once; lingering pipe handles must not turn a valid tool result
+  // into a spurious cleanup failure or consume the live-child budget forever.
+  const closed = new Promise<void>(resolve => {const done=()=>{if(finished)return;finished=true;children--;resolve();};child.once('exit',done);child.once('close',done);});
   const wait = async (ms: number): Promise<void> => { if (finished) return; let timer: ReturnType<typeof setTimeout> | undefined; await Promise.race([closed, new Promise<void>(resolve => { timer = setTimeout(resolve, ms); })]); if (timer) clearTimeout(timer); };
-  const session = new McpClientSession(child.stdout!, child.stdin!, { closeTransport: async () => { await wait(300); if (!finished) { child.kill('SIGTERM'); await wait(300); } if (!finished) { child.kill('SIGKILL'); await wait(1000); } if (!finished) throw new Error('MCP child did not exit after forced cleanup'); } });
+  const session = new McpClientSession(child.stdout!, child.stdin!, { closeTransport: async () => { await wait(500); if (!finished) { child.kill('SIGTERM'); await wait(1000); } if (!finished) { child.kill('SIGKILL'); await wait(2500); } if (!finished) throw new Error('MCP child did not exit after forced cleanup');child.stdout?.destroy();child.stdin?.destroy(); } });
   child.once('error', () => { void session.close().catch(() => {}); });
   return session;
 }

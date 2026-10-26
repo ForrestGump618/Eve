@@ -1,0 +1,32 @@
+{
+  "kind": "real Electron window lifecycle, no model requests",
+  "packaged": false,
+  "phase": "product-340-dev",
+  "at": "2026-10-26T06:38:27.184Z",
+  "results": [
+    {
+      "scenario": "owner-first",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "scenario": "formal-first",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "scenario": "quit-both",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "scenario": "during-start",
+      "errors": [],
+      "exitCode": 0,
+      "ok": true
+    }
+  ]
+}

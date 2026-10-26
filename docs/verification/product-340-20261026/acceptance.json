@@ -1,0 +1,72 @@
+{
+  "version": "3.4.0",
+  "realModelAcceptance": "not passed: vendor HTTP 429 prevents current 18/20 target",
+  "realModelTasks": {
+    "passed": 0,
+    "total": 22,
+    "evidence": "real-model-429.json",
+    "semanticCitationAccuracy": null,
+    "successfulLatencyP50Ms": null,
+    "successfulLatencyP95Ms": null,
+    "monetaryCost": null
+  },
+  "unit": {
+    "passed": 243,
+    "failed": 0,
+    "skipped": 1
+  },
+  "python": {
+    "passed": 520
+  },
+  "rpc": {
+    "passed": 42,
+    "total": 42
+  },
+  "formalUi": {
+    "passed": 20,
+    "total": 20,
+    "errors": [],
+    "pythonRunStatus": "succeeded",
+    "kind": "controlled model protocol fixture + real files and Python worker; not real-model acceptance"
+  },
+  "directToolBoundary": {
+    "passed": 8,
+    "total": 8,
+    "successfulCalls": 11,
+    "attemptedCalls": 11,
+    "p50Ms": 13,
+    "p95Ms": 1909,
+    "note": "Real tools without model; not a model tool-call or general recovery success estimate"
+  },
+  "controlledTruncation": {
+    "seen": 1,
+    "continuations": 1,
+    "completed": true,
+    "realVendorVerified": false
+  },
+  "routes": {
+    "passed": 34,
+    "total": 34,
+    "pages": 12
+  },
+  "daemonUpgrade": {
+    "passed": 2,
+    "total": 2
+  },
+  "packageContent": {
+    "passed": 9,
+    "total": 9
+  },
+  "installer": [
+    {
+      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\product-340\\SuWen-Setup-3.4.0-win-x64.exe",
+      "sha256": "5ade11a8e56f031ea8493ac0e263a477f74d05cd75e2f8dc7d4e494e7767ddc3"
+    }
+  ],
+  "unresolvedEvidence": "root-causes.md",
+  "windowLifecycle": {
+    "developmentPassed": 4,
+    "packagedPassed": 4,
+    "total": 8
+  }
+}

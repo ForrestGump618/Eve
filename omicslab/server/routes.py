@@ -261,12 +261,25 @@ async def list_skills(request: Request) -> dict[str, Any]:
                 "path": str(skill.path),
             }
         )
+    adapter = getattr(state.loop, "desktop_harness", None)
+    if adapter:
+        native = await adapter.rpc("skill.list")
+        for skill in native.get("skills", []):
+            items = [item for item in items if item["name"] != skill["name"]]
+            items.append({**skill, "runtime":"desktop", "when_to_use":"由统一 Harness 按需加载"})
     return {"skills": items}
 
 
 @router.get("/api/skills/{name}")
 async def skill_detail(name: str, request: Request) -> dict[str, Any]:
     state = _state(request)
+    adapter = getattr(state.loop, "desktop_harness", None)
+    if adapter:
+        native = await adapter.rpc("skill.list")
+        record = next((item for item in native.get("skills", []) if item["name"] == name), None)
+        if record:
+            loaded = await adapter.rpc("skill.load", id=record["id"])
+            return {**record,"runtime":"desktop","body":loaded["instructions"],"files":[],"when_to_use":"可执行脚本" if loaded.get("run") else "按需加载的工作流指引"}
     skill = state.skills.get(name)
     if skill is None:
         state.refresh_skills()

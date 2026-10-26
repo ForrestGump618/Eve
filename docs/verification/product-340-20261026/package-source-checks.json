@@ -1,0 +1,39 @@
+[
+  {
+    "path": "omicslab/runtime/desktop_harness.py",
+    "ok": true
+  },
+  {
+    "path": "omicslab/server/routes.py",
+    "ok": true
+  },
+  {
+    "path": "omicslab/server/routes_platform.py",
+    "ok": true
+  },
+  {
+    "path": "omicslab/web/css/platform.css",
+    "ok": true
+  },
+  {
+    "path": "omicslab/web/js/views/chat.js",
+    "ok": true
+  },
+  {
+    "path": "omicslab/web/js/views/platform.js",
+    "ok": true
+  },
+  {
+    "path": "omicslab/cli.py matches committed baseline",
+    "ok": true
+  },
+  {
+    "path": "untracked integrations excluded",
+    "ok": true
+  },
+  {
+    "path": "all 44 packaged compiled JS files",
+    "ok": true,
+    "mismatches": []
+  }
+]

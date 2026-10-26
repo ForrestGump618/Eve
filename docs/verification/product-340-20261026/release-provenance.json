@@ -1,0 +1,41 @@
+{
+  "version": "3.4.0",
+  "baseline": "036a1ee0c9eb7fc22eef6d42fcf8679acf32d252",
+  "legacyStaging": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-release-legacy-Wt2LkZ",
+  "overlays": [
+    {
+      "path": "omicslab/runtime/desktop_harness.py",
+      "sha256": "414e85a7a591c89e2e26e40ca2be929d546b420d99f0c779e7c138b0867aedeb"
+    },
+    {
+      "path": "omicslab/server/routes.py",
+      "sha256": "d2e0daa6bcd87818613ae5716fcd39f4cbbb061db5a869da7411213c681215de"
+    },
+    {
+      "path": "omicslab/server/routes_platform.py",
+      "sha256": "350bffc1ac0c798de85ff1a06f174f56838108b2c9799e485742acb868afa5b8"
+    },
+    {
+      "path": "omicslab/web/css/platform.css",
+      "sha256": "bfd0debaac3d720a7036db2f4fcb0cc0cf4db584c52d912b53065bdac66c2f05"
+    },
+    {
+      "path": "omicslab/web/js/views/chat.js",
+      "sha256": "c0325b73a66a5e318f2b19158b26a39059ab37c573bd977d6439e0ec608320c5"
+    },
+    {
+      "path": "omicslab/web/js/views/platform.js",
+      "sha256": "7e5b7fe4c6ae2514c75b1a47939761ecb7005d543da6ae84119235473a1d91d0"
+    }
+  ],
+  "excludedUnrelatedChanges": [
+    "omicslab/cli.py",
+    "omicslab/integrations/"
+  ],
+  "artifacts": [
+    {
+      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\desktop-vnext\\desktop\\release\\product-340\\SuWen-Setup-3.4.0-win-x64.exe",
+      "sha256": "5ade11a8e56f031ea8493ac0e263a477f74d05cd75e2f8dc7d4e494e7767ddc3"
+    }
+  ]
+}

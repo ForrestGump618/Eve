@@ -1,0 +1,250 @@
+[
+  {
+    "path": "desktop/package.json",
+    "sha256": "e2aad255339111f0ae58955220c9ddf9db5ff940ab373a31503e5096ea3499a4"
+  },
+  {
+    "path": "desktop/package-lock.json",
+    "sha256": "a66152350ff21ddad0821e002f037783b2b3c52312be58bdc6569c1a3e392aaf"
+  },
+  {
+    "path": "desktop/scripts/copy-assets.mjs",
+    "sha256": "77fe650602b8cb668514cc2b27ca7070012bc70c26a766708f6e6844e5219c41"
+  },
+  {
+    "path": "desktop/scripts/formal-ui-e2e.mjs",
+    "sha256": "a68023ad96ab619334b35ac81e7cdf237a7741bc8656c5ecb59ff280370e308e"
+  },
+  {
+    "path": "desktop/scripts/window-lifecycle-e2e.mjs",
+    "sha256": "f1f17310885802a3d56f51b8bf83711ab52b6e1d48117cbc2b790d67bbc33aee"
+  },
+  {
+    "path": "desktop/scripts/build-product-340.mjs",
+    "sha256": "d326e83254b251393d5c233a5ed6a8763264bc2693b4095cdd3dce6247542c60"
+  },
+  {
+    "path": "desktop/scripts/daemon-upgrade-e2e.mjs",
+    "sha256": "73e8839f56d7a10e8f8d9d7fde64e876e5d3ba86364f3b141e3f7e5c320b8b37"
+  },
+  {
+    "path": "desktop/scripts/product-340-e2e.mjs",
+    "sha256": "58cad2e2349fb1345843b05f6711a2030d8834a7e545afae300f8d691385ce23"
+  },
+  {
+    "path": "desktop/scripts/product-tools-e2e.mjs",
+    "sha256": "26c11f0bd2215ee29931d5e0ffcb43ad9fedf003380d99e4560f8e22b1dd6ef9"
+  },
+  {
+    "path": "desktop/src/activities/model.ts",
+    "sha256": "e32f69fc5383fa64fc3fe7984d79f1ce1a7c00119239aeadb6be8d1d17eb4c43"
+  },
+  {
+    "path": "desktop/src/activities/tools.ts",
+    "sha256": "04c683a675c7a69b2330a95d1fcd934a4045d6989d6362a7bb56861a814a4df3"
+  },
+  {
+    "path": "desktop/src/agent-tools.ts",
+    "sha256": "40141bb0de303cc3f83048b70b7728dfe52ba209438123c24f60509abe06cff2"
+  },
+  {
+    "path": "desktop/src/bundled-skills.ts",
+    "sha256": "3eb5cb625df4b90dcbc1a9f314711532c57fbdfa4af7072e07a6b1964c053302"
+  },
+  {
+    "path": "desktop/src/skill-authoring.ts",
+    "sha256": "627d8f296648f14d82baad636247ceac560fd2824e0a45721d722e01938add5a"
+  },
+  {
+    "path": "desktop/src/workspace-files.ts",
+    "sha256": "8a2657992e46ea772eccc7c2c655388cd9e0a85a6741fad539173ad0ca6aa39a"
+  },
+  {
+    "path": "desktop/src/daemon.ts",
+    "sha256": "d7614ce5f7a96ef2c7f69e9c53c701b82e25b67e26fc2a2f8c923aa0f3104f28"
+  },
+  {
+    "path": "desktop/src/domain/tools.ts",
+    "sha256": "d7a47b40b1ca158536ff586471a4310397ea17c7f6c8eb0c9b27799df3c0c6ac"
+  },
+  {
+    "path": "desktop/src/harness/agent-loop.ts",
+    "sha256": "9aa2ae447bac0953ab412cc361b49523706054cf1153437fa141bd09533e8480"
+  },
+  {
+    "path": "desktop/src/main.ts",
+    "sha256": "1192ded470a2a104869a5e50794cbd894f276c6a35a6101d5369a6447fda5fa7"
+  },
+  {
+    "path": "desktop/src/mcp-client.ts",
+    "sha256": "53fed522a622a37bc774f84407307a3387a0bebe278cffc35fa771a790a8888b"
+  },
+  {
+    "path": "desktop/src/providers.ts",
+    "sha256": "d6ee1a07c07e5a75f22b8844359a345aaefc0b8aad03dfcb92283d3a4c918c81"
+  },
+  {
+    "path": "desktop/src/shared/contract.ts",
+    "sha256": "be6bf49adcf5f1798f65eb9741e900cd0a0ab46567eea30e385b1630c1c84bb2"
+  },
+  {
+    "path": "desktop/test/agent-loop.test.ts",
+    "sha256": "f61e322ed296a3351623286a4d0bde4db5a6dc73670f7079ea3943b25a2f4cbb"
+  },
+  {
+    "path": "desktop/test/workspace-skills.test.ts",
+    "sha256": "c898a680f49fba10d6497448fc375bc35da1130dff91b12e7d3e03946e2dc816"
+  },
+  {
+    "path": "omicslab/runtime/desktop_harness.py",
+    "sha256": "414e85a7a591c89e2e26e40ca2be929d546b420d99f0c779e7c138b0867aedeb"
+  },
+  {
+    "path": "omicslab/server/routes.py",
+    "sha256": "d2e0daa6bcd87818613ae5716fcd39f4cbbb061db5a869da7411213c681215de"
+  },
+  {
+    "path": "omicslab/server/routes_platform.py",
+    "sha256": "350bffc1ac0c798de85ff1a06f174f56838108b2c9799e485742acb868afa5b8"
+  },
+  {
+    "path": "omicslab/web/css/platform.css",
+    "sha256": "bfd0debaac3d720a7036db2f4fcb0cc0cf4db584c52d912b53065bdac66c2f05"
+  },
+  {
+    "path": "omicslab/web/js/views/chat.js",
+    "sha256": "c0325b73a66a5e318f2b19158b26a39059ab37c573bd977d6439e0ec608320c5"
+  },
+  {
+    "path": "omicslab/web/js/views/platform.js",
+    "sha256": "7e5b7fe4c6ae2514c75b1a47939761ecb7005d543da6ae84119235473a1d91d0"
+  },
+  {
+    "path": "desktop/bundled-skills/csv-analysis/SKILL.md",
+    "sha256": "2d97c643648f7393c074d9a28eb107da610e0f98e598f5877fa66618516233da"
+  },
+  {
+    "path": "desktop/bundled-skills/csv-analysis/run.py",
+    "sha256": "ada057536ae12ec2018c045aa2d1821de35606cc1918d24e0163420349005016"
+  },
+  {
+    "path": "desktop/bundled-skills/csv-analysis/skill.json",
+    "sha256": "92d7301bc66e804edd348caaccd3a14f69e1eff639168bdda44440f1ef33326b"
+  },
+  {
+    "path": "desktop/bundled-skills/descriptive-stats/SKILL.md",
+    "sha256": "f71062887d59d436e4302bb048f9c7fed964be77302fd58ce6ae4cbf6f51ee0b"
+  },
+  {
+    "path": "desktop/bundled-skills/descriptive-stats/run.py",
+    "sha256": "7ea04f90d7e2054ddde39a53d7e43951c293391f3540a6e42d13f97913732d83"
+  },
+  {
+    "path": "desktop/bundled-skills/descriptive-stats/skill.json",
+    "sha256": "ad8b68a443b7b6f82a6ba0988c1062da7f7bab706c7107a74acc45c4c10be8e6"
+  },
+  {
+    "path": "desktop/bundled-skills/dsh-error-handling/LICENSE.txt",
+    "sha256": "ebb4f09972aee8608be255debaf78451a68e95c290f55c240dec2ecfa16ea6be"
+  },
+  {
+    "path": "desktop/bundled-skills/dsh-error-handling/SKILL.md",
+    "sha256": "fcde7e278056263f7b93b6854fe05d0b492bdf09739f4f4f3537e8ffd30a1c2d"
+  },
+  {
+    "path": "desktop/bundled-skills/dsh-error-handling/skill.json",
+    "sha256": "6f9819b20ad4258f6f7522bbeee47ac37e9fac14b571400e8584c0b2673aad72"
+  },
+  {
+    "path": "desktop/bundled-skills/json-transform/SKILL.md",
+    "sha256": "3c9c5c603f1ee15c4dbcdd2255ad1b5cbe99273ded8d0b3420fda5b8b7438e30"
+  },
+  {
+    "path": "desktop/bundled-skills/json-transform/run.py",
+    "sha256": "c44aad688049169094d9dffd1438c76ce198eae75964f114216e0e4f9a39c1cb"
+  },
+  {
+    "path": "desktop/bundled-skills/json-transform/skill.json",
+    "sha256": "401d0c9ea5d5d2df694ceb42061538cd48b59fd4479332971c103674d7199ce1"
+  },
+  {
+    "path": "desktop/bundled-skills/literature-search/SKILL.md",
+    "sha256": "c55b9be212e4c7e36864e5bb72efaad3eb8a422fe7dca586d75392aded5a3b95"
+  },
+  {
+    "path": "desktop/bundled-skills/literature-search/skill.json",
+    "sha256": "dc8965dddaded6edc6aca1d743dc8a0008b7cbec500ddcfe0c2a3827c4762e12"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/LICENSE.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/SKILL.md",
+    "sha256": "a17383bfb1448637ac1f757ad891ddb9676fa30b0eff620200f0e1cbc0cc0d50"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/agents/openai.yaml",
+    "sha256": "fcc3ba02bdf8d6df1f891637cf5336d2d7ef87bb8910fa622bd150c8e0d4c55b"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/references/openai_yaml.md",
+    "sha256": "9fb5928b7f4a746fdb39df503ebbd7a659d5e64b47f85a60626aa1a03fd76b17"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/scripts/generate_openai_yaml.py",
+    "sha256": "b8f6be33a9d72dd7a8da02e7a9fffea23dc79e94862e6dd6358b57a8899d8f73"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/scripts/init_skill.py",
+    "sha256": "bcb8982d3f033a094f2f1be43123ac8537e2562d25d8ba4d8ef2196ae514d96d"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/scripts/quick_validate.py",
+    "sha256": "6cc9dc3199c935916cf6f73fcbbbb0e3bb1b58c8f5109fefa499978908164f51"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-creator/skill.json",
+    "sha256": "984a259de43ddfaa40ab7e896df948bb6acc75ed0d7d0b64aa729ac6c4e2297f"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/LICENSE.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/SKILL.md",
+    "sha256": "83b31cffb2552a923f4152f0338bea548274accc5489d151a95bced8e7bcfb74"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/agents/openai.yaml",
+    "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/assets/skill-installer-small.svg",
+    "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/scripts/github_utils.py",
+    "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/scripts/install-skill-from-github.py",
+    "sha256": "0fbbd36e8ea294442c0bd48d6f610a2e8656216bfef5c322f1dcf448ef2f09f1"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/scripts/list-skills.py",
+    "sha256": "e4e1f78ca3d045827f2a05cfd99fae57cc7c1a1bfeba8704029108834debff35"
+  },
+  {
+    "path": "desktop/bundled-skills/skill-installer/skill.json",
+    "sha256": "189ba9e627afe79fca500a82449273c58ee33968b594ccd0304114886bb692de"
+  },
+  {
+    "path": "desktop/bundled-skills/workspace-files/SKILL.md",
+    "sha256": "4b59438a7769acdc8d5ad7b229bc07be2ad55ec4e678973e5ba04a1ca0fff3b2"
+  },
+  {
+    "path": "desktop/bundled-skills/workspace-files/skill.json",
+    "sha256": "c40bf0cad4ca53a2bddf104e27e1756aae86af0f89fdd08a64521dd995ff7617"
+  }
+]

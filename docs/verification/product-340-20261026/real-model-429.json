@@ -1,0 +1,5859 @@
+{
+  "phase": "product-340",
+  "model": "deepseek-v4.1-flash-economy",
+  "taskSetSha256": "08e2cc0eddd7db3d0bd87c4f0027e9825e7fccd0fa1f68a0015f3d4776caf2e6",
+  "startedAt": "2026-10-26T06:15:17.067Z",
+  "kind": "real external model, public network, real isolated daemon; MCP/Skill are local executable fixtures",
+  "results": [
+    {
+      "id": "web-electron",
+      "category": "web",
+      "prompt": "检索 Electron 官方文档，说明 contextIsolation 的作用。必须实际检索并引用官方来源，回答不超过150字。",
+      "status": "failed",
+      "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995318009,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "phase": "act",
+          "promptSha256": "bc4fb79709497b4e5f76f8afdfd4db2df9dbd5610e9ad5b21c60d505c8650954"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995318009
+        },
+        {
+          "type": "model.started",
+          "at": 1792995318010,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "tokens": "[REDACTED]",
+          "type": "agent.usage",
+          "at": 1792995320472
+        },
+        {
+          "type": "model.completed",
+          "at": 1792995320475,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "durationMs": 2466,
+          "tokens": "[REDACTED]",
+          "toolNames": [
+            "web_search",
+            "web_search"
+          ],
+          "textChars": 0
+        },
+        {
+          "type": "agent.planned",
+          "at": 1792995320476,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "actions": [
+            {
+              "name": "web_search",
+              "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l"
+            },
+            {
+              "name": "web_search",
+              "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg"
+            }
+          ]
+        },
+        {
+          "type": "tool.started",
+          "at": 1792995320478,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "name": "web_search",
+          "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l",
+          "argumentsSha256": "313c8840d86afc8740b85a7ae316223e33a5dba99dd1bce059c802363a3065a8"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "name": "web_search",
+          "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l",
+          "artifact": {
+            "id": "3645665f-c328-4880-a177-0a97bacd72e4",
+            "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\3645665f-c328-4880-a177-0a97bacd72e4.artifact",
+            "sha256": "c03de6781cd6ab6de141a21829b0a3272a041217cf521dc701768cc486e010a6",
+            "bytes": 4675,
+            "mediaType": "application/json"
+          },
+          "type": "agent.tool_artifact",
+          "at": 1792995321038
+        },
+        {
+          "type": "tool.completed",
+          "at": 1792995321040,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "name": "web_search",
+          "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l",
+          "durationMs": 562,
+          "resultSha256": "fed0ce5e40ad33df8a4be008cc69ad88d589c24d0f4fe1215a4a9aba352d6dae"
+        },
+        {
+          "type": "tool.started",
+          "at": 1792995321045,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "name": "web_search",
+          "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg",
+          "argumentsSha256": "468088c27a087ce7ba45da3893ec3727d1993edd8dc707c1edb0940fd8940f50"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "name": "web_search",
+          "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg",
+          "artifact": {
+            "id": "8a14826a-742a-491c-b939-4e94527a66ab",
+            "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\8a14826a-742a-491c-b939-4e94527a66ab.artifact",
+            "sha256": "fecd5ec074c2d53e8a1c08046f021b3d7dc6d9d8d0096964aeee3bd53fc0f1a8",
+            "bytes": 4353,
+            "mediaType": "application/json"
+          },
+          "type": "agent.tool_artifact",
+          "at": 1792995321267
+        },
+        {
+          "type": "tool.completed",
+          "at": 1792995321268,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "name": "web_search",
+          "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg",
+          "durationMs": 224,
+          "resultSha256": "f0519d4efb855d593a44b40d968271801352b9ed5c416690c2e4d28392f17c62"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "artifact": {
+            "id": "c023e29c-70e7-46a3-a92f-f38136be3d29",
+            "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\c023e29c-70e7-46a3-a92f-f38136be3d29.artifact",
+            "sha256": "13b2f349e254c51a8a000085bbf8bc51411bb3d236832c66632f7bcd76188f57",
+            "bytes": 20155,
+            "mediaType": "application/json"
+          },
+          "type": "agent.checkpoint",
+          "at": 1792995321274
+        },
+        {
+          "type": "agent.observed",
+          "at": 1792995321275,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 0,
+          "toolCount": 2,
+          "sourceCount": 16
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995321277
+        },
+        {
+          "type": "model.started",
+          "at": 1792995321278,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "attempt": 0,
+          "messageCount": 6,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "tokens": "[REDACTED]",
+          "type": "agent.usage",
+          "at": 1792995324223
+        },
+        {
+          "type": "model.completed",
+          "at": 1792995324226,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "durationMs": 2950,
+          "tokens": "[REDACTED]",
+          "toolNames": [
+            "web_fetch",
+            "web_fetch"
+          ],
+          "textChars": 0
+        },
+        {
+          "type": "agent.planned",
+          "at": 1792995324227,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "actions": [
+            {
+              "name": "web_fetch",
+              "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7"
+            },
+            {
+              "name": "web_fetch",
+              "callId": "call_01_ple9pezxxvw0mybdgmexzzch"
+            }
+          ]
+        },
+        {
+          "type": "tool.started",
+          "at": 1792995324228,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "name": "web_fetch",
+          "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7",
+          "argumentsSha256": "ff00358ff15142bc09da91010c77ac86069b09072fbefaa92f670c45eeb9f7d0"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "name": "web_fetch",
+          "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7",
+          "artifact": {
+            "id": "cc477981-860e-4abb-850a-0f7e6760391b",
+            "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\cc477981-860e-4abb-850a-0f7e6760391b.artifact",
+            "sha256": "fd75f2bd93ca19197698e7a7e26c655b63a484ecb27154251de44d4b3284e4e0",
+            "bytes": 4515,
+            "mediaType": "application/json"
+          },
+          "type": "agent.tool_artifact",
+          "at": 1792995324716
+        },
+        {
+          "type": "tool.completed",
+          "at": 1792995324717,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "name": "web_fetch",
+          "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7",
+          "durationMs": 489,
+          "resultSha256": "29155ca3adbc2435d769288059cdf0d59aed6219f0fb1c55c5ea4948954da2f9"
+        },
+        {
+          "type": "tool.started",
+          "at": 1792995324719,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "name": "web_fetch",
+          "callId": "call_01_ple9pezxxvw0mybdgmexzzch",
+          "argumentsSha256": "14811e662c280c85c7dad653e70f3a13448006cae942de0e26067d58e7192fcb"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "name": "web_fetch",
+          "callId": "call_01_ple9pezxxvw0mybdgmexzzch",
+          "artifact": {
+            "id": "a1802838-efef-46bf-a23a-4abf3c7624df",
+            "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\a1802838-efef-46bf-a23a-4abf3c7624df.artifact",
+            "sha256": "be10425b20ab27926d288891b5c753cade6d5682721d9507eb3d227c9573cd7a",
+            "bytes": 14504,
+            "mediaType": "application/json"
+          },
+          "type": "agent.tool_artifact",
+          "at": 1792995325224
+        },
+        {
+          "type": "tool.completed",
+          "at": 1792995325227,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "name": "web_fetch",
+          "callId": "call_01_ple9pezxxvw0mybdgmexzzch",
+          "durationMs": 508,
+          "resultSha256": "a20374b82d3df1123ad1d544a8d643ea9ac2fa1ab80927dd418054d4b5a2b2c6"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "artifact": {
+            "id": "19fb3c4f-660b-4db4-b84d-8d3c0850af73",
+            "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\19fb3c4f-660b-4db4-b84d-8d3c0850af73.artifact",
+            "sha256": "f776888bda92afa7d1b35a15008493aee3b7e94788ee323a0a221b34eba43fc6",
+            "bytes": 58281,
+            "mediaType": "application/json"
+          },
+          "type": "agent.checkpoint",
+          "at": 1792995325237
+        },
+        {
+          "type": "agent.observed",
+          "at": 1792995325239,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 1,
+          "toolCount": 4,
+          "sourceCount": 18
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 2,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995325241
+        },
+        {
+          "type": "model.started",
+          "at": 1792995325242,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 2,
+          "attempt": 0,
+          "messageCount": 9,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995325405,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 2,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 3,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995327428
+        },
+        {
+          "type": "model.started",
+          "at": 1792995327430,
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "turn": 2,
+          "attempt": 1,
+          "messageCount": 9,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995327560
+        }
+      ],
+      "events": [
+        {
+          "sequence": 1,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995317875,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 2,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995317950,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "9f7fc2e7c18dcfd6e943c0162688fe3e27cf44624c12722e532a96c6a59524fa",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 3,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995318009,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995318009,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "phase": "act",
+            "promptSha256": "bc4fb79709497b4e5f76f8afdfd4db2df9dbd5610e9ad5b21c60d505c8650954"
+          }
+        },
+        {
+          "sequence": 4,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995318009,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 5,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995318010,
+          "data": {
+            "type": "model.started",
+            "at": 1792995318010,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 6,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.usage",
+          "version": 1,
+          "at": 1792995320472,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "tokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 7,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.completed",
+          "version": 1,
+          "at": 1792995320475,
+          "data": {
+            "type": "model.completed",
+            "at": 1792995320475,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "durationMs": 2466,
+            "tokens": "[REDACTED]",
+            "toolNames": [
+              "web_search",
+              "web_search"
+            ],
+            "textChars": 0
+          }
+        },
+        {
+          "sequence": 8,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.planned",
+          "version": 1,
+          "at": 1792995320476,
+          "data": {
+            "type": "agent.planned",
+            "at": 1792995320476,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "actions": [
+              {
+                "name": "web_search",
+                "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l"
+              },
+              {
+                "name": "web_search",
+                "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg"
+              }
+            ]
+          }
+        },
+        {
+          "sequence": 9,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.started",
+          "version": 1,
+          "at": 1792995320478,
+          "data": {
+            "type": "tool.started",
+            "at": 1792995320478,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "name": "web_search",
+            "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l",
+            "argumentsSha256": "313c8840d86afc8740b85a7ae316223e33a5dba99dd1bce059c802363a3065a8"
+          }
+        },
+        {
+          "sequence": 10,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.heartbeat",
+          "version": 1,
+          "at": 1792995321020,
+          "data": {
+            "fence": 1
+          }
+        },
+        {
+          "sequence": 11,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.tool_artifact",
+          "version": 1,
+          "at": 1792995321038,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "name": "web_search",
+            "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l",
+            "artifact": {
+              "id": "3645665f-c328-4880-a177-0a97bacd72e4",
+              "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\3645665f-c328-4880-a177-0a97bacd72e4.artifact",
+              "sha256": "c03de6781cd6ab6de141a21829b0a3272a041217cf521dc701768cc486e010a6",
+              "bytes": 4675,
+              "mediaType": "application/json"
+            }
+          }
+        },
+        {
+          "sequence": 12,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.completed",
+          "version": 1,
+          "at": 1792995321040,
+          "data": {
+            "type": "tool.completed",
+            "at": 1792995321040,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "name": "web_search",
+            "callId": "call_00_ggw0ju3yodk8mpyxji27dh7l",
+            "durationMs": 562,
+            "resultSha256": "fed0ce5e40ad33df8a4be008cc69ad88d589c24d0f4fe1215a4a9aba352d6dae"
+          }
+        },
+        {
+          "sequence": 13,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.started",
+          "version": 1,
+          "at": 1792995321045,
+          "data": {
+            "type": "tool.started",
+            "at": 1792995321044,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "name": "web_search",
+            "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg",
+            "argumentsSha256": "468088c27a087ce7ba45da3893ec3727d1993edd8dc707c1edb0940fd8940f50"
+          }
+        },
+        {
+          "sequence": 14,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.heartbeat",
+          "version": 1,
+          "at": 1792995321256,
+          "data": {
+            "fence": 1
+          }
+        },
+        {
+          "sequence": 15,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.tool_artifact",
+          "version": 1,
+          "at": 1792995321267,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "name": "web_search",
+            "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg",
+            "artifact": {
+              "id": "8a14826a-742a-491c-b939-4e94527a66ab",
+              "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\8a14826a-742a-491c-b939-4e94527a66ab.artifact",
+              "sha256": "fecd5ec074c2d53e8a1c08046f021b3d7dc6d9d8d0096964aeee3bd53fc0f1a8",
+              "bytes": 4353,
+              "mediaType": "application/json"
+            }
+          }
+        },
+        {
+          "sequence": 16,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.completed",
+          "version": 1,
+          "at": 1792995321268,
+          "data": {
+            "type": "tool.completed",
+            "at": 1792995321268,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "name": "web_search",
+            "callId": "call_01_4dlzw3r3yxfl41gwofk0ihfg",
+            "durationMs": 224,
+            "resultSha256": "f0519d4efb855d593a44b40d968271801352b9ed5c416690c2e4d28392f17c62"
+          }
+        },
+        {
+          "sequence": 17,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.checkpoint",
+          "version": 1,
+          "at": 1792995321274,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "artifact": {
+              "id": "c023e29c-70e7-46a3-a92f-f38136be3d29",
+              "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\c023e29c-70e7-46a3-a92f-f38136be3d29.artifact",
+              "sha256": "13b2f349e254c51a8a000085bbf8bc51411bb3d236832c66632f7bcd76188f57",
+              "bytes": 20155,
+              "mediaType": "application/json"
+            }
+          }
+        },
+        {
+          "sequence": 18,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.observed",
+          "version": 1,
+          "at": 1792995321275,
+          "data": {
+            "type": "agent.observed",
+            "at": 1792995321275,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 0,
+            "toolCount": 2,
+            "sourceCount": 16
+          }
+        },
+        {
+          "sequence": 19,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995321277,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 20,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995321278,
+          "data": {
+            "type": "model.started",
+            "at": 1792995321277,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "attempt": 0,
+            "messageCount": 6,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 21,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.heartbeat",
+          "version": 1,
+          "at": 1792995322964,
+          "data": {
+            "fence": 1
+          }
+        },
+        {
+          "sequence": 22,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.usage",
+          "version": 1,
+          "at": 1792995324223,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "tokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 23,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.completed",
+          "version": 1,
+          "at": 1792995324226,
+          "data": {
+            "type": "model.completed",
+            "at": 1792995324226,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "durationMs": 2950,
+            "tokens": "[REDACTED]",
+            "toolNames": [
+              "web_fetch",
+              "web_fetch"
+            ],
+            "textChars": 0
+          }
+        },
+        {
+          "sequence": 24,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.planned",
+          "version": 1,
+          "at": 1792995324227,
+          "data": {
+            "type": "agent.planned",
+            "at": 1792995324227,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "actions": [
+              {
+                "name": "web_fetch",
+                "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7"
+              },
+              {
+                "name": "web_fetch",
+                "callId": "call_01_ple9pezxxvw0mybdgmexzzch"
+              }
+            ]
+          }
+        },
+        {
+          "sequence": 25,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.started",
+          "version": 1,
+          "at": 1792995324228,
+          "data": {
+            "type": "tool.started",
+            "at": 1792995324228,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "name": "web_fetch",
+            "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7",
+            "argumentsSha256": "ff00358ff15142bc09da91010c77ac86069b09072fbefaa92f670c45eeb9f7d0"
+          }
+        },
+        {
+          "sequence": 26,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.heartbeat",
+          "version": 1,
+          "at": 1792995324703,
+          "data": {
+            "fence": 1
+          }
+        },
+        {
+          "sequence": 27,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.tool_artifact",
+          "version": 1,
+          "at": 1792995324716,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "name": "web_fetch",
+            "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7",
+            "artifact": {
+              "id": "cc477981-860e-4abb-850a-0f7e6760391b",
+              "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\cc477981-860e-4abb-850a-0f7e6760391b.artifact",
+              "sha256": "fd75f2bd93ca19197698e7a7e26c655b63a484ecb27154251de44d4b3284e4e0",
+              "bytes": 4515,
+              "mediaType": "application/json"
+            }
+          }
+        },
+        {
+          "sequence": 28,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.completed",
+          "version": 1,
+          "at": 1792995324717,
+          "data": {
+            "type": "tool.completed",
+            "at": 1792995324717,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "name": "web_fetch",
+            "callId": "call_00_4mlj3gl81ppauq4oawgn5kn7",
+            "durationMs": 489,
+            "resultSha256": "29155ca3adbc2435d769288059cdf0d59aed6219f0fb1c55c5ea4948954da2f9"
+          }
+        },
+        {
+          "sequence": 29,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.started",
+          "version": 1,
+          "at": 1792995324719,
+          "data": {
+            "type": "tool.started",
+            "at": 1792995324718,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "name": "web_fetch",
+            "callId": "call_01_ple9pezxxvw0mybdgmexzzch",
+            "argumentsSha256": "14811e662c280c85c7dad653e70f3a13448006cae942de0e26067d58e7192fcb"
+          }
+        },
+        {
+          "sequence": 30,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.heartbeat",
+          "version": 1,
+          "at": 1792995325209,
+          "data": {
+            "fence": 1
+          }
+        },
+        {
+          "sequence": 31,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.tool_artifact",
+          "version": 1,
+          "at": 1792995325224,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "name": "web_fetch",
+            "callId": "call_01_ple9pezxxvw0mybdgmexzzch",
+            "artifact": {
+              "id": "a1802838-efef-46bf-a23a-4abf3c7624df",
+              "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\a1802838-efef-46bf-a23a-4abf3c7624df.artifact",
+              "sha256": "be10425b20ab27926d288891b5c753cade6d5682721d9507eb3d227c9573cd7a",
+              "bytes": 14504,
+              "mediaType": "application/json"
+            }
+          }
+        },
+        {
+          "sequence": 32,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "tool.completed",
+          "version": 1,
+          "at": 1792995325227,
+          "data": {
+            "type": "tool.completed",
+            "at": 1792995325226,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "name": "web_fetch",
+            "callId": "call_01_ple9pezxxvw0mybdgmexzzch",
+            "durationMs": 508,
+            "resultSha256": "a20374b82d3df1123ad1d544a8d643ea9ac2fa1ab80927dd418054d4b5a2b2c6"
+          }
+        },
+        {
+          "sequence": 33,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.checkpoint",
+          "version": 1,
+          "at": 1792995325237,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "artifact": {
+              "id": "19fb3c4f-660b-4db4-b84d-8d3c0850af73",
+              "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-harness-live-nCI1xj\\artifacts\\19fb3c4f-660b-4db4-b84d-8d3c0850af73.artifact",
+              "sha256": "f776888bda92afa7d1b35a15008493aee3b7e94788ee323a0a221b34eba43fc6",
+              "bytes": 58281,
+              "mediaType": "application/json"
+            }
+          }
+        },
+        {
+          "sequence": 34,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.observed",
+          "version": 1,
+          "at": 1792995325239,
+          "data": {
+            "type": "agent.observed",
+            "at": 1792995325238,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 1,
+            "toolCount": 4,
+            "sourceCount": 18
+          }
+        },
+        {
+          "sequence": 35,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995325241,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 2,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 36,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995325242,
+          "data": {
+            "type": "model.started",
+            "at": 1792995325242,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 2,
+            "attempt": 0,
+            "messageCount": 9,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 37,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995325405,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995325404,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 2,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 38,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995327428,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 39,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995327430,
+          "data": {
+            "type": "model.started",
+            "at": 1792995327430,
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "turn": 2,
+            "attempt": 1,
+            "messageCount": 9,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 40,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995327560,
+          "data": {
+            "traceId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 41,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995327564,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 42,
+          "taskId": "2c1bd2d5-353a-4ab6-aaac-0f3dc1aab0d8",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995327565,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 7454,
+      "calls": 8,
+      "missingTools": [],
+      "missingContent": [
+        "contextIsolation"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 9836
+    },
+    {
+      "id": "web-typescript",
+      "category": "web",
+      "prompt": "搜索 TypeScript 官方文档，说明 satisfies 操作符用途，附来源链接，回答不超过150字。",
+      "status": "failed",
+      "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995328087,
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "phase": "act",
+          "promptSha256": "316065780836eb6bc237a94e03f1d28836e882ced794bb5fbdcf13761a339cce"
+        },
+        {
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995328090
+        },
+        {
+          "type": "model.started",
+          "at": 1792995328091,
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995328229,
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995330247
+        },
+        {
+          "type": "model.started",
+          "at": 1792995330256,
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995330363
+        }
+      ],
+      "events": [
+        {
+          "sequence": 43,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995327716,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 44,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995327856,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "a869ca6bdcfb39727b9940e24eb5652430a3326fa02e469403fb3d454d828210",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 45,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995328087,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995328087,
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "phase": "act",
+            "promptSha256": "316065780836eb6bc237a94e03f1d28836e882ced794bb5fbdcf13761a339cce"
+          }
+        },
+        {
+          "sequence": 46,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995328090,
+          "data": {
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 47,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995328091,
+          "data": {
+            "type": "model.started",
+            "at": 1792995328091,
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 48,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995328229,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995328228,
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 49,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995330247,
+          "data": {
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 50,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995330256,
+          "data": {
+            "type": "model.started",
+            "at": 1792995330256,
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 51,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995330363,
+          "data": {
+            "traceId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 52,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995330365,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 53,
+          "taskId": "4c29525b-0f5a-49ad-b1e1-0fc785da4298",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995330366,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_search"
+      ],
+      "missingContent": [
+        "satisfies"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2913
+    },
+    {
+      "id": "web-dsh",
+      "category": "web",
+      "prompt": "网页检索 deepseek-ai/deepseek-harness 官方仓库，给出仓库链接和插件架构名称，不超过150字。",
+      "status": "failed",
+      "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995330910,
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "phase": "act",
+          "promptSha256": "c1b5260995eec925ef6eaa33276e103863d87d65f4537e33c641d464ab51679b"
+        },
+        {
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995330912
+        },
+        {
+          "type": "model.started",
+          "at": 1792995330913,
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995331026,
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995333042
+        },
+        {
+          "type": "model.started",
+          "at": 1792995333044,
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995333148
+        }
+      ],
+      "events": [
+        {
+          "sequence": 54,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995330632,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 55,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995330728,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "d67d0f3e9b5e2b41d0e13b14ec027bfdfd5bc9f5688177d0dbbbe817f2522269",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 56,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995330910,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995330910,
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "phase": "act",
+            "promptSha256": "c1b5260995eec925ef6eaa33276e103863d87d65f4537e33c641d464ab51679b"
+          }
+        },
+        {
+          "sequence": 57,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995330912,
+          "data": {
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 58,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995330913,
+          "data": {
+            "type": "model.started",
+            "at": 1792995330913,
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 59,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995331026,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995331026,
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 60,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995333042,
+          "data": {
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 61,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995333044,
+          "data": {
+            "type": "model.started",
+            "at": 1792995333044,
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 62,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995333148,
+          "data": {
+            "traceId": "d92edb55-b922-4219-876c-05e036024af1:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 63,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995333150,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 64,
+          "taskId": "d92edb55-b922-4219-876c-05e036024af1",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995333150,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_search"
+      ],
+      "missingContent": [
+        "Cordis"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2666
+    },
+    {
+      "id": "web-mcp",
+      "category": "web",
+      "prompt": "搜索 Model Context Protocol 官方文档，列出 stdio 与 Streamable HTTP 两种传输，引用来源，不超过150字。",
+      "status": "failed",
+      "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995333730,
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "phase": "act",
+          "promptSha256": "70e64c4a516bcb8e73b7d52144d241949f0432dd8adf8d43d4568dff52a22ef5"
+        },
+        {
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995333733
+        },
+        {
+          "type": "model.started",
+          "at": 1792995333734,
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995333907,
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995335912
+        },
+        {
+          "type": "model.started",
+          "at": 1792995335915,
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995336013
+        }
+      ],
+      "events": [
+        {
+          "sequence": 65,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995333300,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 66,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995333562,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "8b93fe03c10163d65557eb23eb304da3efe85ca6f6e6b94fe26aa758a8e4866f",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 67,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995333730,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995333730,
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "phase": "act",
+            "promptSha256": "70e64c4a516bcb8e73b7d52144d241949f0432dd8adf8d43d4568dff52a22ef5"
+          }
+        },
+        {
+          "sequence": 68,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995333733,
+          "data": {
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 69,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995333734,
+          "data": {
+            "type": "model.started",
+            "at": 1792995333734,
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 70,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995333907,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995333906,
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 71,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995335912,
+          "data": {
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 72,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995335915,
+          "data": {
+            "type": "model.started",
+            "at": 1792995335915,
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 73,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995336013,
+          "data": {
+            "traceId": "87d36cee-abbe-492b-8a1b-e147430e6885:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 74,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995336016,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 75,
+          "taskId": "87d36cee-abbe-492b-8a1b-e147430e6885",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995336016,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_search"
+      ],
+      "missingContent": [
+        "stdio",
+        "HTTP"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2929
+    },
+    {
+      "id": "pubmed-reprogramming",
+      "category": "pubmed",
+      "prompt": "实际检索 PubMed：Takahashi Yamanaka induced pluripotent stem cells 2006。给出一篇原始论文标题、PMID 和来源链接，不超过200字。",
+      "status": "failed",
+      "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995336584,
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "phase": "act",
+          "promptSha256": "551a97675c840d29c34cfeef0c617389414a29bb844f192e487aeac6629a5d35"
+        },
+        {
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995336587
+        },
+        {
+          "type": "model.started",
+          "at": 1792995336588,
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995336740,
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995338748
+        },
+        {
+          "type": "model.started",
+          "at": 1792995338750,
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995338852
+        }
+      ],
+      "events": [
+        {
+          "sequence": 76,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995336231,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 77,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995336394,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "bcf901977a022b0e01ad6444deff78719f8cf815cbffa64856a14a1fa45a7a45",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 78,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995336584,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995336584,
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "phase": "act",
+            "promptSha256": "551a97675c840d29c34cfeef0c617389414a29bb844f192e487aeac6629a5d35"
+          }
+        },
+        {
+          "sequence": 79,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995336587,
+          "data": {
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 80,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995336588,
+          "data": {
+            "type": "model.started",
+            "at": 1792995336588,
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 81,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995336740,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995336739,
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 82,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995338748,
+          "data": {
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 83,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995338750,
+          "data": {
+            "type": "model.started",
+            "at": 1792995338750,
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 84,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995338852,
+          "data": {
+            "traceId": "0282e882-be67-43a7-8523-9a1ba7aad36a:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 85,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995338854,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 86,
+          "taskId": "0282e882-be67-43a7-8523-9a1ba7aad36a",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995338854,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "16904174"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2664
+    },
+    {
+      "id": "pubmed-crispr",
+      "category": "pubmed",
+      "prompt": "在 PubMed 检索 Jinek 2012 programmable dual RNA guided endonuclease，给出标题、PMID 与链接，不超过200字。",
+      "status": "failed",
+      "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995339183,
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "phase": "act",
+          "promptSha256": "5de9310bab56c9c347ed460e1a1c24be60ac35bd3af14adfafd1e49348f890ee"
+        },
+        {
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995339185
+        },
+        {
+          "type": "model.started",
+          "at": 1792995339186,
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995339289,
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995341292
+        },
+        {
+          "type": "model.started",
+          "at": 1792995341294,
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995341400
+        }
+      ],
+      "events": [
+        {
+          "sequence": 87,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995338897,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 88,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995338997,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "33fa8ab6057d90c8b481ada74df363d71d701306575090b9b5447678fec2a19d",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 89,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995339183,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995339182,
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "phase": "act",
+            "promptSha256": "5de9310bab56c9c347ed460e1a1c24be60ac35bd3af14adfafd1e49348f890ee"
+          }
+        },
+        {
+          "sequence": 90,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995339185,
+          "data": {
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 91,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995339186,
+          "data": {
+            "type": "model.started",
+            "at": 1792995339186,
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 92,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995339289,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995339288,
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 93,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995341292,
+          "data": {
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 94,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995341294,
+          "data": {
+            "type": "model.started",
+            "at": 1792995341294,
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 95,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995341400,
+          "data": {
+            "traceId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 96,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995341403,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 97,
+          "taskId": "a17c12f6-aa4c-4e72-95d8-7a9f19863252",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995341403,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "22745249"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2651
+    },
+    {
+      "id": "pubmed-spatial",
+      "category": "pubmed",
+      "prompt": "在 PubMed 检索 Ståhl 2016 spatial transcriptomics，给出论文题名、年份、PMID 与链接，不超过200字。",
+      "status": "failed",
+      "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995341728,
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "phase": "act",
+          "promptSha256": "47f870053adda3904b96d3216c4fa4e75526396917aa78ecf5a8873858a4a600"
+        },
+        {
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995341730
+        },
+        {
+          "type": "model.started",
+          "at": 1792995341731,
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995341834,
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995343848
+        },
+        {
+          "type": "model.started",
+          "at": 1792995343857,
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995343967
+        }
+      ],
+      "events": [
+        {
+          "sequence": 98,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995341552,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 99,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995341557,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "596c5d00303191e23482a391be893af7add3f9855721db4e6cfc5736952cdda8",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 100,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995341728,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995341728,
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "phase": "act",
+            "promptSha256": "47f870053adda3904b96d3216c4fa4e75526396917aa78ecf5a8873858a4a600"
+          }
+        },
+        {
+          "sequence": 101,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995341730,
+          "data": {
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 102,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995341731,
+          "data": {
+            "type": "model.started",
+            "at": 1792995341731,
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 103,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995341834,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995341834,
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 104,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995343848,
+          "data": {
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 105,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995343857,
+          "data": {
+            "type": "model.started",
+            "at": 1792995343857,
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 106,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995343967,
+          "data": {
+            "traceId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 107,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995343969,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 108,
+          "taskId": "cce76aa6-727a-41d0-bb4a-de4d8bc03133",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995343970,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "27365449"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2667
+    },
+    {
+      "id": "pubmed-summary",
+      "category": "summary",
+      "prompt": "实际检索 PMID 16904174 的摘要，根据摘要用中文总结研究对象和主要结果，附来源，不超过200字。",
+      "status": "failed",
+      "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995344583,
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "phase": "act",
+          "promptSha256": "fe628ca6918c4a018dad1aadefe2b4d5ecc7b8e5ebd11181cbc034dede4a90e3"
+        },
+        {
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995344589
+        },
+        {
+          "type": "model.started",
+          "at": 1792995344590,
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995344688,
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995346701
+        },
+        {
+          "type": "model.started",
+          "at": 1792995348090,
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995348271
+        }
+      ],
+      "events": [
+        {
+          "sequence": 109,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995344227,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 110,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995344410,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "c1a1a27fe8642e4f4cd2457ed5a92167611563fddedacfc019aa3f158c5c3d2a",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 111,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995344583,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995344583,
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "phase": "act",
+            "promptSha256": "fe628ca6918c4a018dad1aadefe2b4d5ecc7b8e5ebd11181cbc034dede4a90e3"
+          }
+        },
+        {
+          "sequence": 112,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995344589,
+          "data": {
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 113,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995344590,
+          "data": {
+            "type": "model.started",
+            "at": 1792995344589,
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 114,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995344688,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995344687,
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 115,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995346701,
+          "data": {
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 116,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995348090,
+          "data": {
+            "type": "model.started",
+            "at": 1792995348089,
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 117,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995348271,
+          "data": {
+            "traceId": "809dfd8c-8f65-4472-84bd-4af2abe43569:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 118,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995348273,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 119,
+          "taskId": "809dfd8c-8f65-4472-84bd-4af2abe43569",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995348273,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "16904174"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 4179
+    },
+    {
+      "id": "pubmed-compare",
+      "category": "comparison",
+      "prompt": "分别检索 PMID 16904174 和 18029452，按物种、细胞来源对比两篇论文，附两条来源，不超过250字。",
+      "status": "failed",
+      "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995348839,
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "phase": "act",
+          "promptSha256": "dd5a04d5ec1e2d00af53e602337a8c1de2d9381d89242b4a375557d1553f6932"
+        },
+        {
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995348845
+        },
+        {
+          "type": "model.started",
+          "at": 1792995348847,
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995348949,
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995350952
+        },
+        {
+          "type": "model.started",
+          "at": 1792995350953,
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995351072
+        }
+      ],
+      "events": [
+        {
+          "sequence": 120,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995348495,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 121,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995348646,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "2834a4f88dd8de9c16646373d0023f8a208892d8243b761b01baf38afced50f9",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 122,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995348839,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995348838,
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "phase": "act",
+            "promptSha256": "dd5a04d5ec1e2d00af53e602337a8c1de2d9381d89242b4a375557d1553f6932"
+          }
+        },
+        {
+          "sequence": 123,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995348845,
+          "data": {
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 124,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995348847,
+          "data": {
+            "type": "model.started",
+            "at": 1792995348846,
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 125,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995348949,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995348947,
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 126,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995350952,
+          "data": {
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 127,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995350953,
+          "data": {
+            "type": "model.started",
+            "at": 1792995350953,
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 128,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995351072,
+          "data": {
+            "traceId": "a016944f-28d9-4ede-b841-5528918dd458:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 129,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995351074,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 130,
+          "taskId": "a016944f-28d9-4ede-b841-5528918dd458",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995351074,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "16904174",
+        "18029452"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2672
+    },
+    {
+      "id": "uniprot-human",
+      "category": "database",
+      "prompt": "检索 UniProt accession:P04637，给出蛋白名称和物种、来源链接，不超过150字。",
+      "status": "failed",
+      "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995351414,
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "phase": "act",
+          "promptSha256": "bf5ecb04bd21977d5caac5d0c612162e93c16354c547e618ac5a618fefce8179"
+        },
+        {
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995351416
+        },
+        {
+          "type": "model.started",
+          "at": 1792995351418,
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995351527,
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995353537
+        },
+        {
+          "type": "model.started",
+          "at": 1792995353539,
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995353647
+        }
+      ],
+      "events": [
+        {
+          "sequence": 131,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995351170,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 132,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995351234,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "f054f7bd2e2214b7318d773bee6eabd6963990d74e14521bbc689d3953bbac19",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 133,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995351414,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995351413,
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "phase": "act",
+            "promptSha256": "bf5ecb04bd21977d5caac5d0c612162e93c16354c547e618ac5a618fefce8179"
+          }
+        },
+        {
+          "sequence": 134,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995351416,
+          "data": {
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 135,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995351418,
+          "data": {
+            "type": "model.started",
+            "at": 1792995351417,
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 136,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995351527,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995351527,
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 137,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995353537,
+          "data": {
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 138,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995353539,
+          "data": {
+            "type": "model.started",
+            "at": 1792995353538,
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 139,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995353647,
+          "data": {
+            "traceId": "4dd40eac-d968-47af-98e0-3637f376cf12:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 140,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995353649,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 141,
+          "taskId": "4dd40eac-d968-47af-98e0-3637f376cf12",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995353649,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "P04637"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2678
+    },
+    {
+      "id": "uniprot-egfr",
+      "category": "database",
+      "prompt": "实际检索 UniProt accession:P00533，给出蛋白名称、物种和来源，不超过150字。",
+      "status": "failed",
+      "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995354296,
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "phase": "act",
+          "promptSha256": "757bff8ea0b8747d662a63f8af67846d0f16b4996990012f9c74fb7b267296b7"
+        },
+        {
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995354300
+        },
+        {
+          "type": "model.started",
+          "at": 1792995354302,
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995354465,
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995356478
+        },
+        {
+          "type": "model.started",
+          "at": 1792995356479,
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995356587
+        }
+      ],
+      "events": [
+        {
+          "sequence": 142,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995353852,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 143,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995354114,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "43ec1b40e1d0ae6ca4fec8d769f44e29cae6af0f25c52ec35462dea41ba8c365",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 144,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995354296,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995354295,
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "phase": "act",
+            "promptSha256": "757bff8ea0b8747d662a63f8af67846d0f16b4996990012f9c74fb7b267296b7"
+          }
+        },
+        {
+          "sequence": 145,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995354300,
+          "data": {
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 146,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995354302,
+          "data": {
+            "type": "model.started",
+            "at": 1792995354302,
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 147,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995354465,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995354464,
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 148,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995356478,
+          "data": {
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 149,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995356479,
+          "data": {
+            "type": "model.started",
+            "at": 1792995356479,
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 150,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995356587,
+          "data": {
+            "traceId": "4987c56c-846c-4b86-a3eb-6180056a7145:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 151,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995356588,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 152,
+          "taskId": "4987c56c-846c-4b86-a3eb-6180056a7145",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995356589,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "database_search"
+      ],
+      "missingContent": [
+        "P00533"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2980
+    },
+    {
+      "id": "fetch-electron",
+      "category": "fetch",
+      "prompt": "实际读取 https://www.electronjs.org/docs/latest/tutorial/context-isolation 并提炼两条要点，附该链接，不超过200字。",
+      "status": "failed",
+      "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995357136,
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "phase": "act",
+          "promptSha256": "a04902dc349c1408dcfba965db1ba6513532b10d0040cccf642ede481c603a4f"
+        },
+        {
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995357137
+        },
+        {
+          "type": "model.started",
+          "at": 1792995357138,
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995357229,
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995359234
+        },
+        {
+          "type": "model.started",
+          "at": 1792995359235,
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995359333
+        }
+      ],
+      "events": [
+        {
+          "sequence": 153,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995356835,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 154,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995356945,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "4f08e18b8b3a1fc51590465d535befebbd94fdd2e45cc83154b27ab174b4a645",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 155,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995357136,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995357136,
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "phase": "act",
+            "promptSha256": "a04902dc349c1408dcfba965db1ba6513532b10d0040cccf642ede481c603a4f"
+          }
+        },
+        {
+          "sequence": 156,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995357137,
+          "data": {
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 157,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995357138,
+          "data": {
+            "type": "model.started",
+            "at": 1792995357137,
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 158,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995357229,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995357228,
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 159,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995359234,
+          "data": {
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 160,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995359235,
+          "data": {
+            "type": "model.started",
+            "at": 1792995359235,
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 161,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995359333,
+          "data": {
+            "traceId": "564d0d6e-5241-49ee-adea-a22eb712263e:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 162,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995359335,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 163,
+          "taskId": "564d0d6e-5241-49ee-adea-a22eb712263e",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995359335,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_fetch"
+      ],
+      "missingContent": [
+        "context"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2736
+    },
+    {
+      "id": "fetch-mcp",
+      "category": "fetch",
+      "prompt": "实际读取 https://modelcontextprotocol.io/specification/2025-03-26/basic/transports ，列出两种传输，附来源，不超过200字。",
+      "status": "failed",
+      "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995359937,
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "phase": "act",
+          "promptSha256": "c623232c8166c02d98e2e0df2d3e1d1f8d55cab6c207783625b383f9c63b96c4"
+        },
+        {
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995359938
+        },
+        {
+          "type": "model.started",
+          "at": 1792995359938,
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995360037,
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995362041
+        },
+        {
+          "type": "model.started",
+          "at": 1792995362042,
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995362143
+        }
+      ],
+      "events": [
+        {
+          "sequence": 164,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995359580,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 165,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995359765,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "1c7c17219f8ed00d53b746e7d33f1bec758aabf44141d70f343cd8d04f470b3f",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 166,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995359937,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995359937,
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "phase": "act",
+            "promptSha256": "c623232c8166c02d98e2e0df2d3e1d1f8d55cab6c207783625b383f9c63b96c4"
+          }
+        },
+        {
+          "sequence": 167,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995359938,
+          "data": {
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 168,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995359938,
+          "data": {
+            "type": "model.started",
+            "at": 1792995359938,
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 169,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995360037,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995360037,
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 170,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995362041,
+          "data": {
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 171,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995362042,
+          "data": {
+            "type": "model.started",
+            "at": 1792995362042,
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 172,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995362143,
+          "data": {
+            "traceId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 173,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995362144,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 174,
+          "taskId": "23d4e134-0df4-4cc8-bdff-cd8827f606ad",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995362145,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_fetch"
+      ],
+      "missingContent": [
+        "stdio",
+        "HTTP"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2692
+    },
+    {
+      "id": "read-file",
+      "category": "file",
+      "prompt": "读取已授权文件 benchmark-notes.txt，报告样本数量与均值。必须实际读文件，不超过100字。",
+      "status": "failed",
+      "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995362552,
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "phase": "act",
+          "promptSha256": "2a8f7087ebee50b071ee6f38961c00d67eb81c8a194e06f550953f51d320039a"
+        },
+        {
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995362553
+        },
+        {
+          "type": "model.started",
+          "at": 1792995362555,
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995362672,
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995364697
+        },
+        {
+          "type": "model.started",
+          "at": 1792995364698,
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995364807
+        }
+      ],
+      "events": [
+        {
+          "sequence": 175,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995362271,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 176,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995362365,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "3e24d80d531d5d4da4926ae213d3730215269c004158958d6c5f2f67cb219d87",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 177,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995362552,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995362552,
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "phase": "act",
+            "promptSha256": "2a8f7087ebee50b071ee6f38961c00d67eb81c8a194e06f550953f51d320039a"
+          }
+        },
+        {
+          "sequence": 178,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995362553,
+          "data": {
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 179,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995362555,
+          "data": {
+            "type": "model.started",
+            "at": 1792995362555,
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 180,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995362672,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995362672,
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 181,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995364697,
+          "data": {
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 182,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995364698,
+          "data": {
+            "type": "model.started",
+            "at": 1792995364698,
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 183,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995364807,
+          "data": {
+            "traceId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 184,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995364809,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 185,
+          "taskId": "3ae21467-dda8-45c6-8ad2-05f70fc821b2",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995364809,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "read_file"
+      ],
+      "missingContent": [
+        "5",
+        "6"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2703
+    },
+    {
+      "id": "file-summary",
+      "category": "file",
+      "prompt": "读取已授权文件 benchmark-notes.txt，总结实验组名和结论，包含原文标识 SW-BENCH-20261025，不超过150字。",
+      "status": "failed",
+      "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995365167,
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "phase": "act",
+          "promptSha256": "64e6aaf64e044cdcd46fb48d88c51ae516554a805215b758a934b49d37dfcd80"
+        },
+        {
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995365167
+        },
+        {
+          "type": "model.started",
+          "at": 1792995365168,
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995365270,
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995367276
+        },
+        {
+          "type": "model.started",
+          "at": 1792995367277,
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995367396
+        }
+      ],
+      "events": [
+        {
+          "sequence": 186,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995364978,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 187,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995364980,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "b887ed2b9db0f9efae6d0f29b2ab2c900bc14af56eb4066aa9839e7dba3422a3",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 188,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995365167,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995365164,
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "phase": "act",
+            "promptSha256": "64e6aaf64e044cdcd46fb48d88c51ae516554a805215b758a934b49d37dfcd80"
+          }
+        },
+        {
+          "sequence": 189,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995365167,
+          "data": {
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 190,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995365168,
+          "data": {
+            "type": "model.started",
+            "at": 1792995365168,
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 191,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995365270,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995365270,
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 192,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995367276,
+          "data": {
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 193,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995367277,
+          "data": {
+            "type": "model.started",
+            "at": 1792995367276,
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 194,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995367396,
+          "data": {
+            "traceId": "1fb4670b-6a2d-4ad5-b262-608e772c2834:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 195,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995367398,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 196,
+          "taskId": "1fb4670b-6a2d-4ad5-b262-608e772c2834",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995367398,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "read_file"
+      ],
+      "missingContent": [
+        "SW-BENCH-20261025",
+        "control"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2681
+    },
+    {
+      "id": "mcp-discovery",
+      "category": "mcp",
+      "prompt": "动态发现当前启用的 MCP 服务器和工具，报告实际工具名称 e2e_ping，不要只报告连接成功。",
+      "status": "failed",
+      "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995368025,
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "phase": "act",
+          "promptSha256": "587ba0e0e62433e22ec317b333a8a39b5b8f9ac9214887f81e85374f4cd74b5b"
+        },
+        {
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995368027
+        },
+        {
+          "type": "model.started",
+          "at": 1792995368028,
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995368134,
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995370146
+        },
+        {
+          "type": "model.started",
+          "at": 1792995370156,
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995370253
+        }
+      ],
+      "events": [
+        {
+          "sequence": 197,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995367667,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 198,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995367852,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "89bd654ecfbf508de17c43c60b1580ab178eeba808d85d6144714313b56587a7",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 199,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995368025,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995368025,
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "phase": "act",
+            "promptSha256": "587ba0e0e62433e22ec317b333a8a39b5b8f9ac9214887f81e85374f4cd74b5b"
+          }
+        },
+        {
+          "sequence": 200,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995368027,
+          "data": {
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 201,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995368028,
+          "data": {
+            "type": "model.started",
+            "at": 1792995368027,
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 202,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995368134,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995368133,
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 203,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995370146,
+          "data": {
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 204,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995370156,
+          "data": {
+            "type": "model.started",
+            "at": 1792995370156,
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 205,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995370253,
+          "data": {
+            "traceId": "b20a200c-0418-4a2c-a668-7dd6861915a6:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 206,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995370256,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 207,
+          "taskId": "b20a200c-0418-4a2c-a668-7dd6861915a6",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995370256,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "mcp_tools"
+      ],
+      "missingContent": [
+        "e2e_ping"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2693
+    },
+    {
+      "id": "mcp-execute",
+      "category": "mcp",
+      "prompt": "先发现 MCP 工具，再实际调用 e2e_ping，message 参数为 SUWEN-LIVE-42。报告真实返回值。",
+      "status": "failed",
+      "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995370605,
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "phase": "act",
+          "promptSha256": "b5d6047e9311f742937b261ed9668d9fc68ac5323f84b00f714d55937f6cd451"
+        },
+        {
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995370607
+        },
+        {
+          "type": "model.started",
+          "at": 1792995370608,
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995370716,
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995372719
+        },
+        {
+          "type": "model.started",
+          "at": 1792995372720,
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995372822
+        }
+      ],
+      "events": [
+        {
+          "sequence": 208,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995370362,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 209,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995370428,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "dc1a2e1f4960a48e9298813b7261af3155fcb692f4a5084f87928520a3cad051",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 210,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995370605,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995370604,
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "phase": "act",
+            "promptSha256": "b5d6047e9311f742937b261ed9668d9fc68ac5323f84b00f714d55937f6cd451"
+          }
+        },
+        {
+          "sequence": 211,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995370607,
+          "data": {
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 212,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995370608,
+          "data": {
+            "type": "model.started",
+            "at": 1792995370607,
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 213,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995370716,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995370716,
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 214,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995372719,
+          "data": {
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 215,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995372720,
+          "data": {
+            "type": "model.started",
+            "at": 1792995372720,
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 216,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995372822,
+          "data": {
+            "traceId": "dce27063-d983-4094-8334-61080abaf2cf:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 217,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995372824,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 218,
+          "taskId": "dce27063-d983-4094-8334-61080abaf2cf",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995372824,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "mcp_tools",
+        "mcp_call"
+      ],
+      "missingContent": [
+        "SUWEN-LIVE-42"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2680
+    },
+    {
+      "id": "skill-discover",
+      "category": "skill",
+      "prompt": "查找本地已启用的均值计算 Skill，报告名称与版本，不要执行脚本。",
+      "status": "failed",
+      "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995373463,
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "phase": "act",
+          "promptSha256": "727c86da153b3d863a8279a05d59e858d90ad84d09c3c4cc000319557ded4137"
+        },
+        {
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995373465
+        },
+        {
+          "type": "model.started",
+          "at": 1792995373466,
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995373592,
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995375607
+        },
+        {
+          "type": "model.started",
+          "at": 1792995375610,
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995375710
+        }
+      ],
+      "events": [
+        {
+          "sequence": 219,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995373047,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 220,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995373264,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "1f5915fa2c825252a7ca5f102011036ff4580a262cfbe15926a71b4bdb11f16c",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 221,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995373463,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995373462,
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "phase": "act",
+            "promptSha256": "727c86da153b3d863a8279a05d59e858d90ad84d09c3c4cc000319557ded4137"
+          }
+        },
+        {
+          "sequence": 222,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995373465,
+          "data": {
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 223,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995373466,
+          "data": {
+            "type": "model.started",
+            "at": 1792995373466,
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 224,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995373592,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995373591,
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 225,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995375607,
+          "data": {
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 226,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995375610,
+          "data": {
+            "type": "model.started",
+            "at": 1792995375610,
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 227,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995375710,
+          "data": {
+            "traceId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 228,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995375714,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 229,
+          "taskId": "29a876d7-2d22-4b92-bdc0-28d047e5afc0",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995375714,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "skill_search"
+      ],
+      "missingContent": [
+        "benchmark-mean",
+        "1.0.0"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2727
+    },
+    {
+      "id": "skill-load",
+      "category": "skill",
+      "prompt": "发现并加载 benchmark-mean Skill 的说明，报告其输入格式，不执行。",
+      "status": "failed",
+      "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995376043,
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "phase": "act",
+          "promptSha256": "4e27ff622d3c9d85fb024090950832d2680dbd4724158af29a63e0404a57a635"
+        },
+        {
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995376046
+        },
+        {
+          "type": "model.started",
+          "at": 1792995376047,
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995376151,
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995378164
+        },
+        {
+          "type": "model.started",
+          "at": 1792995378173,
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995378274
+        }
+      ],
+      "events": [
+        {
+          "sequence": 230,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995375778,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 231,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995375839,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "6037a0e0283c56d2e856f28a6551c663d044f5f3e64b87b0c19cfa1baf71ea7d",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 232,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995376043,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995376042,
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "phase": "act",
+            "promptSha256": "4e27ff622d3c9d85fb024090950832d2680dbd4724158af29a63e0404a57a635"
+          }
+        },
+        {
+          "sequence": 233,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995376046,
+          "data": {
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 234,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995376047,
+          "data": {
+            "type": "model.started",
+            "at": 1792995376046,
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 235,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995376151,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995376151,
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 236,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995378164,
+          "data": {
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 237,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995378173,
+          "data": {
+            "type": "model.started",
+            "at": 1792995378172,
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 238,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995378274,
+          "data": {
+            "traceId": "5730c8cd-589f-42b0-a653-9a9132d4fd65:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 239,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995378276,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 240,
+          "taskId": "5730c8cd-589f-42b0-a653-9a9132d4fd65",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995378277,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "skill_search",
+        "skill_load"
+      ],
+      "missingContent": [
+        "numbers"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2679
+    },
+    {
+      "id": "skill-execute",
+      "category": "skill",
+      "prompt": "发现并加载 benchmark-mean Skill，然后实际执行它，输入 numbers=[2,4,6,8,10]，报告均值。",
+      "status": "failed",
+      "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995378900,
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "phase": "act",
+          "promptSha256": "27d7d22d4b379e5c29ed3637bd7b4046c261c38198ada01d74497aca34eebb2b"
+        },
+        {
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995378903
+        },
+        {
+          "type": "model.started",
+          "at": 1792995378904,
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995379006,
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995381016
+        },
+        {
+          "type": "model.started",
+          "at": 1792995381018,
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995381118
+        }
+      ],
+      "events": [
+        {
+          "sequence": 241,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995378460,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 242,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995378710,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "6087b544797cbd4189867c9ca01d6908936912904b6f3006c250a179e2ed465a",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 243,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995378900,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995378900,
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "phase": "act",
+            "promptSha256": "27d7d22d4b379e5c29ed3637bd7b4046c261c38198ada01d74497aca34eebb2b"
+          }
+        },
+        {
+          "sequence": 244,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995378903,
+          "data": {
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 245,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995378904,
+          "data": {
+            "type": "model.started",
+            "at": 1792995378904,
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 246,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995379006,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995379006,
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 247,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995381016,
+          "data": {
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 248,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995381018,
+          "data": {
+            "type": "model.started",
+            "at": 1792995381018,
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 249,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995381118,
+          "data": {
+            "traceId": "2e0a10d8-1675-4827-b796-d4e4dca18b11:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 250,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995381122,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 251,
+          "taskId": "2e0a10d8-1675-4827-b796-d4e4dca18b11",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995381122,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "skill_run"
+      ],
+      "missingContent": [
+        "6"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2735
+    },
+    {
+      "id": "multi-file-skill",
+      "category": "multi-step",
+      "prompt": "读取已授权的 benchmark-notes.txt，再加载并执行 benchmark-mean Skill 复算其中 numbers 的均值，比较文件记录，简短报告是否一致。",
+      "status": "failed",
+      "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995381522,
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "phase": "act",
+          "promptSha256": "a673e03ab90f93a88007e466aa76c7a75d4f1952654ae1be93a13768131903db"
+        },
+        {
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995381525
+        },
+        {
+          "type": "model.started",
+          "at": 1792995381527,
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995381630,
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995383634
+        },
+        {
+          "type": "model.started",
+          "at": 1792995383635,
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995383758
+        }
+      ],
+      "events": [
+        {
+          "sequence": 252,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995381202,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 253,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995381296,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "3158980f5b416d3494ddfc8f9c5a373521c9f8a31aa34ba32becda1b806755c5",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 254,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995381522,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995381522,
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "phase": "act",
+            "promptSha256": "a673e03ab90f93a88007e466aa76c7a75d4f1952654ae1be93a13768131903db"
+          }
+        },
+        {
+          "sequence": 255,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995381525,
+          "data": {
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 256,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995381527,
+          "data": {
+            "type": "model.started",
+            "at": 1792995381526,
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 257,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995381630,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995381629,
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 258,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995383634,
+          "data": {
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 259,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995383635,
+          "data": {
+            "type": "model.started",
+            "at": 1792995383635,
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 260,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995383758,
+          "data": {
+            "traceId": "ce481732-cf56-43d0-bb19-c2179160dbd3:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 261,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995383760,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 262,
+          "taskId": "ce481732-cf56-43d0-bb19-c2179160dbd3",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995383760,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "read_file",
+        "skill_run"
+      ],
+      "missingContent": [
+        "6"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2775
+    },
+    {
+      "id": "multi-search-fetch",
+      "category": "multi-step",
+      "prompt": "先搜索 Electron contextIsolation 官方文档，再读取官方页面，依据读取的内容总结为什么应启用隔离，附官方链接，不超过200字。",
+      "status": "failed",
+      "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+      "runStatus": "failed",
+      "answer": "",
+      "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+      "trace": [
+        {
+          "type": "agent.started",
+          "at": 1792995384340,
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "phase": "act",
+          "promptSha256": "cbf6f01b3c6421edfcd93a5dfb481386c42726853045e53616be7b959c6a54f5"
+        },
+        {
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "turn": 0,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995384347
+        },
+        {
+          "type": "model.started",
+          "at": 1792995384349,
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "turn": 0,
+          "attempt": 0,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "type": "model.retry",
+          "at": 1792995384505,
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "turn": 0,
+          "status": 429,
+          "delayMs": 2000
+        },
+        {
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "turn": 1,
+          "reservedTokens": "[REDACTED]",
+          "type": "agent.model_reserved",
+          "at": 1792995386519
+        },
+        {
+          "type": "model.started",
+          "at": 1792995386530,
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "turn": 0,
+          "attempt": 1,
+          "messageCount": 3,
+          "reservedTokens": "[REDACTED]"
+        },
+        {
+          "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+          "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+          "type": "agent.failed",
+          "at": 1792995386628
+        }
+      ],
+      "events": [
+        {
+          "sequence": 263,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": null,
+          "type": "task.created",
+          "version": 1,
+          "at": 1792995383984,
+          "data": {
+            "stepCount": 1
+          }
+        },
+        {
+          "sequence": 264,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "step.claimed",
+          "version": 1,
+          "at": 1792995384134,
+          "data": {
+            "owner": "worker-54904-d963328f-8f5b-4d46-ac57-59b7f82362c9",
+            "fence": 1,
+            "operationId": "6c5d2ac4153762dbc2abf820453656190b54ef48513363511774f362df01c1b1",
+            "attempt": 1
+          }
+        },
+        {
+          "sequence": 265,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "agent.started",
+          "version": 1,
+          "at": 1792995384340,
+          "data": {
+            "type": "agent.started",
+            "at": 1792995384340,
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "phase": "act",
+            "promptSha256": "cbf6f01b3c6421edfcd93a5dfb481386c42726853045e53616be7b959c6a54f5"
+          }
+        },
+        {
+          "sequence": 266,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995384347,
+          "data": {
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "turn": 0,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 267,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995384349,
+          "data": {
+            "type": "model.started",
+            "at": 1792995384348,
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "turn": 0,
+            "attempt": 0,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 268,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "model.retry",
+          "version": 1,
+          "at": 1792995384505,
+          "data": {
+            "type": "model.retry",
+            "at": 1792995384504,
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "turn": 0,
+            "status": 429,
+            "delayMs": 2000
+          }
+        },
+        {
+          "sequence": 269,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "agent.model_reserved",
+          "version": 1,
+          "at": 1792995386519,
+          "data": {
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "turn": 1,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 270,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "model.started",
+          "version": 1,
+          "at": 1792995386530,
+          "data": {
+            "type": "model.started",
+            "at": 1792995386530,
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "turn": 0,
+            "attempt": 1,
+            "messageCount": 3,
+            "reservedTokens": "[REDACTED]"
+          }
+        },
+        {
+          "sequence": 271,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "agent.failed",
+          "version": 1,
+          "at": 1792995386628,
+          "data": {
+            "traceId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5:reply:1",
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）"
+          }
+        },
+        {
+          "sequence": 272,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": "reply",
+          "type": "step.failed",
+          "version": 1,
+          "at": 1792995386630,
+          "data": {
+            "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+            "attempt": 1,
+            "dueAt": null
+          }
+        },
+        {
+          "sequence": 273,
+          "taskId": "e59a6fb9-f3f1-4882-ae09-07972c74d7b5",
+          "stepId": null,
+          "type": "task.failed",
+          "version": 1,
+          "at": 1792995386630,
+          "data": {}
+        }
+      ],
+      "sources": [],
+      "verification": null,
+      "tokens": 0,
+      "calls": 2,
+      "missingTools": [
+        "web_search",
+        "web_fetch"
+      ],
+      "missingContent": [
+        "contextIsolation"
+      ],
+      "error": "模型 API HTTP 429; provider request rejected（限流或额度不足）",
+      "latencyMs": 2760
+    }
+  ],
+  "finishedAt": "2026-10-26T06:16:26.752Z",
+  "metrics": {
+    "passed": 0,
+    "total": 22,
+    "p50Ms": 2693,
+    "p95Ms": 4179,
+    "tokens": 7454,
+    "toolCompleted": 4,
+    "toolFailed": 0,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+  }
+}

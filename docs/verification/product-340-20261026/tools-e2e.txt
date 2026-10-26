@@ -1,0 +1,3 @@
+(node:51540) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"checks":[{"name":"actual-file-read","ok":true},{"name":"actual-file-search","ok":true},{"name":"actual-file-update","ok":true},{"name":"created-skill-actually-executes","ok":true},{"name":"local-skill-installs","ok":true},{"name":"bundled-json-skill-actually-executes","ok":true},{"name":"github-skill-pinned-and-hashed","ok":true},{"name":"install-never-claims-execution","ok":true}]}

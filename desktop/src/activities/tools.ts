@@ -5,6 +5,8 @@ import {
   McpRegistry, SkillRegistry, type McpRegistryOptions, type SkillRegistryOptions, type ToolDeps,
 } from '../domain/tools.js';
 import { ChannelService, type ChannelDeps } from '../domain/channels.js';
+import {installSkill} from '../skill-authoring.js';
+import {WorkspaceFiles} from '../workspace-files.js';
 import { RsiEngine, type EvalRunner, type RsiEngineOptions, type RsiKind, type StrategyView } from '../domain/rsi.js';
 
 /** The tool-domain service bundle the Lead wires into the daemon and activity engine. */
@@ -177,8 +179,14 @@ export function createToolRpcHandlers(services: ToolActivityServices): Record<st
   const handlers: Record<string, ToolRpcHandler> = {
     // skills
     'skill.list': () => json({ skills: tools.skills.list() }),
+    'skill.load': params => tools.skills.load(requireText(paramsObject(params).id,'id',1,200)),
     'skill.inspect': async params => json({ inspection: await tools.skills.inspect(params) }),
     'skill.install': async params => json({ skill: await tools.skills.install(params) }),
+    'skill.import': async params => {
+      const input=paramsObject(params);
+      const roots=typeof input.path==='string'?[input.path]:[];
+      return installSkill(tools.skills,new WorkspaceFiles(roots,[]),input,AbortSignal.timeout(120000));
+    },
     'skill.enable': async params => {
       const input = paramsObject(params);
       return json({ skill: await tools.skills.enable(requireText(input.id ?? input.skillId, 'id', 1, 200), true) });

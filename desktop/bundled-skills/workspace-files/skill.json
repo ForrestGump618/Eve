@@ -1,0 +1,8 @@
+{
+  "name": "workspace-files",
+  "description": "Workspace files: list search read and edit text; 工作目录 文件 目录 搜索 读取 编辑",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "permissions": []
+}

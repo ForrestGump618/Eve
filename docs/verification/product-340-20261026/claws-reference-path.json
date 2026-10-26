@@ -1,0 +1,65 @@
+{
+  "path": "C:\\Users\\QINGYU~1\\AppData\\Local\\Temp\\suwen-claws-reference-dazyDJ",
+  "selected": [
+    {
+      "path": "dist-app/assets/ChatMessageParts-CbOSNp3p.js",
+      "bytes": 43246,
+      "sha256": "83ae7d79ac9ffdb12ecac460d777780ca809ea16eef32659ecaa2ba721e745e9"
+    },
+    {
+      "path": "dist-app/assets/ChatMessages-D9gU1ZGH.js",
+      "bytes": 21961,
+      "sha256": "8ee90bde9c00250d38752bac0ebe8c908af0464b949f2720ba7c54fc3f249195"
+    },
+    {
+      "path": "dist-app/assets/ChatStatusBar-DCPGCawx.js",
+      "bytes": 392317,
+      "sha256": "049847fbcccd852b06c6e054884d3e100c6b9cb39dc2cb9ff392c9af1b971f1f"
+    },
+    {
+      "path": "dist-app/assets/ChatStatusBar-rzh0CrrH.css",
+      "bytes": 334,
+      "sha256": "fa82610ccb100b40e98cf03e8ac08948e1b68f3c6793872f2d9f0891ff8d94ae"
+    },
+    {
+      "path": "dist-app/assets/SkillDetailDialog-BRCX8h_A.js",
+      "bytes": 125021,
+      "sha256": "46e908708d30c6bbfd6e260de7a4c5cf71dd88cfe6bc89e51e0c3f438e095d48"
+    },
+    {
+      "path": "dist-app/assets/chat-DE_nphcM.css",
+      "bytes": 2572,
+      "sha256": "c7922fb27a760058d717f5464e21104d81177e207af7745f48a2d8a401dc9da2"
+    },
+    {
+      "path": "dist-app/assets/index-V6HLziu0.css",
+      "bytes": 474596,
+      "sha256": "409a9d82a18a1c3433cbeba6b2ee3863e4dab72f4fcc55d7e586ef7c28db9d62"
+    },
+    {
+      "path": "dist-app/assets/sidebar-CGY2gVSM.js",
+      "bytes": 15079,
+      "sha256": "7108ff10aae89d62a3a5737a3dc56c8921c8b48931a8bb549922c8481dcf641e"
+    },
+    {
+      "path": "dist-app/assets/skills-BcwLiKXx.js",
+      "bytes": 10015,
+      "sha256": "a4b2ccce6159ec6eff6e1423de981195a2beac1050d54d1c1451b8313b9ed035"
+    },
+    {
+      "path": "dist-app/assets/useChatShell-B4O2u-NI.js",
+      "bytes": 2308,
+      "sha256": "e6c05c5628a18abdc2843ebbfe6b0ebab329a3638d6e41914e0b0d8dcf4d4650"
+    },
+    {
+      "path": "dist/main.js",
+      "bytes": 8163,
+      "sha256": "80bc590f28d3d1f76d1637ed2cbd16ee3d49b46e0acf38f2375e9e1b25cc4764"
+    },
+    {
+      "path": "dist/preload.cjs",
+      "bytes": 6385,
+      "sha256": "ef2a8382ea276008f7b29cc22736ad4b87e51196987d6f94e1ef589420687704"
+    }
+  ]
+}

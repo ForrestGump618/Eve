@@ -1,0 +1,13 @@
+﻿file,line,purpose
+desktop/src/workspace-files.ts,9,文件目录、读取、搜索与带哈希更新
+desktop/src/skill-authoring.ts,13,技能创建与固定版本安装
+desktop/src/domain/tools.ts,830,按需读取技能参考资料
+desktop/src/bundled-skills.ts,7,幂等预装技能
+desktop/src/harness/agent-loop.ts,86,有限截断恢复
+desktop/src/providers.ts,16,保留截断内容与 Token
+desktop/src/main.ts,29,后台版本协商
+desktop/src/mcp-client.ts,141,MCP 退出及管道清理
+omicslab/runtime/desktop_harness.py,67,正式页面输出预算
+omicslab/server/routes_platform.py,28,能力中心共用技能目录
+omicslab/web/js/views/chat.js,296,聊天事件与工具分组
+omicslab/web/css/platform.css,101,扁平化视觉

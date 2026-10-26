@@ -1,0 +1,18 @@
+PASS workspace-picker-selects-real-directory
+PASS actual-file-and-skill-executed
+PASS truncated-turn-recovers
+PASS one-collapsed-tool-group
+PASS all-tool-cards-settled
+PASS tool-details-expand
+PASS raw-tool-result-accessible
+PASS flat-user-message
+PASS composer-position-stable
+PASS same-installed-skill-catalog-in-ui
+PASS capability-center-shares-catalog
+PASS skill-toggle-shared-with-chat
+PASS sidebar-collapses
+FAIL tool-history-survives-reload
+PASS workspace-selection-survives-reload
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.tool-run-summary')[22m

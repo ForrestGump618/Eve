@@ -1,0 +1,31 @@
+{
+  "previousVersion": "3.3.2",
+  "previousEvidence": "../harness-20261025/verified-final.json",
+  "previousMetrics": {
+    "passed": 22,
+    "total": 22,
+    "p50Ms": 10031,
+    "p95Ms": 38391,
+    "tokens": 186010,
+    "toolCompleted": 48,
+    "toolFailed": 8,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+  },
+  "currentVersion": "3.4.0",
+  "currentMetrics": {
+    "passed": 0,
+    "total": 22,
+    "p50Ms": 2693,
+    "p95Ms": 4179,
+    "tokens": 7454,
+    "toolCompleted": 4,
+    "toolFailed": 0,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review."
+  },
+  "acceptance": "NOT_PASSED: current real model tasks blocked by vendor HTTP 429; no successful latency/cost comparison is valid",
+  "controlledUiIsNotRealModelAcceptance": true
+}

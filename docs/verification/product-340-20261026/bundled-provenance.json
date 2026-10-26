@@ -1,0 +1,103 @@
+{
+  "openai": [
+    {
+      "skill": "skill-creator",
+      "commit": "49f948faa9258a0c61caceaf225e179651397431",
+      "allFilesMatch": true,
+      "files": [
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "fcc3ba02bdf8d6df1f891637cf5336d2d7ef87bb8910fa622bd150c8e0d4c55b",
+          "gitBlob": "f5ce09ed118b72908b7308fcfc1619f59e89f6ea",
+          "matchesUpstream": true
+        },
+        {
+          "path": "LICENSE.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "gitBlob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "matchesUpstream": true
+        },
+        {
+          "path": "references/openai_yaml.md",
+          "sha256": "9fb5928b7f4a746fdb39df503ebbd7a659d5e64b47f85a60626aa1a03fd76b17",
+          "gitBlob": "da5629f8de500ec6f81291d239a2d9c68d1d9044",
+          "matchesUpstream": true
+        },
+        {
+          "path": "scripts/generate_openai_yaml.py",
+          "sha256": "b8f6be33a9d72dd7a8da02e7a9fffea23dc79e94862e6dd6358b57a8899d8f73",
+          "gitBlob": "1a9d784f8704999daf55a2b9036094949d9af3f8",
+          "matchesUpstream": true
+        },
+        {
+          "path": "scripts/init_skill.py",
+          "sha256": "bcb8982d3f033a094f2f1be43123ac8537e2562d25d8ba4d8ef2196ae514d96d",
+          "gitBlob": "f90703eca8159a21a9684ed1df974c702d92f814",
+          "matchesUpstream": true
+        },
+        {
+          "path": "scripts/quick_validate.py",
+          "sha256": "6cc9dc3199c935916cf6f73fcbbbb0e3bb1b58c8f5109fefa499978908164f51",
+          "gitBlob": "0547b4041a5f58fa19892079a114a1df98286406",
+          "matchesUpstream": true
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "a17383bfb1448637ac1f757ad891ddb9676fa30b0eff620200f0e1cbc0cc0d50",
+          "gitBlob": "72bc0b97e7a6476254a9d5c424c9971748402ec3",
+          "matchesUpstream": true
+        }
+      ]
+    },
+    {
+      "skill": "skill-installer",
+      "commit": "49f948faa9258a0c61caceaf225e179651397431",
+      "allFilesMatch": true,
+      "files": [
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e",
+          "gitBlob": "88d40cd9468441cfc83ffed52f9d71867392b850",
+          "matchesUpstream": true
+        },
+        {
+          "path": "assets/skill-installer-small.svg",
+          "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e",
+          "gitBlob": "ccfc034241ae8e6bea7284e188aed142a67c53e9",
+          "matchesUpstream": true
+        },
+        {
+          "path": "LICENSE.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "gitBlob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "matchesUpstream": true
+        },
+        {
+          "path": "scripts/github_utils.py",
+          "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b",
+          "gitBlob": "711f597e4cf0c08b897083c1c337e13524a76260",
+          "matchesUpstream": true
+        },
+        {
+          "path": "scripts/install-skill-from-github.py",
+          "sha256": "0fbbd36e8ea294442c0bd48d6f610a2e8656216bfef5c322f1dcf448ef2f09f1",
+          "gitBlob": "1c8ce89d0a4c54f1eb8ec00625e8fc0fa59301ae",
+          "matchesUpstream": true
+        },
+        {
+          "path": "scripts/list-skills.py",
+          "sha256": "e4e1f78ca3d045827f2a05cfd99fae57cc7c1a1bfeba8704029108834debff35",
+          "gitBlob": "0977c296ab7723d5fdf9ad9ba05329478ba1fe94",
+          "matchesUpstream": true
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "83b31cffb2552a923f4152f0338bea548274accc5489d151a95bced8e7bcfb74",
+          "gitBlob": "8ca23bf833379d2272a0a67e0026c2709b8823f1",
+          "matchesUpstream": true
+        }
+      ]
+    }
+  ],
+  "treeTruncated": false
+}

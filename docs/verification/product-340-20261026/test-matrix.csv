@@ -1,0 +1,23 @@
+﻿task,previous_3.3.2,current_3.4.0,error
+web-electron,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+web-typescript,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+web-dsh,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+web-mcp,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+pubmed-reprogramming,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+pubmed-crispr,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+pubmed-spatial,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+pubmed-summary,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+pubmed-compare,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+uniprot-human,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+uniprot-egfr,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+fetch-electron,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+fetch-mcp,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+read-file,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+file-summary,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+mcp-discovery,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+mcp-execute,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+skill-discover,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+skill-load,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+skill-execute,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+multi-file-skill,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）
+multi-search-fetch,passed,failed,模型 API HTTP 429; provider request rejected（限流或额度不足）

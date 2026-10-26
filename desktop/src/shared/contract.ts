@@ -97,6 +97,9 @@ export interface McpServerView {
 export interface SkillView {
   id: string;
   name: string;
+  description?: string;
+  executable?: boolean;
+  dependencies?: string[];
   version: string;
   source: string;
   license: string | null;
@@ -191,7 +194,7 @@ export const RPC_METHODS = [
   'hypothesis.list', 'hypothesis.get', 'hypothesis.select',
   'experiment.list', 'experiment.create', 'experiment.approve', 'experiment.result',
   'evidence.list', 'evidence.get', 'artifact.read',
-  'skill.list', 'skill.inspect', 'skill.install', 'skill.enable', 'skill.disable', 'skill.test', 'skill.remove',
+  'skill.list', 'skill.load', 'skill.inspect', 'skill.install', 'skill.import', 'skill.enable', 'skill.disable', 'skill.test', 'skill.remove',
   'mcp.list', 'mcp.add', 'mcp.remove', 'mcp.health', 'mcp.tools', 'mcp.enable', 'mcp.disable',
   'channel.list', 'channel.save', 'channel.test', 'channel.send', 'channel.inbox', 'channel.remove',
   'rsi.list', 'rsi.run', 'rsi.review', 'rsi.promote', 'rsi.rollback', 'rsi.active',

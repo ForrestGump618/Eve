@@ -1,0 +1,13 @@
+{
+  "name": "json-transform",
+  "description": "JSON validation formatting select keys; JSON 校验 格式化 字段 提取",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "permissions": [],
+  "run": {
+    "language": "python",
+    "script": "run.py",
+    "timeoutMs": 30000
+  }
+}

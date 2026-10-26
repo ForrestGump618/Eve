@@ -1,0 +1,9 @@
+{
+  "name": "dsh-error-handling",
+  "description": "DeepSeek Harness failure recovery and actionable reports; \u9519\u8bef\u5904\u7406 \u6062\u590d \u91cd\u8bd5 \u6545\u969c",
+  "version": "22ddee379240",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "permissions": [],
+  "upstream": "https://github.com/deepseek-ai/deepseek-harness/tree/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/.agents/skills/dsh-error-handling"
+}
