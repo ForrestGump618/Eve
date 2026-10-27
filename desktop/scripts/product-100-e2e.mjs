@@ -11,7 +11,7 @@ const root=resolve(fileURLToPath(new URL('..',import.meta.url))),require=createR
 const {_electron}=require('playwright-core'),{rpc}=await import('../dist/src/rpc.js');
 const live=process.argv.includes('--live'),packaged=process.argv.includes('--packaged');
 const packagedDirArg=process.argv.find(x=>x.startsWith('--packaged-dir='))?.slice(15);
-const out=resolve(root,'../docs/verification/release-1.0');mkdirSync(out,{recursive:true});
+const out=resolve(root,'../docs/verification/eve-1.0');mkdirSync(out,{recursive:true});
 const profile=mkdtempSync(join(tmpdir(),'suwen-product-100-')),workspace=join(profile,'test-workspace');mkdirSync(workspace);writeFileSync(join(profile,'desktop-window.json'),JSON.stringify({closeAction:'quit'}));
 writeFileSync(join(workspace,'sample.csv'),'value\n2\n4\n6\n');
 const uiSkill=join(workspace,'ui-installed-skill');mkdirSync(uiSkill);
@@ -24,6 +24,16 @@ else{
   let raw='';for await(const c of req)raw+=c;const body=JSON.parse(raw),observations=body.messages.filter(x=>x.role==='tool').map(x=>JSON.parse(x.content));
   const emit=(delta,reason='tool_calls')=>{if(!res.headersSent)res.writeHead(200,{'content-type':'text/event-stream'});res.end('data: '+JSON.stringify({choices:[{delta,finish_reason:reason}],usage:{prompt_tokens:200,completion_tokens:50}})+'\n\ndata: [DONE]\n\n');};
   const call=(name,args)=>emit({tool_calls:[{index:0,id:`step-${observations.length}`,type:'function',function:{name,arguments:JSON.stringify(args)}}]});
+  const research=body.messages.find(x=>x.role==='user'&&x.content.includes('推进 Eve 课题'))?.content.match(/课题 (quest_[a-f0-9]+) 的 ([a-z]+) 阶段/);
+  if(research){
+   if(!observations.length)return call('research_list',{});
+   if(observations.length===1)return call('skill_search',{query:'baseline'});
+   if(observations.length===2)return call('skill_load',{id:observations[1].result.skills[0].id});
+   if(observations.length===3)return call('read_file',{path:'sample.csv'});
+   if(observations.length===4)return call('write_file',{path:'quest-scout.md',content:'Protocol fixture observed sample.csv values: 2,4,6. This is test evidence, not a scientific claim.'});
+   if(observations.length===5)return call('research_record',{id:research[1],stage:research[2],artifacts:['quest-scout.md'],summary:'实际读取 CSV 并登记产物；协议测试，不宣称科学发现。'});
+   return emit({content:'课题阶段已有真实产物记录 RESEARCH_STAGE_DONE'},'stop');
+  }
   const parallel=body.messages.find(x=>x.role==='user'&&/MULTI_CASE_[AB]/.test(x.content))?.content.match(/MULTI_CASE_([AB])/)?.[1];
   if(body.messages.some(x=>x.role==='user'&&x.content.includes('STEER_CASE'))){
    const feedback=body.messages.filter(x=>x.role==='user'&&x.content.startsWith('[用户引导 '));
@@ -79,12 +89,13 @@ let app,connection,remoteCleanup;
 try{
  const env={...process.env,SUWEN_TEST_HOME:profile};delete env.ELECTRON_RUN_AS_NODE;
  const packagedDir=packaged?(packagedDirArg?resolve(root,packagedDirArg):join(root,'release/product-100')):null;
- const executablePath=packaged?join(packagedDir,'SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe');
+ const executablePath=packaged?join(packagedDir,'Eve.exe'):join(root,'node_modules/electron/dist/electron.exe');
  const args=packaged?[]:[root];
  app=await _electron.launch({executablePath,args:[...args,'--native'],env});let shell=await app.firstWindow();await shell.waitForFunction(()=>window.suwen&&document.getElementById('health'));
  await shell.evaluate(async config=>window.suwen.call('configure',config),{provider:'openai',baseUrl,apiKey,model:'deepseek-v4.1-flash-economy',contextWindow:65536,maxOutput:8192});await Promise.race([app.close(),new Promise(r=>setTimeout(r,5000))]);app=null;
  app=await _electron.launch({executablePath,args,env});
  let page;for(let i=0;i<180;i++){page=app.windows().find(p=>p.url().startsWith('http://127.0.0.1:'));if(page)break;await new Promise(r=>setTimeout(r,500));}if(!page)throw Error('Formal window unavailable');
+ page.setDefaultTimeout(45000);
  page.on('pageerror',e=>report.errors.push(e.message));await page.waitForSelector('#app-sidebar');await page.waitForSelector('html[data-ready="true"]',{timeout:60000});
  try{await page.getByRole('button',{name:'先看看',exact:true}).click({timeout:5000});}catch{}
  await page.waitForSelector('.workbench-page.unified-workspace #chat-input',{timeout:60000});
@@ -105,6 +116,10 @@ try{
  check('single-sidebar-in-chat',await page.locator('.chat-sidebar').count()===1&&await page.locator('#app-sidebar').isVisible());
  check('no-brand-subtitle',await page.locator('.brand-sub').count()===0);
  check('desktop-lifecycle-preload-is-restricted',await page.evaluate(()=>!!window.suwenDesktop&&!window.suwen));
+ if(process.argv.includes('--research-only')){
+  const {researchAcceptance}=await import('./research-workspace-acceptance.mjs');
+  await researchAcceptance({page,workspace,check,out,live});
+ }else{
  const before=await page.locator('.composer').boundingBox();
  await page.fill('#chat-input',live?'读取工作目录中的 sample.csv，查找并加载 csv-analysis 技能，然后实际执行此技能汇总行数和值列的均值。必须报告均值4，末尾写 RESULT_OK，不超过200字。':'读取 sample.csv 并实际运行 csv-analysis Skill，汇报真实均值，末尾写 RESULT_OK。');await page.click('#send-btn');
  await page.waitForFunction(()=>document.querySelector('#messages')?.textContent?.includes('RESULT_OK')&&document.querySelector('#stop-btn')?.classList.contains('is-hidden'),null,{timeout:240000});
@@ -121,17 +136,19 @@ try{
  await page.locator('.tool-run-summary').click();
  const style=await page.locator('.msg-user .msg-bubble').first().evaluate(x=>({image:getComputedStyle(x).backgroundImage,shadow:getComputedStyle(x).boxShadow}));check('flat-user-message',style.image==='none'&&style.shadow==='none',style);
  const after=await page.locator('.composer').boundingBox();check('composer-position-stable',Math.abs(before.y-after.y)<=2,{before:before.y,after:after.y});
- const inventory=await page.evaluate(()=>fetch('/api/skills').then(r=>r.json()));check('same-installed-skill-catalog-in-ui',inventory.skills.filter(x=>x.runtime==='desktop').length===8);
- const capabilities=await page.evaluate(()=>fetch('/api/platform/registry/skill').then(r=>r.json()));check('capability-center-shares-catalog',capabilities.items.filter(x=>x.runtime==='desktop').length===8);
+ const inventory=await page.evaluate(()=>fetch('/api/skills').then(r=>r.json()));check('same-installed-skill-catalog-in-ui',inventory.skills.filter(x=>x.runtime==='desktop').length>=258);
+ const capabilities=await page.evaluate(()=>fetch('/api/platform/registry/skill').then(r=>r.json()));check('capability-center-shares-catalog',capabilities.items.filter(x=>x.runtime==='desktop').length===inventory.skills.filter(x=>x.runtime==='desktop').length);
  const csv=capabilities.items.find(x=>x.name==='csv-analysis');const toggled=await page.evaluate(async id=>{await fetch('/api/platform/registry/skill/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:false})});const disabled=await fetch('/api/skills').then(r=>r.json());await fetch('/api/platform/registry/skill/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:true})});return disabled.skills.find(s=>s.id===id)?.enabled===false;},csv.id);check('skill-toggle-shared-with-chat',toggled);
  if(!live){
   await page.evaluate(()=>{location.hash='#/extensions';});await page.waitForSelector('.sw-page');
   await page.locator('.sw-section[data-section="skill"]').click();
   await page.locator('[data-action="new-skill"]').waitFor();
+  check('skill-library-renders-one-bounded-page',await page.locator('.sw-grid > .sw-card').count()<=32);
   await page.locator('[data-action="new-skill"]').click();
   await page.fill('#skill-source','ui-installed-skill');
   await page.check('#skill-trusted');
   await page.getByRole('button',{name:'保存',exact:true}).click();
+  await page.fill('#skill-query','ui-installed-skill');await page.click('[data-action="skill-search"]');
   const installedSkillCard=page.locator('.sw-card').filter({hasText:'ui-installed-skill'});
   await installedSkillCard.waitFor({timeout:30000});
   const installedSkill=await page.evaluate(()=>fetch('/api/skills').then(r=>r.json()).then(x=>x.skills.find(s=>s.name==='ui-installed-skill')));
@@ -337,6 +354,7 @@ try{
  check('1000-message-history-renders-at-most-80',await page.locator('#messages > .msg').count()<=80);
  await page.getByRole('button',{name:/查看更早消息/}).click();
  check('older-history-is-accessible',(await page.locator('#messages').textContent()).includes('History message 860'));
+ }
  check('no-renderer-errors',report.errors.length===0);
 }catch(e){report.error=String(e.message).split(apiKey).join('[redacted]');console.log(report.error);}
 finally{
@@ -344,6 +362,6 @@ finally{
  try{connection??=JSON.parse(readFileSync(join(profile,'runtime/connection.json'),'utf8'));}catch{}
  try{if(connection)await rpc(connection,'shutdown');}catch{}
  if(app)await app.evaluate(({app})=>app.exit(0)).catch(()=>{});if(server){server.closeAllConnections();server.close();}
- writeFileSync(join(out,`product-ui-${live?'live':'controlled'}${process.argv.some(x=>x.startsWith('--ssh-credentials='))?'-ssh':''}${packaged?'-packaged':''}.json`),JSON.stringify(report,null,2).split(apiKey).join('[redacted]'));
+ writeFileSync(join(out,`${process.argv.includes('--research-only')?process.argv.includes('--research-full')?'research-full':'research':'product'}-ui-${live?'live':'controlled'}${process.argv.some(x=>x.startsWith('--ssh-credentials='))?'-ssh':''}${packaged?'-packaged':''}.json`),JSON.stringify(report,null,2).split(apiKey).join('[redacted]'));
  process.exit(report.error||report.checks.some(x=>!x.ok)?1:0);
 }

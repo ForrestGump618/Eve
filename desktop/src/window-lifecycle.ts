@@ -22,7 +22,7 @@ export class WindowLifecycle {
     let image=nativeImage.createFromPath(this.options.icon);
     if(image.isEmpty())image=nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4//8/AwAI/AL+XNkBbgAAAABJRU5ErkJggg==');
     this.tray=new Tray(image);
-    this.tray.setToolTip('素问 SuWen · 后台任务与 SSH 工作区');
+    this.tray.setToolTip('Eve · 后台任务与 SSH 工作区');
     this.tray.setContextMenu(Menu.buildFromTemplate([
       {label:'显示主窗口',click:()=>this.show()},
       {label:'查看任务状态',click:()=>this.show(true)},
@@ -49,7 +49,7 @@ export class WindowLifecycle {
     try{
       let action=this.action;
       if(action==='ask'){
-        const decision=await dialog.showMessageBox(window,{type:'question',title:'关闭素问',message:'如何关闭素问？',detail:'最小化到托盘后，后台任务与 SSH 连接继续运行。彻底退出会停止运行时并释放连接。',buttons:['退出程序','最小化到系统托盘','取消'],defaultId:1,cancelId:2,checkboxLabel:'记住我的选择（可在设置中修改）',checkboxChecked:false,noLink:true});
+        const decision=await dialog.showMessageBox(window,{type:'question',title:'关闭Eve',message:'如何关闭Eve？',detail:'最小化到托盘后，后台任务与 SSH 连接继续运行。彻底退出会停止运行时并释放连接。',buttons:['退出程序','最小化到系统托盘','取消'],defaultId:1,cancelId:2,checkboxLabel:'记住我的选择（可在设置中修改）',checkboxChecked:false,noLink:true});
         if(decision.response===2)return;
         action=decision.response===0?'quit':'tray';
         if(decision.checkboxChecked)this.setCloseAction(action);

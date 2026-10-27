@@ -46,7 +46,7 @@ const NEAR_BOTTOM_PX = 120;
 const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|bmp|tiff?|svg|avif)$/i;
 // One-time migration flag for pre-1.2 expert preferences (CONTRACTS-3 T07).
 const AGENT_MIGRATION_KEY = 'agentMigrationAsked';
-const leadAgentLabel = () => (getPref('agentName','素问助手') || '素问助手') + ' · 自动';
+const leadAgentLabel = () => (getPref('agentName','Eve助手') || 'Eve助手') + ' · 自动';
 // Independent run + resumable trace subscription (CONTRACTS-3 §3 T03).
 const RUN_WATCHDOG_MS = 45000;
 const RUN_RECONNECTS = 3;
@@ -323,7 +323,7 @@ export async function mount(root, ctx = {}) {
         '<div class="chat-empty">' +
           `<div class="chat-empty-mark">${brandMark(46, 'chat')}</div>` +
           '<div class="chat-empty-title">开始一次生物医学分析</div>' +
-          '<div class="chat-empty-hint">描述你的分析目标，素问 Suwen 会规划步骤、调用工具并在工作区生成图表与文件。</div>' +
+          '<div class="chat-empty-hint">描述你的分析目标，Eve 会规划步骤、调用工具并在工作区生成图表与文件。</div>' +
           `<div class="chat-empty-tip">${
             local.vision.configured
               ? '可直接粘贴或拖拽图片，视觉模型会自动解读图像内容。'
@@ -498,6 +498,9 @@ export async function mount(root, ctx = {}) {
       if(local.loadEpoch!==loadEpoch||local.activeId!==id)return;
       const conv = raw?.conversation || raw;
       applyTaskSelection(conv);
+      // Runs launched by the research workspace or another window have no
+      // browser-local bookmark. Recover the authoritative run from the session.
+      if(conv?.meta?.last_run_id)rememberActiveRun(id,{runId:conv.meta.last_run_id});
       const boundWorkspace=conv?.meta?.workspace_id;
       if(boundWorkspace && boundWorkspace!==getState().workspaceId){
         const data=await api.workspaces.get(boundWorkspace);
@@ -2493,7 +2496,7 @@ export async function mount(root, ctx = {}) {
           },
         },
         {
-          label: '改用 素问 Suwen 助手',
+          label: '改用 Eve 助手',
           kind: 'primary',
           onClick: () => {
             applyEffectiveAgent(effectiveId);
@@ -2531,7 +2534,7 @@ export async function mount(root, ctx = {}) {
     const stored = local.agentId;
     if (stored && !knownAgentId(agents, stored)) {
       // Invalid / removed role: return to the effective default (never agents[0] unless necessary).
-      toastInfo('原默认专家已不可用，已切换到 素问 Suwen 助手');
+      toastInfo('原默认专家已不可用，已切换到 Eve 助手');
       applyEffectiveAgent(effectiveId);
     } else if (!stored) {
       applyEffectiveAgent(effectiveId);
@@ -2637,7 +2640,7 @@ function chatLayout() {
   return (
     '<div class="chat-view">' +
     '<aside class="chat-sidebar" aria-label="会话列表">' +
-    '<div class="chat-brand">素问 <span>Suwen</span><span class="brand-chevron">⌄</span></div>' +
+    '<div class="chat-brand">Eve<span class="brand-chevron">⌄</span></div>' +
     '<div class="chat-sidebar-head">' +
     `<button type="button" class="btn btn-primary btn-block" id="new-conv">${icon('edit', { size: 17 })}<span>新聊天</span></button>` +
     '<div class="conv-search">' +
@@ -2649,7 +2652,7 @@ function chatLayout() {
     '<div class="sidebar-section-label">最近会话</div>' +
     '<div class="conv-list" id="conv-list"></div>' +
     '<div class="chat-sidebar-foot">' +
-    '<a href="#/workbench" title="工作台">工作台</a><a href="#/extensions" title="技能与工具">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/settings">设置</a>' +
+    '<a href="#/workbench" title="工作台">工作台</a><a href="#/research" title="科研工作区">科研</a><a href="#/extensions" title="技能与工具">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/settings">设置</a>' +
     '</div>' +
     '</aside>' +
     '<div class="chat-splitter" role="separator" aria-orientation="vertical" title="拖动调整宽度"></div>' +

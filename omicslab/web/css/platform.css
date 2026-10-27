@@ -194,3 +194,27 @@ html,body{overflow:hidden}.app-body{grid-column:2;grid-row:1}.workspace-sidebar{
 .approval-run{margin:12px 0;border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden}.approval-run>summary{padding:10px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text-2)}.approval-run-items{max-height:330px;overflow:auto}.approval-run .approval-card{margin:0;padding:12px;border:0;border-top:1px solid var(--border-soft);border-radius:0;background:transparent;box-shadow:none}.approval-run .approval-head{font-size:12px}.approval-run .approval-scope{display:none}.approval-run .approval-reason,.approval-run .approval-target{font-size:11px}.approval-run .approval-card.is-approved,.approval-run .approval-card.is-denied{opacity:.7}.approval-run .approval-card.is-approved .approval-args,.approval-run .approval-card.is-denied .approval-args{display:none}
 .task-selection-form{display:grid;gap:15px}.task-selection-form p{color:var(--text-3);font-size:12px;margin:0}.task-selection-form label{display:grid;gap:7px;font-size:12px;color:var(--text-2)}.task-selection-form input,.task-selection-form select{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text);font:inherit}.chat-model-chip{font-family:inherit;cursor:pointer;border:1px solid transparent}.chat-model-chip:hover{border-color:var(--border);background:var(--panel-2)}
 .guidance-list{margin-top:8px;border:1px solid var(--border-soft);border-radius:8px;background:var(--panel);max-height:180px;overflow:auto}.guidance-list>summary{padding:8px 10px;font-size:11px;color:var(--text-3);cursor:pointer}.guidance-item{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-top:1px solid var(--border-soft);font-size:12px}.guidance-content{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}.guidance-content blockquote,.guidance-quote{margin:0 0 6px;padding:4px 9px;border-left:2px solid var(--border-strong);color:var(--text-3);max-height:90px;overflow:auto;font-size:11px}.guidance-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:220px;color:var(--text-3);font-size:11px}.guidance-actions button{border:0;background:transparent;color:var(--text-2);font:inherit;cursor:pointer;padding:0}.guidance-actions button:hover{text-decoration:underline}#guidance-feedback{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;resize:vertical}.composer-right{flex-wrap:wrap}.chat-view .composer-hint{font-size:10px}@media(max-width:1200px){.unified-workspace .composer-hint{display:none}}
+.eve-research-head{display:flex;justify-content:space-between;gap:24px;align-items:center}
+.eve-quest-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:20px;margin:20px 0}
+.eve-quest-list{display:flex;flex-direction:column;gap:6px}
+.eve-quest-item{display:grid;gap:7px;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:13px;color:inherit;cursor:pointer}
+.eve-quest-item.is-active{background:var(--surface-2,#f3f4f5);border-color:var(--border,#ddd)}
+.eve-quest-item span,.eve-contract,.eve-stage-number{font-size:12px;color:var(--text-muted,#777)}
+.eve-quest-body{min-width:0}
+.eve-contract{display:flex;gap:22px;flex-wrap:wrap;border-top:1px solid var(--border,#ddd);padding-top:14px}
+.eve-stage-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0}
+.eve-stage{position:relative;min-width:0;padding:20px;border:1px solid var(--border,#ddd);border-radius:10px;background:var(--surface,#fff)}
+.eve-stage[data-status=recorded]{border-top:3px solid var(--text,#333)}
+.eve-stage[data-status=running]{border-top:3px solid #888}
+.eve-stage p{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.eve-stage details{margin-top:16px;font-size:12px}
+.eve-stage li{overflow-wrap:anywhere;margin:10px 0}
+.eve-stage small{display:block;color:var(--text-muted,#777)}
+.eve-stage .sw-inline{margin-top:15px}
+.eve-finding{padding:14px 0;border-bottom:1px solid var(--border,#ddd)}
+.eve-finding>span{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.eve-finding p{margin:5px 0}
+.eve-finding small{color:var(--text-muted,#777)}
+.eve-research-table{width:100%;border-collapse:collapse;font-size:12px;margin:18px 0}
+.eve-research-table th,.eve-research-table td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--border,#ddd)}
+@media(max-width:900px){.eve-quest-layout{grid-template-columns:1fr}.eve-quest-list{flex-direction:row;overflow:auto}.eve-quest-item{min-width:180px}.eve-research-head{align-items:flex-start;flex-direction:column}}

@@ -164,6 +164,20 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
             return {"approved": True, "mode": handle.permission_mode}
         if handle.backend is None:
             raise HTTPException(503, "执行后端不可用；禁止回退本地执行")
+        if operation in {"research_list", "research_create", "research_record"}:
+            service = state.platform.research
+            scope = handle.workspace.workspace_id
+            if operation == "research_list":
+                return {"items": service.agent_list(scope)}
+            await authorize(state, handle, operation, args)
+            try:
+                if operation == "research_create":
+                    return service.create(scope, args)
+                if args.get("stage") == "finalize" or args.get("human_approved"):
+                    raise ValueError("模型不能代替用户复核结题")
+                return await service.record(scope, str(args.get("id") or ""), args, run_id=run_id)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
         if operation in {"write_file", "run_shell", "run_skill"}:
             await authorize(state, handle, "skill_run" if operation == "run_skill" else operation, args)
         try:

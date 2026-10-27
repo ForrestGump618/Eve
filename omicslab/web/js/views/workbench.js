@@ -698,7 +698,7 @@ export async function mount(root, ctx = {}) {
     if (!box) return;
     box.innerHTML =
       '<div class="wb-terminal">' +
-      `<pre class="wb-term-output">${esc(local.terminal.output || '素问 Suwen 工作区 Python 控制台。输入代码后按 Enter 运行。\n')}</pre>` +
+      `<pre class="wb-term-output">${esc(local.terminal.output || 'Eve 工作区 Python 控制台。输入代码后按 Enter 运行。\n')}</pre>` +
       '<div class="wb-term-input-row">' +
       '<span class="wb-term-prompt">In [ ]:</span>' +
       '<input class="wb-term-input" id="wb-term-input" placeholder="print(1 + 1)" autocomplete="off" />' +

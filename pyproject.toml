@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "omicslab"
 version = "1.0.0"
-description = "Suwen - local-first AI agent workspace with persistent tasks, skills, remote workspaces and scientific evidence gates."
+description = "Eve - local-first AI agent workspace with persistent tasks, skills, remote workspaces and scientific evidence gates."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-authors = [{ name = "SuWen contributors" }]
+authors = [{ name = "Eve contributors" }]
 keywords = [
   "ai-agent",
   "agent-platform",

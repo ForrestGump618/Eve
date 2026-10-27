@@ -1,4 +1,4 @@
-/* SuWen stream core - DOM-free incremental reducer for the frozen streaming protocol v1.
+/* Eve stream core - DOM-free incremental reducer for the frozen streaming protocol v1.
    See docs/architecture/streaming-events.md. This file must stay pure: no DOM, no window,
    no timers and no network. ui/app.js consumes it; test/stream-core.test.ts loads it with
    node:vm and drives it with deterministic batches.
@@ -510,9 +510,9 @@
   };
 
   if (root) {
+    root.EveStreamCore = api;
+    // Frozen compatibility names used by existing integrations and sessions.
     root.SuwenStreamCore = api;
-    /* The task contract names the global SuWenStreamCore; keep both spellings so the
-       reducer stays reachable from either integration. */
     root.SuWenStreamCore = api;
   }
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

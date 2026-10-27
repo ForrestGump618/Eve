@@ -1,0 +1,294 @@
+{
+  "kind": "paired real formal workbench, daemon, legacy bridge and renderers; hidden idle for 5 seconds",
+  "runs": [
+    {
+      "label": "before",
+      "scope": "paired real formal workbench, daemon, legacy bridge and renderers; hidden idle for 5 seconds",
+      "startupMs": 12265,
+      "daemonPid": 36604,
+      "stage": "idle",
+      "fullSnapshotBytes": 114347,
+      "fullSnapshotLatencyMs": [
+        2.1859999999996944,
+        1.8724999999994907,
+        1.8425999999999476,
+        3.581500000000233,
+        1.778600000001461
+      ],
+      "windowCount": 1,
+      "rendererPids": [
+        52468
+      ],
+      "mainPid": 57324,
+      "daemonThreadSample": [
+        {
+          "id": 52596,
+          "cpuMs": 2093.75,
+          "module": {
+            "name": "LHShield64.dll",
+            "offset": 1097376,
+            "company": "奇安信集团",
+            "product": "奇安信天擎",
+            "version": "1.0.0.1852",
+            "signature": "",
+            "signer": ""
+          }
+        }
+      ],
+      "mainThreadSample": [
+        {
+          "id": 55516,
+          "cpuMs": 390.625,
+          "module": {
+            "name": "LHShield64.dll",
+            "offset": 1097376,
+            "company": "奇安信集团",
+            "product": "奇安信天擎",
+            "version": "1.0.0.1852",
+            "signature": "",
+            "signer": ""
+          }
+        }
+      ],
+      "daemonThreadCount": 18,
+      "idleWindowMs": 7532,
+      "processes": [
+        {
+          "role": "main",
+          "pid": 57324,
+          "processName": "electron",
+          "workingSetMB": 194.8,
+          "cpuOneCorePercent": 20.537375780159724,
+          "electronReportedPercent": 0.9456791608298147,
+          "eventLoopUtilization": 0
+        },
+        {
+          "role": "daemon",
+          "pid": 36604,
+          "processName": "electron",
+          "workingSetMB": 117.8,
+          "cpuOneCorePercent": 42.31944100154125,
+          "daemonSelfCpuOneCorePercent": 69.70260870842088,
+          "eventLoopUtilization": 0.0009225562618813755
+        },
+        {
+          "role": "renderer",
+          "pid": 52468,
+          "processName": "electron",
+          "workingSetMB": 120.8,
+          "cpuOneCorePercent": 0
+        },
+        {
+          "role": "legacy-bridge",
+          "pid": 56964,
+          "processName": "python",
+          "workingSetMB": 95.1,
+          "cpuOneCorePercent": 0
+        }
+      ],
+      "trackedWorkingSetMB": 528.5,
+      "daemonRpcCallsDuringIdle": {
+        "health": 1
+      },
+      "daemonCpuUsageRaw": {
+        "before": {
+          "user": 12468,
+          "system": 546
+        },
+        "after": {
+          "user": 17671,
+          "system": 593
+        }
+      },
+      "scheduler": {
+        "pending": false,
+        "active": 0,
+        "pollMs": 250,
+        "concurrency": 2
+      },
+      "daemonDescendants": [
+        {
+          "pid": 56964,
+          "parent": 36604,
+          "name": "python.exe",
+          "workingSetMB": 95.1,
+          "cpuOneCorePercent": 0
+        },
+        {
+          "pid": 49268,
+          "parent": 56964,
+          "name": "conhost.exe",
+          "workingSetMB": 7.7,
+          "cpuOneCorePercent": 0
+        },
+        {
+          "pid": 56848,
+          "parent": 56964,
+          "name": "python.exe",
+          "workingSetMB": 94.2,
+          "cpuOneCorePercent": 0
+        }
+      ],
+      "mainTimerLag": {
+        "p50Ms": 5.587299999999232,
+        "p95Ms": 6.803299999999581
+      },
+      "rendererTimerLag": {
+        "p50Ms": 0.09999999403953552,
+        "p95Ms": 1.2999999821186066
+      }
+    },
+    {
+      "label": "after",
+      "scope": "paired real formal workbench, daemon, legacy bridge and renderers; hidden idle for 5 seconds",
+      "startupMs": 10413,
+      "daemonPid": 45544,
+      "stage": "idle",
+      "fullSnapshotBytes": 114345,
+      "fullSnapshotLatencyMs": [
+        2.0667000000030384,
+        1.860899999999674,
+        1.872799999997369,
+        13.754500000002736,
+        2.643000000003667
+      ],
+      "singleTaskSnapshotBytes": 4362,
+      "singleTaskSnapshotMs": 0.7306000000025961,
+      "windowCount": 1,
+      "rendererPids": [
+        17776
+      ],
+      "mainPid": 38868,
+      "daemonThreadSample": [
+        {
+          "id": 51636,
+          "cpuMs": 3703.125,
+          "module": {
+            "name": "LHShield64.dll",
+            "offset": 1097376,
+            "company": "奇安信集团",
+            "product": "奇安信天擎",
+            "version": "1.0.0.1852",
+            "signature": "",
+            "signer": ""
+          }
+        }
+      ],
+      "mainThreadSample": [
+        {
+          "id": 48372,
+          "cpuMs": 2093.75,
+          "module": {
+            "name": "LHShield64.dll",
+            "offset": 1097376,
+            "company": "奇安信集团",
+            "product": "奇安信天擎",
+            "version": "1.0.0.1852",
+            "signature": "",
+            "signer": ""
+          }
+        },
+        {
+          "id": 45216,
+          "cpuMs": 15.625,
+          "module": {
+            "name": "electron.exe",
+            "offset": 10986064,
+            "company": "GitHub, Inc.",
+            "product": "Electron",
+            "version": "45.0.0",
+            "signature": "",
+            "signer": ""
+          }
+        }
+      ],
+      "daemonThreadCount": 18,
+      "idleWindowMs": 7529,
+      "processes": [
+        {
+          "role": "main",
+          "pid": 38868,
+          "processName": "electron",
+          "workingSetMB": 195.4,
+          "cpuOneCorePercent": 40.88526200484605,
+          "electronReportedPercent": 2.083916795713161,
+          "eventLoopUtilization": 0
+        },
+        {
+          "role": "daemon",
+          "pid": 45544,
+          "processName": "electron",
+          "workingSetMB": 127.9,
+          "cpuOneCorePercent": 61.01658390570934,
+          "daemonSelfCpuOneCorePercent": 87.18647221922745,
+          "eventLoopUtilization": 0.00085805882374703
+        },
+        {
+          "role": "renderer",
+          "pid": 17776,
+          "processName": "electron",
+          "workingSetMB": 122,
+          "cpuOneCorePercent": 0
+        },
+        {
+          "role": "legacy-bridge",
+          "pid": 53544,
+          "processName": "python",
+          "workingSetMB": 93.8,
+          "cpuOneCorePercent": 0
+        }
+      ],
+      "trackedWorkingSetMB": 539.1,
+      "daemonRpcCallsDuringIdle": {
+        "health": 1
+      },
+      "daemonCpuUsageRaw": {
+        "before": {
+          "user": 11218,
+          "system": 468
+        },
+        "after": {
+          "user": 17625,
+          "system": 625
+        }
+      },
+      "scheduler": {
+        "pending": false,
+        "active": 0,
+        "pollMs": 250,
+        "concurrency": 2
+      },
+      "daemonDescendants": [
+        {
+          "pid": 53544,
+          "parent": 45544,
+          "name": "python.exe",
+          "workingSetMB": 93.8,
+          "cpuOneCorePercent": 0
+        },
+        {
+          "pid": 49136,
+          "parent": 53544,
+          "name": "conhost.exe",
+          "workingSetMB": 7.7,
+          "cpuOneCorePercent": 0
+        },
+        {
+          "pid": 35772,
+          "parent": 53544,
+          "name": "python.exe",
+          "workingSetMB": 94,
+          "cpuOneCorePercent": 0
+        }
+      ],
+      "mainTimerLag": {
+        "p50Ms": 5.445299999999406,
+        "p95Ms": 6.636899999997695
+      },
+      "rendererTimerLag": {
+        "p50Ms": 0,
+        "p95Ms": 1.4000000059604645
+      }
+    }
+  ]
+}

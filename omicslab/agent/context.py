@@ -62,9 +62,9 @@ def build_system_prompt(
     skills = skills or {}
     sections: list[str] = []
 
-    name = getattr(agent, "name", "素问 Suwen 助手")
+    name = getattr(agent, "name", "Eve 助手")
     instructions = getattr(agent, "instructions", "") or ""
-    sections.append(f"你是 **{name}**，运行在 素问 Suwen（本地优先的生物医学分析工作台）中的智能体。")
+    sections.append(f"你是 **{name}**，运行在 Eve（本地优先的生物医学分析工作台）中的智能体。")
     if instructions.strip():
         sections.append(instructions.strip())
     sections.append(BASE_RULES)
@@ -109,7 +109,7 @@ def build_system_prompt(
 
 def welcome_hint(settings: Settings) -> str:
     return (
-        "素问 Suwen 已就绪。可以直接用中文描述分析目标，例如：\n"
+        "Eve 已就绪。可以直接用中文描述分析目标，例如：\n"
         "- 读取工作区里的 CSV 数据并做质量检查\n"
         "- 对单细胞数据做 QC、聚类和 UMAP 可视化\n"
         "- 帮我画一张出版级的多面板图并导出 PDF"

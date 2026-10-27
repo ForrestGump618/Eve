@@ -1,4 +1,4 @@
-// REST client for the 素问 Suwen backend. All calls are same-origin relative paths,
+// REST client for the Eve backend. All calls are same-origin relative paths,
 // the JSON error envelope {"error": {message, code, detail}} is normalised into ApiError.
 
 import { emit } from './bus.js?v=2.1.1';

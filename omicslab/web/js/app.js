@@ -159,7 +159,7 @@ function shellHtml() {
     '<div class="app-body">' +
     '<header class="mobile-topbar">' +
     `<button type="button" class="icon-btn" id="nav-toggle" aria-label="打开导航">${icon('menu', { size: 20 })}</button>` +
-    `<span class="mobile-brand">${brandMark(24, 'mobile')}<span>素问 Suwen</span></span>` +
+    `<span class="mobile-brand">${brandMark(24, 'mobile')}<span>Eve</span></span>` +
     '<span class="mobile-status"><span class="status-dot" id="mobile-status-dot"></span></span>' +
     '</header>' +
     '<main class="view-root" id="view-root" role="main"></main>' +
@@ -272,7 +272,7 @@ function updateHealthUi() {
   }
   const version = document.getElementById('sidebar-version');
   if (version) {
-    const bits = ['素问 Suwen'];
+    const bits = ['Eve'];
     if (health?.version) bits.push(`v${health.version}`);
     bits.push(online ? '本地运行' : '离线');
     version.textContent = bits.join(' · ');
@@ -341,7 +341,7 @@ async function renderRoute(route, { force = false } = {}) {
   const token = ++app.mountToken;
   setState({ route: target });
   updateNav();
-  document.title = `${routeMeta(target).label} · 素问 Suwen`;
+  document.title = `${routeMeta(target).label} · Eve`;
   app.viewRoot.innerHTML = `<div class="route-loading">${spinnerHtml('加载页面')}</div>`;
   closeNav();
   try {
@@ -668,7 +668,7 @@ async function boot() {
   if(window.suwenDesktop){
     document.documentElement.classList.add('desktop-hosted');
     const titlebar=document.createElement('div');titlebar.className='desktop-titlebar';
-    titlebar.innerHTML=`<button type="button" class="desktop-history" id="desktop-back" aria-label="返回">←</button><button type="button" class="desktop-history" id="desktop-forward" aria-label="前进">→</button><span class="desktop-app-label">素问</span>`;
+    titlebar.innerHTML=`<button type="button" class="desktop-history" id="desktop-back" aria-label="返回">←</button><button type="button" class="desktop-history" id="desktop-forward" aria-label="前进">→</button><span class="desktop-app-label">Eve</span>`;
     titlebar.querySelector('#desktop-back').addEventListener('click',()=>history.back());titlebar.querySelector('#desktop-forward').addEventListener('click',()=>history.forward());
     const rail=document.createElement('nav');rail.className='desktop-rail';rail.setAttribute('aria-label','快捷导航');
     rail.innerHTML=[['chat','chat','聊天'],['workbench','layers','工作台'],['tasks2','clock','任务'],['extensions','skills','技能'],['ssh','terminal','SSH'],['settings','settings','设置']].map(([route,name,label])=>`<a href="#/${route}" title="${label}" aria-label="${label}">${icon(name,{size:22})}</a>`).join('');

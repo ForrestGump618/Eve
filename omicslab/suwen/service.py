@@ -1,4 +1,4 @@
-"""Composition root for Suwen's optional platform modules."""
+"""Composition root for Eve's optional platform modules."""
 from __future__ import annotations
 
 import asyncio
@@ -44,6 +44,8 @@ class Platform:
         register(self)
         from .experiments import Experiments
         self.experiments=Experiments(self)
+        from .research import ResearchQuests
+        self.research=ResearchQuests(self)
         self.sandbox.register()
         for server in self.store.list('mcp'):
             discovered=self.store.get('mcp_status',server['id'])
@@ -303,7 +305,7 @@ class Platform:
         except ImportError:
             resources={'cpu_percent':None,'memory_bytes':None,'disk_free':shutil.disk_usage(self.settings.home).free,'detail':'psutil 未安装，CPU/内存监测不可用'}
         tasks=self.store.list('task',scope)
-        return {'brand':'素问 Suwen','schema_version':2,'runtime':'running','gateway':'running','workspace':scope,
+        return {'brand':'Eve','schema_version':2,'runtime':'running','gateway':'running','workspace':scope,
             'tasks':{s:sum(t['status']==s for t in tasks) for s in {'queued','running','paused','failed','interrupted','succeeded','waiting_approval'}},
             'model':self.state.llm_info(),'usage':dict(self.models.usage(scope),pricing='estimate; unconfigured models have unknown cost'),
             'mcp':[dict(r,status=self.store.get('mcp_status',r['id'])) for r in self.store.list('mcp')],

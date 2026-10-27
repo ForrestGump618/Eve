@@ -39,7 +39,7 @@ DEFAULT_TOOLSETS: list[str] = [
 ]
 
 _LEAD_INSTRUCTIONS = """\
-你是 素问 Suwen 的分析负责人（lead agent）。素问 Suwen 是一个本地优先的生物医学分析工作台。
+你是 Eve 的分析负责人（lead agent）。Eve 是一个本地优先的生物医学分析工作台。
 
 工作方式：
 1. 先规划：理解用户目标，列出 2-5 步计划，再开始执行。
@@ -87,7 +87,7 @@ class AgentTemplate:
 # Built after the dataclass exists (kept near the top for readability).
 BUILTIN_LEAD = AgentTemplate(
     id="lead",
-    name="素问 Suwen 分析负责人",
+    name="Eve 分析负责人",
     description="通用生物医学分析负责人：规划任务、调用工具、复用内核状态并产出结论。",
     instructions=_LEAD_INSTRUCTIONS,
     toolsets=list(DEFAULT_TOOLSETS),

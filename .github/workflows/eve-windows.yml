@@ -1,4 +1,4 @@
-name: SuWen Windows CI
+name: Eve Windows CI
 
 # Real Windows CI for the vNext desktop app + preserved Python baseline (round 3).
 # Builds, typechecks, tests, runs RPC E2E + UI DOM QA + security scan, packages an UNSIGNED NSIS
@@ -9,7 +9,7 @@ name: SuWen Windows CI
 on:
   workflow_dispatch:
   push:
-    branches: [suwen-vnext-durable]
+    branches: [main]
     paths:
       - 'desktop/**'
       - 'omicslab/**'
@@ -17,7 +17,7 @@ on:
       - 'docs/**'
       - 'README.md'
       - 'pyproject.toml'
-      - '.github/workflows/suwen-windows.yml'
+      - '.github/workflows/eve-windows.yml'
   pull_request:
     paths:
       - 'desktop/**'
@@ -26,7 +26,7 @@ on:
       - 'docs/**'
       - 'README.md'
       - 'pyproject.toml'
-      - '.github/workflows/suwen-windows.yml'
+      - '.github/workflows/eve-windows.yml'
 
 permissions:
   contents: read
@@ -111,7 +111,7 @@ jobs:
       - name: Verify installer and publish SHA256SUMS
         shell: pwsh
         run: |
-          $exe = Get-ChildItem release -Filter 'SuWen-Setup-*-win-x64.exe' | Select-Object -First 1
+          $exe = Get-ChildItem release -Filter 'Eve-Setup-*-win-x64.exe' | Select-Object -First 1
           if (-not $exe) { throw 'Installer .exe was not produced' }
           if ($exe.Length -le 0) { throw 'Installer is empty' }
           $blockmap = Get-ChildItem release -Filter '*.blockmap' | Select-Object -First 1
@@ -140,7 +140,7 @@ jobs:
       - name: Upload installer, checksums, SBOM, security scan and logs
         uses: actions/upload-artifact@v4
         with:
-          name: SuWen-windows-x64-preview
+          name: Eve-windows-x64-preview
           if-no-files-found: error
           retention-days: 14
           path: |

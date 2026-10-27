@@ -50,3 +50,10 @@ LICENSE   text
 *.rda     binary
 *.feather binary
 *.parquet binary
+
+# Content-addressed gzip object pack must remain byte-exact.
+*.pack binary
+# Historical raw diagnostics remain in Git, but do not inflate clean source exports.
+docs/verification/harness-20261025 export-ignore
+docs/verification/artifacts export-ignore
+docs/screenshots export-ignore

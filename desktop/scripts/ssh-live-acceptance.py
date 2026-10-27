@@ -12,7 +12,9 @@ import sys
 import tempfile
 import time
 import uuid
+import hashlib
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from omicslab.config import Settings
@@ -87,6 +89,27 @@ async def main(credentials: Path):
         else:raise AssertionError('Traversal accepted')
         assert (settings.workspace/'marker.txt').read_text()=='LOCAL_MUST_NOT_BE_READ'
         report['checks'].append({'name':'local twin remains untouched','passed':True})
+        from omicslab.suwen.research import ResearchQuests
+        from omicslab.suwen.store import PlatformStore
+        store=PlatformStore(private)
+        async def selected_backend(scope):
+            assert scope==workspace.workspace_id
+            return backend
+        def require_workspace(scope):
+            if scope!=workspace.workspace_id:raise ValueError('Wrong workspace')
+            return workspace
+        research=ResearchQuests(SimpleNamespace(store=store,backend=selected_backend,require_workspace=require_workspace))
+        try:
+            q=research.create(workspace.workspace_id,{'title':'Remote evidence acceptance','question':'Verify SSH evidence source',
+                'dataset':'remote-fixture','protocol':'same-host','metrics':[{'name':'sum','direction':'max'}]})
+            q=await check('research stage hashes SSH evidence rather than local twin',
+                lambda:research.record(workspace.workspace_id,q['id'],{'stage':'scout','artifacts':['marker.txt'],'summary':'Actual remote marker'}),
+                lambda value:value['stages'][0]['evidence'][0]['sha256']==hashlib.sha256(b'REMOTE_UPDATED\n').hexdigest())
+            await backend.execute_python("import json,pathlib; pathlib.Path('metrics.json').write_text(json.dumps({'dataset':'remote-fixture','protocol':'same-host','metrics':{'sum':sum([2,4,6])}}))")
+            await check('research baseline reads metrics computed on SSH host',
+                lambda:research.record(workspace.workspace_id,q['id'],{'stage':'baseline','artifacts':['marker.txt'],'metrics_path':'metrics.json','summary':'Remote Python sum'}),
+                lambda value:value['stages'][1]['measured']['sum']==12)
+        finally:store.close()
     except Exception as exc:
         report['error_type']=type(exc).__name__
     finally:
@@ -100,7 +123,7 @@ async def main(credentials: Path):
         values=report['latencies_ms']
         if values:report['p50_ms']=statistics.median(values);report['p95_ms']=sorted(values)[min(len(values)-1,int(len(values)*.95))]
         report['success']=not report.get('error_type') and all(x['passed'] for x in report['checks'])
-        out=Path(__file__).resolve().parents[2]/'docs/verification/release-1.0/ssh-live-acceptance.json'
+        out=Path(__file__).resolve().parents[2]/'docs/verification/eve-1.0/ssh-live-acceptance.json'
         out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
         print(json.dumps(report,ensure_ascii=False,indent=2))
     return 0 if report['success'] else 1

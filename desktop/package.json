@@ -1,11 +1,11 @@
 {
-  "name": "suwen-desktop",
+  "name": "eve-desktop",
   "version": "1.0.0",
   "private": true,
-  "description": "SuWen local research workspace with durable task execution",
+  "description": "Eve research workspace with durable local and SSH task execution",
   "main": "dist/main.js",
   "type": "module",
-  "author": "SuWen contributors",
+  "author": "Eve contributors",
   "license": "MIT",
   "scripts": {
     "build": "tsc && node scripts/copy-assets.mjs",
@@ -34,13 +34,13 @@
     "typescript": "7.0.2"
   },
   "build": {
-    "appId": "org.suwen.desktop",
-    "productName": "SuWen",
+    "appId": "org.eve.research.desktop",
+    "productName": "Eve",
     "asar": false,
     "directories": {
       "output": "release"
     },
-    "artifactName": "SuWen-Setup-${version}-win-${arch}.${ext}",
+    "artifactName": "Eve-Setup-${version}-win-${arch}.${ext}",
     "files": [
       "dist/main.js",
       "dist/src/**/*",
@@ -49,7 +49,8 @@
       "package.json",
       "LICENSE",
       "NOTICE",
-      "third-party-licenses/**/*"
+      "third-party-licenses/**/*",
+      "dist/skill-library/**/*"
     ],
     "extraResources": [
       {
@@ -74,7 +75,7 @@
         ]
       },
       {
-        "from": "assets/suwen.ico",
+        "from": "assets/eve.ico",
         "to": "suwen.ico"
       }
     ],
@@ -88,15 +89,15 @@
         }
       ],
       "signExecutable": false,
-      "icon": "assets/suwen.ico"
+      "icon": "assets/eve.ico"
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": false,
-      "shortcutName": "SuWen",
-      "uninstallDisplayName": "SuWen"
+      "shortcutName": "Eve",
+      "uninstallDisplayName": "Eve"
     }
   }
 }

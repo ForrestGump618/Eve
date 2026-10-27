@@ -43,7 +43,7 @@ test('optional actual Python workbench authenticates all routes and shuts down i
   assert.equal(system.workspace, join(home, 'workspace'));
   const page = await fetch(base + '/', { headers });
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /素问|suwen/i);
+  assert.match(await page.text(), /<title>Eve\b/i);
   assert.equal((await fetch(base + '/api/conversations', { headers })).status, 200);
   assert.ok(readdirSync(home).length > 0);
   for (const entry of readdirSync(home, { withFileTypes: true })) if (entry.isFile()) assert.equal(readFileSync(join(home, entry.name)).includes(Buffer.from(bridge.token)), false);

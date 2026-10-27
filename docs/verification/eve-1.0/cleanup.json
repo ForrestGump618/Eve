@@ -1,0 +1,18 @@
+{
+  "removedGeneratedBytes": 0,
+  "status": "blocked_by_automatic_approval",
+  "reason": "blocked by policy",
+  "retainedOldGeneratedDirectories": [
+    "desktop/release/product-100",
+    "desktop/release/v1.0.0",
+    "desktop/release/win-unpacked"
+  ],
+  "logicalBytesRetained": 1485246315,
+  "cleanExportExcludes": [
+    "node_modules",
+    "desktop/release",
+    "runtime",
+    "user settings and credentials",
+    "raw traces and machine-local screenshots"
+  ]
+}

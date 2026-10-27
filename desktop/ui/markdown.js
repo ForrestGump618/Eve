@@ -1,4 +1,4 @@
-/* SuWen markdown renderer - deliberately small, safe subset. Completed messages use render();
+/* Eve markdown renderer - deliberately small, safe subset. Completed messages use render();
    streaming messages use planProgressive()/renderProgressivePlan(), which typeset only closed
    blocks and keep the still-open tail as plain text (see ui/app.js).
 
@@ -17,7 +17,7 @@
 
    The tokenizer (parse / scanInlineMath / analyze) is DOM-free; render(doc, text) needs a
    document-like object with createElement/createTextNode/createDocumentFragment. Loaded as a
-   classic script before app.js, so it attaches SuwenMarkdown to globalThis.
+   classic script before app.js, so it attaches EveMarkdown to globalThis.
 */
 (function (root) {
   'use strict';
@@ -1063,6 +1063,6 @@
     shouldRenderDiagram: shouldRenderDiagram,
     isSafeUrl: isSafeUrl,
   };
-  if (root) root.SuwenMarkdown = api;
+  if (root) {root.EveMarkdown = api;root.SuwenMarkdown = api;}
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

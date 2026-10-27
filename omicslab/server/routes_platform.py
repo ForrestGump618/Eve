@@ -14,6 +14,46 @@ from ..suwen.tasks import validate_workflow
 router=APIRouter(prefix='/api/platform',tags=['Suwen platform'])
 
 
+@router.get('/quests')
+async def quest_list(request:Request,scope:str='ws_main'):
+    return {'items':platform(request).research.list(scope)}
+
+
+@router.post('/quests')
+async def quest_create(request:Request,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    return guarded(lambda:p.research.create(scope,data))
+
+
+@router.post('/quests/{id}/record')
+async def quest_record(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    try:return await p.research.record(scope,id,data)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/quests/{id}/launch')
+async def quest_launch(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    stage_id=data.get('stage')
+    try:
+        async with p.research.lock(scope,id):
+            prompt=p.research.prompt(scope,id,stage_id)
+            quest=p.research.get(scope,id)
+            stage=next(s for s in quest['stages'] if s['id']==stage_id)
+            if stage['status'] in {'running','recorded'}:raise ValueError('此阶段已有任务或证据，请查看原任务或创建后续课题')
+            conversation=p.state.store.create(agent=p.state.default_agent_info()['agent_id'],title=f"Eve · {quest['title'][:60]} · {stage['label']}")
+            from .chat import _workspace_binding
+            _workspace_binding(p.state,conversation,scope)
+            result=await p.state.runs.submit(session_id=conversation.id,message=prompt,workspace_id=scope,
+                conversation=conversation,permission_mode='ask')
+            run=result.get('run') or {}
+            stage.update(status='running',run_id=run.get('run_id'),session_id=conversation.id)
+            p.store.put('research_quest',id,quest,scope,expected=quest['revision'])
+            return {'quest_id':id,'run':run,'session_id':conversation.id}
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
 def platform(request):
     service=getattr(request.app.state.omicslab,'platform',None)
     if service is None:raise HTTPException(503,'平台服务未就绪')
@@ -182,14 +222,20 @@ async def model_test(request:Request,scope:str='ws_main'):
 
 
 @router.get('/registry/{kind}')
-async def registry_list(request:Request,kind:str,scope:str='ws_main'):
+async def registry_list(request:Request,kind:str,scope:str='ws_main',q:str='',offset:int=0,limit:int=0):
     p=platform(request);p.require_workspace(scope)
     if kind not in {'mcp','channel','agent','skill','workflow','schedule','artifact','evidence','review','source','trash'}:raise HTTPException(404,'未知注册表')
     if kind=='skill':
         adapter,native=await desktop_skills(p)
         items=p.skills.installed(scope)
         items.extend(dict(item,runtime='desktop',status='installed' if item['enabled'] else 'disabled') for item in native)
-        return {'items':items,'scientific':SCIENTIFIC}
+        if q:
+            words=q.casefold().split()
+            items=[item for item in items if all(word in (str(item.get('name',''))+' '+str(item.get('description',''))).casefold() for word in words)]
+        total=len(items)
+        offset=max(0,offset)
+        if limit:items=items[offset:offset+min(100,max(1,limit))]
+        return {'items':items,'total':total,'offset':offset,'scientific':SCIENTIFIC}
     items=p.store.list(kind,'global' if kind in {'mcp','channel','agent'} else scope)
     if kind=='mcp':
         items=[dict(r,status=p.store.get('mcp_status',r['id'])) for r in items]

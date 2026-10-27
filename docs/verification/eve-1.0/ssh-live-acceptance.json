@@ -1,0 +1,96 @@
+{
+  "kind": "real SSH transport and remote files, shell, Python and skill; no mock backend",
+  "checks": [
+    {
+      "name": "password authentication",
+      "passed": true
+    },
+    {
+      "name": "create and read-back verify",
+      "passed": true
+    },
+    {
+      "name": "remote read never reads local twin",
+      "passed": true
+    },
+    {
+      "name": "remote text search",
+      "passed": true
+    },
+    {
+      "name": "stale hash rejects overwrite",
+      "passed": true
+    },
+    {
+      "name": "hash guarded edit",
+      "passed": true
+    },
+    {
+      "name": "scoped shell working directory",
+      "passed": true
+    },
+    {
+      "name": "remote Python worker",
+      "passed": true
+    },
+    {
+      "name": "remote skill actual execution",
+      "passed": true
+    },
+    {
+      "name": "SFTP reconnect reuses in-memory credential",
+      "passed": true
+    },
+    {
+      "name": "dead transport replaced",
+      "passed": true
+    },
+    {
+      "name": "worker recreates after transport loss",
+      "passed": true
+    },
+    {
+      "name": "second host profile is independent",
+      "passed": true
+    },
+    {
+      "name": "second profile does not close first profile",
+      "passed": true
+    },
+    {
+      "name": "workspace traversal rejected",
+      "passed": true
+    },
+    {
+      "name": "local twin remains untouched",
+      "passed": true
+    },
+    {
+      "name": "research stage hashes SSH evidence rather than local twin",
+      "passed": true
+    },
+    {
+      "name": "research baseline reads metrics computed on SSH host",
+      "passed": true
+    }
+  ],
+  "latencies_ms": [
+    122.5,
+    157.36,
+    44.51,
+    86.37,
+    253.36,
+    38.67,
+    527.01,
+    41.69,
+    276.93,
+    343.14,
+    148.14,
+    66.21,
+    128.91
+  ],
+  "started_at": "2026-10-27T11:13:37+0800",
+  "p50_ms": 128.91,
+  "p95_ms": 527.01,
+  "success": true
+}

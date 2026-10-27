@@ -33,7 +33,7 @@ function anthropicMessages(messages:TurnMessage[]):any[] {
 async function streamReply(c:ModelConfig,messages:TurnMessage[],signal:AbortSignal,onText:(text:string)=>void,tools:FunctionSpec[]):Promise<ModelTurn> {
  const anthropic=c.provider==='anthropic';
  const system=messages.filter(m=>m.role==='system').map(m=>m.content).join('\n');
- const nativeMessages=tools.length||messages.some(m=>m.role==='tool'||m.tool_calls?.length)?anthropicMessages(messages):messages.filter(m=>m.role!=='system');
+ const nativeMessages=anthropic&&(tools.length||messages.some(m=>m.role==='tool'||m.tool_calls?.length))?anthropicMessages(messages):messages.filter(m=>m.role!=='system');
  const body=anthropic?{model:c.model,max_tokens:c.maxOutput,system,messages:nativeMessages,stream:true,...(tools.length?{tools:tools.map(t=>({name:t.name,description:t.description,input_schema:t.parameters}))}:{})}:{model:c.model,max_tokens:c.maxOutput,messages,stream:true,stream_options:{include_usage:true},...(tools.length?{tools:tools.map(t=>({type:'function',function:t})),tool_choice:'auto'}:{})};
  const headers:Record<string,string>=anthropic?{'Content-Type':'application/json','x-api-key':c.apiKey,'anthropic-version':'2023-06-01'}:{'Content-Type':'application/json','Authorization':`Bearer ${c.apiKey}`};
  const response=await fetch(c.baseUrl+(anthropic?'/messages':'/chat/completions'),{method:'POST',headers,body:JSON.stringify(body),signal,redirect:'error'});

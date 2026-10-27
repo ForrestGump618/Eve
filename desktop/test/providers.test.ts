@@ -27,6 +27,21 @@ function config(baseUrl: string, provider: 'openai' | 'anthropic' = 'openai'): M
   return validateModelConfig({ provider, baseUrl, model: 'local-protocol-fixture', apiKey: 'fixture-enterprise-credential', contextWindow: 8192, maxOutput: 512 });
 }
 
+test('OpenAI error observation survives malformed arguments without running the Anthropic serializer', async t=>{
+ const baseUrl=await fixture(t,(_request,response,body)=>{
+  assert.equal(body.messages[1].tool_calls[0].function.arguments,'{"query":');
+  assert.equal(body.messages[2].role,'tool');
+  response.writeHead(200,{'Content-Type':'text/event-stream'});
+  response.end('data: {"choices":[{"delta":{"content":"Corrected response"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+ });
+ const result=await modelTurn(config(baseUrl),[
+  {role:'user',content:'lookup'},
+  {role:'assistant',content:'',tool_calls:[{id:'bad',type:'function',function:{name:'lookup',arguments:'{"query":'}}]},
+  {role:'tool',tool_call_id:'bad',content:'{"ok":false,"error":"Tool arguments are not valid JSON"}'}
+ ],new AbortController().signal,()=>{},[{name:'lookup',description:'lookup',parameters:{type:'object'}}]);
+ assert.equal(result.text,'Corrected response');
+});
+
 test('OpenAI-compatible protocol sends authenticated request and joins fragmented UTF-8 SSE text with usage', async t => {
   let seen = false;
   const baseUrl = await fixture(t, (request, response, body) => {

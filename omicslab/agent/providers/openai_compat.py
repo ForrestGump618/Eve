@@ -36,7 +36,7 @@ class OpenAICompatProvider(BaseProvider):
             headers["Authorization"] = f"Bearer {key}"
         if self.target.provider == "openrouter":
             headers["HTTP-Referer"] = "https://github.com/omicslab/omicslab"
-            headers["X-Title"] = "Suwen"
+            headers["X-Title"] = "Eve"
         return headers
 
     async def stream_chat(

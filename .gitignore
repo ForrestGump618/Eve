@@ -103,3 +103,11 @@ desktop/dist-*/
 # Raw live model traces are machine-local
 /docs/verification/harness-20261025/release-*.json
 /docs/verification/harness-20261025/quota-check.json
+
+# Raw Eve test records stay local; curated summaries are published separately.
+/docs/verification/eve-1.0/*-ui-*.json
+/docs/verification/eve-1.0/research-debug.png
+/docs/verification/eve-1.0/*.png
+!/docs/verification/eve-1.0/workbench-default-light.png
+!/docs/verification/eve-1.0/research-full-live.png
+/docs/verification/harness-20261025/eve-final.json

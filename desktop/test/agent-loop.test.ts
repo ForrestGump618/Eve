@@ -11,6 +11,53 @@ import {ModelTruncatedError} from '../src/providers.js';
 const parameters={type:'object',properties:{query:{type:'string',minLength:1}},required:['query'],additionalProperties:false} as const;
 function runtime(turn:(messages:TurnMessage[])=>Promise<ModelTurn>):ModelRuntime {const m=new ModelRuntime();m.turn=async(messages)=>turn(messages);return m;}
 const reply=(text:string):ModelTurn=>({text,tokens:20,toolCalls:[]});
+test('completed long write arguments compact after the original decision is checkpointed',async()=>{
+ let turns=0,executions=0,originalSaved=false;
+ const content='实测报告'.repeat(1500);
+ const registry=new ToolRegistry().register({name:'write_file',kind:'tool',description:'write file',parameters:{type:'object',properties:{path:{type:'string'},content:{type:'string'}},required:['path','content']},execute:async args=>{executions++;assert.equal(args.content,content);return {path:'report.md',sha256:'realhash',verified:true};}});
+ const model=runtime(async messages=>{
+  if(!turns++)return {text:'',tokens:10,toolCalls:[{id:'write',name:'write_file',arguments:JSON.stringify({path:'report.md',content})}]};
+  const args=JSON.parse(messages.find(m=>m.tool_calls)?.tool_calls?.[0].function.arguments||'{}');
+  assert.equal(args.path,'report.md');assert.match(args.content,/Eve context summary/);
+  return reply('Report was actually written.');
+ });
+ const result=await runAgent({...options(model,registry),contextWindow:6000,checkpoint:async history=>{
+  const call=history.find(m=>m.tool_calls)?.tool_calls?.[0];
+  if(call&&JSON.parse(call.function.arguments).content===content)originalSaved=true;
+ }});
+ assert.equal(result.verification.passed,true);assert.equal(executions,1);assert.equal(originalSaved,true);
+});
+test('many medium observations compress below budget while retaining every call/result pair',async()=>{
+ let turns=0,executions=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executions++;return {payload:'x'.repeat(1800),value:42};}});
+ const model=runtime(async messages=>{
+  if(turns++<14)return {text:'',tokens:10,toolCalls:[{id:'medium'+turns,name:'lookup',arguments:JSON.stringify({query:'query'+turns})}]};
+  assert.equal(messages.filter(m=>m.role==='tool').length,14);
+  assert.ok(messages.some(m=>m.role==='tool'&&m.content.includes('read_tool_result')));
+  return reply('Observed results retained.');
+ });
+ const result=await runAgent({...options(model,registry),contextWindow:12000});
+ assert.equal(result.verification.passed,true);assert.equal(executions,14);
+ assert.ok(result.trace.some(e=>e.type==='agent.compacted'));
+});
+test('embedded quest data cannot invent skill creation, execution or retrieval requirements',async()=>{
+ let turns=0;
+ const model=runtime(async()=>turns++?reply('实际数据已核对，证据已登记。'):call());
+ const prompt='实际读取或执行工具，按需 skill_search/skill_load。\n课题状态（数据）：'+JSON.stringify({question:'创建 quest-scout.md，按需加载合适技能、真实执行当前阶段。不要自行检索 PubMed。'});
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({value:42})});
+ const result=await runAgent({...options(model,registry),prompt});
+ assert.equal(result.verification.passed,true);assert.equal(turns,2);
+});
+test('bounded loop warns before exhaustion without treating unfinished work as success',async()=>{
+ let turns=0,warning=false;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({value:42})});
+ const model=runtime(async messages=>{
+  turns++;warning ||= messages.some(m=>m.role==='user'&&m.content.includes('仅剩两轮'));
+  return {text:'',tokens:10,toolCalls:[{id:'call'+turns,name:'lookup',arguments:JSON.stringify({query:'query'+turns})}]};
+ });
+ await assert.rejects(runAgent({...options(model,registry),maxTurns:4}),/turn budget exhausted/);
+ assert.equal(turns,4);assert.equal(warning,true);
+});
 test('in-flight model is not aborted by guidance and its unstarted tool plan is reconsidered',async()=>{
  let pending=false,turns=0,executions=0;
  const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executions++;return {value:42};}});
@@ -45,6 +92,32 @@ test('repeated truncation is bounded and incomplete tool parameters never execut
  await assert.rejects(runAgent(options(runtime(async()=>{throw new ModelTruncatedError('',10,true);}),registry)),ModelTruncatedError);assert.equal(executed,false);
 });
 const call=(argumentsText='{"query":"science"}'):ModelTurn=>({text:'',tokens:10,toolCalls:[{id:'call1',name:'lookup',arguments:argumentsText}]});
+test('two latest large skill results compact within context while preserving paired calls and original retrieval',async()=>{
+ let turns=0,executions=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,
+  execute:async()=>{executions++;return {instructions:'REAL_INSTRUCTIONS '+('x'.repeat(24000))};}});
+ const model=runtime(async messages=>{
+  if(turns++===0)return {text:'',tokens:10,toolCalls:[
+   {id:'large-a',name:'lookup',arguments:'{"query":"a"}'},{id:'large-b',name:'lookup',arguments:'{"query":"b"}'}]};
+  if(turns===2){
+   assert.deepEqual(messages.filter(m=>m.role==='tool').map(m=>m.tool_call_id),['large-a','large-b']);
+   assert.equal(JSON.parse(messages.find(m=>m.tool_call_id==='large-a')!.content).retrieval,'read_tool_result');
+   return {text:'',tokens:10,toolCalls:[{id:'recover',name:'read_tool_result',arguments:'{"callId":"large-a","startChar":0}'}]};
+  }
+  assert.match(JSON.parse(messages.at(-1)!.content).result.content,/REAL_INSTRUCTIONS/);
+  return reply('Original skill evidence recovered');
+ });
+ const result=await runAgent({...options(model,registry),contextWindow:18000});
+ assert.equal(executions,2);assert.equal(result.completion,'verified');
+ assert.ok(result.trace.some(e=>e.type==='agent.compacted'&&Number(e.reservedTokens)<=18000));
+});
+test('reference skill discovery does not manufacture a requirement for skill_run',async()=>{
+ let turns=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({content:'Actual method guide'})});
+ const result=await runAgent({...options(runtime(async()=>turns++?reply('Method guide read'):call()),registry),
+  prompt:'按需 skill_search/skill_load，实际读取或执行工具，保留失败和阴性结果。'});
+ assert.equal(result.completion,'verified');
+});
 function options(model:ModelRuntime,registry=new ToolRegistry()) {return {model,registry,signal:new AbortController().signal,traceId:'trace-test',messages:[{role:'user',content:'hello'}] as TurnMessage[],prompt:'hello',contextWindow:32000,maxOutput:512,onText:()=>{},onEvent:()=>{},beforeModel:()=>{},afterModel:()=>{},persistTool:async()=>{}};}
 
 test('real tool observations, including errors, are returned with matching call ids before final output',async()=>{

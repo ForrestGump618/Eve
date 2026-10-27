@@ -1,15 +1,19 @@
-SuWen desktop 3.0.0-preview.1
-New desktop/ code is MIT licensed. The existing Python implementation in the
-parent repository retains its original Apache-2.0 license and notices.
-No KongMing code, assets, skills or binaries are distributed with this program.
-No DeepSeek Harness code is bundled in this preview.
-Electron includes Chromium/Node.js and separate third-party notices distributed
-in its runtime. js-tiktoken is MIT licensed; its tokenizer vocabulary is derived
-from tiktoken (MIT). See release dependency/SBOM reports for resolved versions.
+Eve desktop 1.0.0
+The Electron/TypeScript application is MIT licensed. The Python implementation
+retains its original Apache-2.0 license and module/API identifiers for compatibility.
+The shared skill library contains upstream reference instructions and resources.
+Pinned source commits, per-skill licenses and copyright notices are retained in
+skill-library/index.json and its content-addressed library.pack. Read a selected
+LICENSE resource through skill_read_resource. Import and omission decisions are
+recorded in skill-library/import-report.json. No upstream scripts run on installation.
 
+The research workflow adapts the stage/evidence mechanisms of ResearAI/DeepScientist
+(b36624417f0c6b8238ec02db37b94d6db2faa5b0, Apache-2.0) to Eve's existing RunService.
+There is no second DeepScientist runner. No ClawsGO binaries or assets are shipped.
 
-The optional compatibility workbench is bundled as original Apache-2.0 Python
-source under resources/legacy. Its original LICENSE is included. Python itself
-and its package dependencies are not bundled; users supply an interpreter with
-those dependencies. The new fixed workers and bridge adapter remain MIT.
+Electron includes Chromium/Node.js with their separate third-party notices.
 Resolved Node runtime license texts are under third-party-licenses/.
+Python itself and its dependencies are not bundled; the managed dependency setup
+uses an available interpreter. Original Python sources and LICENSE ship under
+resources/legacy. Renderers and workers use the existing isolation boundaries;
+subprocess isolation is not an operating-system security sandbox.

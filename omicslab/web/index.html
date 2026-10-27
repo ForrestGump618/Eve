@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ffffff" />
-    <meta name="description" content="素问 Suwen · 本地优先的 AI Agent 工作室：对话式智能体、Jupyter 内核、持久任务、技能包、远程工作区与科研证据门控。" />
-    <title>素问 Suwen · 本地优先的 AI Agent 工作室</title>
+    <meta name="description" content="Eve · 本地优先的 AI Agent 工作室：对话式智能体、Jupyter 内核、持久任务、技能包、远程工作区与科研证据门控。" />
+    <title>Eve · 本地优先的 AI Agent 工作室</title>
     <link rel="icon" href="assets/favicon.svg?v=2.1.1" type="image/svg+xml" />
     <link rel="stylesheet" href="css/base.css?v=2.1.1" />
     <link rel="stylesheet" href="css/components.css?v=2.1.1" />
@@ -43,20 +43,20 @@
         padding: 24px;
         text-align: center;
         background:
-          radial-gradient(900px 520px at 50% 18%, rgba(139, 92, 246, 0.16), transparent 60%),
-          var(--bg, #0f1117);
-        color: var(--text, #e9ecf5);
+
+          var(--bg, #f5f5f5);
+        color: var(--text, #252525);
         font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
       }
       .boot-splash svg {
-        filter: drop-shadow(0 8px 26px rgba(139, 92, 246, 0.45));
+        filter: none;
         animation: boot-float 2.8s ease-in-out infinite;
       }
       .boot-splash-title {
         font-size: 19px;
         font-weight: 700;
         letter-spacing: 0.03em;
-        background: linear-gradient(100deg, #e9ecf5 30%, #a78bfa 72%, #22d3ee);
+        background: #333333;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -78,7 +78,7 @@
         width: 46%;
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, #a78bfa, #22d3ee);
+        background: #555555;
         animation: boot-slide 1.15s ease-in-out infinite;
       }
       .boot-splash.is-error .boot-splash-bar {
@@ -120,15 +120,15 @@
         <svg width="56" height="56" viewBox="0 0 48 48" fill="none" aria-hidden="true">
           <defs>
             <linearGradient id="boot-grad" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#a78bfa" />
-              <stop offset="1" stop-color="#22d3ee" />
+              <stop stop-color="#555555" />
+              <stop offset="1" stop-color="#777777" />
             </linearGradient>
           </defs>
           <path d="M15 5c0 10 18 14 18 24S15 39 15 43" stroke="url(#boot-grad)" stroke-width="3.4" stroke-linecap="round" />
           <path d="M33 5c0 10-18 14-18 24s18 10 18 14" stroke="url(#boot-grad)" stroke-width="3.4" stroke-linecap="round" />
           <path d="M18 14h12M16.5 22h15M18 30h12" stroke="url(#boot-grad)" stroke-width="2.6" stroke-linecap="round" />
         </svg>
-        <div class="boot-splash-title">素问 Suwen</div>
+        <div class="boot-splash-title">Eve</div>
         <div class="boot-splash-sub">本地优先的 AI Agent 工作室 · 正在加载界面</div>
         <div class="boot-splash-bar" aria-hidden="true"></div>
         <div class="boot-splash-error" id="boot-error">
@@ -139,7 +139,7 @@
 
     <noscript>
       <div style="padding: 40px; color: #e9ecf5; background: #0f1117; min-height: 100vh; font-family: sans-serif">
-        <h1 style="font-size: 20px">素问 Suwen 需要启用 JavaScript</h1>
+        <h1 style="font-size: 20px">Eve 需要启用 JavaScript</h1>
         <p style="color: #aab4ca; font-size: 13px">
           界面使用原生 ES modules 构建，请在浏览器中启用 JavaScript 后刷新页面。
         </p>

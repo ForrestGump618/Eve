@@ -1,0 +1,1348 @@
+{
+  "product-ui-controlled-ssh-packaged.json": {
+    "kind": "controlled model protocol fixture + real files and Python worker; not real-model acceptance",
+    "packaged": true,
+    "at": "2026-10-27T04:14:16.481Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "no-chat-execution-errors",
+        "ok": true
+      },
+      {
+        "name": "actual-file-and-skill-executed",
+        "ok": true
+      },
+      {
+        "name": "truncated-turn-recovers",
+        "ok": true
+      },
+      {
+        "name": "one-collapsed-tool-group",
+        "ok": true
+      },
+      {
+        "name": "all-tool-cards-settled",
+        "ok": true
+      },
+      {
+        "name": "tool-details-expand",
+        "ok": true
+      },
+      {
+        "name": "raw-tool-result-accessible",
+        "ok": true
+      },
+      {
+        "name": "flat-user-message",
+        "ok": true,
+        "detail": {
+          "image": "none",
+          "shadow": "none"
+        }
+      },
+      {
+        "name": "composer-position-stable",
+        "ok": true,
+        "detail": {
+          "before": 876,
+          "after": 876
+        }
+      },
+      {
+        "name": "same-installed-skill-catalog-in-ui",
+        "ok": true
+      },
+      {
+        "name": "capability-center-shares-catalog",
+        "ok": true
+      },
+      {
+        "name": "skill-toggle-shared-with-chat",
+        "ok": true
+      },
+      {
+        "name": "skill-library-renders-one-bounded-page",
+        "ok": true
+      },
+      {
+        "name": "formal-ui-installs-discovered-skill",
+        "ok": true
+      },
+      {
+        "name": "capability-dialogs-do-not-stack",
+        "ok": true,
+        "detail": [
+          {
+            "layer": "4",
+            "title": "安装 MCP 服务",
+            "closing": false
+          }
+        ]
+      },
+      {
+        "name": "formal-ui-installs-and-discovers-mcp-tool",
+        "ok": true
+      },
+      {
+        "name": "formal-ui-mcp-is-callable-by-unified-agent",
+        "ok": true
+      },
+      {
+        "name": "sidebar-collapses",
+        "ok": true
+      },
+      {
+        "name": "tool-history-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "permission-selection-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "workspace-selection-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "raw-tool-preview-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "run-details-survive-reload",
+        "ok": true
+      },
+      {
+        "name": "python-projection-and-harness-both-succeeded",
+        "ok": true
+      },
+      {
+        "name": "review-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "review-no-approval-popup",
+        "ok": true
+      },
+      {
+        "name": "review-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "full-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "full-no-approval-popup",
+        "ok": true
+      },
+      {
+        "name": "full-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "askApprove-shows-real-approval",
+        "ok": true
+      },
+      {
+        "name": "multiple-approvals-share-one-group",
+        "ok": true
+      },
+      {
+        "name": "approval-events-do-not-create-toast-stacks",
+        "ok": true
+      },
+      {
+        "name": "askApprove-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "askApprove-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "askDeny-shows-real-approval",
+        "ok": true
+      },
+      {
+        "name": "askDeny-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "askDeny-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "resume-original-side-effect-committed",
+        "ok": true
+      },
+      {
+        "name": "resume-does-not-repeat-completed-write",
+        "ok": true
+      },
+      {
+        "name": "resume-trace-links-original-checkpoint",
+        "ok": true
+      },
+      {
+        "name": "resume-has-no-second-write-call",
+        "ok": true
+      },
+      {
+        "name": "candidate-can-edit-send-withdraw-and-delete",
+        "ok": true
+      },
+      {
+        "name": "annotation-preserves-selected-output",
+        "ok": true
+      },
+      {
+        "name": "guidance-does-not-abort-in-flight-model",
+        "ok": true
+      },
+      {
+        "name": "guidance-applied-to-same-running-task",
+        "ok": true
+      },
+      {
+        "name": "guidance-trace-confirms-context-delivery",
+        "ok": true
+      },
+      {
+        "name": "workspace-switch-is-enabled-during-reply",
+        "ok": true
+      },
+      {
+        "name": "two-workspaces-run-concurrently",
+        "ok": true
+      },
+      {
+        "name": "both-background-tasks-finish",
+        "ok": true
+      },
+      {
+        "name": "concurrent-tools-stay-in-original-workspaces",
+        "ok": true
+      },
+      {
+        "name": "concurrent-model-requests-keep-independent-selection",
+        "ok": true
+      },
+      {
+        "name": "original-conversation-restores-own-model-and-permission",
+        "ok": true
+      },
+      {
+        "name": "switch-back-shows-original-stream-only",
+        "ok": true
+      },
+      {
+        "name": "second-conversation-restores-own-result",
+        "ok": true
+      },
+      {
+        "name": "second-conversation-restores-own-model-and-permission",
+        "ok": true
+      },
+      {
+        "name": "SSH-workspace-selected-in-UI",
+        "ok": true
+      },
+      {
+        "name": "SSH-actual-mean-differs-from-local-twin",
+        "ok": true
+      },
+      {
+        "name": "SSH-tool-target-is-remote",
+        "ok": true
+      },
+      {
+        "name": "SSH-skill-executes-on-selected-host",
+        "ok": true
+      },
+      {
+        "name": "SSH-local-twin-untouched",
+        "ok": true
+      },
+      {
+        "name": "1000-message-history-renders-at-most-80",
+        "ok": true
+      },
+      {
+        "name": "older-history-is-accessible",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 75,
+    "total": 75
+  },
+  "product-ui-controlled.json": {
+    "kind": "controlled model protocol fixture + real files and Python worker; not real-model acceptance",
+    "packaged": false,
+    "at": "2026-10-27T03:10:41.949Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "no-chat-execution-errors",
+        "ok": true
+      },
+      {
+        "name": "actual-file-and-skill-executed",
+        "ok": true
+      },
+      {
+        "name": "truncated-turn-recovers",
+        "ok": true
+      },
+      {
+        "name": "one-collapsed-tool-group",
+        "ok": true
+      },
+      {
+        "name": "all-tool-cards-settled",
+        "ok": true
+      },
+      {
+        "name": "tool-details-expand",
+        "ok": true
+      },
+      {
+        "name": "raw-tool-result-accessible",
+        "ok": true
+      },
+      {
+        "name": "flat-user-message",
+        "ok": true,
+        "detail": {
+          "image": "none",
+          "shadow": "none"
+        }
+      },
+      {
+        "name": "composer-position-stable",
+        "ok": true,
+        "detail": {
+          "before": 876,
+          "after": 876
+        }
+      },
+      {
+        "name": "same-installed-skill-catalog-in-ui",
+        "ok": true
+      },
+      {
+        "name": "capability-center-shares-catalog",
+        "ok": true
+      },
+      {
+        "name": "skill-toggle-shared-with-chat",
+        "ok": true
+      },
+      {
+        "name": "skill-library-renders-one-bounded-page",
+        "ok": true
+      },
+      {
+        "name": "formal-ui-installs-discovered-skill",
+        "ok": true
+      },
+      {
+        "name": "capability-dialogs-do-not-stack",
+        "ok": true,
+        "detail": [
+          {
+            "layer": "4",
+            "title": "安装 MCP 服务",
+            "closing": false
+          }
+        ]
+      },
+      {
+        "name": "formal-ui-installs-and-discovers-mcp-tool",
+        "ok": true
+      },
+      {
+        "name": "formal-ui-mcp-is-callable-by-unified-agent",
+        "ok": true
+      },
+      {
+        "name": "sidebar-collapses",
+        "ok": true
+      },
+      {
+        "name": "tool-history-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "permission-selection-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "workspace-selection-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "raw-tool-preview-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "run-details-survive-reload",
+        "ok": true
+      },
+      {
+        "name": "python-projection-and-harness-both-succeeded",
+        "ok": true
+      },
+      {
+        "name": "review-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "review-no-approval-popup",
+        "ok": true
+      },
+      {
+        "name": "review-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "full-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "full-no-approval-popup",
+        "ok": true
+      },
+      {
+        "name": "full-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "askApprove-shows-real-approval",
+        "ok": true
+      },
+      {
+        "name": "multiple-approvals-share-one-group",
+        "ok": true
+      },
+      {
+        "name": "approval-events-do-not-create-toast-stacks",
+        "ok": true
+      },
+      {
+        "name": "askApprove-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "askApprove-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "askDeny-shows-real-approval",
+        "ok": true
+      },
+      {
+        "name": "askDeny-execution-enforced",
+        "ok": true
+      },
+      {
+        "name": "askDeny-task-status-truthful",
+        "ok": true
+      },
+      {
+        "name": "resume-original-side-effect-committed",
+        "ok": true
+      },
+      {
+        "name": "resume-does-not-repeat-completed-write",
+        "ok": true
+      },
+      {
+        "name": "resume-trace-links-original-checkpoint",
+        "ok": true
+      },
+      {
+        "name": "resume-has-no-second-write-call",
+        "ok": true
+      },
+      {
+        "name": "candidate-can-edit-send-withdraw-and-delete",
+        "ok": true
+      },
+      {
+        "name": "annotation-preserves-selected-output",
+        "ok": true
+      },
+      {
+        "name": "guidance-does-not-abort-in-flight-model",
+        "ok": true
+      },
+      {
+        "name": "guidance-applied-to-same-running-task",
+        "ok": true
+      },
+      {
+        "name": "guidance-trace-confirms-context-delivery",
+        "ok": true
+      },
+      {
+        "name": "workspace-switch-is-enabled-during-reply",
+        "ok": true
+      },
+      {
+        "name": "two-workspaces-run-concurrently",
+        "ok": true
+      },
+      {
+        "name": "both-background-tasks-finish",
+        "ok": true
+      },
+      {
+        "name": "concurrent-tools-stay-in-original-workspaces",
+        "ok": true
+      },
+      {
+        "name": "concurrent-model-requests-keep-independent-selection",
+        "ok": true
+      },
+      {
+        "name": "original-conversation-restores-own-model-and-permission",
+        "ok": true
+      },
+      {
+        "name": "switch-back-shows-original-stream-only",
+        "ok": true
+      },
+      {
+        "name": "second-conversation-restores-own-result",
+        "ok": true
+      },
+      {
+        "name": "second-conversation-restores-own-model-and-permission",
+        "ok": true
+      },
+      {
+        "name": "1000-message-history-renders-at-most-80",
+        "ok": true
+      },
+      {
+        "name": "older-history-is-accessible",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 70,
+    "total": 70
+  },
+  "product-ui-live-ssh-packaged.json": {
+    "kind": "real model + real files and worker",
+    "packaged": true,
+    "at": "2026-10-27T04:07:39.519Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "no-chat-execution-errors",
+        "ok": true
+      },
+      {
+        "name": "actual-file-and-skill-executed",
+        "ok": true
+      },
+      {
+        "name": "one-collapsed-tool-group",
+        "ok": true
+      },
+      {
+        "name": "all-tool-cards-settled",
+        "ok": true
+      },
+      {
+        "name": "tool-details-expand",
+        "ok": true
+      },
+      {
+        "name": "raw-tool-result-accessible",
+        "ok": true
+      },
+      {
+        "name": "flat-user-message",
+        "ok": true,
+        "detail": {
+          "image": "none",
+          "shadow": "none"
+        }
+      },
+      {
+        "name": "composer-position-stable",
+        "ok": true,
+        "detail": {
+          "before": 876,
+          "after": 876
+        }
+      },
+      {
+        "name": "same-installed-skill-catalog-in-ui",
+        "ok": true
+      },
+      {
+        "name": "capability-center-shares-catalog",
+        "ok": true
+      },
+      {
+        "name": "skill-toggle-shared-with-chat",
+        "ok": true
+      },
+      {
+        "name": "sidebar-collapses",
+        "ok": true
+      },
+      {
+        "name": "tool-history-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "permission-selection-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "workspace-selection-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "raw-tool-preview-survives-reload",
+        "ok": true
+      },
+      {
+        "name": "run-details-survive-reload",
+        "ok": true
+      },
+      {
+        "name": "python-projection-and-harness-both-succeeded",
+        "ok": true
+      },
+      {
+        "name": "SSH-workspace-selected-in-UI",
+        "ok": true
+      },
+      {
+        "name": "SSH-actual-mean-differs-from-local-twin",
+        "ok": true
+      },
+      {
+        "name": "SSH-tool-target-is-remote",
+        "ok": true
+      },
+      {
+        "name": "SSH-skill-executes-on-selected-host",
+        "ok": true
+      },
+      {
+        "name": "SSH-local-twin-untouched",
+        "ok": true
+      },
+      {
+        "name": "1000-message-history-renders-at-most-80",
+        "ok": true
+      },
+      {
+        "name": "older-history-is-accessible",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 37,
+    "total": 37
+  },
+  "research-full-ui-live-packaged.json": {
+    "kind": "real model + real files and worker",
+    "packaged": true,
+    "at": "2026-10-27T04:07:39.434Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "research-entry-opens-concrete-module-map",
+        "ok": true
+      },
+      {
+        "name": "quest-form-persists-seven-stages",
+        "ok": true
+      },
+      {
+        "name": "real-api-rejects-skipping-baseline",
+        "ok": true
+      },
+      {
+        "name": "launched-stage-uses-real-tools-and-records-artifact",
+        "ok": true
+      },
+      {
+        "name": "research-agent-final-answer-passes-harness-verification",
+        "ok": true
+      },
+      {
+        "name": "recorded-evidence-is-visible-with-hash",
+        "ok": true
+      },
+      {
+        "name": "real-model-baseline-passes-final-verification",
+        "ok": true
+      },
+      {
+        "name": "real-model-baseline-actually-executes-code",
+        "ok": true
+      },
+      {
+        "name": "real-model-hypothesis-passes-final-verification",
+        "ok": true
+      },
+      {
+        "name": "real-model-experiment-passes-final-verification",
+        "ok": true
+      },
+      {
+        "name": "real-model-experiment-actually-executes-code",
+        "ok": true
+      },
+      {
+        "name": "real-model-analysis-passes-final-verification",
+        "ok": true
+      },
+      {
+        "name": "real-model-write-passes-final-verification",
+        "ok": true
+      },
+      {
+        "name": "actual-classification-baseline-and-experiment-match-data",
+        "ok": true
+      },
+      {
+        "name": "metric-comparison-visible",
+        "ok": true
+      },
+      {
+        "name": "finalize-without-human-approval-keeps-dialog",
+        "ok": true
+      },
+      {
+        "name": "human-reviewed-closure-still-labels-science-unverified",
+        "ok": true
+      },
+      {
+        "name": "quest-artifact-provenance-has-real-run",
+        "ok": true
+      },
+      {
+        "name": "quest-survives-page-reload",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 31,
+    "total": 31
+  },
+  "research-ui-controlled-packaged.json": {
+    "kind": "controlled model protocol fixture + real files and Python worker; not real-model acceptance",
+    "packaged": true,
+    "at": "2026-10-27T03:25:34.887Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "research-entry-opens-concrete-module-map",
+        "ok": true
+      },
+      {
+        "name": "quest-form-persists-seven-stages",
+        "ok": true
+      },
+      {
+        "name": "real-api-rejects-skipping-baseline",
+        "ok": true
+      },
+      {
+        "name": "launched-stage-uses-real-tools-and-records-artifact",
+        "ok": true
+      },
+      {
+        "name": "research-agent-final-answer-passes-harness-verification",
+        "ok": true
+      },
+      {
+        "name": "recorded-evidence-is-visible-with-hash",
+        "ok": true
+      },
+      {
+        "name": "metric-comparison-visible",
+        "ok": true
+      },
+      {
+        "name": "finalize-without-human-approval-keeps-dialog",
+        "ok": true
+      },
+      {
+        "name": "human-reviewed-closure-still-labels-science-unverified",
+        "ok": true
+      },
+      {
+        "name": "quest-artifact-provenance-has-real-run",
+        "ok": true
+      },
+      {
+        "name": "quest-survives-page-reload",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 23,
+    "total": 23
+  },
+  "research-ui-controlled.json": {
+    "kind": "controlled model protocol fixture + real files and Python worker; not real-model acceptance",
+    "packaged": false,
+    "at": "2026-10-27T04:05:36.993Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "research-entry-opens-concrete-module-map",
+        "ok": true
+      },
+      {
+        "name": "quest-form-persists-seven-stages",
+        "ok": true
+      },
+      {
+        "name": "real-api-rejects-skipping-baseline",
+        "ok": true
+      },
+      {
+        "name": "launched-stage-uses-real-tools-and-records-artifact",
+        "ok": true
+      },
+      {
+        "name": "research-agent-final-answer-passes-harness-verification",
+        "ok": true
+      },
+      {
+        "name": "recorded-evidence-is-visible-with-hash",
+        "ok": true
+      },
+      {
+        "name": "metric-comparison-visible",
+        "ok": true
+      },
+      {
+        "name": "finalize-without-human-approval-keeps-dialog",
+        "ok": true
+      },
+      {
+        "name": "human-reviewed-closure-still-labels-science-unverified",
+        "ok": true
+      },
+      {
+        "name": "quest-artifact-provenance-has-real-run",
+        "ok": true
+      },
+      {
+        "name": "quest-survives-page-reload",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 23,
+    "total": 23
+  },
+  "research-ui-live-packaged.json": {
+    "kind": "real model + real files and worker",
+    "packaged": true,
+    "at": "2026-10-27T03:29:19.696Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "research-entry-opens-concrete-module-map",
+        "ok": true
+      },
+      {
+        "name": "quest-form-persists-seven-stages",
+        "ok": true
+      },
+      {
+        "name": "real-api-rejects-skipping-baseline",
+        "ok": true
+      },
+      {
+        "name": "launched-stage-uses-real-tools-and-records-artifact",
+        "ok": true
+      },
+      {
+        "name": "research-agent-final-answer-passes-harness-verification",
+        "ok": true
+      },
+      {
+        "name": "recorded-evidence-is-visible-with-hash",
+        "ok": true
+      },
+      {
+        "name": "metric-comparison-visible",
+        "ok": true
+      },
+      {
+        "name": "finalize-without-human-approval-keeps-dialog",
+        "ok": true
+      },
+      {
+        "name": "human-reviewed-closure-still-labels-science-unverified",
+        "ok": true
+      },
+      {
+        "name": "quest-artifact-provenance-has-real-run",
+        "ok": true
+      },
+      {
+        "name": "quest-survives-page-reload",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 23,
+    "total": 23
+  },
+  "research-ui-live.json": {
+    "kind": "real model + real files and worker",
+    "packaged": false,
+    "at": "2026-10-27T03:21:29.778Z",
+    "error": null,
+    "checks": [
+      {
+        "name": "home-is-full-unified-workbench",
+        "ok": true
+      },
+      {
+        "name": "home-has-one-workspace-sidebar",
+        "ok": true
+      },
+      {
+        "name": "formal-startup-has-only-one-window",
+        "ok": true
+      },
+      {
+        "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "workspace-picker-selects-real-directory",
+        "ok": true
+      },
+      {
+        "name": "default-light-theme",
+        "ok": true
+      },
+      {
+        "name": "three-permission-modes",
+        "ok": true
+      },
+      {
+        "name": "project-files-visible",
+        "ok": true
+      },
+      {
+        "name": "single-sidebar-in-chat",
+        "ok": true
+      },
+      {
+        "name": "no-brand-subtitle",
+        "ok": true
+      },
+      {
+        "name": "desktop-lifecycle-preload-is-restricted",
+        "ok": true
+      },
+      {
+        "name": "research-entry-opens-concrete-module-map",
+        "ok": true
+      },
+      {
+        "name": "quest-form-persists-seven-stages",
+        "ok": true
+      },
+      {
+        "name": "real-api-rejects-skipping-baseline",
+        "ok": true
+      },
+      {
+        "name": "launched-stage-uses-real-tools-and-records-artifact",
+        "ok": true
+      },
+      {
+        "name": "research-agent-final-answer-passes-harness-verification",
+        "ok": true
+      },
+      {
+        "name": "recorded-evidence-is-visible-with-hash",
+        "ok": true
+      },
+      {
+        "name": "metric-comparison-visible",
+        "ok": true
+      },
+      {
+        "name": "finalize-without-human-approval-keeps-dialog",
+        "ok": true
+      },
+      {
+        "name": "human-reviewed-closure-still-labels-science-unverified",
+        "ok": true
+      },
+      {
+        "name": "quest-artifact-provenance-has-real-run",
+        "ok": true
+      },
+      {
+        "name": "quest-survives-page-reload",
+        "ok": true
+      },
+      {
+        "name": "no-renderer-errors",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "passed": 23,
+    "total": 23
+  }
+}

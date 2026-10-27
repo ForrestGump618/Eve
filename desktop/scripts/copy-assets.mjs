@@ -3,6 +3,7 @@ import { join } from 'node:path';
 mkdirSync('dist/ui', {recursive:true});
 cpSync('ui','dist/ui',{recursive:true});
 cpSync('bundled-skills','dist/bundled-skills',{recursive:true});
+cpSync('skill-library','dist/skill-library',{recursive:true});
 // main lives under src/ because tests and application share one typecheck.
 cpSync('src-entry.cjs','dist/main.js');
 // Offline renderers for Markdown math/diagrams (generated into the build, not committed).

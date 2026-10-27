@@ -12,8 +12,10 @@ import { WorkbenchManager } from './workbench.js';
 import {WindowLifecycle} from './window-lifecycle.js';
 
 const here=dirname(fileURLToPath(import.meta.url));
-app.setName('SuWen');
-if(process.env.SUWEN_TEST_HOME)app.setPath('userData',resolve(process.env.SUWEN_TEST_HOME));
+app.setName('Eve');
+// Adopt existing data in place; preserve history, settings and encrypted credentials.
+const legacyData=join(app.getPath('appData'),'SuWen');
+app.setPath('userData',process.env.SUWEN_TEST_HOME?resolve(process.env.SUWEN_TEST_HOME):existsSync(legacyData)?legacyData:join(app.getPath('appData'),'Eve'));
 if(!app.requestSingleInstanceLock())app.quit();
 let win:BrowserWindow|null=null,connection:Connection|null=null;
 let researchWindow:BrowserWindow|null=null;
@@ -27,7 +29,7 @@ function daemonPythonPath():string{try{const value=JSON.parse(readFileSync(join(
 /** Managed, pinned Python dependency set for the legacy web workbench (never bundled credentials). */
 const workbenchDeps=process.env.SUWEN_WORKBENCH_DEPS?resolve(process.env.SUWEN_WORKBENCH_DEPS):join(app.getPath('userData'),'python-env');
 const workbench=new WorkbenchManager({home,depsDir:workbenchDeps,python:daemonPythonPath});
-export const lifecycle=new WindowLifecycle({path:join(app.getPath('userData'),'desktop-window.json'),icon:app.isPackaged?join(process.resourcesPath,'suwen.ico'):resolve(here,'../../assets/suwen.ico'),window:()=>researchWindow&&!researchWindow.isDestroyed()?researchWindow:win,
+export const lifecycle=new WindowLifecycle({path:join(app.getPath('userData'),'desktop-window.json'),icon:app.isPackaged?join(process.resourcesPath,'eve.ico'):resolve(here,'../../assets/eve.ico'),window:()=>researchWindow&&!researchWindow.isDestroyed()?researchWindow:win,
  active:async()=>{if(!connection)return 0;const snapshot=await rpc(connection,'snapshot');return snapshot.tasks.filter((t:any)=>!['completed','failed','cancelled'].includes(t.status)).length;},
  shutdown:async()=>{workbench.cancel();if(!connection)return;const old=connection;await rpc(old,'shutdown');for(let i=0;i<250;i++){await new Promise(r=>setTimeout(r,100));const current=readConnection(home);if(!current||current.pid!==old.pid){connection=null;return;}}throw new Error('运行时未在 25 秒内完成资源清理，请检查任务状态');},
  quit:()=>{quitting=true;app.quit();}});
@@ -145,10 +147,10 @@ async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  if(quitting)return {ok:false};
  if(researchWindow&&!researchWindow.isDestroyed()){researchWindow.show();researchWindow.focus();return {ok:true};}
  const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
- const window=new BrowserWindow({width:1600,height:1000,minWidth:980,minHeight:680,title:'素问 · SuWen',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},backgroundColor:'#eef1f6',show:!process.argv.includes('--background'),webPreferences:{preload:join(here,'desktop-preload.cjs'),session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ const window=new BrowserWindow({width:1600,height:1000,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},backgroundColor:'#eef1f6',show:!process.argv.includes('--background'),webPreferences:{preload:join(here,'desktop-preload.cjs'),session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  researchWindow=window;
  lifecycle.attach(window);
- const startupPage=(message:string,failed=false)=>'data:text/html;charset=utf-8,'+encodeURIComponent(`<!doctype html><html lang="zh"><meta charset="utf-8"><style>body{margin:0;background:#eef1f6;color:#555;font:14px "Segoe UI",sans-serif}header{height:36px;-webkit-app-region:drag}main{margin:32px;padding:32px;border:1px solid #dfe3e9;border-radius:18px;background:#fff}h1{color:#303238;font-size:20px}p{white-space:pre-wrap;line-height:1.8}button{padding:8px 16px;border:1px solid #ddd;background:#f5f5f5;border-radius:6px;cursor:pointer}</style><header></header><main><h1>素问 Suwen</h1><p id="startup-status"></p>${failed?'<button onclick="window.suwenDesktop.retryStartup()">重试启动</button>':''}</main><script>document.getElementById('startup-status').textContent=${JSON.stringify(message).replaceAll('<','\\u003c')}</script></html>`);
+ const startupPage=(message:string,failed=false)=>'data:text/html;charset=utf-8,'+encodeURIComponent(`<!doctype html><html lang="zh"><meta charset="utf-8"><style>body{margin:0;background:#eef1f6;color:#555;font:14px "Segoe UI",sans-serif}header{height:36px;-webkit-app-region:drag}main{margin:32px;padding:32px;border:1px solid #dfe3e9;border-radius:18px;background:#fff}h1{color:#303238;font-size:20px}p{white-space:pre-wrap;line-height:1.8}button{padding:8px 16px;border:1px solid #ddd;background:#f5f5f5;border-radius:6px;cursor:pointer}</style><header></header><main><h1>Eve</h1><p id="startup-status"></p>${failed?'<button onclick="window.suwenDesktop.retryStartup()">重试启动</button>':''}</main><script>document.getElementById('startup-status').textContent=${JSON.stringify(message).replaceAll('<','\\u003c')}</script></html>`);
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);if(researchWindow===window)researchWindow=null;});
@@ -192,7 +194,7 @@ app.whenReady().then(async()=>{
   app.on('second-instance',()=>{lifecycle.show();});
   return;
  }
- win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'素问 · SuWen',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},show:process.argv.includes('--native'),backgroundColor:'#eef1f6',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},show:process.argv.includes('--native'),backgroundColor:'#eef1f6',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  const shell=win;
  lifecycle.attach(shell);
  shell.on('show',()=>{void pumpEvents();});
@@ -242,7 +244,7 @@ app.whenReady().then(async()=>{
     const ref=String(params?.ref??'');if(!/^[A-Za-z][A-Za-z0-9._:-]{0,199}$/.test(ref))throw new Error('凭据引用名无效');
     const map=readSecrets();delete map[ref];writeSecrets(map);await pushSecrets();return {ok:true,count:Object.keys(map).length};
    }
-   if(method==='support') {if(!connection)throw new Error('后台未连接');const snapshot=await rpc(connection,'snapshot');let doctor:any=null;let worker:any=null;try{doctor=await rpc(connection,'doctor.run');}catch{}try{worker=await rpc(connection,'worker.health');}catch{}const result=await dialog.showSaveDialog(win,{defaultPath:'SuWen-diagnostics.json',filters:[{name:'JSON',extensions:['json']}]});if(result.canceled||!result.filePath)return {cancelled:true};const redacted={version:app.getVersion(),generatedAt:new Date().toISOString(),health:snapshot.health,doctor,worker,tasks:snapshot.tasks.map((t:any)=>({id:t.id,status:t.status,version:t.version,steps:t.steps.map((s:any)=>({id:s.id,status:s.status,attempts:s.attempts,operationId:s.operationId})),eventCount:t.events.length}))};writeFileSync(result.filePath,JSON.stringify(redacted,null,2));return {ok:true};}
+   if(method==='support') {if(!connection)throw new Error('后台未连接');const snapshot=await rpc(connection,'snapshot');let doctor:any=null;let worker:any=null;try{doctor=await rpc(connection,'doctor.run');}catch{}try{worker=await rpc(connection,'worker.health');}catch{}const result=await dialog.showSaveDialog(win,{defaultPath:'Eve-diagnostics.json',filters:[{name:'JSON',extensions:['json']}]});if(result.canceled||!result.filePath)return {cancelled:true};const redacted={version:app.getVersion(),generatedAt:new Date().toISOString(),health:snapshot.health,doctor,worker,tasks:snapshot.tasks.map((t:any)=>({id:t.id,status:t.status,version:t.version,steps:t.steps.map((s:any)=>({id:s.id,status:s.status,attempts:s.attempts,operationId:s.operationId})),eventCount:t.events.length}))};writeFileSync(result.filePath,JSON.stringify(redacted,null,2));return {ok:true};}
    if(!exposed.has(method))throw new Error('Unsupported method');await ensureConnected();if(!connection)throw new Error('后台未连接，请在设置中重连');return await rpc(connection,method,params??{});
   }catch(err){throw new Error(safeError(err));}
  });

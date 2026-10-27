@@ -3,7 +3,7 @@ param([int]$Port = 8766, [switch]$LegacyWeb, [switch]$NativeConsole)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 if (-not $LegacyWeb) {
-    & (Join-Path $PSScriptRoot 'desktop\启动素问.ps1') -NativeConsole:$NativeConsole
+    & (Join-Path $PSScriptRoot 'desktop\启动Eve.ps1') -NativeConsole:$NativeConsole
     exit $LASTEXITCODE
 }
 $TaskPython = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'

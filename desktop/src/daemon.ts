@@ -177,6 +177,7 @@ const rsiRunner: EvalRunner = async (args) => {
 
 const toolServices = createToolServices({ store, home, clock: () => Date.now(), worker, secrets }, { runner: rsiRunner });
 await installBundledSkills(toolServices.skills,resolve(dirname(fileURLToPath(import.meta.url)),'../bundled-skills'));
+toolServices.skills.mountLibrary(resolve(dirname(fileURLToPath(import.meta.url)),'../skill-library'));
 
 const databases: DatabaseQuery = {
   query: (kind, query, signal) => queryViaMcp(kind, query, signal) as Promise<Json>,

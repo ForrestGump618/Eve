@@ -12,7 +12,7 @@ const packaged=process.argv.includes('--packaged');
 const formal=process.argv.includes('--formal');
 const packagedDirArg=process.argv.find(x=>x.startsWith('--packaged-dir='))?.slice(15);
 const packagedDir=packaged?(packagedDirArg?resolve(root,packagedDirArg):join(root,'release/product-100')):null;
-const executablePath=packaged?join(packagedDir,'SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe');
+const executablePath=packaged?join(packagedDir,'Eve.exe'):join(root,'node_modules/electron/dist/electron.exe');
 const moduleUrl=pathToFileURL(packaged?join(packagedDir,'resources/app/dist/src/main.js'):join(root,'dist/src/main.js')).href;
 const report={kind:'real Electron lifecycle; native-dialog choices injected',packaged,checks:[]};
 const check=(name,ok,detail)=>{report.checks.push({name,ok:Boolean(ok),detail});console.log((ok?'PASS ':'FAIL ')+name);};
@@ -54,6 +54,6 @@ try{
 finally{
  try{if(connection)await rpc(connection,'shutdown');}catch{}
  if(app)await app.evaluate(({app})=>app.exit(0)).catch(()=>{});
- writeFileSync(join(root,'../docs/verification/release-1.0/tray'+(formal?'-formal':'')+(packaged?'-packaged':'')+'.json'),JSON.stringify(report,null,2));
+ writeFileSync(join(root,'../docs/verification/eve-1.0/tray'+(formal?'-formal':'')+(packaged?'-packaged':'')+'.json'),JSON.stringify(report,null,2));
  process.exit(report.error||report.checks.some(x=>!x.ok)?1:0);
 }

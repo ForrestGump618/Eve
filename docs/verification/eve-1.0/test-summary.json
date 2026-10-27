@@ -1,0 +1,28 @@
+{
+  "typescript": {
+    "total": 266,
+    "passed": 265,
+    "skipped": 1,
+    "failed": 0,
+    "skipReason": "Windows symlink creation privilege unavailable"
+  },
+  "python": {
+    "passed": 581,
+    "failed": 0
+  },
+  "typecheck": "passed",
+  "rpcLivePublicDatabases": {
+    "passed": 42,
+    "failed": 0
+  },
+  "domQa": {
+    "passed": 18,
+    "failed": 0,
+    "warnings": 13
+  },
+  "limitations": [
+    "Local protocol fixtures are not real external MCP services.",
+    "Citation verification checks URL provenance, not semantic entailment.",
+    "Research demonstration uses synthetic data, not a scientific discovery."
+  ]
+}

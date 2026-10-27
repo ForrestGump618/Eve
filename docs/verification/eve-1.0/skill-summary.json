@@ -1,0 +1,38 @@
+{
+  "skills": 278,
+  "uniqueFiles": 2958,
+  "rawBytes": 26399820,
+  "packBytes": 9112964,
+  "sources": [
+    {
+      "repository": "K-Dense-AI/scientific-agent-skills",
+      "commit": "5f2bc0341354fd5590aef76a533ada1e1e5b4e62",
+      "license": "MIT"
+    },
+    {
+      "repository": "obra/superpowers",
+      "commit": "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b",
+      "license": "MIT"
+    },
+    {
+      "repository": "ResearAI/DeepScientist",
+      "commit": "b36624417f0c6b8238ec02db37b94d6db2faa5b0",
+      "license": "Apache-2.0"
+    },
+    {
+      "repository": "ComposioHQ/awesome-codex-skills",
+      "commit": "0930e1373789d2eda449039f7ac154b33031de89",
+      "license": null
+    },
+    {
+      "repository": "FreedomIntelligence/OpenClaw-Medical-Skills",
+      "commit": "b1f9b6e3306f8d870e23b2023057bf730090036f",
+      "license": null
+    }
+  ],
+  "dispositions": {
+    "not-redistributed": 1597,
+    "duplicate": 113
+  },
+  "baseSkills": 8
+}

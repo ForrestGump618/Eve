@@ -92,7 +92,7 @@ class MockProvider(BaseProvider):
                     "ax.plot(x, np.sin(x), label='sin(x)', lw=1.8)\n"
                     "ax.plot(x, np.cos(x), label='cos(x)', lw=1.8, alpha=0.85)\n"
                     "ax.set_xlabel('x'); ax.set_ylabel('value')\n"
-                    "ax.set_title('素问 Suwen mock demo figure')\n"
+                    "ax.set_title('Eve mock demo figure')\n"
                     "ax.legend(frameon=False); ax.spines[['top','right']].set_visible(False)\n"
                     "plt.tight_layout(); plt.show()\n"
                     "print('figure generated:', int(len(x)))\n"
@@ -123,7 +123,7 @@ class MockProvider(BaseProvider):
             return
 
         answer = (
-            "你好，我是 素问 Suwen 的演示助手（离线 mock 模型）。\n\n"
+            "你好，我是 Eve 的演示助手（离线 mock 模型）。\n\n"
             "我可以演示完整工作流：调用共享 Jupyter 内核执行 Python、读取工作区文件、"
             "生成图表并保存到 `figures/`、管理后台任务与记忆。\n\n"
             "试试这些指令：\n"
