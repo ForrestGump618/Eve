@@ -316,7 +316,11 @@ async def skill_detail(name: str, request: Request) -> dict[str, Any]:
         record = next((item for item in native.get("skills", []) if item["name"] == name), None)
         if record:
             loaded = await adapter.rpc("skill.load", id=record["id"])
-            return {**record,"runtime":"desktop","body":loaded["instructions"],"files":[],"when_to_use":"可执行脚本" if loaded.get("run") else "按需加载的工作流指引"}
+            body = re.sub(r"\A---\s*\n.*?\n---\s*\n", "", loaded["instructions"], count=1, flags=re.S)
+            return {**record,"runtime":"desktop","body":body,
+                    "files":loaded.get("resources", []), "run":loaded.get("run"),
+                    "preparation":loaded.get("preparation"), "adaptation":loaded.get("adaptation"),
+                    "when_to_use":"可执行脚本" if loaded.get("run") else "按需加载的工作流指引"}
     skill = state.skills.get(name)
     if skill is None:
         state.refresh_skills()

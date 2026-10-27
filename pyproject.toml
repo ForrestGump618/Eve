@@ -60,6 +60,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+science = ["uv==0.13.6"]
 bio = [
   "numpy>=1.26",
   "pandas>=2.1",

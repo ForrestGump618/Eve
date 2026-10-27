@@ -8,6 +8,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -221,3 +222,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[1] / "skill-library")
     args = parser.parse_args()
     build(args.cache, args.output)
+    science = args.cache / "science-skills-source"
+    if science.is_dir():
+        subprocess.run([sys.executable, str(Path(__file__).with_name("import-science-skills.py")),
+                        "--checkout", str(science), "--output", str(args.output)], check=True)

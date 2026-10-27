@@ -107,6 +107,28 @@ flowchart LR
 - 支持团队成员、依赖关系、独立模型、持久信箱和运行中引导。
 - 图库支持放大、下载、删除和勾画批注；批注可以作为后续任务的指导。
 
+### 科学工具
+
+预装 40 项科学技能，包含 65 个可执行脚本。可按问题选用变异解释、组织表达、蛋白结构、化合物活性和文献检索工具。技能按需加载，运行结果保存在当前本地或 SSH 工作区。
+
+<details>
+<summary>查看工具范围与使用方式</summary>
+
+| 研究方向 | 可用资源 |
+| --- | --- |
+| 基因组与遗传变异 | AlphaGenome、ClinVar、gnomAD、GTEx、Ensembl |
+| 蛋白与结构 | AlphaFold Database、UniProt、PDB、结构相似性搜索 |
+| 药物与靶点 | ChEMBL、PubChem、Open Targets |
+| 科学文献 | PubMed、Europe PMC、bioRxiv、OpenAlex、arXiv |
+
+在“能力中心 → Skills”搜索 `science-`，点击“查看与使用”阅读指引，再将技能加入工作台输入框。首次运行会检查依赖和必要凭据；没有凭据的公开查询仍可执行。安装依赖遵循当前任务的权限设置。
+
+例如：`使用 science-pubchem-database 查询阿司匹林的分子性质，将结果保存到当前工作区，并注明来源。`
+
+[完整使用说明](docs/SCIENCE-TOOLS.md)
+
+</details>
+
 <details>
 <summary>核心交互</summary>
 

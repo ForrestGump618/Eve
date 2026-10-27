@@ -1,0 +1,372 @@
+{
+  "date": "2026-10-28",
+  "version": "1.0.0",
+  "skills": {
+    "version": "1.3.1",
+    "commit": "4de6786171f1479026da5d3a00f110703c8ba35e",
+    "skills": 40,
+    "scripts": 65,
+    "resources": 333,
+    "packSha256": "1e31fd2b1266678f4fa921c3943828bfc11027f59571d955bd1881542cf42d36",
+    "packBytes": 9761927
+  },
+  "typecheck": "passed",
+  "typescript": {
+    "passed": 280,
+    "failed": 0,
+    "skipped": 1
+  },
+  "python": {
+    "passed": 629,
+    "failed": 0
+  },
+  "kernelAndPublicApi": {
+    "kind": "real local Jupyter kernel and upstream scripts; no model acceptance",
+    "checks": [
+      {
+        "name": "science-alphafold-database-fetch-and-analyze",
+        "passed": true,
+        "durationMs": 58
+      },
+      {
+        "name": "science-alphagenome-atlas-website-links",
+        "passed": true,
+        "durationMs": 71
+      },
+      {
+        "name": "science-alphagenome-single-variant-analysis",
+        "passed": true,
+        "durationMs": 136
+      },
+      {
+        "name": "science-alphagenome-variant-impact-score",
+        "passed": true,
+        "durationMs": 78
+      },
+      {
+        "name": "science-chembl-database",
+        "passed": true,
+        "durationMs": 55
+      },
+      {
+        "name": "science-clinical-trials-database",
+        "passed": true,
+        "durationMs": 66
+      },
+      {
+        "name": "science-clinvar-database",
+        "passed": true,
+        "durationMs": 56
+      },
+      {
+        "name": "science-credentials",
+        "passed": true,
+        "durationMs": 52
+      },
+      {
+        "name": "science-dbsnp-database",
+        "passed": true,
+        "durationMs": 76
+      },
+      {
+        "name": "science-embl-ebi-ols",
+        "passed": true,
+        "durationMs": 74
+      },
+      {
+        "name": "science-encode-ccres-database",
+        "passed": true,
+        "durationMs": 62
+      },
+      {
+        "name": "science-ensembl-database",
+        "passed": true,
+        "durationMs": 61
+      },
+      {
+        "name": "science-foldseek-structural-search",
+        "passed": true,
+        "durationMs": 52
+      },
+      {
+        "name": "science-gnomad-database",
+        "passed": true,
+        "durationMs": 53
+      },
+      {
+        "name": "science-gtex-database",
+        "passed": true,
+        "durationMs": 59
+      },
+      {
+        "name": "science-human-protein-atlas-database",
+        "passed": true,
+        "durationMs": 50
+      },
+      {
+        "name": "science-interpro-database",
+        "passed": true,
+        "durationMs": 81
+      },
+      {
+        "name": "science-jaspar-database",
+        "passed": true,
+        "durationMs": 58
+      },
+      {
+        "name": "science-literature-search-arxiv",
+        "passed": true,
+        "durationMs": 53
+      },
+      {
+        "name": "science-literature-search-biorxiv",
+        "passed": true,
+        "durationMs": 55
+      },
+      {
+        "name": "science-literature-search-europepmc",
+        "passed": true,
+        "durationMs": 63
+      },
+      {
+        "name": "science-literature-search-openalex",
+        "passed": true,
+        "durationMs": 106
+      },
+      {
+        "name": "science-ncbi-sequence-fetch",
+        "passed": true,
+        "durationMs": 74
+      },
+      {
+        "name": "science-openfda-database",
+        "passed": true,
+        "durationMs": 76
+      },
+      {
+        "name": "science-opentargets-database",
+        "passed": true,
+        "durationMs": 77
+      },
+      {
+        "name": "science-pdb-database",
+        "passed": true,
+        "durationMs": 65
+      },
+      {
+        "name": "science-predictingthepast",
+        "passed": true,
+        "durationMs": 272
+      },
+      {
+        "name": "science-protein-sequence-msa",
+        "passed": true,
+        "durationMs": 56
+      },
+      {
+        "name": "science-protein-sequence-similarity-search",
+        "passed": true,
+        "durationMs": 74
+      },
+      {
+        "name": "science-pubchem-database",
+        "passed": true,
+        "durationMs": 46
+      },
+      {
+        "name": "science-pubmed-database",
+        "passed": true,
+        "durationMs": 65
+      },
+      {
+        "name": "science-pymol",
+        "passed": true,
+        "durationMs": 49
+      },
+      {
+        "name": "science-quickgo-database",
+        "passed": true,
+        "durationMs": 47
+      },
+      {
+        "name": "science-reactome-database",
+        "passed": true,
+        "durationMs": 56
+      },
+      {
+        "name": "science-string-database",
+        "passed": true,
+        "durationMs": 49
+      },
+      {
+        "name": "science-ucsc-conservation-and-tfbs",
+        "passed": true,
+        "durationMs": 55
+      },
+      {
+        "name": "science-unibind-database",
+        "passed": true,
+        "durationMs": 51
+      },
+      {
+        "name": "science-uniprot-database",
+        "passed": true,
+        "durationMs": 71
+      },
+      {
+        "name": "science-uv",
+        "passed": true,
+        "durationMs": 40
+      },
+      {
+        "name": "science-workflow-skill-creator",
+        "passed": true,
+        "durationMs": 46
+      },
+      {
+        "name": "literature",
+        "passed": true,
+        "durationMs": 2264
+      },
+      {
+        "name": "compound",
+        "passed": true,
+        "durationMs": 1825
+      },
+      {
+        "name": "drug-activity",
+        "passed": true,
+        "durationMs": 2065
+      },
+      {
+        "name": "expression",
+        "passed": true,
+        "durationMs": 1306
+      },
+      {
+        "name": "protein",
+        "passed": true,
+        "durationMs": 2069
+      }
+    ]
+  },
+  "installedScientificUi": {
+    "kind": "controlled model protocol + real Electron/adapter/uv/public API; no paid-model acceptance",
+    "checks": [
+      {
+        "name": "scientific skill found in formal UI",
+        "passed": true
+      },
+      {
+        "name": "scientific runtime and optional credentials visible",
+        "passed": true
+      },
+      {
+        "name": "script resources visible",
+        "passed": true
+      },
+      {
+        "name": "required key shown as runtime requirement",
+        "passed": true
+      },
+      {
+        "name": "use skill action prefills workbench without sending a model request",
+        "passed": true
+      },
+      {
+        "name": "UI to harness to scientific API to verified file to UI",
+        "passed": true
+      },
+      {
+        "name": "only one formal window",
+        "passed": true
+      },
+      {
+        "name": "no renderer exceptions",
+        "passed": true
+      }
+    ],
+    "errors": []
+  },
+  "installedWindowLifecycle": {
+    "kind": "real Electron lifecycle and application modal UI",
+    "packaged": true,
+    "installed": true,
+    "checks": [
+      {
+        "name": "native-tray-created",
+        "ok": true
+      },
+      {
+        "name": "close-confirmation-is-in-existing-window",
+        "ok": true
+      },
+      {
+        "name": "repeated-close-keeps-single-dialog",
+        "ok": true
+      },
+      {
+        "name": "cancel-keeps-window-visible",
+        "ok": true
+      },
+      {
+        "name": "escape-cancels-close",
+        "ok": true
+      },
+      {
+        "name": "unknown-backend-status-keeps-app-open",
+        "ok": true
+      },
+      {
+        "name": "shutdown-failure-keeps-app-open",
+        "ok": true
+      },
+      {
+        "name": "close-hides-to-tray",
+        "ok": true
+      },
+      {
+        "name": "tray-keeps-daemon-and-task-alive",
+        "ok": true
+      },
+      {
+        "name": "remember-choice-is-persisted",
+        "ok": true
+      },
+      {
+        "name": "tray-show-restores-same-window",
+        "ok": true
+      },
+      {
+        "name": "unfinished-task-exit-can-continue-in-tray",
+        "ok": true
+      },
+      {
+        "name": "tray-quit-shows-window-for-confirmation",
+        "ok": true
+      },
+      {
+        "name": "active-task-requires-explicit-stop",
+        "ok": true
+      },
+      {
+        "name": "no-native-close-dialogs",
+        "ok": true
+      },
+      {
+        "name": "exit-drains-runtime-and-closes-app",
+        "ok": true,
+        "detail": {
+          "exitCode": 0,
+          "connectionFileRemaining": false
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Controlled model protocol is not paid-model quality acceptance.",
+    "No new production SSH scientific task acceptance.",
+    "AlphaGenome credentials and external structure-visualization runtimes not verified.",
+    "No matched performance baseline."
+  ]
+}

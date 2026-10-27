@@ -865,7 +865,7 @@ export async function mount(root, ctx = {}) {
   }
 
   function toolCardHtml(call, result) {
-    const names={web_search:'搜索网页',web_fetch:'读取网页',database_search:'检索文献',read_file:'读取文件',list_directory:'查看目录',search_files:'搜索文件',write_file:'保存文件',skill_search:'查找技能',skill_load:'加载技能',skill_read_resource:'读取技能参考',skill_run:'运行技能',skill_create:'创建技能',skill_install:'安装技能',workspace_info:'查看工作目录',mcp_tools:'发现 MCP 工具',mcp_call:'调用 MCP 工具'};
+    const names={web_search:'搜索网页',web_fetch:'读取网页',database_search:'检索文献',read_file:'读取文件',list_directory:'查看目录',search_files:'搜索文件',write_file:'保存文件',skill_search:'查找技能',skill_load:'加载技能',skill_read_resource:'读取技能参考',skill_prepare:'准备科学工具',skill_run:'运行技能',skill_create:'创建技能',skill_install:'安装技能',workspace_info:'查看工作目录',mcp_tools:'发现 MCP 工具',mcp_call:'调用 MCP 工具'};
     const label=names[call.name]||call.name||'执行工具';
     const ok = result ? result.ok !== false : null;
     const stateClass = result ? (ok ? 'is-ok' : 'is-fail') : 'is-running';
@@ -2018,6 +2018,7 @@ export async function mount(root, ctx = {}) {
   }
 
   async function sendMessage({ text = null, resend = false } = {}) {
+    if (!await executionSelectionPending) return;
     if (local.streaming) {
       await sendGuidance('send');
       return;
@@ -2244,13 +2245,13 @@ export async function mount(root, ctx = {}) {
   }
 
   async function saveExecutionSelection(execution) {
-    if (!local.activeId && !await createConversation()) return false;
-    const conversationId = local.activeId;
     const next = {
       provider: execution.provider || '',
       model: execution.model || '',
       permission_mode: execution.permission_mode || root.querySelector('#chat-permission-mode')?.value || 'ask',
     };
+    if (!local.activeId && !await createConversation()) return false;
+    const conversationId = local.activeId;
     const conv = await api.request(`/api/conversations/${encodeURIComponent(conversationId)}/execution`, {
       method: 'PATCH',
       body: next,
@@ -2643,13 +2644,13 @@ export async function mount(root, ctx = {}) {
   });
   root.querySelector('#chat-skills-open')?.addEventListener('click',()=>navigate('skills'));
   const permissionSelect = root.querySelector('#chat-permission-mode');
+  let executionSelectionPending = Promise.resolve(true);
   const guidanceUI=mountGuidance({root,context:()=>({runId:local.run?.runId||local.guidanceRunId,epoch:observerEpoch,running:local.streaming}),clearInput:()=>{el.input.value='';autoGrow();},startTask:content=>void sendMessage({text:content})});
   function refreshGuidance(){return guidanceUI.refresh();}
   function sendGuidance(action){return guidanceUI.send(action);}
-  permissionSelect?.addEventListener('change',async()=>{
-    if(!local.activeId)return;
-    const id=local.activeId;
-    try{const conv=await api.request(`/api/conversations/${encodeURIComponent(id)}/execution`,{method:'PATCH',body:{...local.taskSelection,permission_mode:permissionSelect.value}});if(local.activeId===id)applyTaskSelection(conv);}catch(error){toastError(errorMessage(error));}
+  permissionSelect?.addEventListener('change',()=>{
+    const selection={...local.taskSelection,permission_mode:permissionSelect.value};
+    executionSelectionPending=executionSelectionPending.then(()=>saveExecutionSelection(selection)).catch(error=>{toastError(errorMessage(error));return false;});
   });
   function applyTaskSelection(conv){
     local.taskSelection=conv?.meta?.execution||{};

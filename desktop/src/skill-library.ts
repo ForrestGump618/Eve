@@ -7,6 +7,8 @@ import {ValidationError} from './harness/types.js';
 export interface LibrarySkill {
   id:string; name:string; description:string; version:string; source:string;
   license:string; sha256:string; files:Record<string,string>; omittedResources:string[];
+  bundle?:string; keywords?:string;
+  runtime?:{manager:'uv';scripts:string[];project:boolean;requiredCredentials:string[];optionalCredentials:string[]};
 }
 interface LibraryIndex {
   version:number; skills:LibrarySkill[];
@@ -50,7 +52,7 @@ export class SkillLibrary {
     if(this.index.version!==1||!Array.isArray(this.index.skills))throw new ValidationError('Unsupported skill library');
     this.skills=this.index.skills;
     this.byId=new Map(this.skills.map(skill=>[skill.id,skill]));
-    for(const skill of this.skills)for(const word of tokens(skill.name+' '+skill.description)){
+    for(const skill of this.skills)for(const word of tokens(skill.name+' '+skill.description+' '+(skill.keywords??''))){
       if(!this.postings.has(word))this.postings.set(word,new Set());
       this.postings.get(word)!.add(skill.id);
     }

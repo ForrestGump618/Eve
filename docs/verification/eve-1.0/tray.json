@@ -1,0 +1,74 @@
+{
+  "kind": "real Electron lifecycle and application modal UI",
+  "packaged": false,
+  "checks": [
+    {
+      "name": "native-tray-created",
+      "ok": true
+    },
+    {
+      "name": "close-confirmation-is-in-existing-window",
+      "ok": true
+    },
+    {
+      "name": "repeated-close-keeps-single-dialog",
+      "ok": true
+    },
+    {
+      "name": "cancel-keeps-window-visible",
+      "ok": true
+    },
+    {
+      "name": "escape-cancels-close",
+      "ok": true
+    },
+    {
+      "name": "unknown-backend-status-keeps-app-open",
+      "ok": true
+    },
+    {
+      "name": "shutdown-failure-keeps-app-open",
+      "ok": true
+    },
+    {
+      "name": "close-hides-to-tray",
+      "ok": true
+    },
+    {
+      "name": "tray-keeps-daemon-and-task-alive",
+      "ok": true
+    },
+    {
+      "name": "remember-choice-is-persisted",
+      "ok": true
+    },
+    {
+      "name": "tray-show-restores-same-window",
+      "ok": true
+    },
+    {
+      "name": "unfinished-task-exit-can-continue-in-tray",
+      "ok": true
+    },
+    {
+      "name": "tray-quit-shows-window-for-confirmation",
+      "ok": true
+    },
+    {
+      "name": "active-task-requires-explicit-stop",
+      "ok": true
+    },
+    {
+      "name": "no-native-close-dialogs",
+      "ok": true
+    },
+    {
+      "name": "exit-drains-runtime-and-closes-app",
+      "ok": true,
+      "detail": {
+        "exitCode": 0,
+        "connectionFileRemaining": false
+      }
+    }
+  ]
+}

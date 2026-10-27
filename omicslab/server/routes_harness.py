@@ -19,6 +19,14 @@ from ..agent.permissions import needs_approval
 router = APIRouter(tags=["harness"])
 
 
+def backend_stdout(result: dict[str, Any]) -> str:
+    """SSH workers return stdout; local Jupyter kernels return ordered streams."""
+    if isinstance(result.get("stdout"), str):
+        return result["stdout"]
+    return "".join(str(item.get("text") or "") for item in result.get("outputs", [])
+                   if item.get("type") == "stream" and item.get("name") == "stdout")
+
+
 async def authorize(state: Any, handle: Any, tool: str, arguments: dict[str, Any]) -> None:
     ask, reason = needs_approval(handle.permission_mode, tool, arguments)
     await state.runs._emit(handle, "permission_decision", {
@@ -136,11 +144,25 @@ async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) ->
         if not result.get("ok"):
             raise ValueError(f"远程技能执行失败：{str(result)[:2500]}")
         try:
-            output = json.loads(result.get("stdout") or "")
+            output = json.loads(backend_stdout(result))
         except (ValueError, TypeError) as exc:
             raise ValueError("远程技能未返回有效结构化结果") from exc
         if output.get("exitCode") != 0 or output.get("timedOut") or output.get("truncated"):
             raise ValueError(f"远程技能未成功：{str(output)[:2500]}")
+        return output
+    if operation in {"prepare_science_skill", "run_science_skill"}:
+        from ..execution.science_skills import runtime_source
+        run = operation == "run_science_skill"
+        source = runtime_source(args["bundle"], str(backend.root), input_data=args.get("input"), run=run)
+        result = await backend.execute_python(source, timeout_s=140)
+        if not result.get("ok") or result.get("truncated"):
+            raise ValueError("科学技能运行环境异常；未获得可验证结果")
+        try:
+            output = json.loads(backend_stdout(result))
+        except (ValueError, TypeError) as exc:
+            raise ValueError("科学技能未返回有效结构化结果") from exc
+        if run and output.get("ok") is not True:
+            raise ValueError(f"科学技能未成功：{json.dumps(output, ensure_ascii=False)[:6000]}")
         return output
     raise ValueError("不支持的工作区操作")
 
@@ -226,8 +248,15 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
                 return await service.record(scope, str(args.get("id") or ""), args, run_id=run_id)
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from exc
-        if operation in {"write_file", "run_shell", "run_skill"}:
-            await authorize(state, handle, "skill_run" if operation == "run_skill" else operation, args)
+        if operation in {"write_file", "run_shell", "run_skill", "prepare_science_skill", "run_science_skill"}:
+            approval_args = args
+            if operation in {"prepare_science_skill", "run_science_skill"}:
+                # The permission UI receives identity and execution intent, not an entire source bundle.
+                bundle = args.get("bundle") or {}
+                approval_args = {"id": bundle.get("id"), "source": bundle.get("source"),
+                                 "sha256": bundle.get("sha256"), "input": args.get("input", {})}
+            await authorize(state, handle, "skill_run" if operation in {"run_skill", "run_science_skill"}
+                            else "skill_prepare" if operation == "prepare_science_skill" else operation, approval_args)
         try:
             result = await execute_backend(handle.backend, operation, args)
             return {**result, "execution_target": {"kind": handle.workspace.backend,

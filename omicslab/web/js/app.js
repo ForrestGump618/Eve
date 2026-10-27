@@ -383,6 +383,11 @@ async function renderRoute(route, { force = false } = {}) {
       return;
     }
     app.current = instance || null;
+    if (target === 'workbench' && typeof state.routeParams?.prefill === 'string') {
+      const text = state.routeParams.prefill;
+      delete state.routeParams.prefill;
+      emit('chat:prefill', { text });
+    }
     if(!reduceMotion)requestAnimationFrame(()=>requestAnimationFrame(()=>mountRoot.classList.remove('is-route-entering')));
     if(!['workbench','chat'].includes(target))app.sidebarDispose=await mountSidebarNavigation(document.querySelector('#app-sidebar'),action=>{app.pendingChatAction=action;navigate('workbench');});
     if(app.pendingChatAction&&['workbench','chat'].includes(target)){const action=app.pendingChatAction;app.pendingChatAction=null;emit(action.type==='new'?'chat:new-conversation':'chat:select',action.id);}

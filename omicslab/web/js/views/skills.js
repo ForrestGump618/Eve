@@ -4,7 +4,6 @@ import { icon } from '../icons.js?v=2.1.1';
 import { renderMarkdown } from '../markdown.js?v=2.1.1';
 import { esc, relTime, copyText } from '../util.js?v=2.1.1';
 import { api, errorMessage } from '../api.js?v=2.1.1';
-import { emit } from '../bus.js?v=2.1.1';
 import {
   toastError,
   toastSuccess,
@@ -52,7 +51,7 @@ export async function mount(root, ctx = {}) {
           '<span class="skill-card-body">' +
           `<span class="skill-card-title">${esc(name)}</span>` +
           `<span class="skill-card-desc">${esc(s.description || s.when_to_use || '暂无描述')}</span>` +
-          (s.source ? `<span class="skill-card-source">${esc(s.source)}</span>` : '') +
+          (s.source ? `<span class="skill-card-source">${esc(String(s.name).startsWith('science-') ? '科学工具 · 按需加载' : s.source)}</span>` : '') +
           '</span>' +
           `<span class="skill-card-chev">${icon('chevronRight', { size: 16 })}</span>` +
           '</button>'
@@ -79,7 +78,7 @@ export async function mount(root, ctx = {}) {
         '<div class="skill-detail-head">' +
         '<div class="skill-detail-title-row">' +
         `<h2 class="skill-detail-title">${esc(skill?.name || name)}</h2>` +
-        (skill?.source ? `<span class="tag tag-purple">${esc(skill.source)}</span>` : '') +
+        (skill?.version ? `<span class="tag">${esc(skill.version)}</span>` : '') +
         '</div>' +
         (skill?.description ? `<p class="skill-detail-desc">${esc(skill.description)}</p>` : '') +
         '<div class="skill-detail-actions">' +
@@ -87,6 +86,15 @@ export async function mount(root, ctx = {}) {
         `<button type="button" class="btn btn-ghost btn-sm" id="skill-copy">${icon('copy', { size: 15 })}<span>复制技能名</span></button>` +
         (skill?.path ? `<span class="skill-path" title="${esc(skill.path)}">${icon('folder', { size: 13 })}<span>${esc(skill.path)}</span></span>` : '') +
         '</div></div>' +
+        (skill?.preparation
+          ? '<section class="skill-when"><span class="skill-when-label">执行环境</span>' +
+            `<p>在当前本地或 SSH 工作区运行 · uv 独立依赖环境${skill.run?.scripts?.length ? ` · ${skill.run.scripts.length} 个脚本` : ' · 工作流指引'}</p>` +
+            '<p>首次运行检查依赖和凭据；安装依赖遵循当前任务权限。</p>' +
+            (skill.preparation.requiredCredentials?.length
+              ? `<p>必需凭据：${skill.preparation.requiredCredentials.map(esc).join('、')}（运行时检查）</p>` : '') +
+            (skill.preparation.optionalCredentials?.length
+              ? `<p>可选凭据：${skill.preparation.optionalCredentials.map(esc).join('、')}；公开查询可不配置。</p>` : '') +
+            '</section>' : '') +
         (skill?.when_to_use
           ? `<div class="skill-when"><span class="skill-when-label">${icon('info', { size: 14 })}<span>适用场景</span></span><p>${esc(skill.when_to_use)}</p></div>`
           : '') +
@@ -115,10 +123,7 @@ export async function mount(root, ctx = {}) {
   function bindDetailActions(skill) {
     const name = skill?.name || local.active;
     el.detail.querySelector('#skill-use')?.addEventListener('click', () => {
-      navigate('chat');
-      emit('chat:prefill', {
-        text: `请使用「${name}」技能来帮我完成一项任务：`,
-      });
+      navigate('chat', { prefill: `请使用「${name}」技能来帮我完成一项任务：` });
     });
     el.detail.querySelector('#skill-copy')?.addEventListener('click', async () => {
       const ok = await copyText(name);
@@ -136,6 +141,12 @@ export async function mount(root, ctx = {}) {
       const data = await api.skills.list();
       local.skills = Array.isArray(data?.skills) ? data.skills : Array.isArray(data) ? data : [];
       renderList();
+      const requested = ctx.getState?.()?.routeParams?.skillName;
+      if (requested && local.skills.some(skill => skill.name === requested)) {
+        delete ctx.getState().routeParams.skillName;
+        await openDetail(requested);
+        return;
+      }
       if (local.skills.length && !local.active) {
         const first = local.skills[0];
         await openDetail(first.name);

@@ -2172,6 +2172,31 @@
    Skills
    ========================================================================== */
 
+.skills-page .search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: min(360px, 100%);
+  padding: 8px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.skills-page .search-box input {
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+}
+
+.skills-page .search-box:focus-within {
+  border-color: var(--border-strong);
+}
+
 .skills-layout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);

@@ -19,6 +19,12 @@ this notice and in the skill's source metadata wherever the skill is made
 available through an online service.
 
 Electron includes Chromium/Node.js with their separate third-party notices.
+The scientific skill bundle retains the notices of Google LLC from
+google-deepmind/science-skills (4de6786171f1479026da5d3a00f110703c8ba35e, v1.3.1).
+Software is Apache-2.0; other materials are CC-BY-4.0. Each prepared skill
+includes EVE-UPSTREAM-LICENSE.txt, EVE-MATERIALS-LICENSE.txt and
+EVE-DATA-SOURCE-TERMS.md. Individual databases retain their own terms.
+Eve is not an official Google product.
 Resolved Node runtime license texts are under third-party-licenses/.
 Python itself and its dependencies are not bundled; the managed dependency setup
 uses an available interpreter. Original Python sources and LICENSE ship under

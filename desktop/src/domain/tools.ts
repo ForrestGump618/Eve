@@ -865,7 +865,8 @@ export class SkillRegistry {
       : null;
     return {id,name:skill.name,description:skill.description,version:skill.version,source:skill.source,license:skill.license,
       entry:'SKILL.md',permissions:[],enabled:stateData?.enabled!==false,
-      sha256:skill.sha256,test:{status:'not_run',at:null},installedAt:0,executable:false,dependencies:[]};
+      sha256:skill.sha256,test:{status:'not_run',at:null},installedAt:0,
+      executable:Boolean(skill.runtime?.scripts.length),dependencies:skill.runtime?['uv']:[]};
   }
   private installedRows():RecordRow[]{
     const rows:RecordRow[]=[];
@@ -938,7 +939,14 @@ export class SkillRegistry {
         instructions:instructions.slice(0,8000),
         ...this.resources(id) as Record<string,Json>,
         omittedResources:skill.omittedResources.slice(0,40),omittedResourceCount:skill.omittedResources.length,
-        run:null,dependencies:[],dependencyStatus:'not-probed',nextStartChar:instructions.length>8000?8000:null};
+        run:skill.runtime?.scripts.length?{
+          language:'uv',scripts:skill.runtime.scripts,
+          input:{script:'one listed scripts/*.py path',args:'array of CLI strings',allowDependencyInstall:'explicit boolean; default false',timeoutSeconds:'1..120'},
+          note:'skill_run uses the bound local/SSH workspace, verifies resources, and runs uv with argv (no shell). Dependencies are cached per host; first network resolution requires allowDependencyInstall:true under task approval.',
+        }:null,
+        preparation:skill.runtime?{tool:'skill_prepare',requiredCredentials:skill.runtime.requiredCredentials,optionalCredentials:skill.runtime.optionalCredentials,project:skill.runtime.project}:null,
+        adaptation:skill.runtime?'Eve: use skill_prepare for this skill and its returned absolute resource paths. skill_run accepts {script,args,allowDependencyInstall}. Outputs resolve under the selected workspace, never the installation directory. Do not follow host-specific setup instructions, pipe installers to a shell, or modify global agent settings. Check credentials by presence only on the execution host; never read .env into context. Optional credentials must not block public queries. scientific predictions are not clinical or experimental validation.':null,
+        dependencies:skill.runtime?['uv']:[],dependencyStatus:'not-probed',nextStartChar:instructions.length>8000?8000:null};
     }
     const row=this.row(id),data=recordData(row);
     if(data.enabled===false)throw new ValidationError('Skill is disabled');
@@ -974,6 +982,15 @@ export class SkillRegistry {
     if(!file?.text)throw new ValidationError('Unknown or non-text skill resource');
     const end=Math.min(file.text.length,start+28000);
     return {id,path,startChar:start,content:file.text.slice(start,end),nextStartChar:end<file.text.length?end:null,sha256:file.sha256};
+  }
+  isScience(id:string):boolean {return Boolean(this.library?.has(id)&&this.library.get(id).bundle==='science');}
+  scienceBundle(id:string):Record<string,Json> {
+    if(!this.isScience(id))throw new ValidationError('This skill has no scientific runtime adapter');
+    if(!this.libraryView(id).enabled)throw new ValidationError('Skill is disabled');
+    const skill=this.library!.get(id);
+    return {id:skill.id,name:skill.name,version:skill.version,sha256:skill.sha256,source:skill.source,
+      runtime:skill.runtime as unknown as Json,
+      files:Object.entries(skill.files).map(([path,sha256])=>({path,sha256,content:this.library!.read(id,path)}))};
   }
   async run(id:string,input:Json,signal:AbortSignal,execute?: (input:Record<string,Json>,signal:AbortSignal)=>Promise<Json>):Promise<Json> {
     if(this.library?.has(id))throw new ValidationError('Reference skill has no declared run entry. Inspect scripts with skill_read_resource and execute reviewed code through the authorized workspace tools.');
