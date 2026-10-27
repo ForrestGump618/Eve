@@ -13,7 +13,7 @@
 - 增加“请求批准 / 帮我审核 / 完全权限”、审批分组、检查点恢复、运行中引导、多会话并行与每会话模型/权限隔离。
 - 正式页面使用默认浅色灰阶工作台、单项目/最近会话侧栏、可折叠工具过程和稳定输入区；正常启动只创建一个窗口。
 - 能力中心的 MCP 新装、导入、更新、启停与删除同步到唯一桌面 Agent；Skill 支持发现、渐进加载、创建、安装和远程执行。
-- 根据 ClawsGO 1.1.3 发行包的静态逆向边界，移除统一 Harness 的单轮模型/工具次数上限、三次相同调用告警与五次无进展强制终止；重复调用继续执行并把真实结果回传模型，取消、单步超时、回合时长、Token/上下文预算、检查点和恢复继续生效。证据见 [ClawsGO 1.1.3 逆向记录](docs/verification/clawsgo-1.1.3-rea.md)。
+- 根据 外部项目 1.1.3 发行包的静态逆向边界，移除统一 Harness 的单轮模型/工具次数上限、三次相同调用告警与五次无进展强制终止；重复调用继续执行并把真实结果回传模型，取消、单步超时、回合时长、Token/上下文预算、检查点和恢复继续生效。证据见 [外部项目 1.1.3 逆向记录](docs/verification/clawsgo-1.1.3-rea.md)。
 - 固定 22 项 `deepseek-v4.1-flash-economy` 真实任务最终 22/22 通过；完整结果、指标和未验证边界见 [1.0 验收报告](docs/verification/release-1.0/REPORT.md)。
 
 ## [3.4.0] — 2026-10-26
@@ -21,14 +21,14 @@
 - 正式聊天采用折叠工具过程和扁平化气泡；支持工作目录文件访问、8 个预装技能、技能创建/安装及有限截断恢复。
 - 验证详情及真实供应商 HTTP 429 限制见 [交付记录](docs/verification/product-340-20261026/README.md)。
 
-## 独立 DSH 插件 0.3.0
+## 独立 外部项目 插件 0.3.0
 
-- DSH 集成改为原生科研工具与按需技能：由 DSH 规划、调用模型与协调多代理；`python -m omicslab.integrations.science` 数据计算后端只执行显式操作，不加载 LLM、AppState 或 AgentLoop。
+- 外部项目 集成改为原生科研工具与按需技能：由 外部项目 规划、调用模型与协调多代理；`python -m omicslab.integrations.science` 数据计算后端只执行显式操作，不加载 LLM、AppState 或 AgentLoop。
 - 仓库 [`integrations/dsh`](integrations/dsh/) bundle 规划十一工具，覆盖状态、文献、蛋白、序列、Python、变量、notebook、证据、实验、知识和技能；[`suwen-research`](integrations/dsh/skills/suwen-research/SKILL.md) 指导数据审计、方法选择、显式分析、证据/指标验证与报告，沿用 [`omicslab/skills`](omicslab/skills/) 原始方法正文。
-- 重写 [DSH 插件集成说明](docs/integrations/dsh-plugin.md) 及中英文入口：使用 `plugin_manager` 安装仓库 bundle，不手工修改 profile；旧九工具 Agent 桥接不再作为推荐。执行成功不等于科学验证，外部内容不可信。
+- 重写 [外部项目 插件集成说明](docs/integrations/dsh-plugin.md) 及中英文入口：使用 `plugin_manager` 安装仓库 bundle，不手工修改 profile；旧九工具 Agent 桥接不再作为推荐。执行成功不等于科学验证，外部内容不可信。
 - 落地验证（2026-10-26）：新增 [`tests/test_dsh_science.py`](tests/test_dsh_science.py) 11 项真实子进程测试，与 [`tests/test_dsh_bridge.py`](tests/test_dsh_bridge.py)、[`tests/test_cli.py`](tests/test_cli.py) 合计 **44 passed**。bundle 0.3.0 已安装（`application: applied`），11 个工具注册并经真实调用验证（状态、序列检查、Python 与变量、知识、实验、证据核验、notebook 导出、技能目录与正文、Europe PMC 文献、UniProt 蛋白）。完整科研任务与干净虚拟机验证未执行，详见集成说明「验证记录」。
 - 修复：Host 插件 `inject` 改为服务数组形式 `export const inject = ['tools']`（原对象形式导致行挂起、工具未激活）；UniProt 蛋白名为嵌套对象，渲染层扁平化为推荐名并补基因列。
-- 本清理源码的桌面版本为 **3.4.0**，Python 工作台包版本为 **2.1.1**；本节描述独立 DSH 插件，并不表示该插件已进入已验收的桌面安装包。
+- 本清理源码的桌面版本为 **3.4.0**，Python 工作台包版本为 **2.1.1**；本节描述独立 外部项目 插件，并不表示该插件已进入已验收的桌面安装包。
 
 ## [2.1.1] — 2026-10-24
 

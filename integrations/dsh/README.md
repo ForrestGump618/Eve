@@ -1,6 +1,6 @@
-# 素问科研工具（DeepSeek Harness bundle）
+# 素问科研工具（外部项目 bundle）
 
-把素问（SuWen）仓库里已有的**科研能力**封装成 DeepSeek Harness 的原生工具。计划、推理、模型调用、上下文与多代理都由 DSH 负责；Python 侧只执行明确指定的科研操作，**不加载 LLM、`AppState` 或 `AgentLoop`**，也不需要在本插件里配置另一套模型。
+把素问（SuWen）仓库里已有的**科研能力**封装成 外部项目 的原生工具。计划、推理、模型调用、上下文与多代理都由 外部项目 负责；Python 侧只执行明确指定的科研操作，**不加载 LLM、`AppState` 或 `AgentLoop`**，也不需要在本插件里配置另一套模型。
 
 - Bundle 目录：`integrations/dsh/`（本目录），包名 `@local/suwen`
 - 后端入口：`python -m omicslab.integrations.science --stdio --workspace <ws> --home <home>`
@@ -26,7 +26,7 @@
 ## 安装
 
 1. 确认 Python 环境能 `import omicslab`（`pip install -e .` 或设置 `repoPath`）。
-2. 用 DSH 的 `plugin_manager` 安装本目录的**绝对路径**，不要手工改 profile：
+2. 用 外部项目 的 `plugin_manager` 安装本目录的**绝对路径**，不要手工改 profile：
 
 ```json
 { "action": "install_bundle", "target": "<绝对路径>/integrations/dsh" }
@@ -52,4 +52,4 @@
 
 - Python 代码以**当前用户权限**执行，不是沙箱；只能执行你愿意在本机运行的代码。
 - 工具成功只代表执行完成：文献/数据库结果是外部数据，证据核验与实验比较不替代统计学与生物学复核。
-- 后端不读模型提供商配置，不会自行继续研究；下一步做什么由 DSH 决定。
+- 后端不读模型提供商配置，不会自行继续研究；下一步做什么由 外部项目 决定。
