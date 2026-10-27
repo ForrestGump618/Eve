@@ -55,8 +55,8 @@
 | R064 | RSI 受约束循环 Observe→Diagnose→Propose→Sandbox Test→Benchmark→Review→Canary→Promote/Rollback；同评估集；回归回滚；版本与审计；源码变更需分支/测试/人工批准 |
 | R070 | 统一 ChannelAdapter（connect/disconnect/send/receive/auth/health/capabilities）；Telegram/Slack/Discord/邮件/Webhook/微信官方接口；配置/映射/过滤/权限/审计/测试/告警 |
 | R071 | 远程渠道默认只读；文件修改/shell/敏感数据需额外授权；不绕过平台限制 |
-| R080 | DSH 官方仓库审计（commit/LICENSE/NOTICES/插件生命周期/Agent Loop/持久化/压缩/安全/构建）+ 复用三选一决策 + feature-provenance-matrix + upstream-commits；不得把第三方同名仓库当官方 |
-| R081 | 仅分析许可合规开源；不对已取消 KongMing 安装包逆向/黑盒/集成；不复制专有代码/UI/商标 |
+| R080 | 外部项目 官方仓库审计（commit/LICENSE/NOTICES/插件生命周期/Agent Loop/持久化/压缩/安全/构建）+ 复用三选一决策 + feature-provenance-matrix + upstream-commits；不得把第三方同名仓库当官方 |
+| R081 | 仅分析许可合规开源；不对已取消 外部项目 安装包逆向/黑盒/集成；不复制专有代码/UI/商标 |
 | R090 | 品牌清理：UI/标题/包名/安装文件/应用标识/文档/图标/自动更新/路径/日志仅 SuWen；历史数据字段/迁移标识保留兼容读取，非破坏迁移 |
 | R091 | 遗留品牌全局扫描+例外清单（`LEGACY-BRAND-COMPAT` 注释） |
 | R092 | MIT LICENSE/NOTICE/third-party-licenses/SBOM/依赖清单/许可证扫描；Apache-2.0 等保留原版权与 NOTICE |

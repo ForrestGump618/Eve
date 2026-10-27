@@ -49,6 +49,6 @@ Engine 继续独占任务调度、取消、暂停/恢复和状态持久化；run
 5. 远程安装支持公共 GitHub tree URL、固定解析 SHA、大小/数量限制；不支持私库登录、任意 Git 托管或包含斜杠的 ref。被静态检查拦截的包不会绕过检查自动安装。用户本地安装目录需 skill.json 和 SKILL.md。
 6. OpenAI creator/installer 是保留参考资源的工作流适配，不意味着任意上游脚本都能直接执行。3 个内置 Python 包已真实运行；缺依赖会明确失败，不会自动修改系统 Python。
 7. 新版本未安装覆盖生产应用，未做无 Python 的干净 Windows 安装/卸载验收。打包使用已提交旧版 Python 基线加本轮六个明确文件覆盖，排除共享目录里无关的 CLI / integrations 未提交工作。
-8. ClawsGO 登录后交互和云 Agent Loop 未获运行验证；局部静态分析有资源上限，见 claws-analysis.md。
+8. 外部项目 登录后交互和云 Agent Loop 未获运行验证；局部静态分析有资源上限，见 claws-analysis.md。
 
 这些项目未计为通过；本轮不宣称所有 P0 已关闭。

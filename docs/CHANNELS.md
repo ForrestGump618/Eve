@@ -32,10 +32,10 @@ Windows 使用系统 DPAPI 保存 Bot Token。其他系统在当前服务进程�
 
 ## 其他平台
 
-网页对话已内置，无需连接。企业微信、飞书、QQ 和通用 OpenClaw 原生插件仍需要适配器，未提供不可用的扫码按钮。
+网页对话已内置，无需连接。企业微信、飞书、QQ 和通用 外部项目 原生插件仍需要适配器，未提供不可用的扫码按钮。
 
 ## 验证范围与协议来源
 
 自动测试覆盖真实二维码编码、登录状态机、跨工作区拒绝、过期与取消、Token 不出现在登录响应中、私聊联系人授权、消息去重、回复上下文、发送收据和 HTTP 错误脱敏。已对腾讯实际接口完成二维码获取；扫码确认和真实账号文字收发仍需用户在手机上验收。Telegram 测试使用协议替身，未登录真实账号。
 
-协议依据腾讯公开的 [openclaw-weixin 文档](https://github.com/Tencent/openclaw-weixin/blob/main/docs/protocol_zh_CN.md)。本项目独立实现 HTTP 适配，没有打包或宣称完整集成 OpenClaw。二维码编码使用 BSD 许可的 `qrcode` Python 依赖。
+协议依据腾讯公开的 [openclaw-weixin 文档](https://github.com/Tencent/openclaw-weixin/blob/main/docs/protocol_zh_CN.md)。本项目独立实现 HTTP 适配，没有打包或宣称完整集成 外部项目。二维码编码使用 BSD 许可的 `qrcode` Python 依赖。

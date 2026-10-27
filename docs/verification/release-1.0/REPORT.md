@@ -128,11 +128,11 @@ node scripts/tray-e2e.mjs --formal --packaged
 
 TypeScript durable Engine 是唯一桌面模型/工具循环；Python 保存科研工作台、工作区、事件和既有研究能力，通过 Adapter 传递能力，避免两套 Agent Loop 竞争。原有多模型辩论、裁判、历史、科研工具、Python Worker 与桌面功能保留，并由现有测试覆盖兼容路径。
 
-DSH 参考提交为 `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`。复用已有 DSH 插件 0.3.0，参考 Cordis 生命周期、注册/卸载与按需扩展；没有整体替换运行时。ClawsGO 只参考了适用的信息分区与能力入口，没有复制其发行物代码。
+外部项目 参考提交为 `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`。复用已有 外部项目 插件 0.3.0，参考 Cordis 生命周期、注册/卸载与按需扩展；没有整体替换运行时。外部项目 只参考了适用的信息分区与能力入口，没有复制其发行物代码。
 
 参考：
 
-- [DSH 仓库](https://github.com/deepseek-ai/deepseek-harness)
+- [外部项目 仓库](https://github.com/deepseek-ai/deepseek-harness)
 - [Electron 自定义标题栏](https://www.electronjs.org/docs/latest/tutorial/custom-title-bar)
 - [Electron Tray](https://www.electronjs.org/docs/latest/api/tray)
 - [Paramiko Client](https://docs.paramiko.org/en/stable/api/client.html)

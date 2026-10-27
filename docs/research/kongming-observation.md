@@ -1,4 +1,4 @@
-# KongMing 2.3.3 static observation — 2026-10-24
+# 外部项目 2.3.3 static observation — 2026-10-24
 
 Scope: supplied local installer only; no installer or application execution, account login, endpoint probing, TLS interception, authentication bypass or proprietary source recovery. Extracted files remain in the investigation workspace and must never enter SuWen releases.
 
@@ -6,7 +6,7 @@ Scope: supplied local installer only; no installer or application execution, acc
 |---|---|
 | PowerShell Get-FileHash | 260716184 bytes; SHA256 `fea1c4f21ebd79e3e6a63922f4e64320a5cd5ea697d9863c3462c0165da38b3c` |
 | Get-AuthenticodeSignature | NotSigned; publisher authenticity not established by version strings |
-| PE VersionInfo | Product Agent KongMing, version 2.3.3, declared company GHDDI DataScience Team |
+| PE VersionInfo | Product Agent 外部项目, version 2.3.3, declared company GHDDI DataScience Team |
 | REA `ev_51c467b9ad3450cdb12c5efebe309fbae6a0e05cda1d0c0531c409e633d4b5ff` | PE32 x86 installer stub; 73 resource entries examined, 34 resources. Installer stub architecture is not payload architecture. |
 | 7-Zip 26.02 list | NSIS-3 Unicode; nested `$PLUGINSDIR/app-64.7z`, 260091135 bytes |
 | ASAR inert metadata read | 17003 leaf entries including 150 unpacked entries; package `kongming` 2.3.3; main `dist-electron/main/index.js`; preload and renderer assets present |

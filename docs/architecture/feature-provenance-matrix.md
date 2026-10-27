@@ -1,8 +1,8 @@
 # Feature provenance / actual implementation
 
-KongMing static package resources are not behavior evidence. Unknown means not tested, not absent.
+外部项目 static package resources are not behavior evidence. Unknown means not tested, not absent.
 
-| Area | KongMing evidence | DSH sampled capability / gap | SuWen implementation | Validation / limitation |
+| Area | 外部项目 evidence | 外部项目 sampled capability / gap | SuWen implementation | Validation / limitation |
 |---|---|---|---|---|
 | UI | Electron main/preload/renderer inventory | isolated renderer, host tied to full quit | desktop/src/main.ts, preload.cts, ui/ | Actual Electron stream/renderer isolation/window-close test; independent original UI |
 | Plugins | declared dependencies only; runtime unknown | Cordis lifecycle/disposers | injected harness ActivityHandler; existing Python registries retained | New desktop arbitrary extension importing not implemented |

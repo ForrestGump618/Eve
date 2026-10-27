@@ -30,7 +30,7 @@ From `desktop/package.json` and `desktop/package-lock.json` (pinned):
 
 - Root `LICENSE`: **Apache-2.0** (11,357 B) — preserved with original copyright/notice for the Python implementation (`omicslab/`), per R092.
 - New desktop code: MIT (`desktop/LICENSE`, "Copyright (c) 2026 SuWen contributors").
-- `desktop/NOTICE` states: new desktop code MIT; parent Python retains Apache-2.0; **no KongMing code/assets/skills/binaries distributed**; **no DeepSeek Harness code bundled**; optional compatibility workbench is original Apache-2.0 Python source under `resources/legacy` with its LICENSE; Python interpreter and its packages are **not bundled** (user supplies interpreter).
+- `desktop/NOTICE` states: new desktop code MIT; parent Python retains Apache-2.0; **no 外部项目 code/assets/skills/binaries distributed**; **no 外部项目 code bundled**; optional compatibility workbench is original Apache-2.0 Python source under `resources/legacy` with its LICENSE; Python interpreter and its packages are **not bundled** (user supplies interpreter).
 - Runtime Python dependencies (declared in `pyproject.toml`): fastapi >=0.110, uvicorn[standard] >=0.27, jupyter_client >=8.6, ipykernel >=6.29, httpx >=0.27, nbformat >=5.10, python-multipart >=0.0.9, pyyaml >=6.0, rich >=13.7, prompt_toolkit >=3.0, websockets >=12.0, paramiko >=3.4, qrcode >=8.0,<9; optional bio: numpy >=1.26, pandas >=2.1, matplotlib >=3.8, scanpy >=1.10, anndata >=0.10; dev: pytest >=8.0, pytest-asyncio >=0.23. The Python distribution declares Apache-2.0 itself; transitive Python license texts are not bundled because Python/packages are not shipped.
 
 ## 4. License / notice artifacts present in repo
@@ -83,7 +83,7 @@ Then update this file and `docs/release/windows-installer-verification.md` with 
 
 ## 7. 上游项目 / 参考系统清单（非依赖，未打包代码）
 
-> 范围说明：本节回应任务书要求列出 DSH、Kimi Code、Biomni、Paper2Agent、ERA、Robin、Co-Scientist、Kosmos、
+> 范围说明：本节回应任务书要求列出 外部项目、Kimi Code、Biomni、Paper2Agent、ERA、Robin、Co-Scientist、Kosmos、
 > pubmed-mcp-server、lifesciences-research 等上游。事实来源仅限本仓库已有审计文档：
 > `docs/research/deepseek-harness-audit.md`、`docs/research/upstream-commits.md`、`docs/REFERENCES-V2.md`、
 > `docs/research/branding-exceptions.md`、`docs/progress.md`。**本轮审计没有下载、安装或重新联网核验任何上游**；
@@ -91,8 +91,8 @@ Then update this file and `docs/release/windows-installer-verification.md` with 
 
 | 上游 | 版本/快照（仓库证据） | 许可证（仓库证据） | 代码是否被捆绑 | 真实连通/凭据需求 | 状态与证据 |
 |---|---|---|---|---|---|
-| DeepSeek Harness (DSH，官方) | master/HEAD `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`；tag `dsh-v0.2.1-rc.3` = `1f81c047fc48fa190a683e469daa699857e9afe8`；ZIP SHA-256 `088b7edccadb5577c7cf3898aa899de6a4efab15dc2e7cc80e43a6f8a8df65d3`（50,937,370 B） | **MIT**（`Copyright (c) 2026 DeepSeek`，LICENSE 实读；THIRD_PARTY_NOTICES 另含 Apache-2.0/MPL-2.0 等） | **否**：`desktop/NOTICE` 明示无 DSH 代码；决策 III“独立实现”；`docs/architecture/reuse-decision.md` | 仅静态源码审计；无 API/账号需求；未执行任何上游脚本/测试 | `docs/research/deepseek-harness-audit.md`、`upstream-commits.md`（审计完成，无集成） |
-| KongMing（用户提供的 2.3.3 安装包） | 安装包 260,716,184 B；SHA-256 `fea1c4f21ebd79e3e6a63922f4e64320a5cd5ea697d9863c3462c0165da38b3c` | 未声明/未审查（私有分发；R081 禁止反向工程与集成） | **否**：仅静态包元数据观察（`desktop/NOTICE` 明示不分发其代码/资源/技能/二进制） | 未执行安装器、未启动进程；无账号 | `docs/research/kongming-*.md`；`docs/research/evidence/{package-metadata.json,installer-inventory.txt,payload-inventory.txt}` |
+| 外部项目 (外部项目，官方) | master/HEAD `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`；tag `dsh-v0.2.1-rc.3` = `1f81c047fc48fa190a683e469daa699857e9afe8`；ZIP SHA-256 `088b7edccadb5577c7cf3898aa899de6a4efab15dc2e7cc80e43a6f8a8df65d3`（50,937,370 B） | **MIT**（`Copyright (c) 2026 DeepSeek`，LICENSE 实读；THIRD_PARTY_NOTICES 另含 Apache-2.0/MPL-2.0 等） | **否**：`desktop/NOTICE` 明示无 外部项目 代码；决策 III“独立实现”；`docs/architecture/reuse-decision.md` | 仅静态源码审计；无 API/账号需求；未执行任何上游脚本/测试 | `docs/research/deepseek-harness-audit.md`、`upstream-commits.md`（审计完成，无集成） |
+| 外部项目（用户提供的 2.3.3 安装包） | 安装包 260,716,184 B；SHA-256 `fea1c4f21ebd79e3e6a63922f4e64320a5cd5ea697d9863c3462c0165da38b3c` | 未声明/未审查（私有分发；R081 禁止反向工程与集成） | **否**：仅静态包元数据观察（`desktop/NOTICE` 明示不分发其代码/资源/技能/二进制） | 未执行安装器、未启动进程；无账号 | `docs/research/kongming-*.md`；`docs/research/evidence/{package-metadata.json,installer-inventory.txt,payload-inventory.txt}` |
 | Kimi Code（Moonshot CLI） | 未引入/无快照 | `NOT_REVIEWED` | 否 | 仓库仅有“Kimi”作为 **模型 Provider**（OpenAI 兼容适配，`install.md`/COMPARISON 提及）；Kimi Code CLI 未安装、未审查 | 无代码证据 → `NOT_REVIEWED`（不计完成） |
 | Biomni（snap-stanford/Biomni） | 无快照（仅设计参考） | `NOT_REVIEWED`（仓库仅说明“参考”，未列 LICENSE） | 否；未打包 E1/数据湖（`docs/REFERENCES-V2.md`、`docs/BIOMEDICAL-EVIDENCE.md`） | 需要上游 Python 环境与（可选）模型/API；本轮无 | 参考设计已用于 skill `biomedical-discovery`（自编）；`BLOCKED_EXTERNAL`（上游环境未安装） |
 | Paper2Agent（jmiao24/Paper2Agent） | 无快照（登记册 R053 记为 MIT 目标） | **MIT（登记册声明；本轮未复核 LICENSE 文件）** | 否；skills 中为自编 `paper2agent` 方法手册（`docs/SKILLS.md:206`） | 需要论文/仓库/环境与回归执行；完整自动化未实现 | 部分：方法手册存在；安装/自动工程化 `NOT_STARTED`（R113） |
@@ -107,7 +107,7 @@ Then update this file and `docs/release/windows-installer-verification.md` with 
 ## 8. 供应链结论与缺口
 
 1. **随包分发的运行时依赖**（Electron/Node 运行时、`js-tiktoken`、`base64-js`、可选 legacy Python 源）已在第 1/3 节和下表登记；npm 生产依赖 advisory 快照为 0 漏洞（原型构建时，非长期保证）。
-2. **上游参考项目均未捆绑代码**；DSH 为 MIT 静态审计（决策 III 独立实现），KongMing 仅静态包观察且按 R081 禁止集成。
+2. **上游参考项目均未捆绑代码**；外部项目 为 MIT 静态审计（决策 III 独立实现），外部项目 仅静态包观察且按 R081 禁止集成。
 3. **无法完成的验证**（`BLOCKED_EXTERNAL`/`NOT_REVIEWED`）：真实外部模型账号、Biomni/Robin/ERA/Kosmos 等上游环境与 API、Kimi Code CLI、pubmed-mcp-server/lifesciences-research 安装、各上游许可证逐项复核（本轮无网络重装）。
 4. 发布前需由 Lead 决定：是否为可选的科研上游（Biomni/Robin/ERA）建立锁定版本与 SBOM 条目；若继续以“方法参考、不捆绑”为边界，应保持本文件与 `docs/REFERENCES-V2.md` 的表述一致。
 5. 未执行项不得计入 R092/R094 完成度：R092 的“LICENSE/NOTICE/第三方许可清单/SBOM”已具备；R094 的“上游逐项签名/哈希核验、许可证全量复核”仍为 `UNVERIFIED`。

@@ -1,6 +1,6 @@
 # 素问 3.4.0：界面、文件、技能与长输出改造
 
-本轮提供实际代码和 Windows 安装包。ClawsGO 1.1.3 已完成安装包局部分析及独立配置启动；采用执行过程折叠、侧栏状态、技能可检查性和工作目录边界等设计，保留素问自己的品牌与执行核心。
+本轮提供实际代码和 Windows 安装包。外部项目 1.1.3 已完成安装包局部分析及独立配置启动；采用执行过程折叠、侧栏状态、技能可检查性和工作目录边界等设计，保留素问自己的品牌与执行核心。
 
 **当前版本真实模型验收尚未通过。** 供应商再次返回 HTTP 429，固定 22 项这一轮均未完成。3.3.2 之前的 22/22 保留为历史结果，不能替代 3.4.0 的实测。受控 SSE 测试、真实文件/技能测试和真实外网数据库测试在下表分列，没有混入真实模型成功率。
 
@@ -19,7 +19,7 @@
 
 1. 扁平化消息、输入框和工具列表；浅色用户气泡改为低饱和灰绿，深色用中性面板；减少渐变、阴影与重复框；侧栏折叠并记住偏好。
 2. 统一文件工具，支持目录、文本分页、文件搜索、精确文件授权和带内容哈希的写入。正式页面传入已选工作区，修复“目录存在但模型无权读取”的断链。
-3. 预装 8 个真实技能，保留许可证与固定来源。实际 OpenAI creator / installer、DSH error handling 与素问文件/文献/CSV/统计/JSON 包共用 Registry；按需加载参考文件，避免全部注入。
+3. 预装 8 个真实技能，保留许可证与固定来源。实际 OpenAI creator / installer、外部项目 error handling 与素问文件/文献/CSV/统计/JSON 包共用 Registry；按需加载参考文件，避免全部注入。
 4. 新增 skill_create / skill_install / skill_read_resource，与已有 skill_search / skill_load / skill_run 配合；静态检查、内容摘要、依赖检查和执行结果仍沿用现有机制。
 5. 正式页面不再硬编码 2048 输出上限；保留 length 截断文本和 Token，最多三次有限接续，工具参数不完整时不执行，所有恢复受任务预算控制。
 6. 升级时校验后台版本，防止新界面复用旧执行器；保留有未结束任务的旧后台。修复 MCP 在 Windows 压力下将管道延迟误判为进程未退出的问题。
@@ -32,7 +32,7 @@
 |---|---|---|
 | TypeScript typecheck | 通过 | `npm run typecheck` |
 | TS 单元及本地集成 | 243 通过、0 失败、1 跳过 | unit-tests.txt，244 项；含真实 Python 技能、文件边界、截断恢复；Windows symlink 权限用例跳过 |
-| Python 全套 | 520 通过 | python-final-tests.txt；包含共享工作区原有科学/DSH 测试，但它们的未提交实现不在本轮发布中 |
+| Python 全套 | 520 通过 | python-final-tests.txt；包含共享工作区原有科学/外部项目 测试，但它们的未提交实现不在本轮发布中 |
 | 认证后台 RPC | 42/42 | rpc-tests.txt；真实 Europe PMC / UniProt，不使用供应商模型 |
 | 文件、技能创建/执行和固定 GitHub 安装 | 8/8 | tools-e2e.json；无模型，实际文件系统、Python Worker、公共 GitHub 下载 |
 | 正式产品界面 | 打包版本 20/20 | product-ui-controlled-packaged.json；受控 SSE，真实 CSV/技能；含接续、原始结果摘要、启停同步、刷新历史/目录/运行入口和输入框 0px 位移 |
@@ -75,6 +75,6 @@ node scripts/product-340-e2e.mjs --packaged --live '--credentials=C:\Users\Qingy
 
 [comparison.json](comparison.json) 保留同任务、同模型、同参数对照；当前 HTTP 429 快速失败延迟不能解释为性能改善。供应商没有货币费用返回，费用未知；当前也没有有效的成功样本 P50/P95 或引用准确率。实际工具边界耗时与 UI 异常统计见 acceptance.json；引用机械来源对应不等于语义蕴含。
 
-未解决项详见 root-causes.md：真实模型配额、二进制文档解析、操作系统沙箱、复杂第三方技能依赖和无 Python 干净系统安装均未验收；ClawsGO 服务器端 Agent Loop 未恢复。保留这些限制，不宣称全部 P0 或最初 18/20 门槛已经达到。
+未解决项详见 root-causes.md：真实模型配额、二进制文档解析、操作系统沙箱、复杂第三方技能依赖和无 Python 干净系统安装均未验收；外部项目 服务器端 Agent Loop 未恢复。保留这些限制，不宣称全部 P0 或最初 18/20 门槛已经达到。
 
 本轮没有安装覆盖生产程序、删除用户历史或修改 API.txt。共享工作区的 README、CHANGELOG、CLI 和 integrations 其他修改保持原样；发布的 Python 资源从已提交基线加明确覆盖文件生成，排除了这些未审查改动。

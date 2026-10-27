@@ -2,6 +2,30 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
+[![Release](https://img.shields.io/badge/release-1.0.0-202020)](https://github.com/ForrestGump618/suwen/releases)
+[![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
+[![License](https://img.shields.io/badge/license-MIT-202020)](LICENSE)
+
+> Windows 安装包：前往 [Releases](https://github.com/ForrestGump618/suwen/releases) 下载 `Eve-Setup-1.0.0-win-x64.exe`。
+
+| 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
+| --- | --- | --- | --- | --- |
+| 论文、数据、代码、复现、核验 | 引物、载体、对照、验证 | RNA、ATAC、蛋白、空间 | 本地、SSH、PowerShell | 勾画、批注、局部修改 |
+
+<details>
+<summary>点击查看一条科研任务如何流转</summary>
+
+```mermaid
+flowchart LR
+  A[问题] --> B[资料与数据]
+  B --> C[工作区执行]
+  C --> D[结果与图表]
+  D --> E[证据核验]
+  E --> F[报告或下一步实验]
+```
+
+</details>
+
 ## 能做什么
 
 ### 深度调研
@@ -29,6 +53,17 @@ Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数�
 - 支持 PowerShell、远程终端、后台任务、任务恢复和多个独立会话。
 - 支持团队成员、依赖关系、独立模型、持久信箱和运行中引导。
 - 图库支持放大、下载、删除和勾画批注；批注可以作为后续任务的指导。
+
+<details>
+<summary>核心交互</summary>
+
+- `请求批准`：敏感操作先询问。
+- `帮我审核`：低风险操作自动通过，高风险操作仍需确认。
+- `完全权限`：由用户明确授予当前任务。
+- `上下文`：查看组成、压缩记录、原文和运行轨迹。
+- `团队`：先保存方案，再批准成员和依赖关系。
+
+</details>
 
 ## 使用方法
 

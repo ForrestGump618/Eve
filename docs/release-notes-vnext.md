@@ -14,7 +14,7 @@
 
 现有项目实际是 Python/FastAPI + 原生网页工作台，并无原有 Electron/TypeScript 工程。此次保留原代码、配置兼容和用户数据，另建桌面壳与独立后台，不执行破坏性迁移。现有 Python 源码继续保留 Apache-2.0，新写桌面代码为 MIT，附第三方许可。
 
-KongMing 2.3.3：用户提供的 260,716,184 字节安装包 SHA-256 为 `fea1c4f21ebd79e3e6a63922f4e64320a5cd5ea697d9863c3462c0165da38b3c`。实测是未签名 NSIS 安装器，内含 Electron ASAR；包元数据声明 Vue、ACP、RDKit 等。仅做静态元数据/结构检查，未执行或复制其闭源 JS、图标、技能或二进制。界面、长程任务、恢复等动态行为全部保留“未知”。
+外部项目 2.3.3：用户提供的 260,716,184 字节安装包 SHA-256 为 `fea1c4f21ebd79e3e6a63922f4e64320a5cd5ea697d9863c3462c0165da38b3c`。实测是未签名 NSIS 安装器，内含 Electron ASAR；包元数据声明 Vue、ACP、RDKit 等。仅做静态元数据/结构检查，未执行或复制其闭源 JS、图标、技能或二进制。界面、长程任务、恢复等动态行为全部保留“未知”。
 
 DeepSeek 官方上游固定在 `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`。实际代码与文档表明默认 workflow/jobs 不等价于附件要求的持久执行；采用独立实现为主、未来适配为辅。没有把社区同名项目当成官方，也没有捆绑上游代码。
 
@@ -30,7 +30,7 @@ DeepSeek 官方上游固定在 `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`。实�
 
 ## 仍未完成
 
-隔离 KongMing 动态测试、干净 Windows 安装/升级/卸载、8/24/72小时耐久/断电/重启测试尚未执行。未配置外部模型账号；费用与所有模型 token 的精确硬预算、OS资源硬隔离、Windows Service/远端worker仍未完成。Paper2Agent、Biomni/ERA/Robin/Kosmos 的完整验收、全部旧工具接入新执行器、自动数据导入及完整 RSI 晋级回滚仍需后续实现。新旧任务的恢复语义不同，不对兼容工作台承诺新durable机制。
+隔离 外部项目 动态测试、干净 Windows 安装/升级/卸载、8/24/72小时耐久/断电/重启测试尚未执行。未配置外部模型账号；费用与所有模型 token 的精确硬预算、OS资源硬隔离、Windows Service/远端worker仍未完成。Paper2Agent、Biomni/ERA/Robin/Kosmos 的完整验收、全部旧工具接入新执行器、自动数据导入及完整 RSI 晋级回滚仍需后续实现。新旧任务的恢复语义不同，不对兼容工作台承诺新durable机制。
 
 详细的逐项完成/未知/未完成清单与源码证据保存在 `docs/progress.md`、`desktop/acceptance-matrix.md` 和 `docs/research/`；本次归档均包含这些文件。
 

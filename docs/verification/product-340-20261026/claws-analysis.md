@@ -1,4 +1,4 @@
-# ClawsGO 1.1.3：安装包分析与素问采用记录
+# 外部项目 1.1.3：安装包分析与素问采用记录
 
 分析对象为用户指定的 `C:\Users\Qingyuan Zhuang\AppData\Local\Programs\@clawsgodesktop`。只读取安装包；实际启动使用独立临时 `--user-data-dir`，未读取现有账户配置、登录或绕过认证。
 
@@ -7,8 +7,8 @@
 | package | `@clawsgo/desktop` 1.1.3，region cn |
 | Electron 主入口 | `dist/main.js` |
 | app.asar SHA-256 | `e21b73cfeabd98ace9be44606ca7930e652fd8e77e14600a2836edcbe1aa0b58` |
-| ClawsGO.exe SHA-256 | `9d58e682afcf2e9a9dbff26282b2a9c8167da55363658830ebbe22b8a4be1eb2` |
-| 实际运行 | `app://bundle/login`，标题 ClawsGO Science；见 claws-runtime.json / claws-isolated-initial.png |
+| 外部项目.exe SHA-256 | `9d58e682afcf2e9a9dbff26282b2a9c8167da55363658830ebbe22b8a4be1eb2` |
+| 实际运行 | `app://bundle/login`，标题 外部项目 Science；见 claws-runtime.json / claws-isolated-initial.png |
 | REA 静态证据 | `ev_bd15c36551e911d019a97445d0a86703a58f36060e2169ce134c91bd087b63a5` |
 
 ## 能确认的设计与采用方式
@@ -23,7 +23,7 @@
 | daemon 的 30s presence、[500,1000,2000,4000,8000,15000] 退避及 watchdog | 长任务需与窗口生命周期分离，连接恢复须有限 | 保留素问已有脱离 UI 的 durable daemon 和退避机制，补版本协商；空闲旧后台升级，有未结束任务时保留 |
 | `dist/main.js` 的 cn/global 用户目录分区与单实例 | 生命周期与账户状态需明确 | 沿用素问现有隔离 profile / 单实例 / safeStorage，不导入其他程序账户配置 |
 
-这里采用交互结构和工程原则；未把 ClawsGO 的私有代码、图标、CSS 或品牌资源复制进素问。实际产品改动在 code-locations.csv，ClawsGO 原始选定文件只留在临时分析目录。
+这里采用交互结构和工程原则；未把 外部项目 的私有代码、图标、CSS 或品牌资源复制进素问。实际产品改动在 code-locations.csv，外部项目 原始选定文件只留在临时分析目录。
 
 ## 覆盖和未知
 
@@ -36,7 +36,7 @@ REA 对明确选择的四个 JS 文件进行了静态分析：198391 字节、55
 ## 开源技能来源
 
 - [OpenAI skills](https://github.com/openai/skills)，commit `49f948faa9258a0c61caceaf225e179651397431`：skill-creator、skill-installer。原始文件逐个 Git blob 比对全匹配，Apache-2.0 许可证保留；SuWen 的 skill.json 是新增适配清单，非上游执行入口。详见 bundled-provenance.json。
-- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)，commit `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`：dsh-error-handling，保留 MIT 许可证。实际 GitHub 下载与固定 SHA 安装见 tools-e2e.json。
+- [外部项目](https://github.com/deepseek-ai/deepseek-harness)，commit `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`：dsh-error-handling，保留 MIT 许可证。实际 GitHub 下载与固定 SHA 安装见 tools-e2e.json。
 - 五个 SuWen 基础技能为本项目实现；其中 csv-analysis、descriptive-stats、json-transform 有实际 Python run 入口，另两个为文件/文献工作流指引。
 
-DSH 更完整的 Cordis、Agent Loop、Registry、MCP 等审查见上一轮 `../harness-20261025/architecture.md`。本轮继续采用 Adapter 和同一执行核心，没有替换成第二套竞争的 Harness。
+外部项目 更完整的 Cordis、Agent Loop、Registry、MCP 等审查见上一轮 `../harness-20261025/architecture.md`。本轮继续采用 Adapter 和同一执行核心，没有替换成第二套竞争的 Harness。

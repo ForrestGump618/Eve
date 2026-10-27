@@ -35,7 +35,7 @@
 
 ## 2026-10-26 恢复额度后的新增复现
 
-22. **引用边界误判**：首轮恢复测试为 21/22。DSH 任务实际成功搜索，且读到了官方 API 和 README，但中文全角括号被吞入 URL；修正回合的仓库网页地址又因只登记 API URL 被拒。`citationUrls` 补中文边界；`fetchedSource` 只接受 GitHub 仓库 API 返回且与请求 owner/repo 精确匹配的 html_url，保留 retrievedUrl。不允许其他站点、issue API 或伪造地址扩大引用集合。单元测试及真实 GitHub API 抓取见 github-canonical-live.json；随后完整固定任务为 22/22。
+22. **引用边界误判**：首轮恢复测试为 21/22。外部项目 任务实际成功搜索，且读到了官方 API 和 README，但中文全角括号被吞入 URL；修正回合的仓库网页地址又因只登记 API URL 被拒。`citationUrls` 补中文边界；`fetchedSource` 只接受 GitHub 仓库 API 返回且与请求 owner/repo 精确匹配的 html_url，保留 retrievedUrl。不允许其他站点、issue API 或伪造地址扩大引用集合。单元测试及真实 GitHub API 抓取见 github-canonical-live.json；随后完整固定任务为 22/22。
 23. **失败任务 Trace 在基准汇总中丢失**：失败 activity 没有 output，runner 原先只读取 output.trace，误报 missingTools，工具成功率也漏算失败任务内调用。现在从持久化事件恢复 Trace ID 和工具事件；原始历史报告保留，comparison.json 的历史工具计数按事件重新汇总。不会把失败任务改成通过。
 24. **结构重建后首段 Markdown 未刷新、节流尾部不 flush**：renderChat 建立新节点后未调用补丁；最后一个事件是结构事件时，直到下一批 token/poll 才渲染。另一个路径先记 painted，再延迟块渲染，定时器因文本相同而跳过。现在节点替换后立即应用已到文本，允许未完成的稳定块刷新；workbench-progressive-reproduced.json 保留 33/34 失败，修复后 34/34。
 25. **新会话被较晚返回的旧数据恢复**：loadConversations 每次发现空 conversationId 就选择最近历史；refreshConversationRecord 也未核对返回时的当前选择。连续测试复现“新建”后恢复旧会话、持久化检查读到前两项合法回复。现在只有未经用户选择的首次加载可自动选择，get/list 和 open 用会话 epoch 约束；新建清理旧检查面板与滚动意图。真实 IPC 竞态 4/4，连续长流后新建只保存一条助手回复。

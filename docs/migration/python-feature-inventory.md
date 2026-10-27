@@ -119,7 +119,7 @@ Evidence types: (a) source code paths/line refs from the Lead's `docs/architectu
 
 - `suwen/extensions.py` `Channels` + `suwen/wechat.py` (11.9 KB: trusted base URL, QR image, iLink QR login polling, private-chat text polling, optional reply) + `server/routes*.py` channel endpoints + `web/js/views/channel-setup.js` + `docs/CHANNELS.md`.
 - Implemented: WebChat, Telegram adapter, WeChat iLink QR login/private text polling (QR retrieval tested by Lead; phone confirmation/real session pending user acceptance).
-- Missing: WeCom/Feishu/QQ/OpenClaw native plugin, groups, attachments, full reconnect/backoff, unified ChannelAdapter lifecycle, remote read-only enforcement per channel.
+- Missing: WeCom/Feishu/QQ/外部项目 native plugin, groups, attachments, full reconnect/backoff, unified ChannelAdapter lifecycle, remote read-only enforcement per channel.
 - Credentials: channel secrets in config; vNext contract requires `secretRef` (safeStorage) and no plaintext secrets in JSON.
 
 ## 13. Security, approvals, credentials

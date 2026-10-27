@@ -72,7 +72,7 @@ MCP 创建后默认停用。配置命令/参数或 HTTP URL、允许工作区/Ag
 
 `mcpServers` JSON 导入时，env/header 值经 DPAPI 加密再保存引用。stdio 服务是本机进程，配置来源需可信；不是自动进入 Docker。MCP OAuth 需要在原服务完成授权，当前没有内嵌完整 OAuth 登录流程。
 
-消息渠道已改为引导设置：微信使用腾讯 iLink 协议扫码绑定，自动接收本人文字消息；可明确开启成功任务的文字回复。Telegram 使用 Bot Token 表单与认证测试，Webhook 仍需公开 HTTPS 地址和共享密钥。陌生联系人拒绝，默认只读；企业微信、飞书、QQ、OpenClaw 仍需外部适配器。详细步骤与边界见 [消息渠道设置](CHANNELS.md)。
+消息渠道已改为引导设置：微信使用腾讯 iLink 协议扫码绑定，自动接收本人文字消息；可明确开启成功任务的文字回复。Telegram 使用 Bot Token 表单与认证测试，Webhook 仍需公开 HTTPS 地址和共享密钥。陌生联系人拒绝，默认只读；企业微信、飞书、QQ、外部项目 仍需外部适配器。详细步骤与边界见 [消息渠道设置](CHANNELS.md)。
 
 ## 代码隔离
 

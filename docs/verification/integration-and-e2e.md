@@ -165,7 +165,7 @@ Explicit non-passes recorded by the smoke run:
   PASS; `upgrade-path.json` (`2026-10-24T17:46:42Z`, 3.1.0) is historical/superseded.
   Only that upgrade path was tested (no other release line exists).
 - Environment caveat (not a product defect): the developer shell inherits `ELECTRON_RUN_AS_NODE=1`
-  from the DSH parent process, making Electron executables exit as Node; probes remove it from the
+  from the 外部项目 parent process, making Electron executables exit as Node; probes remove it from the
   launching shell only and the shipped app is not modified.
 - **Clean-VM install/upgrade/uninstall is NOT RUN** and remains PENDING_LEAD; the host has Node,
   Python, prior SuWen data and dev installs, so no result here is a clean-machine verification.

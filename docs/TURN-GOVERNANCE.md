@@ -1,6 +1,6 @@
 # 自动回合治理与流式输出
 
-素问 1.0 / Eve 1.0.0 的统一 Harness 不设置隐藏的单轮模型请求或工具调用次数上限，也不按“相同调用三次”或“无进展五次”强制终止。这个决定来自对 ClawsGO 1.1.3 发行包静态逆向后得到的能力边界：可以确认每轮在独立子进程运行、同会话新轮会终止旧轮、取消与连接看门狗存在；发行包没有公开或暴露可验证的固定模型/工具迭代阈值。实现细节见 [ClawsGO 1.1.3 逆向记录](verification/clawsgo-1.1.3-rea.md)。
+素问 1.0 / Eve 1.0.0 的统一 Harness 不设置隐藏的单轮模型请求或工具调用次数上限，也不按“相同调用三次”或“无进展五次”强制终止。这个决定来自对 外部项目 1.1.3 发行包静态逆向后得到的能力边界：可以确认每轮在独立子进程运行、同会话新轮会终止旧轮、取消与连接看门狗存在；发行包没有公开或暴露可验证的固定模型/工具迭代阈值。实现细节见 [外部项目 1.1.3 逆向记录](verification/clawsgo-1.1.3-rea.md)。
 
 ## 每一次工具结果都回传模型
 
@@ -48,4 +48,4 @@ Token 统计不能预测外部服务的精确账单；Provider 未报告用量�
 
 回归位于 `tests/test_turn_governance.py`、`desktop/test/agent-loop.test.ts` 与 `tests/test_runtime.py`。它们用可控 Provider 驱动真实 AgentLoop/ToolRegistry，验证超过旧 24 步/48 工具边界的任务可以完成、相同调用与循环序列仍能观察、取消与时长边界、流聚合与关闭、Token 边界、跨回合重置，以及停止原因持久化。
 
-本次按 DeepSeek Harness 的运行时防护原则独立实现，并参考 Argus 的 [预算执行与显式结算](https://github.com/microsoft/ArgusAgent/blob/main/packages/runtime/src/budgetedPi.ts)、[运行中用量观察](https://github.com/microsoft/ArgusAgent/blob/main/argus/adapters/agent_cli_backend/_budget_monitor.py) 和 [流进度聚合](https://github.com/microsoft/ArgusAgent/blob/main/argus/adapters/stream_progress.py)。参考的是资源控制与事件边界设计，未引入其 Manager/Planner/Engineer/Reviewer 运行体系或复用上游基准成绩。
+本次按 外部项目 的运行时防护原则独立实现，并参考 Argus 的 [预算执行与显式结算](https://github.com/microsoft/外部项目/blob/main/packages/runtime/src/budgetedPi.ts)、[运行中用量观察](https://github.com/microsoft/外部项目/blob/main/argus/adapters/agent_cli_backend/_budget_monitor.py) 和 [流进度聚合](https://github.com/microsoft/外部项目/blob/main/argus/adapters/stream_progress.py)。参考的是资源控制与事件边界设计，未引入其 Manager/Planner/Engineer/Reviewer 运行体系或复用上游基准成绩。

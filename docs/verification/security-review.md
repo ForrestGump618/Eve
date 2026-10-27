@@ -70,7 +70,7 @@ the shipped app, and the tests assert they are never echoed into user-facing err
 | Shell execution | No `shell:true`; spawn sites use explicit argv and `-E`/`-I` isolated Python flags (`legacy-worker.ts:19`, `python-worker.ts:6`, `mcp-client.ts:113`, `research-worker.ts:463`); `taskkill` via `execFile` |
 | Dependency/supply chain | pinned Electron 45 / Node 24 runtime, `package-lock.json`, SBOM (`npm sbom --omit=dev`, CycloneDX 1.5), license inventory (`desktop/third-party-licenses/`) |
 
-Known local test-environment caveat: the developer shell inherits `ELECTRON_RUN_AS_NODE=1` from DSH,
+Known local test-environment caveat: the developer shell inherits `ELECTRON_RUN_AS_NODE=1` from 外部项目,
 so Electron executables launch as Node. Installer/lifecycle smoke scripts remove that variable for
 the launched process only; the shipped application is unmodified. This is a test-harness caveat, not
 a product defect.

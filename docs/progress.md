@@ -5,8 +5,8 @@ Delivered **3.0.0-preview.1**, a first implementation slice. The full attachment
 ## Completed and verified
 
 - Source audit: baseline is Python/FastAPI and ES Modules, not Electron. Preserve this code and its data contracts. Fix an independently reproduced job status/exit-code race; full original Python suite now **482 passed, one dependency deprecation warning**, 36.52 seconds.
-- KongMing static identity, unsigned PE resources, NSIS payload/ASAR inventory and package metadata. No installer/app execution, private-source recovery, asset copying or backend probing. Dynamic behavior remains unknown.
-- Official DeepSeek Harness pinned source review at `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`; independently implement core durability (III), retain future adapter option (II). No upstream source bundled.
+- 外部项目 static identity, unsigned PE resources, NSIS payload/ASAR inventory and package metadata. No installer/app execution, private-source recovery, asset copying or backend probing. Dynamic behavior remains unknown.
+- Official 外部项目 pinned source review at `22ddee3792402c3e70ec5f86a63c3e3e895a2f60`; independently implement core durability (III), retain future adapter option (II). No upstream source bundled.
 - New MIT desktop: Electron main + sandboxed preload/renderer, restrictive local CSP, schema-checked IPC and sender checks; original icon and SuWen executable metadata; five workspaces, complete Chinese/English labels, stable composer, bounded visible history, streamed text, event panels and redacted support export.
 - Detached Node daemon: authenticated current-user named pipe; SQLite WAL/FULL/foreign keys/busy timeout; versioned migrations and backups; state/event/checkpoint/artifact transactions, CAS, leases/fencing/heartbeat/reclamation, DAG, durable timers, explicit controls, bounded retries and uncertain-effect reconciliation. Model credentials lock queued work without consuming attempts.
 - ContextManager/CompactionService: real known-model tokenizer plus tool/schema/output reserves, explicit conservative unknown-model estimates, 70/82% thresholds, append-only source hash chain, structured source-linked summaries, large tool output artifacts, complete tool groups, coverage checks, versions/manual compaction/rollback and restart replay. Tokenization runs in serialized worker threads. Ten ~201k-token rounds reduced to ~2.0–2.8k; explicit test constraints/evidence/user text retained 100%, **not a claim of semantic losslessness**.
@@ -18,7 +18,7 @@ Delivered **3.0.0-preview.1**, a first implementation slice. The full attachment
 
 ## Unfinished acceptance gates / next work
 
-1. KongMing isolated dynamic matrix and clean Windows install/upgrade/uninstall require a VM/snapshot/test account. No available isolated environment was found; host execution was not substituted.
+1. 外部项目 isolated dynamic matrix and clean Windows install/upgrade/uninstall require a VM/snapshot/test account. No available isolated environment was found; host execution was not substituted.
 2. Actual elapsed 8/24/72-hour fault injection, reboot/sleep/power loss/disk full and measured recovery rates remain unperformed. Short real SIGKILL tests do not establish endurance.
 3. Real external model-account verification requires user-supplied endpoint/credentials; current protocols passed local fixtures. Money limits, failure-side provider charges and all proprietary tokenizers are not exact prepaid guarantees. CPU/memory/disk OS quotas, Windows Service, remote/Temporal workers remain incomplete.
 4. Complete new-executor bridge for all legacy scientific workflows, third-party Skill/MCP supply-chain lifecycle, Paper2Agent installation/test, Biomni/ERA/Robin/Kosmos/co-scientist integration and full RSI review/canary/promotion/rollback remain incomplete. Existing functionality is preserved and reachable through compatibility mode, not re-validated as new scientific integrations.
