@@ -14,7 +14,9 @@ export const ROUTES = [
   { id: 'diagnostics', label: '系统诊断', icon: 'cpu', subtitle: '状态、资源与执行追踪' },
   { id: 'connections', label: '连接设置', icon: 'key', subtitle: '兼容的模型连接与凭据配置', hidden: true },
   { id: 'workbench', label: '工作台', icon: 'layers', subtitle: '工作区、会话与计算面板' },
-  { id: 'chat', label: '对话', icon: 'chat', subtitle: '与智能体协作分析' },
+  // Chat is rendered inside the unified workbench. Keep the legacy route id
+  // hidden for old bookmarks, but never expose a second chat surface.
+  { id: 'chat', label: '对话', icon: 'chat', subtitle: '工作台中的智能体协作', hidden: true },
   { id: 'discovery', label: '发现', icon: 'discovery', subtitle: '自主发现（RSI）项目' },
   { id: 'vars', hidden: true, label: '变量', icon: 'vars', subtitle: '内核工作区变量' },
   { id: 'files', hidden: true, label: '文件', icon: 'files', subtitle: '工作区文件管理' },
@@ -67,12 +69,13 @@ export function setState(patch) {
 export function parseHash(hash = window.location.hash) {
   const raw = String(hash || '').replace(/^#\/?/, '').split('?')[0].trim();
   const preferred = getPref('homeRoute', 'workbench');
+  if (raw === 'chat') return 'workbench';
   return ROUTE_IDS.includes(raw) ? raw : ROUTE_IDS.includes(preferred) ? preferred : 'workbench';
 }
 
 /** Navigate to a view by updating the hash (the router reacts to hashchange). */
 export function navigate(route, params = null) {
-  const target = ROUTE_IDS.includes(route) ? route : 'chat';
+  const target = route === 'chat' ? 'workbench' : ROUTE_IDS.includes(route) ? route : 'workbench';
   if (params && typeof params === 'object') state.routeParams = { ...params };
   const next = `#/${target}`;
   if (window.location.hash === next) {

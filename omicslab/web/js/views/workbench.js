@@ -1177,7 +1177,7 @@ function layout() {
     '<button type="button" class="btn btn-ghost btn-sm" id="wb-layout">布局</button>' +
     `<button type="button" class="btn btn-ghost btn-sm" id="wb-probe">${icon('refresh', { size: 14 })}<span>刷新状态</span></button>` +
     `<button type="button" class="btn btn-ghost btn-sm" id="wb-new-ws">${icon('folderPlus', { size: 14 })}<span>新建工作区</span></button>` +
-    `<button type="button" class="btn btn-ghost btn-sm" id="wb-old-chat">${icon('external', { size: 14 })}<span>专注对话</span></button>` +
+    `<button type="button" class="btn btn-ghost btn-sm" id="wb-old-chat" title="聊天已集成在工作台">${icon('chat', { size: 14 })}<span>工作台对话</span></button>` +
     '</div>' +
     '</div>' +
     '<div class="wb-main">' +

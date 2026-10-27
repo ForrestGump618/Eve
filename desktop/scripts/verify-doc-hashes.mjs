@@ -4,11 +4,25 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const repoRoot = resolve(root, '..');
 const allowMissingRelease = process.argv.includes('--allow-missing-release');
+const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+if(pkg.build?.productName==='Eve'){
+  const manifest=JSON.parse(readFileSync(join(repoRoot,'docs/verification/eve-1.0/installer.json'),'utf8'));
+  const expected=`Eve-Setup-${pkg.version}-win-x64.exe`;
+  if(manifest.file!==expected||manifest.version!==pkg.version||!/^[a-f0-9]{64}$/.test(manifest.sha256)||!Number.isSafeInteger(manifest.bytes)||manifest.bytes<=0)throw Error('Invalid Eve installer manifest');
+  const artifact=[join(root,'release/eve-v1.0.0',expected),join(root,'release',expected)].find(existsSync);
+  if(artifact){
+    const data=readFileSync(artifact);
+    if(data.length!==manifest.bytes||createHash('sha256').update(data).digest('hex')!==manifest.sha256)throw Error('Eve installer differs from documented manifest');
+  }else if(!allowMissingRelease)throw Error('Eve installer unavailable; build first or explicitly verify the committed manifest');
+  console.log(`verify-doc-hashes: PASS Eve ${pkg.version} (${artifact?'actual installer bytes verified':'fresh checkout: committed manifest validated'})`);
+  process.exit(0);
+}
 let sumsPath = join(root, 'release', 'SHA256SUMS');
 let docsOnly = false;
 if (!existsSync(sumsPath)) {
@@ -22,7 +36,6 @@ if (!existsSync(sumsPath)) {
     process.exit(1);
   }
 }
-const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const version = String(pkg.version);
 const entries = readFileSync(sumsPath, 'utf8')
   .split(/\r?\n/)

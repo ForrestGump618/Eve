@@ -39,10 +39,16 @@ EventSink = Callable[[dict[str, Any]], Awaitable[None]]
 _MISSING = object()
 
 _BOOTSTRAP_CODE = r"""
-%matplotlib inline
-import matplotlib_inline.backend_inline as _omicslab_inline
-_omicslab_inline.InlineBackend.instance().figure_formats = {"png"}
-_omicslab_inline.InlineBackend.instance().rc = {"figure.dpi": 130, "savefig.dpi": 200}
+# Plotting is optional. Missing scientific extras must not abort installation
+# of the stdlib-only variable inspector below.
+try:
+    import matplotlib_inline.backend_inline as _omicslab_inline
+    get_ipython().run_line_magic("matplotlib", "inline")
+    _omicslab_inline.InlineBackend.instance().figure_formats = {"png"}
+    _omicslab_inline.InlineBackend.instance().rc = {"figure.dpi": 130, "savefig.dpi": 200}
+    _omicslab_plotting_available = True
+except ImportError:
+    _omicslab_plotting_available = False
 import warnings as _omicslab_warnings
 _omicslab_warnings.filterwarnings("ignore")
 import json as __omicslab_json
@@ -217,12 +223,12 @@ class KernelService:
         try:
             return KernelSpec(
                 argv=argv,
-                display_name="素问 Suwen Python",
+                display_name="Eve Python",
                 language="python",
                 env=env,
             )
         except TypeError:  # pragma: no cover - very old jupyter_client
-            return KernelSpec(argv, "素问 Suwen Python", "python", env)
+            return KernelSpec(argv, "Eve Python", "python", env)
 
     def _make_manager(self) -> Any:
         from jupyter_client.manager import AsyncKernelManager
@@ -667,7 +673,7 @@ class KernelService:
         return {
             "cells": cells,
             "metadata": {
-                "kernelspec": {"display_name": "素问 Suwen Python", "language": "python", "name": "omicslab"},
+                "kernelspec": {"display_name": "Eve Python", "language": "python", "name": "omicslab"},
                 "language_info": {"name": "python", "version": "3"},
             },
             "nbformat": 4,

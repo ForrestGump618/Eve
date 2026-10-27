@@ -378,7 +378,11 @@ class FakeSSHClient:
 
 
 @pytest.fixture(autouse=True)
-def _reset_connection_service():
+def _reset_connection_service(monkeypatch):
+    # This suite tests the memory fallback, independent of host keyring setup.
+    # Persistent backends are exercised separately; never write test passwords
+    # into a CI runner's or developer's real system credential store.
+    monkeypatch.setattr(manager_module.CredentialStore, "_init_backend", lambda self: None)
     connections_module.reset_for_tests()
     yield
     connections_module.reset_for_tests()

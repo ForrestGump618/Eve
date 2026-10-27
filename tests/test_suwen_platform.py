@@ -253,7 +253,8 @@ def test_permission_denial_and_channel_restriction_happen_before_execution(p):
 @pytest.mark.asyncio
 async def test_desktop_mcp_sync_preserves_project_and_secret_references(p):
     adapter=DesktopAdapter();p.state.loop.desktop_harness=adapter
-    p.vault.put('mcp.header','sensitive-value')
+    # This verifies reference transport, not Windows-only DPAPI persistence.
+    p.vault.put('mcp.header','sensitive-value',persist=False)
     server=p.mcp.save({'name':'shared','transport':'http','url':'https://mcp.example/rpc',
         'enabled':True,'read_only':False,'workspaces':['ws_main'],'header_refs':{'Authorization':'mcp.header'}})
     await sync_desktop_mcp(p,server)
