@@ -4,6 +4,7 @@ import {on} from './bus.js?v=2.1.1';
 import {esc,escAttr} from './util.js?v=2.1.1';
 import {icon} from './icons.js?v=2.1.1';
 import {openModal,toastError,toastInfo} from './ui.js?v=2.1.1';
+import {openWorkspaceEditor,openWorkspaceSearch,openWorkspaceGit} from './workspace-editor.js?v=1.0.0';
 
 /** Lazy, bounded file tree. No polling, recursive preload or cross-workspace cache. */
 export async function mountProjectFiles(root,{busy,changed}){
@@ -57,12 +58,17 @@ export async function mountProjectFiles(root,{busy,changed}){
    await listing(path,children,Math.min(10,Number(button.style.getPropertyValue('--file-depth'))+1));
   }else{
    const id=getState().workspaceId,version=epoch;
-   try{const data=await api.workspaces.files.read(id,path);if(disposed||version!==epoch)return;openModal({title:path,size:'lg',html:`<pre class="project-preview">${esc(data.content??data.text??(data.binary?'二进制文件，请在文件浏览器打开':''))}</pre>`,actions:[{label:'关闭',kind:'ghost'},{label:'文件浏览器',kind:'primary',onClick:()=>navigate('files')} ]});}catch(error){toastError(errorMessage(error));}
+   try{if(disposed||version!==epoch)return;await openWorkspaceEditor({...getState().workspace,workspace_id:id},path);}catch(error){toastError(errorMessage(error));}
   }
  }
  select.addEventListener('change',change);tree.addEventListener('click',click);
  const off=on('workspace:change',()=>{void refresh();});
+ const offFiles=on('workspace:files-changed',event=>{if(event.workspaceId===getState().workspaceId)void listing('.',tree);});
+ const search=()=>openWorkspaceSearch(getState().workspace).catch(error=>toastError(errorMessage(error)));
+ const git=()=>openWorkspaceGit(getState().workspace).catch(error=>toastError(errorMessage(error)));
+ root.querySelector('#project-search')?.addEventListener('click',search);
+ root.querySelector('#project-git')?.addEventListener('click',git);
  root.querySelector('#project-refresh')?.addEventListener('click',refresh);
  await refresh();
- return ()=>{disposed=true;epoch++;off();select.removeEventListener('change',change);tree.removeEventListener('click',click);root.querySelector('#project-refresh')?.removeEventListener('click',refresh);};
+ return ()=>{disposed=true;epoch++;off();offFiles();select.removeEventListener('change',change);tree.removeEventListener('click',click);root.querySelector('#project-refresh')?.removeEventListener('click',refresh);root.querySelector('#project-search')?.removeEventListener('click',search);root.querySelector('#project-git')?.removeEventListener('click',git);};
 }

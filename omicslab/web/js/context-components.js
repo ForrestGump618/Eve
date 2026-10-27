@@ -1,0 +1,20 @@
+import {esc,escAttr} from './util.js?v=2.1.1';
+
+export function contextRequestsHtml(requests={}){
+ const items=requests.items||[],max=Math.max(1,...items.map(r=>Object.values(r.composition).reduce((n,v)=>n+v,0)));
+ return `<section class="eve-dashboard-card"><h2>请求趋势与上下文浏览器</h2><p class="eve-detail-note">每根柱表示一次已存档的模型请求。高度为可见 JSON 的 UTF-8 字节估算，计费 Token 见运行用量。</p><div class="context-trend">${items.slice().reverse().map(r=>{
+  const total=Object.values(r.composition).reduce((n,v)=>n+v,0);
+  return `<button data-context-request="${r.sequence}" title="请求 ${r.sequence} · ${total.toLocaleString()} 字节"><i style="height:${Math.max(3,total/max*96)}px"></i><span>${r.sequence}</span></button>`;
+ }).join('')}</div><div id="context-request-list">${items.map(r=>`<button class="context-source" data-context-request="${r.sequence}">请求 ${r.sequence} · ${r.messageCount} 条消息 · ${r.metadata?.at?new Date(r.metadata.at).toLocaleString():'初始上下文'} · ${esc(r.metadata?.model||'')} <span>${Object.entries(r.composition).map(([k,v])=>`${esc(k)} ${Number(v).toLocaleString()}`).join(' / ')}</span></button>`).join('')||'<p class="eve-muted">尚无模型请求</p>'}</div>${requests.nextOffset!==null&&requests.nextOffset!==undefined?`<button class="btn btn-sm" data-context-more="${requests.nextOffset}">更早请求</button>`:''}</section>`;
+}
+export function contextActivityHtml(data){
+ const runs=data.runs||[],events=data.events||[];
+ const activity=events.filter(e=>/tool|command|file|context|compact|error|fail/i.test(e.type));
+ return `<section class="eve-dashboard-card"><h2>运行与成员轨迹</h2>${runs.map(r=>`<button class="context-source" data-context-run="${escAttr(r.run_id)}">${esc(r.status)} · ${esc(r.created_at)} · ${Number(r.usage?.total_tokens||0).toLocaleString()} Token${r.parent_run_id?' · 子任务':''}</button>`).join('')||'<p class="eve-muted">暂无运行</p>'}</section>
+ <section class="eve-dashboard-card"><h2>文件、命令与上下文事件</h2><p class="eve-detail-note">最近 5 次运行，每次至多 200 条事件；展开可查看原始事件和状态。空记录不代表操作成功。</p>${activity.slice(-100).reverse().map(e=>`<details class="context-snapshot"><summary>${esc(e.type)} · ${esc(e.data?.name||e.data?.tool||'')} <span>${esc(e.ts||'')}</span></summary><pre class="context-original">${esc(JSON.stringify(e.data,null,2))}</pre></details>`).join('')||'<p class="eve-muted">暂无相关事件</p>'}</section>`;
+}
+export function contextOverviewHtml(data,{query='',sort='recent',day=''}={}){
+ const days=data.daily||[],max=Math.max(1,...days.map(d=>d.tokens));
+ const sessions=(data.sessions||[]).filter(s=>(!query||s.title.toLowerCase().includes(query.toLowerCase()))&&(!day||s.days?.includes(day))).sort((a,b)=>sort==='tokens'?b.tokens-a.tokens:Number(b.updated_at)-Number(a.updated_at));
+ return `<div class="eve-metric-grid"><article><span>活跃会话</span><strong>${data.sessions?.length||0}</strong></article><article><span>运行次数</span><strong>${data.runs}</strong></article><article><span>报告 Token</span><strong>${Number(data.tokens).toLocaleString()}</strong></article><article><span>费用 / 缓存命中</span><strong>—</strong><small>未取得可靠计费数据</small></article></div><section class="eve-dashboard-card"><h2>每日用量</h2><div class="context-trend">${days.map(d=>`<button data-context-day="${escAttr(d.day)}" class="${day===d.day?'is-active':''}" title="${escAttr(d.day)} · ${d.tokens} Token"><i style="height:${Math.max(3,d.tokens/max*96)}px"></i><span>${esc(d.day.slice(5))}</span></button>`).join('')||'<p class="eve-muted">此范围没有已报告的用量</p>'}</div><p class="eve-detail-note">${data.limited?'只统计最近 500 次运行。':'统计已有运行日志；'}缺失用量不计入。点击日期筛选，再次点击取消。</p></section><section class="eve-dashboard-card"><div class="eve-card-heading"><h2>会话</h2><input class="input" id="insights-query" placeholder="搜索会话" value="${escAttr(query)}"/><select id="insights-sort"><option value="recent" ${sort==='recent'?'selected':''}>最近</option><option value="tokens" ${sort==='tokens'?'selected':''}>Token</option></select></div>${sessions.map(s=>`<button class="context-source" data-context-session="${escAttr(s.id)}">${esc(s.title)} <span>${s.runs} 次运行 · ${s.tokens.toLocaleString()} Token · ${s.failed} 次异常</span></button>`).join('')||'<p class="eve-muted">没有匹配会话</p>'}</section>`;
+}

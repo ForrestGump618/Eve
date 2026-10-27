@@ -1272,6 +1272,13 @@ class SSHManager:
         started = time.perf_counter()
         stdout = bytearray()
         stderr = bytearray()
+        output_limited = False
+        def capture(target, chunk):
+            nonlocal output_limited
+            remaining = max(0, MAX_CAPTURE_CHARS * 2-len(stdout)-len(stderr))
+            if len(chunk) > remaining:
+                output_limited = True
+            target.extend(chunk[:remaining])
         deadline = time.monotonic() + timeout_s
         try:
             payload = command
@@ -1288,8 +1295,6 @@ class SSHManager:
                 pass
             timed_out = False
             while True:
-                if stdout and stderr and len(stdout) + len(stderr) > MAX_CAPTURE_CHARS * 2:
-                    pass
                 if time.monotonic() > deadline:
                     timed_out = True
                     break
@@ -1298,7 +1303,7 @@ class SSHManager:
                     if channel.recv_ready():
                         chunk = channel.recv(65536)
                         if chunk:
-                            stdout.extend(chunk)
+                            capture(stdout, chunk)
                             got = True
                 except Exception as exc:
                     raise SSHCommandUnknown(
@@ -1311,7 +1316,7 @@ class SSHManager:
                     if channel.recv_stderr_ready():
                         chunk = channel.recv_stderr(65536)
                         if chunk:
-                            stderr.extend(chunk)
+                            capture(stderr, chunk)
                             got = True
                 except Exception as exc:
                     raise SSHCommandUnknown(
@@ -1343,9 +1348,11 @@ class SSHManager:
             try:
                 exit_code = int(channel.recv_exit_status())
             except Exception:
-                exit_code = 0
+                raise SSHCommandUnknown("SSH 命令退出码不可读，不能确认成功",
+                    stdout=self._decode_output(stdout),stderr=self._decode_output(stderr),duration_ms=duration_ms)
             return {
-                "status": "ok" if exit_code == 0 else "nonzero",
+                "status": "output_limited" if output_limited else "ok" if exit_code == 0 else "nonzero",
+                "truncated": output_limited,
                 "exit_code": exit_code,
                 "stdout": self._decode_output(stdout),
                 "stderr": self._decode_output(stderr),

@@ -7,6 +7,7 @@ leaves a half-written conversation behind.
 
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import re
@@ -44,6 +45,7 @@ class ConversationStore:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self._lock = threading.RLock()
+        self._summaries: dict[str, tuple[tuple[int, int], dict[str, Any]]] = {}
 
     # -- paths -------------------------------------------------------------
     @property
@@ -75,6 +77,12 @@ class ConversationStore:
             return summaries
         for path in paths:
             try:
+                stat = path.stat()
+                stamp = (stat.st_mtime_ns, stat.st_size)
+                cached = self._summaries.get(path.stem)
+                if cached and cached[0] == stamp:
+                    summaries.append(copy.deepcopy(cached[1]))
+                    continue
                 data = json.loads(path.read_text(encoding="utf-8"))
                 if not isinstance(data, dict):
                     raise ValueError("会话文件不是 JSON 对象")
@@ -82,9 +90,12 @@ class ConversationStore:
                 summary = conversation.summary()
                 summary["message_count"] = len(conversation.messages)
                 summaries.append(summary)
+                self._summaries[path.stem] = (stamp, copy.deepcopy(summary))
             except (OSError, ValueError, TypeError, KeyError) as exc:
                 logger.warning("跳过损坏的会话文件 %s: %s", path, exc)
                 continue
+        if len(self._summaries) > 512:
+            self._summaries = dict(list(self._summaries.items())[-512:])
         summaries.sort(key=lambda item: float(item.get("updated_at") or 0.0), reverse=True)
         return summaries
 
@@ -124,11 +135,34 @@ class ConversationStore:
             raise ConfigError(f"非法的会话 id: {conv.id!r}")
         conv.title = _clean_title(conv.title)
         conv.updated_at = time.time()
-        payload = conv.to_dict()
-        text = json.dumps(payload, ensure_ascii=False, indent=2)
         with self._lock:
-            self._ensure_root()
-            atomic_write_text(self._path(conv.id), text)
+            # UI metadata must survive a later save from an in-flight run's object.
+            path = self._path(conv.id)
+            if path.exists():
+                saved = self.get(conv.id)
+                for key in ("archived", "pinned"):
+                    if key in saved.meta:
+                        conv.meta[key] = saved.meta[key]
+            self._write_locked(conv)
+
+    def _write_locked(self, conv: Conversation) -> None:
+        self._ensure_root()
+        atomic_write_text(self._path(conv.id), json.dumps(conv.to_dict(), ensure_ascii=False, indent=2))
+        self._summaries.pop(conv.id, None)
+
+    def update_metadata(self, cid: str, patch: dict[str, Any]) -> Conversation:
+        with self._lock:
+            conv = self.get(cid)
+            if "title" in patch:
+                conv.title = _clean_title(patch["title"])
+            for key in ("archived", "pinned"):
+                if key in patch:
+                    if not isinstance(patch[key], bool):
+                        raise ValueError(f"{key} must be boolean")
+                    conv.meta[key] = patch[key]
+            # Archiving/pinning doesn't promote an old conversation to most recent.
+            self._write_locked(conv)
+            return conv
 
     def delete(self, cid: str) -> bool:
         """Delete a conversation file; returns False when it did not exist."""

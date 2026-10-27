@@ -18,6 +18,7 @@ import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
 import { ValidationError, type TaskDefinition, type Json } from './harness/types.js';
 import { ensureHome, newConnection, connectionPath, atomicJson, secretEqual, safeError } from './security.js';
+import {queryContextAsync} from './context-query.js';
 import { ContextManager } from './context.js';
 import { prepareContextAsync } from './context-async.js';
 import { queryViaMcp } from './mcp-client.js';
@@ -366,19 +367,40 @@ function contextOptions(params: Record<string, Json>): { id: string; conversatio
   const first = store.getSteps(params.id).find(step => step.kind === 'model');
   const conversationId = String((first?.input as Record<string, Json> | undefined)?.conversationId ?? params.id);
   const cid = createHash('sha256').update(conversationId).digest('hex').slice(0, 32);
-  const current = modelRuntime.current();
+  const current = taskModels.get(params.id)?.current() ?? modelRuntime.current();
+  const preparedEvent = store.events(params.id).filter(event=>event.type==='agent.context_prepared').at(-1)?.data as Record<string, Json> | undefined;
   return {
     id: params.id,
     conversationId,
     options: {
       directory: join(home, 'contexts', cid),
-      model: current?.model ?? 'gpt-4o',
-      contextWindow: current?.contextWindow ?? 128000,
-      outputTokens: current?.maxOutput ?? 4096,
+      model: String(preparedEvent?.model ?? current?.model ?? 'unknown'),
+      contextWindow: Number(preparedEvent?.contextWindow ?? current?.contextWindow ?? 128000),
+      outputTokens: Number(preparedEvent?.maxOutput ?? current?.maxOutput ?? 4096),
       accounting: 'estimate',
     },
   };
 }
+handlers['contextInspect'] = params => queryContextAsync(contextOptions(params).options,'inspect');
+handlers['contextRequests'] = params => {
+  const offset=Number(params.offset??0);
+  if(!Number.isSafeInteger(offset)||offset<0)throw new ValidationError('Invalid context offset');
+  return queryContextAsync(contextOptions(params).options,'requests',undefined,{offset,limit:50});
+};
+handlers['contextRequest'] = params => {
+  const sequence=Number(params.sequence),offset=Number(params.offset??0);
+  if(!Number.isSafeInteger(sequence)||sequence<1||!Number.isSafeInteger(offset)||offset<0)throw new ValidationError('Invalid context request');
+  return queryContextAsync(contextOptions(params).options,'request',undefined,{sequence,offset,limit:30});
+};
+handlers['contextSearch'] = params => {
+  if(typeof params.query!=='string'||!params.query.trim()||params.query.length>500)throw new ValidationError('Invalid context search');
+  return queryContextAsync(contextOptions(params).options,'search',undefined,{text:params.query,limit:30});
+};
+handlers['contextSource'] = params => {
+  const source=params.source as {requestSequence:number;messageIndex:number;sha256:string}|undefined;
+  if(!source||!Number.isSafeInteger(source.requestSequence)||!Number.isSafeInteger(source.messageIndex)||!/^[a-f0-9]{64}$/.test(source.sha256))throw new ValidationError('Invalid context source');
+  return queryContextAsync(contextOptions(params).options,'source',source);
+};
 handlers['contextHistory'] = params => new ContextManager(contextOptions(params).options).history() as unknown as Json;
 handlers['contextCompact'] = params => {
   const { conversationId, options } = contextOptions(params);

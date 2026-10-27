@@ -765,6 +765,7 @@
 .chat-figure.compact img {
   max-height: 200px;
 }
+.figure-annotator-stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:260px;background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:10px;overflow:hidden}.figure-annotator-stage img{display:block;max-width:100%;max-height:58vh;object-fit:contain}.figure-annotator-stage canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}.figure-annotator-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0}.figure-annotator-tools label{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:4px}
 
 /* scroll to bottom */
 .scroll-bottom {

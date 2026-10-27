@@ -36,6 +36,8 @@ import {
 const HEALTH_INTERVAL_MS = 15000;
 
 const VIEW_LOADERS = {
+  context: () => import('./views/context-dashboard.js?v=1.0.0'),
+  teams: () => import('./views/teams.js?v=1.0.0'),
   settings: () => import('./views/platform.js?v=2.1.1'),
   tasks2: () => import('./views/platform.js?v=2.1.1'),
   extensions: () => import('./views/platform.js?v=2.1.1'),
@@ -134,7 +136,7 @@ const app = {
 /* ------------------------------------------------------------------ */
 
 function shellHtml() {
-  const order = ['workbench','chat','tasks2','research','knowledge','workflow','artifacts','extensions','discovery','ssh','settings','diagnostics'];
+  const order = ['workbench','chat','tasks2','teams','context','research','knowledge','workflow','artifacts','extensions','discovery','ssh','settings','diagnostics'];
   const navItems = ROUTES.filter(route => !route.hidden).sort((a,b) => order.indexOf(a.id)-order.indexOf(b.id)).map(
     (route) =>
       `<button type="button" class="nav-item" data-route="${route.id}" title="${esc(route.label)}">` +

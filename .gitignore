@@ -113,3 +113,6 @@ desktop/dist-*/
 /docs/verification/harness-20261025/eve-final.json
 /docs/verification/harness-20261025/final-20261027.json
 /docs/verification/eve-1.0/formal-current-packaged/*.png
+
+# Reproducible offline terminal assets populated by desktop build
+omicslab/web/vendor/xterm/

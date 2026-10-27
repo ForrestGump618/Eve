@@ -17,6 +17,14 @@ cpSync(join(katex,'fonts'), 'dist/ui/vendor/katex/fonts', {recursive:true});
 mkdirSync('dist/ui/vendor/mermaid', {recursive:true});
 cpSync(join(mermaid,'mermaid.min.js'), 'dist/ui/vendor/mermaid/mermaid.min.js');
 
+// Terminal renderer stays local/offline and is loaded only when opened.
+mkdirSync('../omicslab/web/vendor/xterm', {recursive:true});
+for (const [source,name] of [
+ ['@xterm/xterm/lib/xterm.js','xterm.js'],
+ ['@xterm/xterm/css/xterm.css','xterm.css'],
+ ['@xterm/addon-fit/lib/addon-fit.js','addon-fit.js'],
+]) cpSync(join('node_modules',source),join('../omicslab/web/vendor/xterm',name));
+
 // Include the hosted workbench and worker, not only the TypeScript shell.
 // No user profiles, generated caches or credentials enter the build identity.
 const digest = createHash('sha256');

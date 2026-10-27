@@ -2,6 +2,7 @@
 // No external icon fonts or CDN assets are used anywhere in this SPA.
 
 const PATHS = {
+  gitBranch:'<circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="6" r="2"/><path d="M6 7v10M18 8v2a6 6 0 0 1-6 6H6"/>',
   chat: '<path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H5l-2 2v-4.6A8.5 8.5 0 1 1 21 12Z"/>',
   vars: '<path d="M9 3H7a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h2"/><path d="M15 3h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-2"/>',
   files: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
@@ -66,6 +67,7 @@ const PATHS = {
   wand: '<path d="m4 20 10-10M13 5l1 3 3 1-3 1-1 3-1-3-3-1 3-1Z"/>',
   tag: '<path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
   pin: '<path d="M9 3h6l-1 6 4 4H6l4-4Z"/><path d="M12 13v8"/>',
+  bookmark: '<path d="M6 3h12v18l-6-4-6 4Z"/>',
   dot: '<circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>',
   spinner: '<path d="M12 3a9 9 0 1 0 9 9" />',
   brain:

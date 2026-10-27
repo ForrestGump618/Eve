@@ -101,10 +101,29 @@ class LocalExecutionBackend(ExecutionBackend):
             creationflags=creationflags,
             start_new_session=sys.platform != "win32",
         )
+        captured = 0
+        limited = False
+        async def capture(stream):
+            nonlocal captured, limited
+            chunks = []
+            while True:
+                chunk = await stream.read(65536)
+                if not chunk:
+                    break
+                remaining = max(0, 1_000_000-captured)
+                if len(chunk) > remaining:
+                    limited = True
+                kept = chunk[:remaining]
+                captured += len(kept)
+                if kept:
+                    chunks.append(kept)
+            return b"".join(chunks)
+        collection = asyncio.gather(capture(process.stdout), capture(process.stderr), process.wait())
         try:
-            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+            stdout, stderr, _ = await asyncio.wait_for(asyncio.shield(collection), timeout=timeout)
         except asyncio.TimeoutError:
             await self._terminate_process(process)
+            await asyncio.gather(collection, return_exceptions=True)
             return {
                 "ok": False,
                 "exit_code": -1,
@@ -114,15 +133,18 @@ class LocalExecutionBackend(ExecutionBackend):
             }
         except asyncio.CancelledError:
             await self._terminate_process(process)
+            await asyncio.gather(collection, return_exceptions=True)
             raise
         stdout_text = stdout.decode("utf-8", errors="replace")
         stderr_text = stderr.decode("utf-8", errors="replace")
         return {
-            "ok": process.returncode == 0,
+            "ok": process.returncode == 0 and not limited,
             "exit_code": process.returncode,
             "stdout": stdout_text,
             "stderr": stderr_text,
             "timed_out": False,
+            "truncated": limited,
+            "status": "output_limited" if limited else "ok" if process.returncode == 0 else "nonzero",
         }
 
     async def _terminate_process(self, process: asyncio.subprocess.Process) -> None:

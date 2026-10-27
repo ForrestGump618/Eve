@@ -12,6 +12,7 @@ import {
   spinnerHtml,
 } from '../ui.js?v=2.1.1';
 import { setState } from '../store.js?v=2.1.1';
+import {annotateFigure} from '../figure-annotator.js?v=1.0.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();
@@ -56,6 +57,7 @@ export async function mount(root, ctx = {}) {
           `<span class="figure-meta">${esc(meta)}</span>` +
           '</figcaption>' +
           '<div class="figure-actions">' +
+          `<button type="button" class="icon-btn figure-annotate" title="勾画批注" aria-label="勾画批注">${icon('pencil', { size: 15 })}</button>` +
           `<a class="icon-btn" href="${esc(src)}" download title="下载" aria-label="下载图表">${icon('download', { size: 15 })}</a>` +
           `<button type="button" class="icon-btn figure-delete" title="删除" aria-label="删除图表">${icon('trash', { size: 15 })}</button>` +
           '</div></figure>'
@@ -112,6 +114,7 @@ export async function mount(root, ctx = {}) {
       }
       return;
     }
+    if (evt.target.closest('.figure-annotate')) { try { await annotateFigure(fig); } catch (err) { toastError(`批注失败：${errorMessage(err)}`); } return; }
     if (evt.target.closest('.figure-thumb')) {
       openLightbox({
         src,

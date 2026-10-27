@@ -199,7 +199,7 @@ async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  const origin=`http://127.0.0.1:${result.port}`;
  const contentsId=window.webContents.id;
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
- isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
+ isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*',origin.replace(/^http/,'ws')+'/*']},(details,callback)=>{
   if(!quitting&&liveWindow(window)&&details.webContentsId===contentsId)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
  });
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));

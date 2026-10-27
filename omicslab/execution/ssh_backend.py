@@ -725,6 +725,7 @@ class SSHExecutionBackend(ExecutionBackend):
             "stdout": str(result.get("stdout") or ""),
             "stderr": str(result.get("stderr") or ""),
             "timed_out": status == "timeout",
+            "truncated": bool(result.get("truncated")),
             "duration_ms": int(result.get("duration_ms") or 0),
             "retried": bool(result.get("retried")),
             "command_id": result.get("command_id"),

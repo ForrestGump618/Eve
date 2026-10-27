@@ -112,8 +112,11 @@ export interface PrepareContext {
   tools?: unknown[];
   state?: ContextState;
   force?: boolean;
+  /** Journal the actual protocol request without a second compaction policy. */
+  recordOnly?: boolean;
 }
 export interface ContextResult {
+  requestSequence?: number;
   messages: ContextMessage[];
   summary?: ContextSummary;
   action: 'none' | 'suggested' | 'compacted';
@@ -151,6 +154,7 @@ export class ContextManager {
   private readonly toolLimit: number;
   private readonly compaction: CompactionService;
   private events: RawEvent[] = [];
+  private objects=new Map<string,unknown>();
   private activeVersion?: number;
   private activeRequestSequence?: number;
 
@@ -174,6 +178,7 @@ export class ContextManager {
     }
     mkdirSync(join(options.directory, 'artifacts'), { recursive: true });
     mkdirSync(join(options.directory, 'summaries'), { recursive: true });
+    mkdirSync(join(options.directory, 'objects'), { recursive: true });
     this.loadEvents();
     const active = join(options.directory, 'active.json');
     if (existsSync(active)) {
@@ -223,6 +228,7 @@ export class ContextManager {
       accounting: this.tokenizer ? 'visible-json-tokenization-plus-reserves' : 'conservative-utf8-bytes-plus-reserves', exactProviderFraming: false,
     };
     const oversizedTool = original.some(message => message.role === 'tool' && this.countText(message.content) > this.toolLimit);
+    if(request.recordOnly)return {messages:original,action:'none',stats:baseStats,requestSequence:event.sequence};
     if (!request.force && before < this.options.contextWindow * this.hard && !oversizedTool) {
       return { messages: original, action: before >= this.options.contextWindow * this.soft ? 'suggested' : 'none', stats: baseStats };
     }
@@ -308,7 +314,8 @@ export class ContextManager {
     const sequence = this.events.length + 1;
     const sha256 = digest(serial(data));
     const event: RawEvent = { sequence, previousHash, sha256, chainHash: digest(serial({ sequence, previousHash, sha256 })), data };
-    appendFileSync(join(this.options.directory, 'raw-events.jsonl'), serial(event) + '\n', 'utf8');
+    const packed={...event,data:{messages:data.messages.map(m=>this.packObject(m)),tools:this.packObject(data.tools),state:this.packObject(data.state)}};
+    appendFileSync(join(this.options.directory, 'raw-events.jsonl'), serial(packed) + '\n', 'utf8');
     this.events.push(event);
     this.activeVersion = undefined;
     this.activeRequestSequence = sequence;
@@ -321,13 +328,38 @@ export class ContextManager {
     if (!existsSync(file)) return;
     let previous = '';
     for (const line of readFileSync(file, 'utf8').split('\n').filter(Boolean)) {
-      const event = JSON.parse(line) as RawEvent;
+      const disk = JSON.parse(line);
+      const event:RawEvent={...disk,data:{
+        messages:disk.data.messages.map((m:unknown)=>this.unpackObject(m)),
+        tools:this.unpackObject(disk.data.tools),state:this.unpackObject(disk.data.state),
+      }};
       const expected = digest(serial({ sequence: event.sequence, previousHash: event.previousHash, sha256: event.sha256 }));
       if (event.sequence !== this.events.length + 1 || event.previousHash !== previous || digest(serial(event.data)) !== event.sha256 || expected !== event.chainHash) {
         throw new Error('Raw context event integrity check failed');
       }
       this.events.push(event); previous = event.chainHash;
     }
+  }
+
+  /** Large repeated message/schema bodies are stored once. Old inline journals
+   * remain readable, and the existing full-request hash chain is unchanged. */
+  private packObject(value:unknown):unknown{
+    const text=serial(value);if(Buffer.byteLength(text,'utf8')<4096)return value;
+    const sha256=digest(text),path=join(this.options.directory,'objects',`${sha256}.json`);
+    if(!existsSync(path))this.atomicWrite(path,text);
+    else if(!this.objects.has(sha256)&&digest(readFileSync(path,'utf8'))!==sha256)throw new Error('Context object integrity check failed');
+    this.objects.set(sha256,value);
+    return {__eveContextObject:sha256};
+  }
+
+  private unpackObject(value:any):any{
+    if(!value||typeof value!=='object'||Object.keys(value).length!==1||typeof value.__eveContextObject!=='string')return value;
+    const sha256=value.__eveContextObject;
+    if(!/^[a-f0-9]{64}$/.test(sha256))throw new Error('Context object integrity check failed');
+    if(this.objects.has(sha256))return this.objects.get(sha256);
+    const text=readFileSync(join(this.options.directory,'objects',`${sha256}.json`),'utf8');
+    if(digest(text)!==sha256)throw new Error('Context object integrity check failed');
+    const decoded=JSON.parse(text);this.objects.set(sha256,decoded);return decoded;
   }
 
   private storeArtifact(text: string, source: SourceRef): ArtifactRef {
@@ -349,6 +381,46 @@ export class ContextManager {
     const message = this.events[source.requestSequence - 1]?.data.messages[source.messageIndex];
     if (!message || digest(serial(message)) !== source.sha256) throw new Error('Source reference integrity check failed');
     return clone(message);
+  }
+
+  inspectRequests(offset=0,limit=50): unknown {
+    const end=Math.max(0,this.events.length-offset);
+    const page=this.events.slice(Math.max(0,end-limit),end).reverse();
+    return {total:this.events.length,offset,nextOffset:offset+page.length<this.events.length?offset+page.length:null,
+      items:page.map(event=>{
+        const composition:Record<string,number>={tools:Buffer.byteLength(serial(event.data.tools),'utf8')};
+        for(const m of event.data.messages)composition[m.role]=(composition[m.role]??0)+Buffer.byteLength(serial(m),'utf8');
+        return {sequence:event.sequence,messageCount:event.data.messages.length,composition,metadata:event.data.state.contextTelemetry??null};
+      })};
+  }
+
+  requestPage(sequence:number,offset=0,limit=50):unknown {
+    if(!Number.isSafeInteger(sequence)||sequence<1)throw new Error('Invalid request sequence');
+    const event=this.events[sequence-1];if(!event)throw new Error('Unknown request');
+    const messages=event.data.messages.slice(offset,offset+limit).map((message,index)=>({
+      ...message,content:message.content.slice(0,16000),truncated:message.content.length>16000,
+      source:{requestSequence:sequence,messageIndex:offset+index,sha256:digest(serial(message))},
+    }));
+    return {sequence,total:event.data.messages.length,messages,nextOffset:offset+messages.length<event.data.messages.length?offset+messages.length:null,
+      tools:offset===0?event.data.tools:[],state:offset===0?event.data.state:null};
+  }
+
+  search(query:string,limit=30):unknown {
+    if(!query.trim()||query.length>500)throw new Error('Invalid context query');
+    const needle=query.toLocaleLowerCase(),seen=new Set<string>(),matches:unknown[]=[];
+    let scanned=0;
+    for(let i=this.events.length-1;i>=0&&scanned<20000;i--){
+      const event=this.events[i]!;
+      for(let index=event.data.messages.length-1;index>=0&&scanned++<20000;index--){
+        const message=event.data.messages[index]!,sha256=digest(serial(message));
+        if(seen.has(sha256))continue;seen.add(sha256);
+        const at=message.content.toLocaleLowerCase().indexOf(needle);if(at<0)continue;
+        matches.push({role:message.role,text:message.content.slice(Math.max(0,at-160),at+900),
+          source:{requestSequence:event.sequence,messageIndex:index,sha256}});
+        if(matches.length>=limit)return {matches,limited:true,scanned};
+      }
+    }
+    return {matches,limited:scanned>=20000,scanned};
   }
 
   private atomicWrite(path: string, content: string): void {

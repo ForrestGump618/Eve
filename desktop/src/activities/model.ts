@@ -12,6 +12,7 @@ import type { Store } from '../harness/store.js';
 import { writeArtifact } from '../harness/artifacts.js';
 import { ContextManager, encodingForContextModel, type ContextMessage } from '../context.js';
 import { prepareContextAsync } from '../context-async.js';
+import {queryContextAsync} from '../context-query.js';
 import type { ModelRuntime } from '../model-runtime.js';
 import type { StreamBuffer } from '../shared/contract.js';
 import type { ToolServices } from './tools.js';
@@ -112,6 +113,7 @@ export function createModelActivity(deps: ModelActivityDeps): ActivityHandler {
     } catch {
       throw new ValidationError('上下文准备失败或预算不足；保留原始记录，未发送模型请求。');
     }
+    store.activityProgress(ctx.task.id,ctx.step,'agent.context_prepared',{model:current.model,contextWindow:current.contextWindow,maxOutput:current.maxOutput,action:prepared.action,stats:prepared.stats,summaryVersion:prepared.summary?.version??null});
     if (ctx.task.limits.maxTokens !== undefined && ctx.task.tokens + prepared.stats.afterTokens > ctx.task.limits.maxTokens) throw new ValidationError('当前请求及输出预留超过剩余 token 预算');
 
     streams.set(ctx.task.id, { text: '', updatedAt: Date.now(), stepId: ctx.step.id });
@@ -136,6 +138,15 @@ export function createModelActivity(deps: ModelActivityDeps): ActivityHandler {
         priorActions:[...priorEvidence.map(()=> 'database_search'),...resume?.actions??[]],
         resumeHistory:resume?.history,
         guidance:{take:()=>takeGuidance(store,ctx.task.id),pending:()=>listGuidance(store,ctx.task.id).some(x=>x.status==='queued')},
+        contextJournal:{
+          record:async(history,tools,metadata)=>{
+            const recorded=await prepareContextAsync({directory:join(home,'contexts',contextId),model:current.model,contextWindow:current.contextWindow,outputTokens:current.maxOutput,accounting},
+              {recordOnly:true,messages:history as ContextMessage[],tools,state:{...state,contextTelemetry:{...metadata,at:Date.now(),traceId,model:current.model}}},ctx.signal);
+            return recorded.requestSequence!;
+          },
+          source:async source=>await queryContextAsync({directory:join(home,'contexts',contextId),model:current.model,contextWindow:current.contextWindow,outputTokens:current.maxOutput,accounting},'source',source) as unknown as ContextMessage,
+          search:query=>queryContextAsync({directory:join(home,'contexts',contextId),model:current.model,contextWindow:current.contextWindow,outputTokens:current.maxOutput,accounting},'search',undefined,{text:query,limit:20}),
+        },
         onEvent:event=>progress(event.type,event as unknown as Json,{call:event.type==='tool.started'}),
         beforeModel:(turn,reserved)=>{
           const task=store.getTask(ctx.task.id)!;

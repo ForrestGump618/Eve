@@ -72,13 +72,22 @@ async def get_conversation(cid: str, request: Request) -> dict[str, Any]:
 async def rename_conversation(cid: str, request: Request) -> dict[str, Any]:
     state = _state(request)
     payload = await _json(request)
-    title = str(payload.get("title") or "").strip()
-    if not title:
-        raise _error("标题不能为空")
+    patch = {key: payload[key] for key in ("title", "archived", "pinned") if key in payload}
+    if not patch or ("title" in patch and not str(patch["title"] or "").strip()):
+        raise _error("需要非空标题或归档 / 置顶状态")
     try:
-        conv = state.store.rename(cid, title)
-    except Exception as exc:
-        raise _error(f"重命名失败：{exc}", "not_found", 404) from exc
+        conv = state.store.update_metadata(cid, patch)
+        if state.runs is not None:
+            for handle in state.runs._handles.values():
+                if handle.session_id == cid:
+                    handle.conversation.title = conv.title
+                    for key in ("archived", "pinned"):
+                        if key in conv.meta:
+                            handle.conversation.meta[key] = conv.meta[key]
+    except ValueError as exc:
+        raise _error(str(exc)) from exc
+    except KeyError as exc:
+        raise _error("会话不存在", "not_found", 404) from exc
     return conv.to_dict()
 
 
@@ -453,6 +462,36 @@ async def figure_delete(name: str, request: Request) -> dict[str, Any]:
     except OSError as exc:
         raise _error(f"删除失败：{exc}", "io_error", 500) from exc
     return {"ok": True}
+
+
+@router.post("/api/figures/{name}/annotations")
+async def figure_annotations(name: str, request: Request) -> dict[str, Any]:
+    """Persist human markup as task guidance; it never overwrites the source figure."""
+    path = _figure_path(request, name)
+    body = await _json(request)
+    strokes = body.get("strokes") if isinstance(body.get("strokes"), list) else []
+    note = str(body.get("note") or "").strip()
+    if len(strokes) > 500 or len(note) > 5000:
+        raise _error("批注过长", "annotation_limit")
+    clean = []
+    for stroke in strokes:
+        if not isinstance(stroke, dict) or not isinstance(stroke.get("points"), list):
+            continue
+        points = [{"x": max(0, min(1, float(p.get("x", 0)))), "y": max(0, min(1, float(p.get("y", 0))))}
+                  for p in stroke["points"] if isinstance(p, dict)]
+        if points:
+            clean.append({"color": str(stroke.get("color") or "#d92d20")[:20], "width": max(1, min(24, float(stroke.get("width", 3)))), "points": points[:500]})
+    state = _state(request)
+    record = state.platform.store.put("figure_annotation", f"figure:{name}", {"name": name, "strokes": clean, "note": note}, "global")
+    state.platform.store.audit("figure.annotation", {"name": name, "stroke_count": len(clean), "note_chars": len(note)})
+    return {"ok": True, "annotation": record, "source": str(path.name)}
+
+
+@router.get("/api/figures/{name}/annotations")
+async def figure_annotation_get(name: str, request: Request) -> dict[str, Any]:
+    _figure_path(request, name)
+    state = _state(request)
+    return {"annotation": state.platform.store.get("figure_annotation", f"figure:{name}", "global")}
 
 
 # -------------------------------------------------------------------- settings

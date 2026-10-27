@@ -137,6 +137,9 @@ class Conversation:
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "message_count": len(self.messages),
+            "archived": bool(self.meta.get("archived")),
+            "pinned": bool(self.meta.get("pinned")),
+            "workspace_id": self.meta.get("workspace_id"),
         }
 
     def to_dict(self) -> dict[str, Any]:

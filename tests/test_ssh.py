@@ -578,6 +578,17 @@ def test_exec_success(manager, fake_ssh):
     assert result["command_id"].startswith("cmd_")
 
 
+def test_exec_output_capture_is_bounded_and_never_false_success(manager, fake_ssh, monkeypatch):
+    created = _add_profile(manager, password="pw")
+    monkeypatch.setattr(manager_module, "MAX_CAPTURE_CHARS", 1000)
+    FakeSSHClient.channel_factory = lambda client: FakeChannel(stdout=b"x"*100000, stderr=b"y"*100000)
+    result = manager.exec(created["id"], "generate output")
+    assert result["ok"] is False and result["status"] == "output_limited"
+    assert result["truncated"] is True
+    # Decoding adds a short explicit truncation note; capture arrays stay bounded.
+    assert len(result["stdout"])+len(result["stderr"]) < 2400
+
+
 def test_exec_cwd_is_quoted_prefix(manager, fake_ssh):
     created = _add_profile(manager, password="pw")
     commands: list[str] = []

@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import asyncio
 import threading
+import shlex
+from types import SimpleNamespace
 
 import pytest
 from fastapi import WebSocketDisconnect
@@ -153,14 +155,14 @@ async def test_ssh_terminal_streams_output_and_input(
 
     assert websocket.accepted is True
     assert service.calls == [{"profile_id": "prof_1", "cols": 120, "rows": 40}]
-    assert channel.sent[0] == "cd -- '/home/alice/project'\r"
+    assert channel.sent[0] == f"cd -- {shlex.quote('/home/alice/project')}\r"
     assert "pwd\n" in channel.sent
     assert channel.resizes == [(100, 30)]
     outputs = "".join(frame["data"] for frame in websocket.frames("output"))
-    assert "素问 Suwen SSH 终端" in outputs
+    assert "Eve SSH" in outputs
     assert "alice@node" in outputs
     exits = websocket.frames("exit")
-    assert exits and exits[-1]["code"] == -1
+    assert exits and exits[-1]["code"] is None
     assert channel.closed is True
     assert websocket.closed is True
 
@@ -248,8 +250,36 @@ def test_query_int_clamps(settings: Settings) -> None:
     assert terminal_module._query_int(websocket, "rows", 30, 5, 200) == 30
 
 
-def test_shell_command_is_available(settings: Settings) -> None:
-    executable, args, label = terminal_module._shell_command()
-    assert executable
-    assert isinstance(args, list)
-    assert label
+async def test_workspace_terminal_never_falls_back_local(settings, monkeypatch):
+    calls = []
+    async def local(*args):
+        calls.append("local")
+    async def remote(websocket, settings, profile_id, cwd):
+        calls.append((profile_id, cwd))
+    monkeypatch.setattr(terminal_module, "_run_local_terminal", local)
+    monkeypatch.setattr(terminal_module, "_run_ssh_terminal", remote)
+    broken = SimpleNamespace(backend="ssh", remote={"root":"/remote"})
+    registry = SimpleNamespace(get=lambda id: broken if id == "remote" else None)
+    websocket = FakeWebSocket({"workspace_id":"remote"})
+    await terminal_module.run_terminal(websocket, settings, registry)
+    assert calls == []
+    assert websocket.frames("diagnostic")[0]["code"] == "remote_profile_missing"
+    broken.remote["profile_id"] = "host-a"
+    await terminal_module.run_terminal(FakeWebSocket({"workspace_id":"remote","profile_id":"attacker","cwd":"C:/local"}), settings, registry)
+    assert calls == [("host-a","/remote")]
+    await terminal_module.run_terminal(FakeWebSocket({"workspace_id":"missing"}), settings, registry)
+    assert len(calls) == 1
+
+
+async def test_remote_terminal_quotes_path_and_decodes_split_utf8(settings, monkeypatch):
+    text = "远程研究✓"
+    encoded = text.encode()
+    channel = FakeSSHChannel(chunks=[encoded[:2], encoded[2:7], encoded[7:]])
+    _install(monkeypatch, FakeConnectionService(channel=channel))
+    cwd = "/home/user/it's research; echo unsafe"
+    socket = FakeWebSocket({"profile_id":"host","cwd":cwd})
+    await _run_with_release(socket, channel, settings)
+    assert channel.sent[0] == f"cd -- {shlex.quote(cwd)}\r"
+    assert text in "".join(frame["data"] for frame in socket.frames("output"))
+
+

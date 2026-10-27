@@ -329,6 +329,15 @@ class EventStore:
         ).fetchone()
         return _run_row_to_dict(row) if row else None
 
+    def list_run_summaries(self, limit: int = 500) -> list[dict[str, Any]]:
+        """Dashboard reads never decode the (potentially huge) final answer."""
+        rows = self._execute(
+            "SELECT run_id,trace_id,session_id,parent_run_id,status,workspace_json,"
+            "created_at,started_at,ended_at,usage_json,meta_json FROM runs "
+            "ORDER BY created_at DESC LIMIT ?", (max(1, min(limit, 500)),),
+        ).fetchall()
+        return [_run_row_to_dict(row) for row in rows]
+
     def active_run_for_session(self, session_id: str) -> dict[str, Any] | None:
         placeholders = ", ".join("?" for _ in ACTIVE_STATUSES)
         row = self._execute(

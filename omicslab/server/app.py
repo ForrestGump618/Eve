@@ -26,6 +26,8 @@ from .state import AppState
 from .routes_platform import router as platform_router
 from .routes_harness import router as harness_router
 from .terminal import run_terminal
+from .routes_workspace_tools import router as workspace_tools_router
+from .routes_sidebar import router as sidebar_router
 
 logger = logging.getLogger("omicslab.server")
 
@@ -137,6 +139,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(workspaces_router)
     app.include_router(platform_router)
     app.include_router(harness_router)
+    app.include_router(workspace_tools_router)
+    app.include_router(sidebar_router)
     for optional_router in _load_optional_routers():
         app.include_router(optional_router)
 
@@ -146,7 +150,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if origin and origin not in origins:
             await websocket.close(code=1008)
             return
-        await run_terminal(websocket, settings)
+        await run_terminal(websocket, settings, app.state.omicslab.workspaces)
 
     # ---------------------------------------------------------------- errors
     @app.exception_handler(HTTPException)

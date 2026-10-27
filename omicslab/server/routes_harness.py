@@ -164,6 +164,54 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
             return {"approved": True, "mode": handle.permission_mode}
         if handle.backend is None:
             raise HTTPException(503, "执行后端不可用；禁止回退本地执行")
+        if operation.startswith("team_"):
+            from ..suwen.teams import create_team, member_team, team_snapshot, team_mailbox, send_message, assign_member
+            p, scope = state.platform, handle.workspace.workspace_id
+            try:
+                if operation == "team_create":
+                    if state.store.get(handle.session_id).meta.get("team_member"):
+                        raise ValueError("团队成员不能创建下一级团队")
+                    existing = [t for t in p.store.list("team", scope)
+                                if t.get("captain_session") == handle.session_id and t.get("draft") and not t.get("archived")]
+                    if existing:
+                        return team_snapshot(p, scope, existing[0])
+                    await authorize(state, handle, operation, args)
+                    # A member cannot silently exceed the parent's authority.
+                    modes = {"ask": 0, "review": 1, "full": 2}
+                    for m in args.get("members", []):
+                        if modes.get(m.get("permission_mode", "ask"), 99) > modes[handle.permission_mode]:
+                            raise ValueError("成员权限不能高于队长任务权限")
+                    return create_team(p, scope, {**args, "draft": True, "captain_session": handle.session_id})
+                if operation == "team_status" and not args.get("id"):
+                    eligible = []
+                    for row in p.store.list("team", scope):
+                        try:
+                            team, _ = member_team(p, scope, handle.session_id, row["id"])
+                            eligible.append(team_snapshot(p, scope, team))
+                        except ValueError:
+                            continue
+                    return {"items": eligible}
+                team, actor = member_team(p, scope, handle.session_id, args.get("id"))
+                if operation == "team_status":
+                    return team_snapshot(p, scope, team)
+                if operation == "team_mailbox":
+                    return {"items": team_mailbox(p, scope, team["id"], None if actor == "captain" else actor)}
+                await authorize(state, handle, operation, args)
+                if operation == "team_message":
+                    return await send_message(p, scope, team["id"], actor, args.get("recipient"), args.get("content"),
+                                              wake=actor == "captain" and args.get("wake") is True)
+                if actor != "captain":
+                    raise ValueError("只有队长可以重新分配或归档团队")
+                if operation == "team_assign":
+                    return await assign_member(p, scope, team["id"], args.get("member_id"), args.get("goal"))
+                if operation == "team_archive":
+                    snap = team_snapshot(p, scope, team)
+                    if not team.get("draft") and any(m["task"]["status"] not in {"succeeded", "failed", "cancelled", "needs_review"} for m in snap["members"]):
+                        raise ValueError("活动团队不可归档")
+                    return p.store.put("team", team["id"], {**team, "archived": True}, scope)
+                raise ValueError("未知团队操作")
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
         if operation in {"research_list", "research_create", "research_record"}:
             service = state.platform.research
             scope = handle.workspace.workspace_id

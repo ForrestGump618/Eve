@@ -1,11 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ContextBudgetError, ContextManager, CompactionService, encodingForContextModel, type ContextMessage, type CompactionInput, type ContextSummary } from '../src/context.js';
 
 const call: ContextMessage = { role: 'assistant', content: '', tool_calls: [{ id: 'c1', type: 'function', function: { name: 'analyze', arguments: '{}' } }] };
+
+test('large repeated context bodies are deduplicated while raw hashes and old inline records remain valid',()=>{
+ const directory=mkdtempSync(join(tmpdir(),'eve-context-dedup-'));
+ try{
+  const options={directory,model:'deepseek-v4.1-flash-economy',contextWindow:64000,outputTokens:512,accounting:'estimate' as const};
+  const manager=new ContextManager(options),text='Evidence /remote/研究.csv\n'.repeat(600);
+  const messages:ContextMessage[]=[{role:'user',content:'Keep original goal.'},{role:'assistant',content:text}];
+  for(let i=0;i<10;i++)manager.prepare({recordOnly:true,messages,tools:[{name:'example',description:'x'.repeat(5000)}]});
+  const objects=join(directory,'objects'),files=readdirSync(objects);
+  assert.equal(files.length,2);
+  const bytes=statSync(join(directory,'raw-events.jsonl')).size+files.reduce((n,f)=>n+statSync(join(objects,f)).size,0);
+  const inlineBytes=Buffer.byteLength(JSON.stringify({messages,tools:[{name:'example',description:'x'.repeat(5000)}]}))*10;
+  assert.ok(bytes<inlineBytes/3);
+  assert.deepEqual(new ContextManager(options).replay()?.messages,messages);
+  const file=files.find(f=>readFileSync(join(objects,f),'utf8').includes('研究.csv'))!;
+  writeFileSync(join(objects,file),readFileSync(join(objects,file),'utf8').replace('研究.csv','tampered.csv'));
+  assert.throws(()=>new ContextManager(options),/integrity/);
+ }finally{rmSync(directory,{recursive:true,force:true});}
+});
 
 test('known tokenizer mapping and fail-closed unknown model', () => {
   assert.equal(encodingForContextModel('gpt-4o-2024-08-06'), 'o200k_base');

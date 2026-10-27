@@ -100,6 +100,8 @@ export async function mount(root, ctx = {}) {
     rightWidth: clampNum(getPref('wbRightWidth', 330), RIGHT_MIN, RIGHT_MAX),
     bottomHeight: clampNum(getPref('wbBottomHeight', 210), BOTTOM_MIN, BOTTOM_MAX),
     terminal: { output: '', busy: false },
+    terminalEpoch: 0,
+    destroyed: false,
     logs: { jobs: [], active: '', log: '' },
     jobs: { items: [], loading: false },
     tree: { runs: [], loading: false },
@@ -628,6 +630,7 @@ export async function mount(root, ctx = {}) {
   function computeTabs() {
     const tabs = [
       ['terminal', '终端', 'terminal'],
+      ['python', 'Python', 'code'],
       ['logs', '日志', 'fileText'],
       ['jobs', '后台任务', 'jobs'],
       ['children', '子任务树', 'layers'],
@@ -686,10 +689,36 @@ export async function mount(root, ctx = {}) {
     });
     const box = el.bottomBody;
     if (!box) return;
-    if (tab === 'terminal') renderTerminal();
+    local.terminalEpoch++;
+    if (tab === 'terminal') await renderShell();
+    else if (tab === 'python') renderTerminal();
     else if (tab === 'logs') await loadLogs();
     else if (tab === 'jobs') await loadJobs();
     else await loadTree();
+  }
+
+  async function renderShell() {
+    const workspace = local.workspace;
+    if (!workspace) { el.bottomBody.textContent = '请先选择工作区'; return; }
+    const epoch = local.terminalEpoch;
+    try {
+      const service=await import('../terminal-panel.js?v=1.0.0');
+      if(epoch!==local.terminalEpoch||local.destroyed)return;
+      const session=await service.acquireTerminalSession(workspace);
+      if(epoch!==local.terminalEpoch||local.destroyed)return;
+      const tabs=document.createElement('nav');tabs.className='eve-terminal-tabs';tabs.setAttribute('aria-label','终端会话');
+      tabs.innerHTML=service.terminalSessions(workspace).map(s=>`<button class="${s.id===session.id?'is-active':''}" data-terminal-id="${escAttr(s.id)}">${esc(s.title)}</button>`).join('')+'<button data-terminal-new aria-label="新建终端">+</button>';
+      tabs.onclick=async event=>{
+        const selected=event.target.closest('[data-terminal-id]'),add=event.target.closest('[data-terminal-new]');
+        if(!selected&&!add)return;
+        try{
+          if(add){add.disabled=true;await service.acquireTerminalSession(workspace,{fresh:true});}
+          else service.selectTerminalSession(workspace,selected.dataset.terminalId);
+          if(!local.destroyed&&local.workspace?.workspace_id===workspace.workspace_id&&local.compute==='terminal')await renderShell();
+        }catch(error){toastError(errorMessage(error));}finally{if(add)add.disabled=false;}
+      };
+      el.bottomBody.replaceChildren(tabs,session.panel.node);session.panel.focus();
+    }catch(error){if(epoch===local.terminalEpoch&&!local.destroyed)el.bottomBody.textContent=errorMessage(error);}
   }
 
   function renderTerminal() {
@@ -1111,6 +1140,9 @@ export async function mount(root, ctx = {}) {
     if (local.pane === 'files') void loadFiles(local.filesPath);
     if (local.compute === 'children') void loadTree();
   });
+  const offTerminals=on('terminal:sessions',event=>{
+    if(!local.destroyed&&local.compute==='terminal'&&event.workspaceId===local.workspace?.workspace_id)void renderShell();
+  });
 
   /* ---------------------------------------------------------------- */
   /* Boot                                                              */
@@ -1136,6 +1168,9 @@ export async function mount(root, ctx = {}) {
 
   return {
     destroy() {
+      local.destroyed = true; local.terminalEpoch++;
+      // Retained terminal sessions keep their PTYs; closing a tab closes one.
+      offTerminals();
       offState();
       offWorkspace();
       document.removeEventListener('mousemove', onResizeMove);

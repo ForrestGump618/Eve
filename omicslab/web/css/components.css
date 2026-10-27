@@ -917,6 +917,7 @@ select.input {
   overflow: hidden;
   animation: pop-in 200ms var(--ease) both;
 }
+.modal .btn{min-height:32px;padding:7px 12px;font-size:12px;border-radius:7px}.modal-foot{gap:7px}.modal-head{min-height:48px}.modal-body{line-height:1.55}
 
 .modal-sm {
   width: min(420px, 100%);

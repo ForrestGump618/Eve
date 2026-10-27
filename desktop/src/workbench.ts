@@ -32,6 +32,7 @@ export const WORKBENCH_REQUIREMENTS = [
   'paramiko==5.1.0',
   'qrcode==8.2',
   'keyring==25.7.0',
+  ...(process.platform === 'win32' ? ['pywinpty==3.1.0'] : []),
 ] as const;
 
 export const WORKBENCH_MARKER = '.suwen-workbench.json';
@@ -40,7 +41,7 @@ export const WORKBENCH_SCHEMA = 1;
 export const WORKBENCH_DOWNLOAD_MB = 130;
 const INSTALL_TIMEOUT_MS = 20 * 60_000;
 const PROBE_TIMEOUT_MS = 20_000;
-const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'keyring'];
+const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'keyring', ...(process.platform==='win32'?['winpty']:[])];
 const SAFE_ENV_KEYS = [
   'SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA',
   'HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'PIP_INDEX_URL', 'PIP_TRUSTED_HOST', 'PIP_EXTRA_INDEX_URL',

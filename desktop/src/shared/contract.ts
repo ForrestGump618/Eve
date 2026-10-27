@@ -184,7 +184,8 @@ export interface StreamBatch {
 /** Canonical RPC method names. daemon.ts and main.ts must agree with this list. */
 export const RPC_METHODS = [
   'health', 'snapshot', 'create', 'control', 'approval', 'configure', 'python', 'shutdown', 'events.stream',
-  'contextHistory', 'contextRestore', 'contextCompact', 'legacyStart', 'legacyOpen',
+  'contextHistory', 'contextRestore', 'contextCompact', 'contextInspect', 'contextSource',
+  'contextRequests', 'contextRequest', 'contextSearch', 'legacyStart', 'legacyOpen',
   'workbench.status', 'workbench.install', 'workbench.cancel',
   'project.list', 'project.create', 'project.update', 'project.delete',
   'conversation.list', 'conversation.create', 'conversation.get', 'conversation.append', 'conversation.update', 'conversation.delete',
