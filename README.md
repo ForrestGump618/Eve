@@ -5,12 +5,33 @@ Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数�
 [![Release](https://img.shields.io/badge/release-1.0.0-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![License](https://img.shields.io/badge/license-MIT-202020)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
+[![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
 > Windows 安装包：前往 [Releases](https://github.com/ForrestGump618/suwen/releases) 下载 `Eve-Setup-1.0.0-win-x64.exe`。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
 | 论文、数据、代码、复现、核验 | 引物、载体、对照、验证 | RNA、ATAC、蛋白、空间 | 本地、SSH、PowerShell | 勾画、批注、局部修改 |
+
+<p align="center">
+  <a href="#深度调研"><img alt="深度调研" src="https://img.shields.io/badge/深度调研-论文复现-202020" /></a>
+  <a href="#实验设计"><img alt="实验设计" src="https://img.shields.io/badge/实验设计-引物与载体-202020" /></a>
+  <a href="#多组学数据处理"><img alt="多组学" src="https://img.shields.io/badge/多组学-QC与整合-202020" /></a>
+  <a href="#图表批注"><img alt="图表批注" src="https://img.shields.io/badge/图表-可勾画批注-202020" /></a>
+</p>
+
+<details>
+<summary>快速选择入口</summary>
+
+| 我想做什么 | 从哪里开始 |
+| --- | --- |
+| 读懂并复现一篇论文 | [深度调研](#深度调研) |
+| 设计 PCR、qPCR 或克隆方案 | [实验设计](#实验设计) |
+| 分析 RNA、ATAC、蛋白或空间数据 | [多组学数据处理](#多组学数据处理) |
+| 修改已经生成的图表 | [图表批注](#7-图表批注) |
+
+</details>
 
 <details>
 <summary>点击查看一条科研任务如何流转</summary>
