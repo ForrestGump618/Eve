@@ -1,7 +1,8 @@
 {
   "file": "Eve-Setup-1.0.0-win-x64.exe",
-  "bytes": 140673201,
-  "sha256": "d7d9899079e199dfdf4960addba6dc57bc6292dad29b2855bf6a65d752ae3398",
+  "bytes": 140701882,
+  "sha256": "f8a77fc511784e04a5b91113f5b56007bb9a04df40a21afb4db6cf284945c01e",
+  "version": "1.0.0",
   "signed": false,
-  "version": "1.0.0"
+  "buildId": "881aecce1a5edbde2a7f557e9d9d351b1ff974a4586627d5b17172330c290d3e"
 }

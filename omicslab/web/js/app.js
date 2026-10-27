@@ -21,6 +21,7 @@ import {
 import { on, emit } from './bus.js?v=2.1.1';
 import {workspaceSidebarHtml,mountSidebarNavigation} from './workspace-sidebar.js?v=2.1.1';
 import { initApprovalCenter } from './approvals.js?v=2.1.1';
+import { mountEveSelects } from './eve-select.js?v=2.1.1';
 import {
   ROUTES,
   state,
@@ -125,6 +126,7 @@ const app = {
   healthTimer: 0,
   palette: null,
   navOpen: false,
+  selectDispose: null,
 };
 
 /* ------------------------------------------------------------------ */
@@ -170,6 +172,8 @@ function shellHtml() {
 
 function buildShell(root) {
   root.innerHTML = shellHtml();
+  app.selectDispose?.();
+  app.selectDispose = mountEveSelects(document);
   app.shell = root.querySelector('#app-shell');
   app.viewRoot = root.querySelector('#view-root');
   app.nav = root.querySelector('#app-nav');
@@ -324,26 +328,34 @@ function stopHealthPolling() {
 /* ------------------------------------------------------------------ */
 
 async function renderRoute(route, { force = false } = {}) {
-  document.body.dataset.route = route;
   const target = ROUTES.some((r) => r.id === route) ? route : 'chat';
   if (!force && app.current && state.route === target) return;
+  document.body.dataset.route = target;
   // T01: dialogs are view-owned; leave no stale layer behind on route change.
   closeAllModals();
   app.sidebarDispose?.();app.sidebarDispose=null;
-  if (app.current) {
+  const previousInstance=app.current;
+  const previousMount=app.viewRoot?.querySelector(':scope > .route-mount')||null;
+  const token = ++app.mountToken;
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setState({ route: target });
+  updateNav();
+  document.title = `${routeMeta(target).label} · Eve`;
+  closeNav();
+  if(previousMount&&!reduceMotion){
+    previousMount.classList.add('is-route-leaving');
+    await new Promise(resolve=>setTimeout(resolve,100));
+    if(token!==app.mountToken)return;
+  }
+  if (previousInstance) {
     try {
-      app.current.destroy?.();
+      previousInstance.destroy?.();
     } catch (err) {
       console.warn('[app] view destroy failed', err);
     }
     app.current = null;
   }
-  const token = ++app.mountToken;
-  setState({ route: target });
-  updateNav();
-  document.title = `${routeMeta(target).label} · Eve`;
   app.viewRoot.innerHTML = `<div class="route-loading">${spinnerHtml('加载页面')}</div>`;
-  closeNav();
   try {
     const loader = VIEW_LOADERS[target];
     if (!loader) throw new Error(`未知页面：${target}`);
@@ -354,7 +366,7 @@ async function renderRoute(route, { force = false } = {}) {
     // Each asynchronous mount owns its own DOM root. A superseded mount's
     // destroy() must never clear a newer route that shares viewRoot.
     const mountRoot=document.createElement('div');
-    mountRoot.className='route-mount';
+    mountRoot.className=reduceMotion?'route-mount':'route-mount is-route-entering';
     app.viewRoot.replaceChildren(mountRoot);
     const instance = await mod.mount(mountRoot, {
       navigate,
@@ -369,6 +381,7 @@ async function renderRoute(route, { force = false } = {}) {
       return;
     }
     app.current = instance || null;
+    if(!reduceMotion)requestAnimationFrame(()=>requestAnimationFrame(()=>mountRoot.classList.remove('is-route-entering')));
     if(!['workbench','chat'].includes(target))app.sidebarDispose=await mountSidebarNavigation(document.querySelector('#app-sidebar'),action=>{app.pendingChatAction=action;navigate('workbench');});
     if(app.pendingChatAction&&['workbench','chat'].includes(target)){const action=app.pendingChatAction;app.pendingChatAction=null;emit(action.type==='new'?'chat:new-conversation':'chat:select',action.id);}
   } catch (err) {
@@ -613,6 +626,13 @@ function closePalette() {
 function bindGlobalKeys() {
   document.addEventListener('keydown', (evt) => {
     const meta = evt.metaKey || evt.ctrlKey;
+    if (meta && evt.shiftKey && evt.key.toLowerCase() === 'f' && state.route === 'workbench') {
+      // The mounted chat view owns the actual locator and performs the jump.
+      evt.preventDefault();
+      evt.stopPropagation();
+      document.querySelector('#chat-locator-btn')?.click();
+      return;
+    }
     if (meta && evt.key.toLowerCase() === getPref('paletteShortcut','k')) {
       evt.preventDefault();
       openPalette();
@@ -671,7 +691,7 @@ async function boot() {
     titlebar.innerHTML=`<button type="button" class="desktop-history" id="desktop-back" aria-label="返回">←</button><button type="button" class="desktop-history" id="desktop-forward" aria-label="前进">→</button><span class="desktop-app-label">Eve</span>`;
     titlebar.querySelector('#desktop-back').addEventListener('click',()=>history.back());titlebar.querySelector('#desktop-forward').addEventListener('click',()=>history.forward());
     const rail=document.createElement('nav');rail.className='desktop-rail';rail.setAttribute('aria-label','快捷导航');
-    rail.innerHTML=[['chat','chat','聊天'],['workbench','layers','工作台'],['tasks2','clock','任务'],['extensions','skills','技能'],['ssh','terminal','SSH'],['settings','settings','设置']].map(([route,name,label])=>`<a href="#/${route}" title="${label}" aria-label="${label}">${icon(name,{size:22})}</a>`).join('');
+    rail.innerHTML=[['workbench','layers','工作台'],['tasks2','clock','任务'],['extensions','skills','技能'],['ssh','terminal','SSH'],['settings','settings','设置']].map(([route,name,label])=>`<a href="#/${route}" title="${label}" aria-label="${label}">${icon(name,{size:22})}</a>`).join('');
     document.body.prepend(titlebar,rail);
   }
   initUi();

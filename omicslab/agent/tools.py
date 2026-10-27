@@ -268,12 +268,9 @@ class ToolRegistry:
         refused, slot = guard.before(ctx, str(name), args)
         if refused is not None:
             return refused
-        try:
-            result = await self._execute_unchecked(ctx, name, arguments)
-            guard.observe(ctx, str(name), args, slot, result)
-            return result
-        finally:
-            guard.inflight.discard(slot)
+        result = await self._execute_unchecked(ctx, name, arguments)
+        guard.observe(ctx, str(name), args, slot, result)
+        return result
 
     async def _execute_unchecked(
         self,

@@ -40,23 +40,29 @@ export class WindowLifecycle {
     });
   }
   show(tasks=false):void{
-    const window=this.options.window();if(!window||window.isDestroyed())return;
-    if(window.isMinimized())window.restore();window.show();window.focus();
-    if(tasks&&window.webContents.getURL().startsWith('http://127.0.0.1:'))void window.webContents.executeJavaScript("location.hash='#/tasks2'").catch(()=>{});
+    const window=this.options.window();if(!this.live(window))return;
+    try{
+      if(window.isMinimized())window.restore();
+      window.show();window.focus();
+      if(tasks&&this.live(window)&&window.webContents.getURL().startsWith('http://127.0.0.1:'))void window.webContents.executeJavaScript("location.hash='#/tasks2'").catch(()=>{});
+    }catch{/* window was destroyed between visibility checks */}
   }
   private async close(window:BrowserWindow):Promise<void>{
     if(this.deciding||this.exiting)return;this.deciding=true;
     try{
+      if(!this.live(window))return;
       let action=this.action;
       if(action==='ask'){
-        const decision=await dialog.showMessageBox(window,{type:'question',title:'关闭Eve',message:'如何关闭Eve？',detail:'最小化到托盘后，后台任务与 SSH 连接继续运行。彻底退出会停止运行时并释放连接。',buttons:['退出程序','最小化到系统托盘','取消'],defaultId:1,cancelId:2,checkboxLabel:'记住我的选择（可在设置中修改）',checkboxChecked:false,noLink:true});
+        const decision=!this.live(window)
+          ? await dialog.showMessageBox({type:'question',title:'关闭Eve',message:'如何关闭Eve？',detail:'最小化到托盘后，后台任务与 SSH 连接继续运行。彻底退出会停止运行时并释放连接。',buttons:['退出程序','最小化到系统托盘','取消'],defaultId:1,cancelId:2,checkboxLabel:'记住我的选择（可在设置中修改）',checkboxChecked:false,noLink:true})
+          : await dialog.showMessageBox(window,{type:'question',title:'关闭Eve',message:'如何关闭Eve？',detail:'最小化到托盘后，后台任务与 SSH 连接继续运行。彻底退出会停止运行时并释放连接。',buttons:['退出程序','最小化到系统托盘','取消'],defaultId:1,cancelId:2,checkboxLabel:'记住我的选择（可在设置中修改）',checkboxChecked:false,noLink:true});
         if(decision.response===2)return;
         action=decision.response===0?'quit':'tray';
         if(decision.checkboxChecked)this.setCloseAction(action);
       }
       if(action==='tray'){
-        if(!this.tray){await dialog.showMessageBox(window,{type:'error',message:'系统托盘不可用，窗口保持打开。'});return;}
-        window.hide();return;
+        if(!this.tray){if(this.live(window))await dialog.showMessageBox(window,{type:'error',message:'系统托盘不可用，窗口保持打开。'});return;}
+        if(this.live(window))window.hide();return;
       }
       await this.quit();
     }finally{this.deciding=false;}
@@ -71,7 +77,7 @@ export class WindowLifecycle {
     }
     if(active>0){
       const result=await dialog.showMessageBox({type:'warning',message:`仍有 ${active} 项任务未结束`,detail:'停止并退出会取消当前执行。已提交的远程命令可能需要重连后核对；不会自动重放。',buttons:['停止任务并退出','保留任务并最小化到托盘','取消'],defaultId:1,cancelId:2,noLink:true});
-      if(result.response===1){this.options.window()?.hide();return;}
+      if(result.response===1){const target=this.options.window();if(this.live(target))target.hide();return;}
       if(result.response!==0)return;
     }
     this.exiting=true;
@@ -81,4 +87,7 @@ export class WindowLifecycle {
   dispose():void{this.tray?.destroy();this.tray=null;}
   get isExiting():boolean{return this.exiting;}
   get trayAvailable():boolean{return this.tray!==null&&!this.tray.isDestroyed();}
+  private live(window:BrowserWindow|null|undefined):window is BrowserWindow {
+    try{return Boolean(window&&!window.isDestroyed()&&!window.webContents.isDestroyed());}catch{return false;}
+  }
 }

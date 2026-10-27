@@ -332,7 +332,6 @@ class AgentLoop:
         provider: str | None,
         model: str | None,
         persist: bool,
-        max_iterations: int | None = None,
         allow_delegate: bool = True,
         run_id: str | None = None,
         run_ctx: Any | None = None,
@@ -386,8 +385,10 @@ class AgentLoop:
             tools = [tool for tool in tools if not tool["function"]["name"].startswith("mcp_") or any(
                 platform.mcp.allowed(server, workspace_id, agent.id) and tool["function"]["name"].startswith(server["id"]+"__")
                 for server in platform.store.list("mcp"))]
-        # Per-turn built-ins; legacy user iteration/cost settings cannot weaken or exhaust them.
-        guard = TurnGuard(TurnPolicy(steps=min(24, max_iterations) if max_iterations else 24))
+        # Resource accounting remains observable, while repeated calls and
+        # arbitrary model/tool iteration counts remain real observations for the
+        # model. The durable runtime owns cancellation, deadlines and recovery.
+        guard = TurnGuard(TurnPolicy())
         total_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
         tool_call_count = 0
         last_text = ""
@@ -399,9 +400,6 @@ class AgentLoop:
                 from ..suwen.store import redact
                 reason["diagnostics"] = {"attempted_calls": [{"name": a["name"], "arguments_preview": _truncate(json.dumps(redact(a["arguments"]), ensure_ascii=False), 256)} for a in guard.attempted[-8:]],
                                          "recovery": guard.last_recovery}
-                if code == "no_progress" and guard.last_recovery:
-                    message += " " + guard.last_recovery["strategy"]
-                    reason["message"] = message
             conv.meta["stop_reason"] = reason
             conv.messages.append(ChatMessage(role="system", content=json.dumps(reason, ensure_ascii=False), meta={"kind": "stop_reason"}))
             await emit(AgentEvent("stop_reason", reason))
@@ -420,7 +418,7 @@ class AgentLoop:
             self._check_cancel(cancel_event)
             blocked = guard.pre_step()
             if blocked:
-                return await settle(blocked, "运行时已阻止下一次模型请求。连续重复、调用数量、用量或时长已达到本轮内置限制；已完成的工具结果保留，可从诊断继续。")
+                return await settle(blocked, "运行时已阻止下一次模型请求。Token 用量或本轮时长已达到资源边界；已完成的工具结果和检查点保留，可恢复继续。")
             if steer is not None:
                 try:
                     incoming = list(steer() or [])
@@ -475,7 +473,7 @@ class AgentLoop:
                             reasoning_parts.append(delta)
                             await emit(AgentEvent("reasoning", {"delta": delta}))
                     elif etype == "tool_calls":
-                        round_tool_calls = list(event.get("tool_calls") or [])[:guard.policy.tools+1]
+                        round_tool_calls = list(event.get("tool_calls") or [])
                     elif etype == "usage":
                         usage = event.get("usage") or {}
                         usage_received = True
@@ -563,7 +561,7 @@ class AgentLoop:
                     )
                 self._save(conv)
                 if guard.finalizing:
-                    return await settle(guard.final_reason or "tool_budget", "模型在收尾阶段仍请求工具，运行时已拒绝；现有结果已保存。")
+                    return await settle(guard.final_reason or "turn_deadline", "模型在收尾阶段仍请求工具，运行时已拒绝；现有结果已保存。")
                 if guard.final_reason:
                     guard.finalizing = True
                 iteration += 1
@@ -647,7 +645,6 @@ class AgentLoop:
                     result = refused
                 else:
                     turn_guard.observe(ctx, name, invalid_args, slot, result)
-                    turn_guard.inflight.discard(slot)
         else:
             await emit(AgentEvent("status", {"text": f"正在执行工具 {name}…"}))
             try:
@@ -820,7 +817,6 @@ class AgentLoop:
                 provider=provider,
                 model=model,
                 persist=False,
-                max_iterations=10,
                 allow_delegate=False,
             )
         except AgentCancelled:

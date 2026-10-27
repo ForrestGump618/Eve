@@ -20,6 +20,7 @@ SOURCES = [
     ("deepscientist-source", "ResearAI/DeepScientist", "src/skills/", "LICENSE"),
     ("community", "ComposioHQ/awesome-codex-skills", "", None),
     ("medical-source", "FreedomIntelligence/OpenClaw-Medical-Skills", "skills/", None),
+    ("mineru-source", "opendatalab/MinerU", "skills/", "LICENSE.md"),
 ]
 SKIP = {".git", "node_modules", "__pycache__", ".venv", "repo", "data", "datasets", "tests"}
 TEXT_EXT = {".md", ".txt", ".py", ".js", ".mjs", ".ts", ".json", ".yaml", ".yml",
@@ -38,6 +39,51 @@ def metadata(text: str) -> dict:
     return {}
 
 
+def add_object(objects: dict, pack: bytearray, data: bytes) -> str:
+    sha = hashlib.sha256(data).hexdigest()
+    if sha not in objects:
+        compressed = gzip.compress(data, compresslevel=9, mtime=0)
+        objects[sha] = {"offset": len(pack), "length": len(compressed), "bytes": len(data)}
+        pack.extend(compressed)
+    return sha
+
+
+def import_sparse_skill(cache: Path, folder: str, repo: str, entry: str, license_path: str) -> tuple[dict, list[dict]]:
+    """Read an exact commit without asking a partial clone to fetch every blob.
+
+    A `blob:none` cache may have only the selected tree entries. `git show`
+    fetches just the requested blobs, while `git archive` can request unrelated
+    historical blobs and fail behind restrictive networks.
+    """
+    root = cache / folder
+    commit = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+    skill_text = subprocess.check_output(
+        ["git", "-C", str(root), "show", f"{commit}:{entry}"],
+        env={**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"},
+    )
+    license_text = subprocess.check_output(
+        ["git", "-C", str(root), "show", f"{commit}:{license_path}"],
+        env={**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"},
+    )
+    text = skill_text.decode("utf-8", errors="strict")
+    meta = metadata(text)
+    name = str(meta.get("name") or PurePosixPath(entry).parent.name)
+    normalized = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    declared = str(meta.get("license") or "")
+    root_id = "Apache-2.0" if re.search(
+        r"Apache License(?:\s+Version)?\s+2\.0",
+        license_text.decode("utf-8", "replace"),
+        re.I,
+    ) else None
+    return (
+        {"name": name, "normalized": normalized, "text": text, "meta": meta,
+         "declared": declared, "root_id": root_id, "skill_text": skill_text,
+         "license_text": license_text, "commit": commit, "repo": repo,
+         "skill_root": str(PurePosixPath(entry).parent)},
+        [{"repository": repo, "commit": commit, "license": root_id}],
+    )
+
+
 def build(cache: Path, output: Path) -> None:
     output.mkdir(parents=True, exist_ok=True)
     objects, skills, decisions, sources = {}, [], [], []
@@ -47,6 +93,29 @@ def build(cache: Path, output: Path) -> None:
     for folder, repo, prefix, license_path in SOURCES:
         root = cache / folder
         commit = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+        if folder == "mineru-source":
+            imported, source_records = import_sparse_skill(cache, folder, repo, "skills/mineru/SKILL.md", license_path or "LICENSE.md")
+            sources.extend(source_records)
+            entry = "skills/mineru/SKILL.md"
+            skill_root = imported["skill_root"]
+            text = imported["text"]
+            meta = imported["meta"]
+            name = imported["name"]
+            normalized = imported["normalized"]
+            digest = hashlib.sha256(text.encode()).hexdigest()
+            files = {"SKILL.md": add_object(objects, pack, imported["skill_text"]),
+                     "EVE-UPSTREAM-LICENSE.txt": add_object(objects, pack, imported["license_text"])}
+            description = str(meta.get("description") or name)[:1600]
+            skills.append({"id": f"builtin:{normalized[:80]}:{digest[:12]}", "name": name,
+                           "description": description, "version": f"git-{commit[:12]}",
+                           "source": f"https://github.com/{repo}/tree/{commit}/{skill_root}",
+                           "license": imported["root_id"], "sha256": digest, "files": files,
+                           "omittedResources": [],
+                           "origin": {"repository": repo, "commit": commit, "path": entry}})
+            seen[normalized] = skills[-1]["id"]
+            content_seen[digest] = skills[-1]["id"]
+            raw_bytes += len(imported["skill_text"]) + len(imported["license_text"])
+            continue
         with tempfile.TemporaryDirectory(prefix="eve-skill-import-") as staging:
             archive = Path(staging) / "source.zip"
             subprocess.run(["git", "-C", str(root), "archive", "--format=zip", "-o", str(archive), commit],
@@ -54,7 +123,10 @@ def build(cache: Path, output: Path) -> None:
             with zipfile.ZipFile(archive) as z:
                 names = set(z.namelist())
                 root_license = z.read(license_path).decode("utf-8") if license_path else None
-                root_id = "Apache-2.0" if repo == "ResearAI/DeepScientist" else "MIT" if root_license else None
+                root_id = ("Apache-2.0" if re.search(r"Apache License(?:\s+Version)?\s+2\.0", root_license or "", re.I)
+                           else "MIT" if root_license and "Permission is hereby granted, free of charge" in root_license
+                           else "BSD-3-Clause" if root_license and re.search(r"BSD 3-Clause", root_license, re.I)
+                           else None)
                 sources.append({"repository": repo, "commit": commit, "license": root_id})
                 entries = sorted(n for n in names if n.startswith(prefix) and n.endswith("/SKILL.md")
                                  and not any(p in SKIP or p.startswith(".") for p in PurePosixPath(n).parts))
@@ -83,7 +155,7 @@ def build(cache: Path, output: Path) -> None:
                         r"unauthorized copying|this (?:skill|software|material).{0,80}(?:proprietary|confidential)|"
                         r"license\s*:\s*(?:proprietary|.*non.?commercial))",
                         text[:2500] + "\nlicense: " + declared, re.I)
-                    detected = ("Apache-2.0" if re.search(r"Apache License\s+Version 2\.0", license_text, re.I)
+                    detected = ("Apache-2.0" if re.search(r"Apache License(?:\s+Version)?\s+2\.0", license_text, re.I)
                                 else "MIT" if "Permission is hereby granted, free of charge" in license_text
                                 else "")
                     if not re.search(r"\bMIT\b|\bApache[- ]2\.0\b|\bBSD\b", declared + license_text + detected, re.I):
@@ -115,7 +187,7 @@ def build(cache: Path, output: Path) -> None:
                             objects[sha] = {"offset": len(pack), "length": len(compressed), "bytes": len(data)}
                             pack.extend(compressed)
                         files[rel] = sha
-                    if root_license:
+                    if root_license and "EVE-UPSTREAM-LICENSE.txt" not in files:
                         data = root_license.encode()
                         sha = hashlib.sha256(data).hexdigest()
                         if sha not in objects:

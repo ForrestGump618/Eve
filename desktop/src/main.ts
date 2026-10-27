@@ -10,16 +10,25 @@ import { validateModelConfig } from './providers.js';
 import { RPC_METHODS } from './shared/contract.js';
 import { WorkbenchManager } from './workbench.js';
 import {WindowLifecycle} from './window-lifecycle.js';
+import {resolveUserData} from './user-data.js';
+import {blocksRuntimeUpgrade, compatibleRuntime, diagnosticConsole, runtimeIdentity} from './runtime-identity.js';
 
 const here=dirname(fileURLToPath(import.meta.url));
 app.setName('Eve');
-// Adopt existing data in place; preserve history, settings and encrypted credentials.
-const legacyData=join(app.getPath('appData'),'SuWen');
-app.setPath('userData',process.env.SUWEN_TEST_HOME?resolve(process.env.SUWEN_TEST_HOME):existsSync(legacyData)?legacyData:join(app.getPath('appData'),'Eve'));
-if(!app.requestSingleInstanceLock())app.quit();
+// Eve owns its profile. Legacy SuWen data is renamed once when that can be done
+// safely; a locked old profile is left intact rather than shared.
+const testHome=process.env.EVE_TEST_HOME??process.env.SUWEN_TEST_HOME;
+const nativeConsole=diagnosticConsole(process.argv,testHome);
+const buildIdentity=runtimeIdentity(app.getVersion(),resolve(here,'..'));
+const userData=resolveUserData({appData:app.getPath('appData'),testHome:testHome?resolve(testHome):undefined});
+app.setPath('userData',userData.path);
+if(userData.migrationError)console.warn('[Eve] Legacy profile migration deferred; old data remains intact:',userData.migrationError);
+const hasSingleInstanceLock=app.requestSingleInstanceLock();
+if(!hasSingleInstanceLock)app.quit();
 let win:BrowserWindow|null=null,connection:Connection|null=null;
 let researchWindow:BrowserWindow|null=null;
 let quitting=false;
+let activationPending=false;
 let streamCursor=0,pumpTimer:NodeJS.Timeout|null=null,pumpBusy=false;
 let reconnectTimer:NodeJS.Timeout|null=null,reconnecting=false;
 const home=join(app.getPath('userData'),'runtime');
@@ -29,18 +38,38 @@ function daemonPythonPath():string{try{const value=JSON.parse(readFileSync(join(
 /** Managed, pinned Python dependency set for the legacy web workbench (never bundled credentials). */
 const workbenchDeps=process.env.SUWEN_WORKBENCH_DEPS?resolve(process.env.SUWEN_WORKBENCH_DEPS):join(app.getPath('userData'),'python-env');
 const workbench=new WorkbenchManager({home,depsDir:workbenchDeps,python:daemonPythonPath});
-export const lifecycle=new WindowLifecycle({path:join(app.getPath('userData'),'desktop-window.json'),icon:app.isPackaged?join(process.resourcesPath,'eve.ico'):resolve(here,'../../assets/eve.ico'),window:()=>researchWindow&&!researchWindow.isDestroyed()?researchWindow:win,
+/** Electron can destroy a BrowserWindow between any two synchronous accesses.
+ * Keep teardown races contained here so native callbacks never surface an
+ * "Object has been destroyed" modal to the user. */
+function liveWindow(window:BrowserWindow|null|undefined):window is BrowserWindow {
+ try{return Boolean(window&&!window.isDestroyed()&&!window.webContents.isDestroyed());}catch{return false;}
+}
+function runInWindow(window:BrowserWindow|null|undefined,script:string):void {
+ if(!liveWindow(window))return;
+ try{void window.webContents.executeJavaScript(script).catch(()=>{});}catch{/* destroyed during dispatch */}
+}
+function sendToWindow(window:BrowserWindow|null|undefined,channel:string,...args:unknown[]):boolean {
+ if(!liveWindow(window))return false;
+ try{window.webContents.send(channel,...args);return true;}catch{return false;}
+}
+export const lifecycle=new WindowLifecycle({path:join(app.getPath('userData'),'desktop-window.json'),icon:app.isPackaged?join(process.resourcesPath,'eve.ico'):resolve(here,'../../assets/eve.ico'),window:()=>liveWindow(researchWindow)?researchWindow:liveWindow(win)?win:null,
  active:async()=>{if(!connection)return 0;const snapshot=await rpc(connection,'snapshot');return snapshot.tasks.filter((t:any)=>!['completed','failed','cancelled'].includes(t.status)).length;},
  shutdown:async()=>{workbench.cancel();if(!connection)return;const old=connection;await rpc(old,'shutdown');for(let i=0;i<250;i++){await new Promise(r=>setTimeout(r,100));const current=readConnection(home);if(!current||current.pid!==old.pid){connection=null;return;}}throw new Error('运行时未在 25 秒内完成资源清理，请检查任务状态');},
  quit:()=>{quitting=true;app.quit();}});
+function activateExistingInstance():void{
+ activationPending=true;
+ const target=liveWindow(researchWindow)?researchWindow:liveWindow(win)?win:BrowserWindow.getAllWindows().find(candidate=>liveWindow(candidate));
+ if(liveWindow(target)){target.show();target.focus();activationPending=false;}
+}
+if(hasSingleInstanceLock)app.on('second-instance',activateExistingInstance);
 async function connectDaemon():Promise<void>{
  const old=readConnection(home);
  if(old){
   let health:any=null;try{health=await rpc(old,'health');}catch{}
   if(health){
-   if(health.version===app.getVersion()){connection=old;return;}
+   if(compatibleRuntime(health,buildIdentity)){connection=old;return;}
    const snapshot:any=await rpc(old,'snapshot');
-   if(snapshot.tasks.some((task:any)=>!['completed','failed','cancelled'].includes(task.status)))throw new Error(`后台 ${health.version} 有未结束任务。请完成或取消任务后重连，以加载 ${app.getVersion()}。`);
+   if(blocksRuntimeUpgrade(snapshot))throw new Error(`旧构建后台正在执行任务。请完成或暂停任务后重连，以加载当前 Eve ${app.getVersion()} 工作台。`);
    await rpc(old,'shutdown');
    let stopped=false;
    for(let i=0;i<60;i++){await new Promise(r=>setTimeout(r,100));try{await rpc(old,'health');}catch{stopped=true;break;}}
@@ -57,21 +86,22 @@ async function connectDaemon():Promise<void>{
  }
  env.NO_PROXY=env.NO_PROXY??'localhost,127.0.0.1,::1';
  const args=[script,'--home',home,'--worker',worker,'--legacy-source',app.isPackaged?join(process.resourcesPath,'legacy'):resolve(here,'../../..'),'--legacy-script',app.isPackaged?join(process.resourcesPath,'worker','legacy_server.py'):resolve(here,'../../worker/legacy_server.py')];
- if(existsSync(join(workbenchDeps,'.suwen-workbench.json')))args.push('--legacy-deps',workbenchDeps);
+ // Only openResearchWorkspace may select dependencies, after interpreter/hash
+ // checks. A historical marker alone must not inject incompatible binary wheels.
  const child=spawn(process.execPath,args,{detached:true,windowsHide:true,stdio:'ignore',env});child.unref();
- for(let i=0;i<80;i++){await new Promise(r=>setTimeout(r,150));const c=readConnection(home);if(c){try{await rpc(c,'health');connection=c;return;}catch{}}}
+ for(let i=0;i<80;i++){await new Promise(r=>setTimeout(r,150));const c=readConnection(home);if(c){try{if(compatibleRuntime(await rpc(c,'health') as any,buildIdentity)){connection=c;return;}}catch{}}}
  throw new Error('后台未启动，请在诊断中重试。');
 }
 /** Push incremental daemon events to the renderer; see docs/architecture/streaming-events.md. */
 async function pumpEvents():Promise<void>{
- if(quitting||pumpBusy||!win||win.isDestroyed()||!win.isVisible())return;
+ if(quitting||pumpBusy||!liveWindow(win)||(!win.isVisible()&&!testHome))return;
  if(!connection){scheduleReconnect();return;}
  pumpBusy=true;
  try{
   const batch:any=await rpc(connection,'events.stream',{since:streamCursor,limit:500});
   if(typeof batch?.cursor==='number')streamCursor=batch.cursor;
   const hasPayload=batch?.reset===true||(Array.isArray(batch?.events)&&batch.events.length>0)||(Array.isArray(batch?.streams)&&batch.streams.length>0)||(Array.isArray(batch?.tasks)&&batch.tasks.length>0);
-  if(hasPayload&&win&&!win.isDestroyed())win.webContents.send('suwen:events',batch);
+  if(hasPayload)sendToWindow(win,'suwen:events',batch);
  }catch{
   // A killed/restarted daemon leaves a stale connection object behind; without clearing it the
   // pump would retry the dead pipe forever instead of rescheduling. Clear it and reconnect.
@@ -84,14 +114,14 @@ function startEventPump():void{
  if(pumpTimer)return;
  const next=()=>{
   if(quitting)return;
-  pumpTimer=setTimeout(async()=>{pumpTimer=null;await pumpEvents();next();},win&&!win.isDestroyed()&&win.isVisible()?150:2000);
+  pumpTimer=setTimeout(async()=>{pumpTimer=null;await pumpEvents();next();},liveWindow(win)&&(win.isVisible()||testHome)?150:2000);
   pumpTimer.unref?.();
  };
  next();
 }
 /** Renderer-facing connection state for streaming UI recovery. */
 function notifyConnection(state:'reconnecting'|'restored'|'lost'):void{
- try{if(win&&!win.isDestroyed())win.webContents.send('suwen:connection',{state,at:Date.now()});}catch{/* window teardown */}
+ sendToWindow(win,'suwen:connection',{state,at:Date.now()});
 }
 /** Re-establish the detached daemon without losing the renderer; bounded exponential backoff. */
 function scheduleReconnect():void{
@@ -141,11 +171,11 @@ const MAIN_ONLY=new Set(['settings','configure','login','reconnect','pythonPicke
 /** Main-process handlers that the sandboxed renderer may invoke directly (no daemon passthrough). */
 const UI_MAIN_METHODS=['secrets.status','secret.put','secret.remove','events.replay','workbench.status','workbench.install','workbench.cancel'];
 const exposed=new Set<string>([...RPC_METHODS.filter(method=>!MAIN_ONLY.has(method)),...UI_MAIN_METHODS]);
-/** The full research workspace is the default product window. The native console
- * remains available with --native for diagnostics and deterministic shell E2E. */
+/** The formal workbench is the only product home. An isolated test profile can
+ * opt into the diagnostic console; stale launch arguments cannot open it. */
 async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  if(quitting)return {ok:false};
- if(researchWindow&&!researchWindow.isDestroyed()){researchWindow.show();researchWindow.focus();return {ok:true};}
+ if(liveWindow(researchWindow)){researchWindow.show();researchWindow.focus();return {ok:true};}
  const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
  const window=new BrowserWindow({width:1600,height:1000,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},backgroundColor:'#eef1f6',show:!process.argv.includes('--background'),webPreferences:{preload:join(here,'desktop-preload.cjs'),session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  researchWindow=window;
@@ -153,48 +183,47 @@ async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  const startupPage=(message:string,failed=false)=>'data:text/html;charset=utf-8,'+encodeURIComponent(`<!doctype html><html lang="zh"><meta charset="utf-8"><style>body{margin:0;background:#eef1f6;color:#555;font:14px "Segoe UI",sans-serif}header{height:36px;-webkit-app-region:drag}main{margin:32px;padding:32px;border:1px solid #dfe3e9;border-radius:18px;background:#fff}h1{color:#303238;font-size:20px}p{white-space:pre-wrap;line-height:1.8}button{padding:8px 16px;border:1px solid #ddd;background:#f5f5f5;border-radius:6px;cursor:pointer}</style><header></header><main><h1>Eve</h1><p id="startup-status"></p>${failed?'<button onclick="window.suwenDesktop.retryStartup()">重试启动</button>':''}</main><script>document.getElementById('startup-status').textContent=${JSON.stringify(message).replaceAll('<','\\u003c')}</script></html>`);
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
- window.on('closed',()=>{isolated.webRequest.onBeforeSendHeaders(null);if(researchWindow===window)researchWindow=null;});
+ window.on('closed',()=>{try{isolated.webRequest.onBeforeSendHeaders(null);}catch{/* session already torn down */}if(researchWindow===window)researchWindow=null;});
  try{
  await window.loadURL(startupPage('正在准备工作台…'));
  let runtime=await workbench.runtime();
  if(!runtime.ready){
-  const installed=await workbench.install(progress=>{if(!window.isDestroyed())void window.webContents.executeJavaScript(`document.getElementById('startup-status').textContent=${JSON.stringify('正在安装独立运行环境，完成后自动进入工作台…\n'+String(progress.message||'')).replaceAll('<','\\u003c')}`).catch(()=>{});});
+  const installed=await workbench.install(progress=>runInWindow(window,`document.getElementById('startup-status').textContent=${JSON.stringify('正在安装独立运行环境，完成后自动进入工作台…\n'+String(progress.message||'')).replaceAll('<','\\u003c')}`));
   if(!installed.installed)throw new Error(installed.error||'科研工作台运行环境未就绪，请在设置中检查 Python');
   runtime={ready:true,depsDir:installed.depsDir};
  }
  const cfg=readConfig();
  const modelConfig=cfg&&cfg.apiKey?{provider:cfg.provider==='anthropic'?'custom-anthropic':'custom-openai',model:cfg.model,apiBase:cfg.baseUrl,apiKey:cfg.apiKey}:undefined;
  await ensureConnected();const result=await rpc(connection!,'legacyStart',{...(runtime.depsDir?{deps:runtime.depsDir}:{}),...(modelConfig?{config:modelConfig}:{})});
- if(quitting||window.isDestroyed())return {ok:false};
+ if(quitting||!liveWindow(window))return {ok:false};
  const origin=`http://127.0.0.1:${result.port}`;
  const contentsId=window.webContents.id;
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
  isolated.webRequest.onBeforeSendHeaders({urls:[origin+'/*']},(details,callback)=>{
-  if(!quitting&&!window.isDestroyed()&&details.webContentsId===contentsId)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
+  if(!quitting&&liveWindow(window)&&details.webContentsId===contentsId)callback({requestHeaders:{...details.requestHeaders,Authorization:'Bearer '+result.token}});else callback({cancel:true});
  });
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  window.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
- await window.loadURL(origin);if(quitting||window.isDestroyed())return {ok:false};if(!process.argv.includes('--background'))window.show();if(primary&&win&&!win.isDestroyed())win.hide();return {ok:true};
- }catch(error){if(!quitting&&!window.isDestroyed()){window.webContents.removeAllListeners('will-navigate');await window.loadURL(startupPage('工作台启动失败：'+safeError(error),true));}return {ok:false};}
+ await window.loadURL(origin);if(quitting||!liveWindow(window))return {ok:false};if(activationPending||!process.argv.includes('--background')){activationPending=false;window.show();window.focus();}if(primary&&liveWindow(win))win.hide();return {ok:true};
+ }catch(error){if(!quitting&&liveWindow(window)){try{window.webContents.removeAllListeners('will-navigate');await window.loadURL(startupPage('工作台启动失败：'+safeError(error),true));}catch{/* closed while reporting failure */}}return {ok:false};}
 }
-app.whenReady().then(async()=>{
+if(hasSingleInstanceLock)app.whenReady().then(async()=>{
  lifecycle.install();
  ipcMain.handle('suwen:desktop',(event,method:unknown,value:unknown)=>{
   const target=researchWindow;
-  if(!target||target.isDestroyed()||event.sender!==target.webContents||event.senderFrame!==target.webContents.mainFrame)throw new Error('Untrusted desktop sender');
+  if(!liveWindow(target)||event.sender!==target.webContents||event.senderFrame!==target.webContents.mainFrame)throw new Error('Untrusted desktop sender');
   if(method==='getCloseAction')return lifecycle.getCloseAction();
   if(method==='setCloseAction')return lifecycle.setCloseAction(value);
-  if(method==='retryStartup'&&target.webContents.getURL().startsWith('data:text/html')){target.destroy();researchWindow=null;void openResearchWorkspace(true);return {ok:true};}
+  if(method==='retryStartup'&&target.webContents.getURL().startsWith('data:text/html')){try{target.destroy();}catch{/* already closed */}if(researchWindow===target)researchWindow=null;void openResearchWorkspace(true);return {ok:true};}
   throw new Error('Unsupported desktop operation');
  });
  ensureHome(home);let startupError='';try{await connectDaemon();const c=readConfig();if(c&&connection)await rpc(connection,'configure',c);if(connection)await pushSecrets();}catch(err){startupError=safeError(err);}
  if(quitting)return;
- if(!process.argv.includes('--native')){
+ if(!nativeConsole){
   await openResearchWorkspace(true);
-  app.on('second-instance',()=>{lifecycle.show();});
   return;
  }
- win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},show:process.argv.includes('--native'),backgroundColor:'#eef1f6',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ win=new BrowserWindow({width:1400,height:930,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:'#eef1f6',symbolColor:'#333333',height:36},show:!process.argv.includes('--background'),backgroundColor:'#eef1f6',webPreferences:{preload:join(here,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:!testHome}});
  const shell=win;
  lifecycle.attach(shell);
  shell.on('show',()=>{void pumpEvents();});
@@ -203,7 +232,7 @@ app.whenReady().then(async()=>{
  win.webContents.on('will-navigate',(event,url)=>{if(url!==pathToFileURL(uiFile).href)event.preventDefault();});
  win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
  ipcMain.handle('suwen:call',async(event,method:unknown,params:any)=>{
-  if(!win||win.isDestroyed()||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==pathToFileURL(uiFile).href)throw new Error('Untrusted sender');
+  if(!liveWindow(win)||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==pathToFileURL(uiFile).href)throw new Error('Untrusted sender');
   if(typeof method!=='string'||JSON.stringify(params??{}).length>1_000_000)throw new Error('Invalid request');
   try{
    if(method==='settings') {const c=readConfig();return {provider:c?.provider??'openai',baseUrl:c?.baseUrl??'https://api.openai.com/v1',model:c?.model??'gpt-4o-mini',contextWindow:c?.contextWindow??128000,maxOutput:c?.maxOutput??4096,hasKey:!!c?.apiKey,encrypted:safeStorage.isEncryptionAvailable(),launchAtLogin:app.getLoginItemSettings().openAtLogin,startupError,home};}
@@ -219,9 +248,9 @@ app.whenReady().then(async()=>{
    if(method==='workbench.status')return await workbench.status();
    if(method==='workbench.cancel')return {cancelled:workbench.cancel()};
    if(method==='workbench.install') {
-    if(!win)throw new Error('窗口不可用');
+    if(!liveWindow(win))throw new Error('窗口不可用');
     // Long-running but bounded: resolves only after install/probe finishes; progress events stream separately.
-    return await workbench.install(progress=>{try{if(win&&!win.isDestroyed())win.webContents.send('suwen:workbench',progress);}catch{/* window may close mid-install */}});
+    return await workbench.install(progress=>{sendToWindow(win,'suwen:workbench',progress);});
    }
    if(method==='legacyOpen') {
     return await openResearchWorkspace();
@@ -248,11 +277,11 @@ app.whenReady().then(async()=>{
    if(!exposed.has(method))throw new Error('Unsupported method');await ensureConnected();if(!connection)throw new Error('后台未连接，请在设置中重连');return await rpc(connection,method,params??{});
   }catch(err){throw new Error(safeError(err));}
  });
- try{await shell.loadFile(uiFile);}catch(error){if(quitting||shell.isDestroyed())return;throw error;}
- if(quitting||shell.isDestroyed())return;
+ try{await shell.loadFile(uiFile);}catch(error){if(quitting||!liveWindow(shell))return;throw error;}
+ if(quitting||!liveWindow(shell))return;
  startEventPump();
- if(process.argv.includes('--background')&&!shell.isDestroyed())shell.hide();
- app.on('second-instance',()=>{const target=researchWindow&&!researchWindow.isDestroyed()?researchWindow:win&&!win.isDestroyed()?win:BrowserWindow.getAllWindows()[0];target?.show();target?.focus();});
+ if(activationPending){activationPending=false;if(liveWindow(shell)){shell.show();shell.focus();}}
+ else if(process.argv.includes('--background')&&liveWindow(shell))shell.hide();
 });
-app.on('before-quit',event=>{if(!quitting){event.preventDefault();void lifecycle.quit();return;}workbench.cancel();lifecycle.dispose();if(pumpTimer)clearInterval(pumpTimer);if(reconnectTimer)clearTimeout(reconnectTimer);});
-app.on('window-all-closed',()=>{if(quitting)app.quit();});
+if(hasSingleInstanceLock)app.on('before-quit',event=>{if(!quitting){event.preventDefault();void lifecycle.quit();return;}workbench.cancel();lifecycle.dispose();if(pumpTimer)clearInterval(pumpTimer);if(reconnectTimer)clearTimeout(reconnectTimer);});
+if(hasSingleInstanceLock)app.on('window-all-closed',()=>{if(quitting)app.quit();});

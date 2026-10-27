@@ -816,6 +816,8 @@ export class SkillRegistry {
   private readonly sandboxRoot: string;
   private readonly maxFiles: number;
   private library?:SkillLibrary;
+  private installedCache?:SkillView[];
+  private bundledStateCache?:Map<string,RecordRow>;
 
   constructor(deps: ToolDeps, options: SkillRegistryOptions = {}) {
     this.store = deps.store;
@@ -854,12 +856,15 @@ export class SkillRegistry {
     };
   }
 
-  mountLibrary(root:string):void { this.library=new SkillLibrary(root); }
+  mountLibrary(root:string):void { this.library=new SkillLibrary(root);this.invalidateSkillCaches(); }
   libraryStats(){return this.library?.stats()??null;}
   private libraryView(id:string,state:RecordRow|undefined|null=this.store.getRecord(id)):SkillView {
     const skill=this.library!.get(id);
+    const stateData=state?.data&&typeof state.data==='object'&&!Array.isArray(state.data)
+      ? state.data as unknown as Record<string,Json>
+      : null;
     return {id,name:skill.name,description:skill.description,version:skill.version,source:skill.source,license:skill.license,
-      entry:'SKILL.md',permissions:[],enabled:state?.data&&typeof state.data==='object'&&!Array.isArray(state.data)?state.data.enabled!==false:true,
+      entry:'SKILL.md',permissions:[],enabled:stateData?.enabled!==false,
       sha256:skill.sha256,test:{status:'not_run',at:null},installedAt:0,executable:false,dependencies:[]};
   }
   private installedRows():RecordRow[]{
@@ -867,14 +872,29 @@ export class SkillRegistry {
     for(let offset=0;;offset+=500){const batch=this.store.listRecords('skill',{limit:500,offset});rows.push(...batch);if(batch.length<500)break;}
     return rows;
   }
-  list(): SkillView[] {
+  private bundledStates():Map<string,RecordRow>{
+    if(this.bundledStateCache)return this.bundledStateCache;
     const states=new Map<string,RecordRow>();
     for(let offset=0;;offset+=500){
       const batch=this.store.listRecords('bundledSkillState',{limit:500,offset});
       for(const row of batch)states.set(row.id,row);
       if(batch.length<500)break;
     }
-    const installed=this.installedRows().map(row=>this.toView(row));
+    this.bundledStateCache=states;
+    return states;
+  }
+  private installedViews():SkillView[]{
+    if(this.installedCache)return this.installedCache;
+    this.installedCache=this.installedRows().map(row=>this.toView(row));
+    return this.installedCache;
+  }
+  private invalidateSkillCaches():void{
+    this.installedCache=undefined;
+    this.bundledStateCache=undefined;
+  }
+  list(): SkillView[] {
+    const states=this.bundledStates();
+    const installed=this.installedViews();
     const names=new Set(installed.map(skill=>skill.name.toLowerCase()));
     return [...installed,...(this.library?.skills.filter(skill=>!names.has(skill.name.toLowerCase()))
       .map(skill=>this.libraryView(skill.id,states.get(skill.id)??null))??[])];
@@ -884,18 +904,29 @@ export class SkillRegistry {
   /** Progressive discovery: descriptions only, never all SKILL.md bodies. */
   search(query: string): Json {
     const words = query.toLowerCase().split(/[^\p{L}\p{N}_-]+/u).filter(Boolean);
-    const installed=this.installedRows().filter(row=>recordData(row).enabled!==false).map(row=>{
-      const data=recordData(row),manifest=data.manifest as unknown as SkillManifest;
-      const description=manifest?.description??'';
-      const text=`${data.name} ${description}`.toLowerCase();
-      return {id:row.id,name:String(data.name),version:String(data.version),description,
-        score:(String(data.name).toLowerCase()===query.trim().toLowerCase()?20:0)+words.reduce((n,w)=>n+(text.includes(w)?1:0),0)};
+    const installed=this.installedViews().filter(skill=>skill.enabled).map(skill=>{
+      const text=`${skill.name} ${skill.description}`.toLowerCase();
+      return {id:skill.id,name:skill.name,version:skill.version,description:skill.description,
+        score:(skill.name.toLowerCase()===query.trim().toLowerCase()?20:0)+words.reduce((n,w)=>n+(text.includes(w)?1:0),0)};
     });
-    const bundled=this.library?.search(query,32).filter(result=>this.libraryView(result.id).enabled).map(result=>{
+    const states=this.bundledStates();
+    const bundled=this.library?.search(query,32).filter(result=>{
+      const state=states.get(result.id);
+      const data=state?.data&&typeof state.data==='object'&&!Array.isArray(state.data)
+        ? state.data as unknown as Record<string,Json>
+        : null;
+      return data?.enabled!==false;
+    }).map(result=>{
       const skill=this.library!.get(result.id);
       return {id:skill.id,name:skill.name,version:skill.version,description:skill.description,score:result.score};
     })??[];
-    return [...installed,...bundled].filter(result=>result.score>0).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name)).slice(0,8) as unknown as Json;
+    const ranked=[...installed,...bundled].filter(result=>result.score>0).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
+    const requested=query.trim().toLowerCase();
+    const exactOrPrefix=ranked.filter(result=>{
+      const name=result.name.toLowerCase();
+      return name===requested||name.startsWith(requested);
+    });
+    return [...exactOrPrefix,...ranked.filter(result=>!exactOrPrefix.includes(result))].slice(0,8) as unknown as Json;
   }
   load(id: string): Json {
     if(this.library?.has(id)){
@@ -1117,6 +1148,7 @@ export class SkillRegistry {
       id, expectedVersion: 0,
       provenance: { kind: 'skill.install', at: installedAt, sha256: inspection.sha256, source },
     });
+    this.invalidateSkillCaches();
     return this.toView(row);
   }
 
@@ -1124,10 +1156,12 @@ export class SkillRegistry {
     if(this.library?.has(id)){
       const old=this.store.getRecord(id);
       this.store.putRecord('bundledSkillState',{enabled},{id,expectedVersion:old?.version??0});
+      this.invalidateSkillCaches();
       return this.libraryView(id);
     }
     const row = this.row(id);
     const updated = this.store.putRecord('skill', { ...(recordData(row) as Record<string, Json>), enabled } as Json, { id, expectedVersion: row.version });
+    this.invalidateSkillCaches();
     return this.toView(updated);
   }
 
@@ -1136,6 +1170,7 @@ export class SkillRegistry {
     const row = this.row(id);
     const installed = this.installedPath(id);
     this.store.deleteRecord(id, expectedVersion);
+    this.invalidateSkillCaches();
     try { rmSync(installed, { recursive: true, force: true }); } catch { /* record removal is authoritative */ }
     return { ok: true };
   }
@@ -1175,6 +1210,7 @@ export class SkillRegistry {
         ...(recordData(row) as Record<string, Json>),
         test: { status, at, detail },
       } as Json, { id, expectedVersion: row.version, provenance: { kind: 'skill.test', at, status, script: manifest.test.script } });
+      this.invalidateSkillCaches();
       return { skill: this.toView(updated), result, status, detail };
     } catch (error) {
       const detail = `worker error: ${failureMessage(error)}`;
@@ -1182,6 +1218,7 @@ export class SkillRegistry {
         ...(recordData(row) as Record<string, Json>),
         test: { status: 'failed', at, detail },
       } as Json, { id, expectedVersion: row.version, provenance: { kind: 'skill.test', at, status: 'failed', transportError: true } });
+      this.invalidateSkillCaches();
       throw new Error(`Skill test worker failed: ${detail}`);
     }
   }

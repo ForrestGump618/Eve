@@ -15,7 +15,7 @@ if(pkg.build?.productName==='Eve'){
   const manifest=JSON.parse(readFileSync(join(repoRoot,'docs/verification/eve-1.0/installer.json'),'utf8'));
   const expected=`Eve-Setup-${pkg.version}-win-x64.exe`;
   if(manifest.file!==expected||manifest.version!==pkg.version||!/^[a-f0-9]{64}$/.test(manifest.sha256)||!Number.isSafeInteger(manifest.bytes)||manifest.bytes<=0)throw Error('Invalid Eve installer manifest');
-  const artifact=[join(root,'release/eve-v1.0.0',expected),join(root,'release',expected)].find(existsSync);
+  const artifact=[join(root,'release',expected),join(root,'release/eve-v1.0.0',expected)].find(existsSync);
   if(artifact){
     const data=readFileSync(artifact);
     if(data.length!==manifest.bytes||createHash('sha256').update(data).digest('hex')!==manifest.sha256)throw Error('Eve installer differs from documented manifest');
@@ -50,7 +50,7 @@ const unpacked = entries.find(e => /(^|\/)SuWen\.exe$/.test(e.name) && !e.name.i
 const blockmap = entries.find(e => e.name === `${installerName}.blockmap`);
 const failures = [];
 if (!installer) failures.push(`SHA256SUMS has no entry for ${installerName}`);
-if (!unpacked) failures.push('SHA256SUMS has no entry for win-unpacked/SuWen.exe');
+if (!unpacked) failures.push('SHA256SUMS has no entry for win-unpacked/Eve.exe');
 if (!blockmap) failures.push(`SHA256SUMS has no entry for ${installerName}.blockmap`);
 
 const notesRel = `docs/release/release-notes-v${version}.md`;

@@ -1,0 +1,33 @@
+{
+  "kind": "installed Windows app, actual existing user profile, read-only UI inspection",
+  "checks": [
+    {
+      "name": "only-formal-page-no-diagnostic-console",
+      "ok": true
+    },
+    {
+      "name": "default-light-workbench",
+      "ok": true
+    },
+    {
+      "name": "shared-project-and-history-sidebar",
+      "ok": true
+    },
+    {
+      "name": "single-chat-composer",
+      "ok": true
+    },
+    {
+      "name": "installed-build-serves-current-runtime",
+      "ok": true
+    },
+    {
+      "name": "no-observed-renderer-errors",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "version": "1.0.0",
+  "buildId": "881aecce1a5edbde2a7f557e9d9d351b1ff974a4586627d5b17172330c290d3e",
+  "workbenchTitle": "工作台 · Eve"
+}

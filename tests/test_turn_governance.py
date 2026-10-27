@@ -26,23 +26,22 @@ def env(tmp_path):
     return settings, registry, ctx
 
 
-async def test_missing_directory_is_refused_then_root_remains_available(env):
+async def test_missing_directory_observation_allows_retry_and_root_listing(env):
     settings, registry, ctx = env
     (settings.workspace/'actual_data').mkdir()
     failed = await registry.execute(ctx, 'list_files', {'path': 'mast0912'})
     assert not failed.ok
     assert failed.data['recovery']['category'] == 'path_not_found'
     assert failed.data['recovery']['next_calls'][0]['arguments'] == {'path': '.'}
-    refused = await registry.execute(ctx, 'list_files', {'path': './mast0912/'})
-    assert refused.error == 'duplicate_tool_call'
-    assert refused.data['guard']['executed'] is False
-    assert refused.data['guard']['recovery']['category'] == 'path_not_found'
+    repeated = await registry.execute(ctx, 'list_files', {'path': './mast0912/'})
+    assert not repeated.ok
+    assert repeated.data['recovery']['category'] == 'path_not_found'
     listing = await registry.execute(ctx, 'list_files', {'path': '.'})
     assert listing.ok
     assert listing.data['entries'][0]['path'] == 'actual_data'
 
 
-async def test_same_call_cannot_execute_twice_or_bypass_with_json_key_order(env):
+async def test_same_call_remains_an_observation_even_with_json_key_order(env):
     _, _, ctx = env
     calls = []
     async def handler(ctx, args):
@@ -50,12 +49,12 @@ async def test_same_call_cannot_execute_twice_or_bypass_with_json_key_order(env)
         return ToolResult('', 'probe', True, 'stable result')
     registry = ToolRegistry([ToolSpec('probe', '', {}, 'files', handler)])
     assert (await registry.execute(ctx, 'probe', {'a': 1, 'b': 2})).ok
-    assert (await registry.execute(ctx, 'probe', '{"b":2,"a":1}')).error == 'duplicate_tool_call'
-    assert len(calls) == 1
+    assert (await registry.execute(ctx, 'probe', '{"b":2,"a":1}')).ok
+    assert len(calls) == 2
     assert (await registry.execute(ctx, 'probe', {'a': 3})).ok
 
 
-async def test_duplicate_inflight_call_is_fail_closed(env):
+async def test_identical_inflight_call_executes_and_observes_its_result(env):
     _, _, ctx = env
     started, finish = asyncio.Event(), asyncio.Event()
     async def handler(ctx, args):
@@ -65,23 +64,25 @@ async def test_duplicate_inflight_call_is_fail_closed(env):
     registry = ToolRegistry([ToolSpec('probe', '', {}, 'files', handler)])
     running = asyncio.create_task(registry.execute(ctx, 'probe', {}))
     await started.wait()
-    assert (await registry.execute(ctx, 'probe', {})).error == 'duplicate_inflight_call'
+    second = asyncio.create_task(registry.execute(ctx, 'probe', {}))
+    await asyncio.sleep(0)
+    assert not second.done()
     finish.set()
-    assert (await running).ok
+    assert (await running).ok and (await second).ok
 
 
-async def test_observable_file_change_allows_read_again(env):
+async def test_unchanged_file_can_be_read_again(env):
     settings, registry, ctx = env
     path = settings.workspace/'data.txt'
     path.write_text('old')
     assert (await registry.execute(ctx, 'read_file', {'path': 'data.txt'})).ok
-    assert (await registry.execute(ctx, 'read_file', {'path': 'data.txt'})).error == 'duplicate_tool_call'
+    assert (await registry.execute(ctx, 'read_file', {'path': 'data.txt'})).ok
     path.write_text('changed content')
     result = await registry.execute(ctx, 'read_file', {'path': 'data.txt'})
     assert result.ok and 'changed content' in result.content
 
 
-def test_abc_cycle_is_detected_independently_of_consecutive_repeats(env):
+def test_abc_cycle_remains_observable_without_a_counter_guard(env):
     _, _, ctx = env
     guard = TurnGuard()
     codes = []
@@ -90,33 +91,29 @@ def test_abc_cycle_is_detected_independently_of_consecutive_repeats(env):
         if refused:
             codes.append(refused.error)
         else:
-            guard.inflight.discard(slot)
             guard.observe(ctx, name, {}, slot, ToolResult('', name, True, name))
-    assert codes[-1] == 'tool_cycle'
+    assert codes == []
 
 
-async def test_same_output_with_different_arguments_stalls_before_next_execution(env):
+async def test_same_output_with_different_arguments_remains_observable(env):
     _, _, ctx = env
     calls = []
     async def handler(ctx, args):
         calls.append(args)
         return ToolResult('', 'probe', False, 'SSH connection refused', error='SSH connection refused')
     registry = ToolRegistry([ToolSpec('probe', '', {}, 'files', handler)])
-    for i in range(3):
+    for i in range(4):
         result = await registry.execute(ctx, 'probe', {'path': str(i)})
         assert result.data['recovery']['category'] == 'remote_unavailable'
-    assert (await registry.execute(ctx, 'probe', {'path': '4'})).error == 'output_stagnation'
-    assert len(calls) == 3
+    assert len(calls) == 4
 
 
-async def test_tool_budget_blocks_before_handler_and_resets_with_new_turn(env):
+async def test_many_tool_calls_are_not_blocked_by_an_arbitrary_counter(env):
     _, registry, ctx = env
-    ctx.turn_guard = TurnGuard(TurnPolicy(tools=1))
-    assert (await registry.execute(ctx, 'list_files', {'path': '.'})).ok
-    result = await registry.execute(ctx, 'list_files', {'path': 'missing'})
-    assert result.error == 'tool_budget' and not result.data['guard']['executed']
-    ctx.turn_guard = TurnGuard(TurnPolicy(tools=1))
-    assert (await registry.execute(ctx, 'list_files', {'path': '.'})).ok
+    ctx.turn_guard = TurnGuard(TurnPolicy())
+    for _ in range(60):
+        assert (await registry.execute(ctx, 'list_files', {'path': '.'})).ok
+    assert ctx.turn_guard.calls == 60
 
 
 async def test_stream_coalesces_tokens_and_preserves_channel_order():
@@ -236,38 +233,39 @@ async def test_full_turn_missing_path_recovers_without_crash_or_manual_iteration
     assert result['finish_reason']=='stop' and result['stop_reason']['code']=='completed'
     assert len(provider.requests)==4
     results = [e.data for e in events if e.type=='tool_result']
-    assert results[1]['data']['guard']['code']=='duplicate_tool_call'
+    assert results[1]['ok'] is False
     assert results[2]['data']['entries'][0]['path']=='real_data'
     assert conv.meta['stop_reason']['code']=='completed'
     assert any(m.meta and m.meta.get('kind')=='stop_reason' for m in conv.messages)
 
 
-async def test_full_turn_repeated_tool_stops_early_with_diagnosis(env, monkeypatch):
-    batches = [[{'type':'tool_calls','tool_calls':[tool('list_files',path='mast0912')]}]]*20
+async def test_full_turn_repeated_tool_remains_observable_until_model_finishes(env, monkeypatch):
+    batches = [[{'type':'tool_calls','tool_calls':[tool('list_files',path='mast0912')]}]]*8 + [[{'type':'text','delta':'目标不存在，已根据真实观察收尾。'}]]
     loop, provider = make_loop(env, monkeypatch, batches)
     result = await loop.run(Conversation(), '查找 mast0912')
     assert result['finish_reason']=='stop'
-    assert result['stop_reason']['code']=='no_progress'
-    assert len(provider.requests)==6
-    assert 'no_progress' in result['text']
+    assert result['stop_reason']['code']=='completed'
+    assert len(provider.requests)==9
+    assert '目标不存在' in result['text']
 
 
-async def test_tool_budget_reserves_tools_disabled_final_answer(env, monkeypatch):
+async def test_tool_results_are_returned_without_a_counter_disabled_final_answer(env, monkeypatch):
     loop, provider = make_loop(env, monkeypatch, [
         [{'type':'tool_calls','tool_calls':[tool('list_files',path='.'),tool('list_files',path='mast0912')]}],
         [{'type':'text','delta':'已检查根目录，未继续执行缺失目录调用。'}],
-    ], TurnPolicy(tools=1))
+    ], TurnPolicy())
     result = await loop.run(Conversation(), '检查目录')
-    assert result['stop_reason']['code']=='tool_budget'
-    assert provider.requests[-1][1]==[]
+    assert result['stop_reason']['code']=='completed'
+    assert provider.requests[-1][1]
     assert '已检查根目录' in result['text']
 
 
-async def test_step_budget_rejects_next_model_request(env, monkeypatch):
-    loop, provider = make_loop(env, monkeypatch, [[{'type':'tool_calls','tool_calls':[tool('list_files',path='.')]}]], TurnPolicy(steps=1))
+async def test_more_than_legacy_step_count_can_complete(env, monkeypatch):
+    batches = [[{'type':'tool_calls','tool_calls':[tool('list_files',path='.')]}]]*25 + [[{'type':'text','delta':'检查完成。'}]]
+    loop, provider = make_loop(env, monkeypatch, batches, TurnPolicy())
     result = await loop.run(Conversation(), '检查目录')
-    assert result['stop_reason']['code']=='step_budget'
-    assert len(provider.requests)==1
+    assert result['stop_reason']['code']=='completed'
+    assert len(provider.requests)==26
 
 
 async def test_token_warning_compacts_tools_and_hard_limit_stops(env, monkeypatch):

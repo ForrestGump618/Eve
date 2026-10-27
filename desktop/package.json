@@ -43,6 +43,7 @@
     "artifactName": "Eve-Setup-${version}-win-${arch}.${ext}",
     "files": [
       "dist/main.js",
+      "dist/build-info.json",
       "dist/src/**/*",
       "dist/ui/**/*",
       "dist/bundled-skills/**/*",
@@ -76,7 +77,7 @@
       },
       {
         "from": "assets/eve.ico",
-        "to": "suwen.ico"
+        "to": "eve.ico"
       }
     ],
     "win": {

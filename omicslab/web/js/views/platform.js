@@ -64,9 +64,39 @@ export async function mount(root){
    else await registry(section);
   }catch(err){content.innerHTML=blank('操作未完成',errorMessage(err))+button('reload','重试');}
  }
+ async function openProviderEditor(providerId=''){
+  const data=await api.settings.get();const providers=Object.values(data.providers||{});const selected=providers.find(p=>p.id===providerId)||providers[0]||{};
+  const modelOptions=[selected.default_model,...(selected.models||[])].filter(Boolean).filter((m,i,a)=>a.indexOf(m)===i);
+  const providerSelect=providers.map(p=>`<option value="${escAttr(p.id)}" ${p.id===selected.id?'selected':''}>${esc(p.label||p.id)}</option>`).join('');
+  const html=`<div class="eve-provider-editor"><div class="eve-provider-step"><span class="eve-provider-step-number">1</span><div><strong>选择供应商</strong><small>每个供应商独立保存连接状态，其他 Key 不会被覆盖。</small></div></div><label class="sw-field"><span>供应商</span><select id="provider-editor-provider">${providerSelect}</select></label><div class="eve-provider-step"><span class="eve-provider-step-number">2</span><div><strong>填写模型连接</strong><small>先测试，再决定是否设为默认路由。</small></div></div><div class="sw-form-grid">${field('模型名称','provider-editor-model',selected.default_model||modelOptions[0]||'','例如 deepseek-chat')}${field('API Base（自定义端点必填）','provider-editor-base',selected.api_base||'','留空使用供应商默认地址')}</div>${field('API Key','provider-editor-key', '',selected.has_key?'已保存，留空保持不变':'粘贴 API Key','','password')}<label class="sw-check"><input type="checkbox" id="provider-editor-default" ${data.llm?.provider===selected.id?'checked':''}/>设为默认供应商与模型</label><label class="sw-check"><input type="checkbox" id="provider-editor-test" checked/>保存后立即测试连接</label></div>`;
+  const modal=modalForm('添加 / 编辑供应商',html,async body=>{
+    const provider=modalValue(body,'provider-editor-provider'),model=modalValue(body,'provider-editor-model').trim(),base=modalValue(body,'provider-editor-base').trim(),key=modalValue(body,'provider-editor-key').trim(),activate=body.querySelector('#provider-editor-default')?.checked===true;
+    const meta=providers.find(p=>p.id===provider)||{};
+    if(meta.needs_model&&!model)throw new Error('该供应商需要填写模型名称');
+    if(meta.needs_api_base&&!base)throw new Error('该供应商需要填写 API Base');
+    if(!meta.no_key_required&&!meta.has_key&&!key)throw new Error('请填写 API Key');
+    const payload={provider,model,api_base:base,key,activate};
+    const saved=await api.settings.saveKeys(payload);
+    if(body.querySelector('#provider-editor-test')?.checked){const tested=await api.settings.testLLM({provider,model,api_base:base,api_key:key});if(!tested?.ok)throw new Error(tested?.error||'连接测试失败');}
+    toastSuccess(activate?'供应商已保存并设为默认':'供应商连接已保存');
+    await models();
+    return saved;
+  },'保存并测试');
+  modal?.body?.querySelector('#provider-editor-provider')?.addEventListener('change',(event)=>{
+    const next=providers.find(p=>p.id===event.target.value)||{};
+    const model=next.default_model||(next.models||[])[0]||'';
+    const modelInput=modal.body.querySelector('#provider-editor-model');
+    const baseInput=modal.body.querySelector('#provider-editor-base');
+    const keyInput=modal.body.querySelector('#provider-editor-key');
+    if(modelInput)modelInput.value=model;
+    if(baseInput)baseInput.value=next.api_base||'';
+    if(keyInput)keyInput.placeholder=next.has_key?'已保存，留空保持不变':'粘贴 API Key';
+  });
+ }
  async function models(){
-  const c=await config('models');const health=getState().health;
-  content.innerHTML=`<section class="sw-card sw-hero"><div class="sw-kicker">让Eve选择合适的处理方式</div><h2>你定目标，Eve安排执行。</h2><p>普通使用只需选择思考模式。已有模型连接沿用原配置，可随时修改。</p><div class="sw-mode-grid">${[['fast','快速','日常问答与简单处理'],['balanced','均衡','分析、写作与大多数工作'],['deep','深度','复杂问题与科研推理']].map(([id,label,desc])=>`<button class="sw-mode ${c.mode===id?'is-active':''}" data-action="mode" data-id="${id}">${icon(id==='fast'?'wand':id==='deep'?'brain':'layers',{size:22})}<strong>${label}</strong><span>${desc}</span></button>`).join('')}</div><div class="sw-inline">${button('connections','管理模型连接与 API Key','btn-primary')}${button('model-test','测试当前模型')}<span class="sw-muted">备用模型只在尚未输出内容、且请求可重试时启用。</span></div></section><section class="sw-card"><h3>路由策略</h3>${select('优先考虑','model-strategy',[['quality','质量'],['latency','响应速度'],['cost','经济'],['privacy','本地隐私']],c.strategy)}<p class="sw-muted">隐私策略禁止路由到远程模型。速度与经济策略按已有延迟记录、配置价格和可用模型排序；没有测量或价格时沿用配置顺序。</p><details><summary>高级：角色模型、能力与备用连接</summary>${area('角色模型：text / reasoning / vision / embedding / code','model-roles',c.roles)}${area('模型能力（按模型名；temperature、max_output、token_parameter）','model-caps',c.capabilities)}${area('备用模型列表（provider、model）','model-fallbacks',c.fallbacks,3)}${field('上下文窗口（字符预算采用保守估算）','model-context',c.context_window,'','number')}</details><label class="sw-check"><input type="checkbox" id="sage-verification" ${c.sage_verification?'checked':''}/>Sage-A1.5 自检（仅该模型，需兼容服务）</label><label class="sw-check"><input type="checkbox" id="sage-orchestration" ${c.orchestration?'checked':''}/>启用并行子任务（受现有权限与预算约束）</label>${button('save-models','保存路由配置','btn-primary')}</section>`;
+  const c=await config('models');const data=await api.settings.get().catch(()=>({}));const providers=Object.values(data.providers||{});const active=data.llm||{};
+  const cards=providers.filter(p=>p.id!=='mock').map(p=>{const isActive=active.provider===p.id;const model=isActive&&active.model?active.model:(p.default_model||p.models?.[0]||'');return `<article class="eve-provider-card ${p.configured?'is-configured':'is-pending'} ${isActive?'is-default':''}"><div class="eve-provider-card-head"><div><span class="eve-provider-family">${esc(p.family||'兼容 API')}</span><h3>${esc(p.label||p.id)}</h3></div><span class="sw-badge ${p.configured?'status-configured':'status-missing'}">${p.configured?'已连接':'未连接'}</span></div><p>${esc(p.hint||`${(p.models||[]).length||1} 个建议模型`)}</p><div class="eve-provider-meta"><code>${esc(model||'待填写模型')}</code>${isActive?'<span class="eve-default-mark">默认路由</span>':''}</div><div class="sw-inline">${button('provider-edit',p.configured?'编辑连接':'添加连接','btn-primary',p.id)}${p.configured&&!isActive?button('provider-default','设为默认','',`${p.id}::${model}`):''}</div></article>`;}).join('');
+  content.innerHTML=`<section class="sw-card sw-hero"><div class="sw-kicker">MODEL ROUTING</div><h2>连接一次，按任务切换。</h2><p>多个供应商可以同时保存。当前任务只使用启动时选定的模型，切换默认路由不会中断运行中的任务。</p><div class="sw-mode-grid">${[['fast','快速','日常问答与简单处理'],['balanced','均衡','分析、写作与大多数工作'],['deep','深度','复杂问题与科研推理']].map(([id,label,desc])=>`<button class="sw-mode ${c.mode===id?'is-active':''}" data-action="mode" data-id="${id}">${icon(id==='fast'?'wand':id==='deep'?'brain':'layers',{size:22})}<strong>${label}</strong><span>${desc}</span></button>`).join('')}</div><div class="sw-inline">${button('provider-add','添加供应商','btn-primary')}${button('model-test','测试当前默认模型')}<span class="sw-muted">当前默认：${esc(active.provider||'未设置')} / ${esc(active.model||'未设置')}</span></div></section><section class="sw-card eve-provider-manager"><div class="sw-toolbar"><div><h3>供应商连接</h3><p class="sw-muted">Key 按供应商独立保存，支持 DeepSeek、OpenAI、Anthropic、通义、Ollama、自定义端点等。</p></div>${button('provider-add','添加供应商','btn-primary')}</div><div class="eve-provider-grid">${cards||blank('还没有供应商连接','添加一个供应商开始使用 Eve。')}</div></section><section class="sw-card"><h3>路由策略</h3>${select('优先考虑','model-strategy',[['quality','质量'],['latency','响应速度'],['cost','经济'],['privacy','本地隐私']],c.strategy)}<p class="sw-muted">隐私策略禁止路由到远程模型。速度与经济策略按已测延迟、价格和可用模型排序。</p><details><summary>高级：角色模型、能力与备用连接</summary>${area('角色模型：text / reasoning / vision / embedding / code','model-roles',c.roles)}${area('模型能力（按模型名；temperature、max_output、token_parameter）','model-caps',c.capabilities)}${area('备用模型列表（provider、model）','model-fallbacks',c.fallbacks,3)}${field('上下文窗口（字符预算采用保守估算）','model-context',c.context_window,'','number')}</details><label class="sw-check"><input type="checkbox" id="sage-verification" ${c.sage_verification?'checked':''}/>Sage-A1.5 自检（仅该模型，需兼容服务）</label><label class="sw-check"><input type="checkbox" id="sage-orchestration" ${c.orchestration?'checked':''}/>启用并行子任务（受现有权限与预算约束）</label>${button('save-models','保存路由配置','btn-primary')}</section>`;
  }
  async function settings(key){
   const c=await config(key);let html='';
@@ -165,7 +195,9 @@ export async function mount(root){
    else if(action==='skill-prev'){skillPage=Math.max(0,skillPage-1);await registry('skill');}
    else if(action==='skill-next'){skillPage++;await registry('skill');}
    else if(action==='reload')await load();
-   else if(action==='connections')navigate('connections');
+    else if(action==='connections'||action==='provider-add')await openProviderEditor();
+    else if(action==='provider-edit')await openProviderEditor(id);
+    else if(action==='provider-default'){const [provider,model]=(id||'').split('::');await api.settings.update({provider,model});toastSuccess('默认模型已切换');await models();}
    else if(action==='mode'){await save('models',{mode:id});await models();}
    else if(action==='save-models')await save('models',{sage_verification:checked('sage-verification'),orchestration:checked('sage-orchestration'),strategy:val('model-strategy'),roles:json('model-roles'),capabilities:json('model-caps'),fallbacks:json('model-fallbacks'),context_window:Number(val('model-context'))});
    else if(action==='save-appearance')await save('appearance',{theme:val('theme'),font:val('font'),font_size:Number(val('font-size')),accent:val('accent'),density:val('density'),radius:Number(val('radius')),mode:val('ui-mode'),home:val('home'),agent_name:val('agent-name'),avatar:val('avatar'),shortcuts:{palette:val('shortcut-palette')}});

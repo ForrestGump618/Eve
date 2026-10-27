@@ -13,6 +13,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { launchLegacy, type LegacyModelConfig } from './legacy-worker.js';
+import { runtimeIdentity } from './runtime-identity.js';
 import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
 import { ValidationError, type TaskDefinition, type Json } from './harness/types.js';
@@ -75,6 +76,7 @@ function appVersion(): string {
   return '0.0.0';
 }
 const VERSION = appVersion();
+const BUILD_IDENTITY = runtimeIdentity(VERSION, resolve(dirname(fileURLToPath(import.meta.url)), '..'));
 
 const connection = newConnection(home);
 const store = new Store(join(home, 'harness.sqlite'));
@@ -265,6 +267,8 @@ function healthPayload(): Json {
   return {
     pid: process.pid,
     version: VERSION,
+    buildId: BUILD_IDENTITY.buildId,
+    runtimeRoot: BUILD_IDENTITY.runtimeRoot,
     uptime: process.uptime(),
     startedAt,
     mode: 'user-background',

@@ -15,11 +15,12 @@ const only=args.find(x=>x.startsWith('--only='))?.slice(7);
 const report={kind:'real Electron window lifecycle, no model requests',packaged,phase,at:new Date().toISOString(),results:[]};
 for(const scenario of ['owner-first','formal-first','quit-both','during-start'].filter(x=>!only||x===only)){
  const profile=mkdtempSync(join(tmpdir(),'suwen-window-close-'));
+ writeFileSync(join(profile,'desktop-window.json'),JSON.stringify({closeAction:'quit'}));
  const errorsFile=join(profile,'main-errors.jsonl'),env={...process.env,SUWEN_TEST_HOME:profile};delete env.ELECTRON_RUN_AS_NODE;
  let app,connection,child;
  const entry={scenario,errors:[]};
  try{
-  app=await _electron.launch({executablePath:packaged?join(root,args.find(x=>x.startsWith('--app-dir='))?.slice(10)??'release/win-unpacked','SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe'),args:packaged?[]:[root],env,timeout:60000});
+  app=await _electron.launch({executablePath:packaged?join(root,args.find(x=>x.startsWith('--app-dir='))?.slice(10)??'release/win-unpacked','Eve.exe'):join(root,'node_modules/electron/dist/electron.exe'),args:packaged?[]:[root],env,timeout:60000});
   child=app.process();
   await app.evaluate(async({dialog},file)=>{
    const fs=process.getBuiltinModule('fs');

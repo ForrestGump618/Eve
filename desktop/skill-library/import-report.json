@@ -1,8 +1,8 @@
 {
-  "skills": 278,
-  "uniqueFiles": 2958,
-  "rawBytes": 26399820,
-  "packBytes": 9112964,
+  "skills": 279,
+  "uniqueFiles": 2960,
+  "rawBytes": 26440829,
+  "packBytes": 9127370,
   "sources": [
     {
       "repository": "K-Dense-AI/scientific-agent-skills",
@@ -28,6 +28,11 @@
       "repository": "FreedomIntelligence/OpenClaw-Medical-Skills",
       "commit": "b1f9b6e3306f8d870e23b2023057bf730090036f",
       "license": null
+    },
+    {
+      "repository": "opendatalab/MinerU",
+      "commit": "b7f3dd0c5f6e6d66a298239ffd02b328b873918e",
+      "license": "Apache-2.0"
     }
   ],
   "decisions": [

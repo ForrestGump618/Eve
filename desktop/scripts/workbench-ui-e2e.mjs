@@ -8,7 +8,7 @@
  * must detect the installed runtime, then main's `legacyOpen` bridge starts the real
  * Python legacy server (desktop/worker/legacy_server.py) and opens the real legacy SPA
  * (omicslab/web) in an isolated, Bearer-authenticated window. This script audits that
- * window's shell and all 12 visible routes, capturing screenshots and console errors.
+ * window's shell and all 11 visible routes, capturing screenshots and console errors.
  *
  * Output: desktop/release/workbench-e2e/<stamp>/report.json + screenshots/
  * Usage:  node scripts/workbench-ui-e2e.mjs
@@ -29,7 +29,6 @@ const { _electron } = require('playwright-core');
 
 const ROUTES = [
   { id: 'workbench', label: '工作台' },
-  { id: 'chat', label: '对话' },
   { id: 'tasks2', label: '任务中心' },
   { id: 'research', label: '科研与证据' },
   { id: 'knowledge', label: '知识与记忆' },
@@ -554,15 +553,19 @@ function dirInventory(dir) {
 function collectProcessesLike(patterns) {
   // Best-effort residual check via WMIC-free PowerShell CIM query.
   try {
+    const excluded = new Set([process.pid, process.ppid].filter(Boolean));
     const command =
       "Get-CimInstance Win32_Process | Where-Object { " +
+      `($_.ProcessId -ne $PID) -and ($_.Name -eq 'electron.exe') -and (` +
       patterns.map(p => `($_.CommandLine -like '*${p}*')`).join(' -or ') +
-      " } | Select-Object ProcessId,Name,CommandLine | ConvertTo-Json -Compress";
+      ") } | Select-Object ProcessId,Name,CommandLine | ConvertTo-Json -Compress";
     const result = spawnSync('powershell.exe', ['-NoProfile', '-Command', command], { encoding: 'utf8', timeout: 20000, windowsHide: true });
     if (result.status !== 0 || !result.stdout.trim()) return [];
     const parsed = JSON.parse(result.stdout);
     const list = Array.isArray(parsed) ? parsed : [parsed];
-    return list.map(item => ({ pid: item.ProcessId, name: item.Name, cmd: String(item.CommandLine || '').slice(0, 300) }));
+    return list
+      .filter(item => !excluded.has(item.ProcessId))
+      .map(item => ({ pid: item.ProcessId, name: item.Name, cmd: String(item.CommandLine || '').slice(0, 300) }));
   } catch {
     return [];
   }
@@ -789,7 +792,7 @@ async function main() {
     markdownFixture = await startMarkdownFixture();
     report.native.markdownFixture = { url: `http://127.0.0.1:${markdownFixture.port}/v1`, port: markdownFixture.port, deterministic: true, plainHttpOnly: true };
     log('fixture', `markdown SSE fixture http://127.0.0.1:${markdownFixture.port}/v1 (deterministic local)`);
-    app = await _electron.launch({ executablePath: electronExe, args: [project, '--native'], env, timeout: 60000 });
+    app = await _electron.launch({ executablePath: electronExe, args: [project, '--native', '--background'], env, timeout: 60000 });
     const electronPid = app.process()?.pid;
     cleanup.electronPid = electronPid;
     log('launch', `electron pid=${electronPid}`);
@@ -878,12 +881,25 @@ async function main() {
     legacyPage = windowOrError;
     armPage(legacyPage, 'legacy');
     log('legacy', `window event received url=${legacyPage.url()}`);
+    legacyPage.on('framenavigated', frame => {
+      if (frame === legacyPage.mainFrame()) log('legacy', `navigated url=${frame.url()}`);
+    });
+    legacyPage.on('requestfailed', request => log('legacy', `request failed ${request.url()} ${request.failure()?.errorText || ''}`));
+    legacyPage.on('response', response => {
+      if (response.url().startsWith('http://127.0.0.1:')) log('legacy', `response ${response.status()} ${response.url()}`);
+    });
     await openPromise;
     if (openError) throw new Error(`legacyOpen bridge failed: ${openError}`);
-    if (openResult && openResult.ok === false) throw new Error(`legacyOpen refused: ${JSON.stringify(openResult).slice(0, 400)}`);
+    if (openResult && openResult.ok === false) {
+      const startupStatus = await legacyPage.locator('#startup-status').textContent({ timeout: 5000 }).catch(() => null);
+      throw new Error(`legacyOpen refused: ${JSON.stringify(openResult).slice(0, 400)} url=${legacyPage.url()} startup=${String(startupStatus || '').slice(0, 1000)}`);
+    }
     await legacyPage.waitForLoadState('domcontentloaded', { timeout: 60000 });
     await legacyPage.waitForSelector('#app-shell', { timeout: 90000 });
-    await legacyPage.waitForFunction(() => document.querySelectorAll('#app-nav .nav-item').length >= 12, null, { timeout: 30000 });
+    await legacyPage.waitForFunction(() => {
+      const rail = [...document.querySelectorAll('.desktop-rail a[href^="#/"]')].map(link => link.getAttribute('href'));
+      return rail.length >= 5 && ['#/workbench', '#/tasks2', '#/extensions', '#/ssh', '#/settings'].every(route => rail.includes(route));
+    }, null, { timeout: 30000 });
     await sleep(600);
     // First-boot onboarding modal (legacy store default onboarded=false) covers route content.
     const onboarding = await legacyPage.evaluate(() => {
@@ -937,10 +953,10 @@ async function main() {
       })(),
       prefersLight: matchMedia('(prefers-color-scheme: light)').matches,
       lang: document.documentElement.lang || '',
-      brand: (document.querySelector('.brand-name')?.textContent || '').trim(),
-      navCount: document.querySelectorAll('#app-nav .nav-item').length,
-      navRoutes: [...document.querySelectorAll('#app-nav .nav-item')].map(button => button.dataset.route),
-      navLabels: [...document.querySelectorAll('#app-nav .nav-item .nav-label')].map(node => (node.textContent || '').trim()),
+      brand: (document.querySelector('.chat-brand')?.childNodes?.[0]?.textContent || '').trim(),
+      navCount: document.querySelectorAll('.desktop-rail a[href^="#/"]').length,
+      navRoutes: [...document.querySelectorAll('.desktop-rail a[href^="#/"]')].map(link => link.getAttribute('href').slice(2)),
+      navLabels: [...document.querySelectorAll('.desktop-rail a[href^="#/"]')].map(link => (link.getAttribute('title') || '').trim()),
       bootSplashPresent: !!document.getElementById('boot-splash'),
       window: { innerWidth: window.innerWidth, innerHeight: window.innerHeight, dpr: window.devicePixelRatio },
       bodyTextLen: (document.body.innerText || '').trim().length,
@@ -950,13 +966,13 @@ async function main() {
     report.legacy.shell = shellInfo;
     log('legacy', `title="${shellInfo.title}" nav=${shellInfo.navCount} theme=${shellInfo.theme} brand="${shellInfo.brand}"`);
     check('legacy.window.event', 'PASS', `url=${shellInfo.url}`);
-    check('legacy.title.contains素问', /素问/.test(shellInfo.title) ? 'PASS' : 'FAIL', shellInfo.title);
-    check('legacy.shell.navItems>=12', shellInfo.navCount >= 12 ? 'PASS' : 'FAIL', `${shellInfo.navCount} nav items: ${shellInfo.navRoutes.join(',')}`);
-    check('legacy.shell.brand', /素问/.test(shellInfo.brand) ? 'PASS' : 'FAIL', shellInfo.brand);
+    check('legacy.title.containsEve', /\bEve\b/.test(shellInfo.title) ? 'PASS' : 'FAIL', shellInfo.title);
+    check('legacy.shell.railRoutes', shellInfo.navCount >= 5 ? 'PASS' : 'FAIL', `${shellInfo.navCount} rail routes: ${shellInfo.navRoutes.join(',')}`);
+    check('legacy.shell.brand', /^Eve$/.test(shellInfo.brand) ? 'PASS' : 'FAIL', shellInfo.brand);
     check(
-      'legacy.theme.darkDefault',
-      shellInfo.theme === 'dark' ? 'PASS' : 'FAIL',
-      `data-theme=${shellInfo.theme || '(none)'} (requirement: dark by default; storedPref=${shellInfo.storedTheme}; prefersLight=${shellInfo.prefersLight}; static index.html fallback is dark, but platform appearance default "system" resolves from OS)`,
+      'legacy.theme.lightDefault',
+      shellInfo.theme === 'light' ? 'PASS' : 'FAIL',
+      `data-theme=${shellInfo.theme || '(none)'} (requirement: light by default; storedPref=${shellInfo.storedTheme}; prefersLight=${shellInfo.prefersLight})`,
     );
     check('legacy.isolated.session', !/127\.0\.0\.1/.test(shellInfo.url) ? 'FAIL' : 'PASS', `origin=${shellInfo.origin}`);
     const shellShot = join(shotsDir, 'legacy-shell.png');
@@ -1020,7 +1036,7 @@ async function main() {
             const root = document.getElementById('view-root');
             if (!root || root.children.length === 0) return false;
             if (root.querySelector('.route-loading')) return false;
-            if (document.title !== `${label} · 素问 Suwen`) return false;
+            if (document.title !== `${label} · Eve`) return false;
             return true;
           },
           { label: route.label },
@@ -1104,7 +1120,7 @@ async function main() {
       log(routePhase, `${status} title="${data.title}" textLen=${data.viewTextLen} children=${data.childCount} consoleErrors=${realErrors.length}${failure ? ' — ' + failure : ''}`);
     }
     const routeFailures = report.routes.filter(route => route.status !== 'PASS');
-    check('legacy.routes.all12', routeFailures.length === 0 ? 'PASS' : 'FAIL', `${12 - routeFailures.length}/12 routes rendered${routeFailures.length ? '; failures: ' + routeFailures.map(r => r.route).join(',') : ''}`);
+    check('legacy.routes.allVisible', routeFailures.length === 0 ? 'PASS' : 'FAIL', `${ROUTES.length - routeFailures.length}/${ROUTES.length} routes rendered${routeFailures.length ? '; failures: ' + routeFailures.map(r => r.route).join(',') : ''}`);
 
     // ---------- native regression after legacy window ----------
     currentPhase = 'native-regression';
@@ -1161,6 +1177,24 @@ async function main() {
     report.error = String(error?.stack || error).slice(0, 4000);
     log('error', `E2E failed: ${error?.message || error}`);
     check('e2e.run', 'FAIL', String(error?.message || error).slice(0, 400));
+    try {
+      if (legacyPage && !legacyPage.isClosed()) {
+        const debug = await legacyPage.evaluate(() => ({
+          url: location.href,
+          title: document.title,
+          text: (document.body?.innerText || '').slice(0, 3000),
+          html: (document.body?.innerHTML || '').slice(0, 3000),
+        })).catch(error => ({ evaluateError: String(error?.message || error) }));
+        log('error', `legacy page debug ${JSON.stringify(debug)}`);
+      }
+    } catch {
+      /* diagnostics only */
+    }
+    try {
+      writeFileSync(join(reportDir, 'partial-report.json'), JSON.stringify(report, null, 2));
+    } catch {
+      /* diagnostics only */
+    }
   } finally {
     currentPhase = 'cleanup';
     log('cleanup', 'starting');
@@ -1228,6 +1262,14 @@ async function main() {
     } catch (error) {
       cleanup.daemonShutdownError = String(error?.message || error);
     }
+    // A successful close may leave Electron's daemon child alive because it is
+    // intentionally detached. Kill it by the fresh profile path before removing
+    // that profile; otherwise Windows keeps marker and log handles open.
+    cleanup.residualProcesses = collectProcessesLike([profile]);
+    for (const processInfo of cleanup.residualProcesses) {
+      taskkill(processInfo.pid);
+    }
+    if (cleanup.residualProcesses.length) await sleep(500);
     cleanup.legacyPid = legacyPid;
     if (legacyPid) {
       for (let i = 0; i < 20; i += 1) {
@@ -1256,10 +1298,7 @@ async function main() {
       cleanup.profileRemoved = false;
       cleanup.profileRemoveError = String(error?.message || error);
     }
-    cleanup.residualProcesses = collectProcessesLike([`suwen-wb-e2e-`, depsDir]);
-    if (cleanup.residualProcesses.length) {
-      for (const processInfo of cleanup.residualProcesses) taskkill(processInfo.pid);
-    }
+    cleanup.residualProcesses = [...cleanup.residualProcesses, ...collectProcessesLike([profile])];
     if (markdownFixture) {
       try {
         await markdownFixture.close();
@@ -1305,8 +1344,8 @@ async function main() {
       'Deterministic local run: no real model provider credentials are configured; legacy chat/research views render unconfigured/empty states. Native markdown rendering is driven by a local loopback OpenAI-compatible SSE fixture (127.0.0.1, fixed payload, ~900 ms pause to observe the streaming state) — not a real provider.',
       'Only loopback traffic (Electron IPC + 127.0.0.1 Python bridge + in-page /api requests + the local markdown fixture) is exercised; external services (SSH hosts, message channels, model APIs, public databases) are not contacted.',
       'Route checks assert shell mount, non-fatal render, per-route title, and absence of fatal error cards; they do not validate every legacy feature action (approvals, uploads, kernels, SSH sessions) beyond whatever each view initializes on mount.',
-      'Legacy SPA is Chinese-only (zh-CN). Its shell resolves the appearance default theme="system"; on this light-mode host that resolves to light, so the task-13 expectation "dark by default" fails (see checks legacy.theme.darkDefault). Toggle to dark was exercised and is captured in report.legacy.themeToggle.',
-      'The first-boot onboarding modal (欢迎来到素问) is dismissed via its 先看看 button before route checks; the modal screenshot legacy-first-boot.png is retained.',
+      'The workbench defaults to the light theme. Theme switching is exercised separately and captured in report.legacy.themeToggle.',
+      'The first-boot onboarding modal is dismissed before route checks; its screenshot is retained as legacy-first-boot.png.',
       'Native markdown audit assumes the rebuilt UI (app.js) contains the markdown/KaTeX/Mermaid renderer; if the build predates it, native.markdown.* checks fail with explicit reasons.',
       'The managed Python dependency directory is reused as-is via SUWEN_WORKBENCH_DEPS; installation/repair flows (network + pip) are not exercised.',
       'Renderer screenshots are viewport captures of the isolated 1600x1000 window; no OS-level DPI / accessibility / contrast measurements are claimed.',

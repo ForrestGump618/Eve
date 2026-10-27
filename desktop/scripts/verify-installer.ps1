@@ -1,4 +1,4 @@
-# SuWen Windows installer lifecycle verification (reproducible).
+# Eve Windows installer lifecycle verification (reproducible).
 # Steps: [optional old-version install] -> silent install -> metadata -> launch app ->
 #        authenticated daemon health -> UI close keeps daemon -> reinstall -> silent uninstall ->
 #        install dir removed, user data preserved, registry entry removed.
@@ -29,16 +29,16 @@ function Wait-Exit($process, [int]$seconds) {
   if ($null -eq $process) { return $true }
   return $process.WaitForExit($seconds * 1000)
 }
-function Get-SuWenRegistryEntry {
+function Get-EveRegistryEntry {
   $keys = Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue
   foreach ($key in $keys) {
     $props = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction SilentlyContinue
-    if ($props -and $props.DisplayName -eq 'SuWen') { return $props }
+    if ($props -and $props.DisplayName -eq 'Eve') { return $props }
   }
   return $null
 }
 function Get-DaemonHealth {
-  $homeDir = Join-Path $env:APPDATA 'SuWen\runtime'
+  $homeDir = Join-Path $env:APPDATA 'Eve\runtime'
   $script = Join-Path $PSScriptRoot 'pipe-health.mjs'
   $raw = & node $script --home $homeDir 2>&1
   if ($LASTEXITCODE -ne 0) { return $null }
@@ -48,13 +48,13 @@ function Get-DaemonHealth {
 if (-not (Test-Path -LiteralPath $Installer)) { Fail "installer not found: $Installer" }
 $installerItem = Get-Item -LiteralPath $Installer
 $installerHash = (Get-FileHash -LiteralPath $Installer -Algorithm SHA256).Hash
-$installDir = Join-Path $env:LOCALAPPDATA 'Programs\SuWen'
-$userDataDir = Join-Path $env:APPDATA 'SuWen'
-$appExe = Join-Path $installDir 'SuWen.exe'
-$uninstaller = Join-Path $installDir 'Uninstall SuWen.exe'
+$installDir = Join-Path $env:LOCALAPPDATA 'Programs\Eve'
+$userDataDir = Join-Path $env:APPDATA 'Eve'
+$appExe = Join-Path $installDir 'Eve.exe'
+$uninstaller = Join-Path $installDir 'Uninstall Eve.exe'
 
 # Make sure no stale app process from a previous run interferes.
-Get-Process -Name 'SuWen' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process -Name 'Eve' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Milliseconds 500
 
 if ($UpgradeFrom) {
@@ -63,7 +63,7 @@ if ($UpgradeFrom) {
   $old = Start-Process -FilePath $UpgradeFrom -ArgumentList '/S' -Wait -PassThru
   if (-not $old -or $old.ExitCode -ne 0) { Fail "old installer exit code: $($old.ExitCode)" }
   Start-Sleep -Seconds 5
-  $oldEntry = Get-SuWenRegistryEntry
+  $oldEntry = Get-EveRegistryEntry
   if (-not $oldEntry) { Fail 'old version registry entry missing after install' }
   $oldDetail = "DisplayVersion=$($oldEntry.DisplayVersion)"
   if ($UpgradeFromVersion) { $oldDetail += " expected=$UpgradeFromVersion" }
@@ -80,9 +80,9 @@ Add-Step 'install' 'PASS' ("exit={0} installerBytes={1} sha256={2} duration=~{3}
 if (-not (Test-Path -LiteralPath $appExe)) { Fail "app executable missing: $appExe" }
 if (-not (Test-Path -LiteralPath $uninstaller)) { Fail "uninstaller missing: $uninstaller" }
 $appItem = Get-Item -LiteralPath $appExe
-Add-Step 'files' 'PASS' ("SuWen.exe bytes={0} FileVersion={1} ProductVersion={2}" -f $appItem.Length, $appItem.VersionInfo.FileVersion, $appItem.VersionInfo.ProductVersion)
+Add-Step 'files' 'PASS' ("Eve.exe bytes={0} FileVersion={1} ProductVersion={2}" -f $appItem.Length, $appItem.VersionInfo.FileVersion, $appItem.VersionInfo.ProductVersion)
 
-$entry = Get-SuWenRegistryEntry
+$entry = Get-EveRegistryEntry
 if (-not $entry) { Fail 'registry entry missing' }
 $registryDetail = "DisplayName=$($entry.DisplayName) DisplayVersion=$($entry.DisplayVersion)"
 if ($entry.DisplayVersion -ne $Version) { Fail "registry version mismatch: $($entry.DisplayVersion) != $Version" }
@@ -126,7 +126,7 @@ if (Test-Path -LiteralPath $appExe) { Add-Step 'uninstall' 'FAIL' 'app executabl
 else { Add-Step 'uninstall' 'PASS' "exit=$uninstallCode install directory removed" }
 if (Test-Path -LiteralPath $userDataDir) { Add-Step 'user_data_preserved' 'PASS' $userDataDir }
 else { Add-Step 'user_data_preserved' 'FAIL' "user data directory missing: $userDataDir" }
-$entryAfter = Get-SuWenRegistryEntry
+$entryAfter = Get-EveRegistryEntry
 if ($entryAfter) { Add-Step 'registry_removed' 'FAIL' "registry entry still present: $($entryAfter.DisplayVersion)" }
 else { Add-Step 'registry_removed' 'PASS' 'HKCU uninstall entry removed' }
 

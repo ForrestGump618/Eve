@@ -1500,7 +1500,7 @@ async function sendMessage(event) {
     const task = await call('create', {
       name: text.slice(0, 120),
       steps,
-      limits: { maxCalls: 24, maxWallMs: 900000, concurrency: 2, maxTokens: 300000 },
+      limits: { maxWallMs: 900000, concurrency: 2, maxTokens: 300000 },
     });
     if (task && task.id) {
       S.selectedTaskId = task.id;
@@ -2046,7 +2046,7 @@ async function launchResearch(kind, button) {
     const task = await call('create', {
       name: `${objective.slice(0, 100)} · ${t(`launcher${kind.charAt(0).toUpperCase()}${kind.slice(1)}`)}`,
       steps: [step],
-      limits: { maxCalls: 6, maxWallMs: 900000, concurrency: 1, maxTokens: 200000 },
+      limits: { maxWallMs: 900000, concurrency: 1, maxTokens: 200000 },
     });
     if (task && task.id) {
       S.selectedTaskId = task.id;
@@ -3908,7 +3908,7 @@ function reconcileStreamSnapshot() {
 }
 
 Object.assign(copy, {
-  version: ['3.3.0 · 开发预览版', '3.3.0 · dev preview'],
+  version: ['1.0.0', '1.0.0'],
   themeLabel: ['界面主题', 'Interface theme'],
   themeSystem: ['跟随系统', 'Follow system'],
   themeLight: ['浅色', 'Light'],

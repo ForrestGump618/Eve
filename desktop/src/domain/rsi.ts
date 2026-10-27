@@ -99,7 +99,12 @@ export const DEFAULT_THRESHOLDS: RegressionThresholds = Object.freeze({
 export const MAX_CANDIDATES = 10;
 export const MAX_EVAL_CASES = 20;
 
-/** Fixed strategy baseline the engine may tune; keys are the complete allowed schema. */
+/**
+ * Fixed strategy baseline the engine may tune; keys are the complete allowed
+ * schema. Tool counts and retry values here are RSI benchmark metadata only:
+ * the unified AgentLoop does not read them as runtime iteration or tool-call
+ * truncation limits.
+ */
 export const DEFAULT_STRATEGIES: Readonly<Record<RsiKind, Json>> = Object.freeze({
   routing: Object.freeze({ smallModelThreshold: 0.35, escalateThreshold: 0.65, maxToolsPerStep: 4, toolRetryLimit: 1 }),
   prompt: Object.freeze({ systemStyle: 'concise', evidenceFirst: true, uncertaintyNote: true, maxExamples: 2 }),

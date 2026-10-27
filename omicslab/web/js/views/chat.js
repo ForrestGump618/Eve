@@ -270,6 +270,16 @@ export async function mount(root, ctx = {}) {
     dropHint: root.querySelector('.chat-drop-hint'),
     modelChip: root.querySelector('#chat-model-chip'),
     composerHint: root.querySelector('#composer-hint'),
+    runPanel: root.querySelector('#chat-run-panel'),
+    runPanelPhase: root.querySelector('#chat-run-phase'),
+    runPanelTool: root.querySelector('#chat-run-tool'),
+    runPanelElapsed: root.querySelector('#chat-run-elapsed'),
+    runPanelStop: root.querySelector('#chat-run-stop'),
+    runPanelDetail: root.querySelector('#chat-run-detail'),
+    locator: root.querySelector('#chat-locator'),
+    locatorInput: root.querySelector('#chat-locator-input'),
+    locatorResults: root.querySelector('#chat-locator-results'),
+    locatorButton: root.querySelector('#chat-locator-btn'),
   };
 
   const local = {
@@ -289,6 +299,18 @@ export async function mount(root, ctx = {}) {
     vision: { configured: false, enabled: false, model: '' },
     visionWarned: false,
     run: null,
+    catalog: [],
+    taskSelection: {},
+    modelPickerDispose: null,
+    runState: {
+      status: '',
+      phase: '',
+      tool: '',
+      startedAt: 0,
+      runId: '',
+      timer: 0,
+    },
+    locatorIndex: -1,
   };
   // The composer is stable and read-only until history/model initialization
   // finishes. Early input cannot race a second route mount or boot projection.
@@ -378,6 +400,62 @@ export async function mount(root, ctx = {}) {
     el.statusPill.innerHTML = `<span class="status-dot"></span><span>${esc(text)}</span>`;
   }
 
+  function formatRunElapsed(startedAt) {
+    if (!startedAt) return '0 秒';
+    const seconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+    if (seconds < 60) return `${seconds} 秒`;
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes} 分 ${seconds % 60} 秒`;
+  }
+
+  function renderRunPanel() {
+    if (!el.runPanel) return;
+    const state = local.runState;
+    const visible = Boolean(state.status);
+    el.runPanel.hidden = !visible;
+    if (!visible) {
+      if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = 0;
+      }
+      return;
+    }
+    el.runPanel.dataset.status = state.status;
+    el.runPanelPhase.textContent = state.phase || runStatusLabel(state.status);
+    el.runPanelTool.textContent = state.tool ? `正在${state.tool}` : '正在准备下一步';
+    el.runPanelElapsed.textContent = formatRunElapsed(state.startedAt);
+    el.runPanelDetail.disabled = !state.runId;
+    if (!state.timer) {
+      state.timer = window.setInterval(() => {
+        if (el.runPanelElapsed) el.runPanelElapsed.textContent = formatRunElapsed(local.runState.startedAt);
+      }, 1000);
+    }
+  }
+
+  function beginRunState(status = 'preparing', runId = '') {
+    local.runState.status = status;
+    local.runState.phase = runStatusLabel(status);
+    local.runState.tool = '';
+    local.runState.startedAt = Date.now();
+    local.runState.runId = runId || '';
+    renderRunPanel();
+  }
+
+  function updateRunState(patch = {}) {
+    const state = local.runState;
+    if (patch.status !== undefined) state.status = patch.status;
+    if (patch.phase !== undefined) state.phase = patch.phase;
+    if (patch.tool !== undefined) state.tool = patch.tool;
+    if (patch.runId !== undefined) state.runId = patch.runId;
+    if (patch.startedAt !== undefined) state.startedAt = patch.startedAt;
+    if (RUN_TERMINAL_STATUSES.has(state.status)) {
+      state.status = '';
+      state.phase = '';
+      state.tool = '';
+    }
+    renderRunPanel();
+  }
+
   /* ---------------------------------------------------------------- */
   /* Conversation list                                                 */
   /* ---------------------------------------------------------------- */
@@ -449,6 +527,7 @@ export async function mount(root, ctx = {}) {
     observerEpoch++;
     if(local.run){local.run.detached=true;clearWatchdog(local.run);local.run.ctrl.abort();}
     local.abort?.abort();local.run=null;pendingDraft=null;setStreaming(false);
+    updateRunState({status:''});
     local.guidanceRunId=null;guidanceUI.clear();
   }
   async function createConversation() {
@@ -610,10 +689,15 @@ export async function mount(root, ctx = {}) {
     const end=local.historyEnd===null||local.historyEnd===undefined?local.messages.length:Math.min(local.historyEnd,local.messages.length);
     const start=Math.max(0,end-80);
     if(start>0){const older=h(`<button type="button" class="btn btn-ghost">查看更早消息（${start}）</button>`);older.addEventListener('click',()=>{local.historyEnd=Math.max(80,end-60);renderMessages();el.messages.scrollTop=0;});el.messages.appendChild(older);}
-    for (const msg of local.messages.slice(start,end)) {
+    for (let messageIndex=start;messageIndex<end;messageIndex+=1) {
+      const msg=local.messages[messageIndex];
       if (msg?.role === 'tool') continue; // rendered together with its assistant tool card
         if(!msg?.content?.trim()&&!msg?.tool_calls?.length&&!msg?.figures?.length)continue;
-      el.messages.appendChild(renderMessage(msg, toolResults));
+      const node=renderMessage(msg, toolResults);
+      node.dataset.messageIndex=String(messageIndex);
+      node.dataset.messageRole=msg?.role||'assistant';
+      if(String(msg?.content||'').trim())node.dataset.messageText=String(msg.content).slice(0,1200);
+      el.messages.appendChild(node);
     }
     if(end<local.messages.length){const newer=h('<button type="button" class="btn btn-ghost">查看更新消息</button>');newer.addEventListener('click',()=>{local.historyEnd=end+60>=local.messages.length?null:end+60;renderMessages();});el.messages.appendChild(newer);}
     renderFinishedChildren();
@@ -682,6 +766,85 @@ export async function mount(root, ctx = {}) {
     if(msg?.meta?.run_id){const meta=node.querySelector('.msg-meta');const link=document.createElement('button');link.type='button';link.className='link-btn run-detail-link';link.dataset.runId=msg.meta.run_id;link.innerHTML=`${icon('history',{size:13})}<span>查看运行详情</span>`;meta.appendChild(link);}
     updateToolGroup(node.querySelector('.tool-run'));
     return node;
+  }
+
+  function locatorEntries() {
+    return local.messages
+      .map((message, index) => ({
+        index,
+        role: message?.role || 'assistant',
+        text: String(message?.content || '').replace(/\s+/g, ' ').trim(),
+      }))
+      .filter(entry => entry.text && entry.role !== 'tool');
+  }
+
+  function closeLocator() {
+    if (!el.locator) return;
+    el.locator.hidden = true;
+    el.locatorButton?.setAttribute('aria-expanded', 'false');
+    local.locatorIndex = -1;
+  }
+
+  function jumpToMessage(index) {
+    const targetIndex = Number(index);
+    if (!Number.isSafeInteger(targetIndex) || targetIndex < 0) return;
+    local.historyEnd = targetIndex >= local.messages.length ? null : Math.max(80, targetIndex + 21);
+    renderMessages();
+    requestAnimationFrame(() => {
+      const node = el.messages.querySelector(`[data-message-index="${targetIndex}"]`);
+      if (!node) {
+        toastWarn('这条消息暂时无法定位');
+        return;
+      }
+      node.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      node.classList.remove('is-located');
+      void node.offsetWidth;
+      node.classList.add('is-located');
+      window.setTimeout(() => node.classList.remove('is-located'), 1600);
+    });
+    closeLocator();
+  }
+
+  function renderLocator(query = '') {
+    if (!el.locatorResults) return;
+    const needle = query.trim().toLowerCase();
+    const entries = locatorEntries()
+      .filter(entry => !needle || entry.text.toLowerCase().includes(needle))
+      .slice(-100)
+      .reverse();
+    if (!entries.length) {
+      el.locatorResults.innerHTML = `<div class="chat-locator-empty">${needle ? '没有匹配的消息' : '当前会话还没有可定位的消息'}</div>`;
+      local.locatorIndex = -1;
+      return;
+    }
+    if (local.locatorIndex < 0 || local.locatorIndex >= entries.length) local.locatorIndex = 0;
+    el.locatorResults.innerHTML = entries.map((entry, position) => {
+      const role = entry.role === 'user' ? '你' : entry.role === 'error' ? '错误' : 'Eve';
+      const text = entry.text.length > 110 ? `${entry.text.slice(0, 110)}…` : entry.text;
+      return `<button type="button" class="chat-locator-item${position === local.locatorIndex ? ' is-active' : ''}" data-message-index="${entry.index}" data-locator-position="${position}">` +
+        `<span class="chat-locator-role">${role}</span><span class="chat-locator-text">${esc(text)}</span></button>`;
+    }).join('');
+    el.locatorResults.dataset.count = String(entries.length);
+  }
+
+  function openLocator() {
+    if (!el.locator) return;
+    el.locator.hidden = false;
+    el.locatorButton?.setAttribute('aria-expanded', 'true');
+    local.locatorIndex = 0;
+    renderLocator(el.locatorInput?.value || '');
+    requestAnimationFrame(() => {
+      el.locatorInput?.focus();
+      el.locatorInput?.select();
+    });
+  }
+
+  function moveLocator(delta) {
+    const count = Number(el.locatorResults?.dataset.count) || 0;
+    if (!count) return;
+    local.locatorIndex = (local.locatorIndex + delta + count) % count;
+    el.locatorResults.querySelectorAll('.chat-locator-item').forEach((item, index) => item.classList.toggle('is-active', index === local.locatorIndex));
+    el.locatorResults.querySelector('.chat-locator-item.is-active')?.scrollIntoView({ block: 'nearest' });
   }
 
   function toolGroupHtml(content='') {
@@ -1394,8 +1557,10 @@ export async function mount(root, ctx = {}) {
     el.input.disabled = false;
     if (on) {
       setStatus('正在连接…');
+      if (!local.runState.status) beginRunState(local.run?.status || 'preparing', local.run?.runId || '');
     } else {
       setStatus('');
+      updateRunState({ status: '' });
       local.abort = null;
       local.live = null;
     }
@@ -1463,6 +1628,7 @@ export async function mount(root, ctx = {}) {
       case 'status': {
         const text = data.text || '处理中…';
         setStatus(text);
+        updateRunState({ phase: text });
         local.live?.setStatus(text);
         break;
       }
@@ -1471,6 +1637,7 @@ export async function mount(root, ctx = {}) {
         if (local.run && status) local.run.status = status;
         const label = runStatusLabel(status);
         setStatus(label);
+        updateRunState({ status, phase: label, runId: data.run_id || local.run?.runId || local.runState.runId });
         local.live?.setStatus(status === 'waiting_approval' ? '等待审批' : `运行${label}`);
         if (RUN_TERMINAL_STATUSES.has(status)) turn.doneReceived = true;
         break;
@@ -1489,15 +1656,18 @@ export async function mount(root, ctx = {}) {
       case 'tool_call':
         local.live?.addToolCall(data);
         setStatus(`调用工具：${data.name || ''}`);
+        updateRunState({ status: 'running', phase: '调用工具', tool: data.name || '' });
         break;
       case 'tool_result':
         local.live?.applyToolResult(data);
         setStatus('正在生成…');
+        updateRunState({ status: 'running', phase: '核对工具结果', tool: '' });
         break;
       case 'approval_request':
         local.live?.addApproval(data);
         emit('approval:request', data);
         setStatus('等待你的批准');
+        updateRunState({ status: 'waiting_approval', phase: '等待你的批准', tool: '' });
         break;
       case 'approval_resolved': {
         // Older backends emit {id, approved}; CONTRACTS-3 uses {id, decision}.
@@ -1512,6 +1682,7 @@ export async function mount(root, ctx = {}) {
         const agent = data.agent_id || '子任务';
         const label = status === 'running' ? '开始' : childStatusLabel(status);
         setStatus(`子任务 ${agent}：${label}`);
+        updateRunState({ phase: `子任务 ${agent}`, tool: label });
         local.live?.setStatus(`子任务 ${agent}：${label}`);
         if (local.run && CHILD_TERMINAL.has(status)) local.childDirty = true;
         break;
@@ -1524,11 +1695,13 @@ export async function mount(root, ctx = {}) {
         break;
       case 'error':
         turn.fatalError = data;
+        updateRunState({ status: 'failed', phase: data.message || '调用失败', tool: '' });
         local.live?.setError(data.message || '调用失败', data.detail || '');
         break;
       case 'done':
         turn.doneReceived = true;
         setStatus('');
+        updateRunState({ status: 'succeeded' });
         break;
       default:
         break;
@@ -1844,6 +2017,7 @@ export async function mount(root, ctx = {}) {
     local.guidanceRunId=flow.runId;void refreshGuidance();
     local.abort = flow.ctrl;
     setStreaming(true);
+    beginRunState(run.status, run.runId);
     setStatus(runStatusLabel(run.status));
     void (async()=>{let result = null;
     try {
@@ -1902,7 +2076,11 @@ export async function mount(root, ctx = {}) {
       ts: Date.now() / 1000,
     });
     if (!el.messages.querySelector('.msg')) el.messages.innerHTML = '';
-    el.messages.appendChild(renderMessage(local.messages[local.messages.length - 1], new Map()));
+    const liveMessage=renderMessage(local.messages[local.messages.length - 1], new Map());
+    liveMessage.dataset.messageIndex=String(local.messages.length-1);
+    liveMessage.dataset.messageRole='user';
+    liveMessage.dataset.messageText=message.slice(0,1200);
+    el.messages.appendChild(liveMessage);
     // drop the empty state if present
     el.messages.querySelector('.chat-empty')?.remove();
 
@@ -1916,6 +2094,7 @@ export async function mount(root, ctx = {}) {
     local.abort = new AbortController();
     const epoch=observerEpoch,conversationId=local.activeId;
     setStreaming(true);
+    beginRunState('preparing');
     scrollToBottom(true);
 
     let result = null;
@@ -1937,6 +2116,7 @@ export async function mount(root, ctx = {}) {
         local.guidanceRunId=flow.runId;void refreshGuidance();
         local.abort = flow.ctrl;
         rememberActiveRun(local.activeId, { runId: flow.runId, traceId: flow.traceId });
+        beginRunState(run.status,flow.runId);
         setStatus(runStatusLabel(run.status));
         result = await driveRun(flow);
       } else {
@@ -1965,6 +2145,7 @@ export async function mount(root, ctx = {}) {
       if (flow?.runId) local.live?.setRun(flow.runId, flow.traceId);
       pendingDraft = null;
       setStreaming(false);
+      updateRunState({status:''});
       setStatus('');
       updateEmptyState();
       local.live = null;
@@ -2044,6 +2225,22 @@ export async function mount(root, ctx = {}) {
         enabled: Boolean(vision.enabled),
         model: vision.model || '',
       };
+      local.llm.configured = Boolean(llm.configured || Object.values(data?.providers || {}).some(provider => provider?.configured && provider.id !== 'mock'));
+      if (!local.llm.provider || !local.llm.model) {
+        const firstProvider = Object.values(data?.providers || {}).find(provider => provider?.configured && provider.id !== 'mock');
+        if (firstProvider) {
+          local.llm.provider = firstProvider.id;
+          local.llm.model = firstProvider.default_model || firstProvider.models?.[0] || '';
+        }
+      }
+      local.catalog = Object.values(data?.providers || {})
+        .filter(provider => provider && provider.configured && provider.id !== 'mock')
+        .map(provider => ({
+          id: provider.id,
+          label: provider.label || provider.id,
+          models: Array.isArray(provider.models) ? provider.models.map(String) : [],
+          defaultModel: provider.default_model || '',
+        }));
     } catch {
       // Settings are advisory here: the chat still works with the backend defaults.
     }
@@ -2060,17 +2257,114 @@ export async function mount(root, ctx = {}) {
     el.modelChip.hidden = false;
     const { configured }=local.llm;
     const provider=local.taskSelection?.provider||local.llm.provider,model=local.taskSelection?.model||local.llm.model;
+    el.modelChip.setAttribute('aria-haspopup','dialog');
     if (configured) {
       const label = [provider, model].filter(Boolean).join(' / ') || '已配置';
       el.modelChip.className = 'chat-model-chip is-ok';
       el.modelChip.textContent = label;
-      el.modelChip.title = `此会话后续任务使用：${label}。点击单独配置；运行中的任务保持原模型。`;
+      el.modelChip.title = `此会话后续任务使用：${label}。点击快速切换；右键打开高级配置；运行中的任务保持原模型。`;
     } else {
       el.modelChip.className = 'chat-model-chip is-warn';
       el.modelChip.textContent = '模型未配置';
       el.modelChip.title = '尚未配置可用的模型 API Key，请前往「设置 → 模型与供应商」保存并测试';
     }
     if (!local.messages.length && !local.live) updateEmptyState();
+  }
+
+  async function saveExecutionSelection(execution) {
+    if (!local.activeId && !await createConversation()) return false;
+    const conversationId = local.activeId;
+    const next = {
+      provider: execution.provider || '',
+      model: execution.model || '',
+      permission_mode: execution.permission_mode || root.querySelector('#chat-permission-mode')?.value || 'ask',
+    };
+    const conv = await api.request(`/api/conversations/${encodeURIComponent(conversationId)}/execution`, {
+      method: 'PATCH',
+      body: next,
+    });
+    if (local.activeId !== conversationId) return false;
+    local.taskSelection = conv?.meta?.execution || next;
+    root.querySelector('#chat-permission-mode').value = local.taskSelection.permission_mode || 'ask';
+    setPref('recentExecution', JSON.stringify(next));
+    renderModelChip();
+    toastSuccess('此会话后续任务已切换');
+    return true;
+  }
+
+  function executionCatalog() {
+    const choices = [];
+    const seen = new Set();
+    for (const provider of local.catalog || []) {
+      const models = [...new Set([provider.defaultModel, ...provider.models].filter(Boolean))];
+      for (const model of models.length ? models : ['']) {
+        const key = `${provider.id}\u0000${model}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        choices.push({ provider: provider.id, model, label: provider.label, modelLabel: model || '默认模型' });
+      }
+    }
+    if (local.llm.provider || local.llm.model) {
+      const key = `${local.llm.provider}\u0000${local.llm.model}`;
+      if (!seen.has(key)) choices.unshift({ provider: local.llm.provider, model: local.llm.model, label: '当前默认', modelLabel: local.llm.model || '默认模型' });
+    }
+    return choices;
+  }
+
+  async function openModelPicker() {
+    try {
+      const selected = local.taskSelection || {};
+      const providers = (local.catalog || []).filter((provider) => provider.models.length || provider.defaultModel);
+      if (!providers.length) {
+        navigate('settings');
+        toastInfo('请先在设置中连接一个供应商');
+        return;
+      }
+      local.modelPickerDispose?.();
+      const popover = h('<div class="eve-model-popover" role="dialog" aria-label="切换此会话的模型"></div>');
+      const search = document.createElement('input');
+      search.type = 'search'; search.className = 'eve-model-search'; search.placeholder = '搜索供应商或模型…';
+      const body = document.createElement('div'); body.className = 'eve-model-body';
+      const footer = document.createElement('div'); footer.className = 'eve-model-footer';
+      footer.innerHTML = `<span>只影响后续任务 · 运行中的任务保持原模型</span><button type="button" class="eve-model-manage">${icon('settings', { size: 13 })}<span>管理供应商</span></button>`;
+      popover.append(search, body, footer); document.body.appendChild(popover);
+      let providerId = selected.provider || providers[0].id;
+      const currentModel = () => local.taskSelection?.provider === providerId ? (local.taskSelection.model || '') : '';
+      const render = () => {
+        const query = search.value.trim().toLowerCase();
+        const visible = providers.filter((provider) => `${provider.label} ${provider.id} ${provider.models.join(' ')}`.toLowerCase().includes(query));
+        const active = providers.find((provider) => provider.id === providerId) || visible[0] || providers[0];
+        providerId = active.id;
+        const models = [...new Set([active.defaultModel, ...active.models].filter(Boolean))].filter((model) => !query || `${active.label} ${model}`.toLowerCase().includes(query));
+        body.innerHTML = `<div class="eve-model-providers" role="listbox" aria-label="供应商">${visible.map((provider) =>
+          `<button type="button" class="eve-model-provider${provider.id === providerId ? ' is-active' : ''}" data-provider="${escAttr(provider.id)}"><span>${esc(provider.label)}</span><small>${provider.models.length || 1} 个模型</small>${provider.id === selected.provider ? icon('check', { size: 13 }) : ''}</button>`
+        ).join('') || '<div class="eve-model-empty">没有匹配的供应商</div>'}</div><div class="eve-model-models" role="listbox" aria-label="模型">${models.map((model) =>
+          `<button type="button" class="eve-model-option${active.id === selected.provider && model === (selected.model || active.defaultModel) ? ' is-selected' : ''}" data-provider="${escAttr(active.id)}" data-model="${escAttr(model)}"><span class="eve-model-option-main"><strong>${esc(model)}</strong><small>${model === active.defaultModel ? '推荐模型' : active.label}</small></span>${active.id === selected.provider && model === (selected.model || active.defaultModel) ? icon('check', { size: 15 }) : ''}</button>`
+        ).join('') || '<div class="eve-model-empty">该供应商还没有模型建议，请使用高级配置。</div>'}</div>`;
+      };
+      const rect = el.modelChip.getBoundingClientRect();
+      popover.style.top = `${Math.min(window.innerHeight - 420, rect.bottom + 8)}px`;
+      popover.style.left = `${Math.max(12, Math.min(window.innerWidth - 460, rect.left))}px`;
+      const onClick = async (event) => {
+        const provider = event.target.closest('.eve-model-provider');
+        if (provider) { providerId = provider.dataset.provider; render(); return; }
+        const option = event.target.closest('.eve-model-option');
+        if (option) {
+          try {
+            if (await saveExecutionSelection({ ...(local.taskSelection || {}), provider: option.dataset.provider, model: option.dataset.model, permission_mode: root.querySelector('#chat-permission-mode')?.value || 'ask' })) dispose();
+          } catch (error) { toastError(errorMessage(error)); }
+        }
+      };
+      const onOutside = (event) => { if (!popover.contains(event.target) && event.target !== el.modelChip) dispose(); };
+      const onKey = (event) => { if (event.key === 'Escape') { event.preventDefault(); dispose(); el.modelChip.focus(); } };
+      const onResize = () => { const next = el.modelChip.getBoundingClientRect(); popover.style.left = `${Math.max(12, Math.min(window.innerWidth - 460, next.left))}px`; };
+      const dispose = () => { document.removeEventListener('pointerdown', onOutside, true); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); popover.remove(); if (local.modelPickerDispose === dispose) local.modelPickerDispose = null; };
+      local.modelPickerDispose = dispose;
+      search.addEventListener('input', render); popover.addEventListener('click', onClick); footer.querySelector('.eve-model-manage')?.addEventListener('click', () => { dispose(); navigate('settings'); });
+      document.addEventListener('pointerdown', onOutside, true); document.addEventListener('keydown', onKey); window.addEventListener('resize', onResize); render(); search.focus();
+    } catch (error) {
+      toastError(errorMessage(error));
+    }
   }
 
   function attachmentMedia(att, idx) {
@@ -2363,7 +2657,7 @@ export async function mount(root, ctx = {}) {
   permissionSelect?.addEventListener('change',async()=>{
     if(!local.activeId)return;
     const id=local.activeId;
-    try{const conv=await api.request(`/api/conversations/${encodeURIComponent(id)}/execution`,{method:'PATCH',body:{...local.taskSelection,permission_mode:permissionSelect.value}});if(local.activeId===id)local.taskSelection=conv.meta.execution;}catch(error){toastError(errorMessage(error));}
+    try{const conv=await api.request(`/api/conversations/${encodeURIComponent(id)}/execution`,{method:'PATCH',body:{...local.taskSelection,permission_mode:permissionSelect.value}});if(local.activeId===id)applyTaskSelection(conv);}catch(error){toastError(errorMessage(error));}
   });
   function applyTaskSelection(conv){
     local.taskSelection=conv?.meta?.execution||{};
@@ -2372,7 +2666,7 @@ export async function mount(root, ctx = {}) {
     root.querySelector('#chat-permission-mode').value=mode;
     renderModelChip();
   }
-  el.modelChip?.addEventListener('click',async()=>{
+  async function openTaskConfig(){
     try{
       const settings=await api.settings.get(),catalog=Object.values(settings.providers||{}).filter(p=>p.configured&&p.id!=='mock');
       const selected=local.taskSelection||{};
@@ -2384,7 +2678,35 @@ export async function mount(root, ctx = {}) {
       }}]});
       modal.body.querySelector('#task-permission').value=permissionSelect.value;
     }catch(error){toastError(errorMessage(error));}
+  }
+  el.modelChip?.addEventListener('click',()=>void openModelPicker());
+  el.modelChip?.addEventListener('contextmenu',event=>{event.preventDefault();void openTaskConfig();});
+  el.locatorButton?.addEventListener('click',()=>el.locator?.hidden?openLocator():closeLocator());
+  el.locatorInput?.addEventListener('input',()=>{local.locatorIndex=0;renderLocator(el.locatorInput.value);});
+  el.locatorInput?.addEventListener('keydown',event=>{
+    if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();moveLocator(event.key==='ArrowDown'?1:-1);return;}
+    if(event.key==='Enter'){event.preventDefault();const item=el.locatorResults?.querySelector('.chat-locator-item.is-active');if(item)jumpToMessage(item.dataset.messageIndex);return;}
+    if(event.key==='Escape'){event.preventDefault();closeLocator();el.input.focus();}
   });
+  el.locatorResults?.addEventListener('click',event=>{const item=event.target.closest('[data-message-index]');if(item)jumpToMessage(item.dataset.messageIndex);});
+  el.locator?.addEventListener('mousedown',event=>{if(event.target===el.locator)closeLocator();});
+  el.runPanelStop?.addEventListener('click',()=>void stopStreaming());
+  el.runPanelDetail?.addEventListener('click',()=>{
+    const runId=local.runState.runId||local.run?.runId;
+    if(runId)openRunDetail({runId,traceId:local.run?.traceId||''});
+  });
+  const locatorShortcut=event=>{
+    if((event.ctrlKey||event.metaKey)&&event.shiftKey&&event.key.toLowerCase()==='f'){
+      event.preventDefault();event.stopPropagation();
+      if(el.locator?.hidden)openLocator();else closeLocator();
+    }
+  };
+  root.addEventListener('keydown',locatorShortcut);
+  const locatorOutsidePointer=event=>{
+    if(!el.locator||el.locator.hidden)return;
+    if(!el.locator.contains(event.target))closeLocator();
+  };
+  document.addEventListener('pointerdown',locatorOutsidePointer,true);
   root.querySelector('#chat-workspace')?.addEventListener('click',async()=>{
     const value=await promptDialog({title:'选择工作目录 · 更换后开始新会话',placeholder:'输入本机文件夹的完整路径',value:getState().workspace?.local_path||getState().workspace?.root||'',confirmText:'使用此目录'});
     if(value===null||!value.trim())return;
@@ -2618,6 +2940,7 @@ export async function mount(root, ctx = {}) {
         local.run = null;
       }
       local.abort?.abort();
+      local.modelPickerDispose?.();
       offNewConversation();
       offPrefill();
       offLlmChanged();
@@ -2625,6 +2948,9 @@ export async function mount(root, ctx = {}) {
       offChatSelect();
       local.attachments.forEach(releasePreview);
       local.attachments = [];
+      if(local.runState.timer){clearInterval(local.runState.timer);local.runState.timer=0;}
+      root.removeEventListener('keydown',locatorShortcut);
+      document.removeEventListener('pointerdown',locatorOutsidePointer,true);
       setStatus('');
       root.innerHTML = '';
     },
@@ -2661,7 +2987,7 @@ function chatLayout() {
     '<header class="chat-header">' +
     `<button type="button" class="icon-btn chat-drawer-btn" id="chat-drawer-toggle" aria-label="显示会话列表">${icon('panelLeft', { size: 18 })}</button>` +
     '<div class="chat-heading">' +
-    '<div class="chat-title-row"><h1 class="chat-title" id="chat-title">新对话</h1><span class="chat-status" id="chat-status" hidden></span><button type="button" class="chat-model-chip" id="chat-model-chip" aria-label="选择任务模型" hidden></button></div>' +
+    '<div class="chat-title-row"><h1 class="chat-title" id="chat-title">新对话</h1><span class="chat-status" id="chat-status" hidden></span><button type="button" class="chat-model-chip" id="chat-model-chip" aria-label="切换此会话模型" hidden></button><button type="button" class="icon-btn chat-locator-btn" id="chat-locator-btn" aria-label="定位聊天消息" aria-expanded="false" title="定位消息（Ctrl/Cmd+Shift+F）">' + icon('search',{size:15}) + '</button></div>' +
     `<div class="chat-subtitle" id="chat-subtitle"></div>` +
     '</div>' +
     '<div class="chat-header-actions">' +
@@ -2670,6 +2996,7 @@ function chatLayout() {
     `<button type="button" class="btn btn-ghost btn-sm" id="resend-btn" title="重发上一条消息">${icon('refresh', { size: 15 })}<span>重发</span></button>` +
     '</div>' +
     '</header>' +
+    '<div class="chat-locator" id="chat-locator" hidden role="dialog" aria-label="定位聊天消息"><div class="chat-locator-panel"><div class="chat-locator-search">' + icon('search',{size:15}) + '<input id="chat-locator-input" type="search" autocomplete="off" placeholder="搜索或跳转到消息…" aria-label="搜索聊天消息" /><kbd>Esc</kbd></div><div class="chat-locator-results" id="chat-locator-results"></div><div class="chat-locator-foot"><span>↑ ↓ 选择</span><span>Enter 跳转</span><span>Ctrl/Cmd+Shift+F</span></div></div></div>' +
     '<div class="messages" id="messages" aria-live="polite"></div>' +
     `<button type="button" class="scroll-bottom" id="scroll-bottom" aria-label="回到最新">${icon('chevronDown', { size: 18 })}</button>` +
     '<div class="composer">' +
@@ -2677,8 +3004,9 @@ function chatLayout() {
     icon('image', { size: 22 }) +
     '<span>松开以添加图片 / 附件</span>' +
     '</div>' +
+    '<div class="chat-run-panel" id="chat-run-panel" hidden role="status"><span class="chat-run-indicator"></span><div class="chat-run-copy"><strong id="chat-run-phase">运行中</strong><span id="chat-run-tool">正在准备下一步</span></div><span class="chat-run-elapsed" id="chat-run-elapsed">0 秒</span><button type="button" class="btn btn-ghost btn-sm" id="chat-run-detail" title="查看运行详情">' + icon('history',{size:14}) + '<span>详情</span></button><button type="button" class="btn btn-ghost btn-sm" id="chat-run-stop" title="停止当前任务">' + icon('stop',{size:14}) + '<span>停止</span></button></div>' +
     '<div class="composer-box">' +
-    `<textarea id="chat-input" class="composer-input" rows="1" placeholder="向智能体描述你的分析任务…"></textarea>` +
+    `<textarea id="chat-input" class="composer-input" rows="1" placeholder="描述任务，或输入 @ 引用文件、/ 查看命令…"></textarea>` +
     '<div class="composer-bar">' +
     '<div class="composer-left">' +
     `<button type="button" class="icon-btn" id="attach-btn" title="添加图片或附件（也可粘贴 / 拖拽）">${icon('upload', { size: 17 })}</button>` +

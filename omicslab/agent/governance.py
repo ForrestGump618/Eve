@@ -5,7 +5,6 @@ import hashlib
 import json
 import posixpath
 import time
-from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -14,12 +13,8 @@ from .types import ToolResult
 
 @dataclass(frozen=True)
 class TurnPolicy:
-    steps: int = 24
-    tools: int = 48
     tokens: int = 120_000
     warning_ratio: float = .8
-    no_progress: int = 6
-    same_output: int = 3
     seconds: float = 900
 
 
@@ -61,22 +56,17 @@ class TurnGuard:
     steps: int = 0
     calls: int = 0
     tokens: int = 0
-    stalled: int = 0
     epoch: int = 0
     started: float = field(default_factory=time.monotonic)
-    seen: dict = field(default_factory=dict)
-    history: list = field(default_factory=list)
-    outputs: Counter = field(default_factory=Counter)
     attempted: list = field(default_factory=list)
     finalizing: bool = False
     final_reason: str = ""
-    inflight: set = field(default_factory=set)
     last_recovery: dict = field(default_factory=dict)
-    last_outputs: dict = field(default_factory=dict)
 
     def snapshot(self) -> dict:
         return {"steps": self.steps, "tool_calls": self.calls, "tokens": self.tokens,
-                "consecutive_no_progress": self.stalled, "degraded": self.degraded}
+                "elapsed_seconds": round(time.monotonic() - self.started, 3),
+                "degraded": self.degraded}
 
     @property
     def degraded(self) -> bool:
@@ -85,12 +75,8 @@ class TurnGuard:
     def pre_step(self) -> str | None:
         if time.monotonic() - self.started >= self.policy.seconds:
             return "turn_deadline"
-        if self.steps >= self.policy.steps:
-            return "step_budget"
         if self.tokens >= self.policy.tokens:
             return "token_budget"
-        if self.stalled >= self.policy.no_progress and not self.finalizing:
-            return "no_progress"
         self.steps += 1
         return None
 
@@ -118,7 +104,6 @@ class TurnGuard:
         return digest([self.epoch, stamps])
 
     def refuse(self, name: str, args: dict, code: str, previous: dict | None = None) -> ToolResult:
-        self.stalled += 1
         detail = {"code": code, "retryable": False, "executed": False,
                   "attempted_arguments": canonical(args), "counters": self.snapshot(),
                   "recovery": (previous or {}).get("recovery") or recovery(name, args)}
@@ -129,32 +114,17 @@ class TurnGuard:
                           data={"guard": detail}, error=code)
 
     def before(self, ctx, name: str, args: dict) -> tuple[ToolResult | None, tuple]:
-        self.calls += 1  # Includes rejected requests: varying invalid calls cannot escape limits.
+        self.calls += 1
         key = digest([name, canonical(args)])
         state = self.state(ctx, name, args)
         slot = (key, state)
         self.attempted.append({"name": name, "arguments": canonical(args)})
         self.attempted[:] = self.attempted[-64:]
-        if self.calls > self.policy.tools or self.finalizing:
-            self.final_reason = "tool_budget" if not self.final_reason else self.final_reason
-            return self.refuse(name, args, self.final_reason), slot
+        if self.finalizing:
+            return self.refuse(name, args, self.final_reason or "finalizing"), slot
         if self.tokens >= self.policy.tokens or time.monotonic() - self.started >= self.policy.seconds:
             self.final_reason = "token_budget" if self.tokens >= self.policy.tokens else "turn_deadline"
             return self.refuse(name, args, self.final_reason), slot
-        if self.stalled >= self.policy.no_progress:
-            return self.refuse(name, args, "no_progress"), slot
-        if slot in self.inflight:
-            return self.refuse(name, args, "duplicate_inflight_call"), slot
-        self.history.append(slot)
-        self.history[:] = self.history[-24:]
-        for width in range(2, 7):
-            if len(self.history) >= width * 2 and self.history[-width:] == self.history[-2*width:-width]:
-                return self.refuse(name, args, "tool_cycle", self.seen.get(slot)), slot
-        if slot in self.seen:
-            return self.refuse(name, args, "duplicate_tool_call", self.seen[slot]), slot
-        if any(tool == name and count >= self.policy.same_output for (tool, _), count in self.outputs.items()):
-            return self.refuse(name, args, "output_stagnation"), slot
-        self.inflight.add(slot)
         return None, slot
 
     def observe(self, ctx, name: str, args: dict, slot: tuple, result: ToolResult) -> None:
@@ -162,22 +132,13 @@ class TurnGuard:
         ignored = {"duration_ms", "ts", "timestamp", "execution_count", "tool_call_id"}
         data = {k: v for k, v in (result.data or {}).items() if k not in ignored}
         output = digest([result.ok, result.content, result.error, data])
-        repeated = self.last_outputs.get(name) == output
-        if not repeated:
-            for key in [key for key in self.outputs if key[0] == name]:
-                del self.outputs[key]
-        self.last_outputs[name] = output
-        self.outputs[(name, output)] += 1
-        self.stalled = self.stalled + 1 if repeated or not result.ok else 0
         info = {"fingerprint": digest([slot[0], output]), "recovery": recovery(name, args, result)}
         if not result.ok:
             self.last_recovery = info["recovery"]
             result.data["recovery"] = info["recovery"]
             result.content += "\n" + json.dumps({"recovery": info["recovery"], "attempted_arguments": canonical(args)}, ensure_ascii=False)
         # Only actual successful state-changing tools invalidate cached reads.
-        if result.ok and not repeated and name in {"write_file", "run_python_code", "run_shell", "submit_background_job", "export_notebook",
+        if result.ok and name in {"write_file", "run_python_code", "run_shell", "submit_background_job", "export_notebook",
                 "memory_create", "memory_edit", "ssh_exec", "ssh_upload", "ssh_download", "discovery_run",
                 "discovery_create_project", "discovery_record_analysis_result", "discovery_record_evidence"}:
             self.epoch += 1
-        self.seen[slot] = info
-        self.seen[(slot[0], self.state(ctx, name, args))] = info

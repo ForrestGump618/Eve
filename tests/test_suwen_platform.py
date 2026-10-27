@@ -17,6 +17,7 @@ from omicslab.agent.tools import build_registry,ToolContext
 from omicslab.agent.types import ToolResult
 from omicslab.agent.templates import load_agents
 from omicslab.agent.approvals import Approver
+from omicslab.server.routes import router as api_router
 from omicslab.server.routes_platform import router,sync_desktop_mcp
 from omicslab.server import files
 from omicslab.suwen.service import Platform
@@ -50,7 +51,9 @@ def p(tmp_path):
     settings=Settings(workspace=tmp_path/'workspace',home=tmp_path/'home');settings.ensure_dirs()
     workspaces=WorkspaceService(settings)
     state=SimpleNamespace(settings=settings,workspaces=workspaces,registry=build_registry(settings),agents=load_agents(settings),
-        loop=SimpleNamespace(),llm_info=lambda:{'provider':'mock','model':'mock-model','configured':True})
+        loop=SimpleNamespace(),llm_info=lambda:{'provider':'mock','model':'mock-model','configured':True},
+        vision_info=lambda:{'enabled':False,'configured':False,'model':'','base_url':'','has_key':False},
+        rebuild_approver=lambda:None)
     platform=Platform(state);state.platform=platform
     async def backend(scope):return FilesBackend(settings,platform.require_workspace(scope))
     platform.backend=backend
@@ -61,11 +64,24 @@ def p(tmp_path):
 @pytest.fixture
 def client_app(p):
     app=FastAPI();app.state.omicslab=p.state;app.include_router(router)
+    app.include_router(api_router)
     @app.exception_handler(ValueError)
     async def value_error(request:Request,exc):return JSONResponse({'error':str(exc)},status_code=400)
     @app.exception_handler(PermissionError)
     async def permission_error(request:Request,exc):return JSONResponse({'error':str(exc)},status_code=403)
     return app
+
+
+@pytest.mark.asyncio
+async def test_settings_keys_keep_multiple_provider_credentials(p,client_app):
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        first=await client.post('/api/settings/keys',json={'provider':'deepseek','model':'deepseek-chat','key':'deepseek-test-key','activate':False})
+        second=await client.post('/api/settings/keys',json={'provider':'openai','model':'gpt-4o-mini','key':'openai-test-key','activate':False})
+    assert first.status_code==200 and second.status_code==200
+    assert p.settings.auth()['DEEPSEEK_API_KEY']=='deepseek-test-key'
+    assert p.settings.auth()['OPENAI_API_KEY']=='openai-test-key'
+    assert second.json()['providers']['deepseek']['has_key'] is True
+    assert second.json()['providers']['openai']['has_key'] is True
 
 
 def test_migration_is_backed_up_and_repeatable(p):

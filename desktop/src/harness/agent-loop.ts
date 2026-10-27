@@ -11,7 +11,7 @@ export interface AgentTrace { type:string; at:number; traceId:string; turn?:numb
 export interface AgentResult { text:string; tokens:number; traceId:string; trace:AgentTrace[]; sources:Source[]; verification:{passed:boolean;citationUrls:string[];checks:string[]}; completion:'verified'|'partial' }
 export interface AgentOptions {
   model:ModelRuntime; registry:ToolRegistry; signal:AbortSignal; traceId:string;
-  messages:TurnMessage[]; prompt:string; maxTurns?:number; maxTools?:number;
+  messages:TurnMessage[]; prompt:string;
   contextWindow:number; maxOutput:number;
   onText:(text:string)=>void;
   onEvent:(event:AgentTrace)=>void;
@@ -70,7 +70,7 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
     const start=Number(args.startChar??0),end=Math.min(raw.length,start+16000);
     return {callId:String(args.callId),content:raw.slice(start,end),sha256:createHash('sha256').update(raw).digest('hex'),nextStartChar:end<raw.length?end:null};
   }});
-  let specs=o.registry.definitions();let tokens=0,toolCount=0,repair=0,requests=0,truncations=0,outputBudget=o.maxOutput;const repeats=new Map<string,number>();
+  let specs=o.registry.definitions();let tokens=0,toolCount=0,repair=0,requests=0,truncations=0,outputBudget=o.maxOutput;
   const intent=operationText(o.prompt);
   let requiresAction=/检索|搜索|实际读取|读取|读文件|已授权|实际执行|实际调用|MCP|Skill|技能|保存文件|写入文件|search|fetch|read.*file/i.test(intent);
   if(o.contextWindow<8192&&!requiresAction)specs=[]; // Small-context direct text turns need no tool catalog.
@@ -84,10 +84,12 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
   if(/安装[^。；\n，,]{0,40}?(?:\bskills?\b|技能)/i.test(intent))requiredTools.push('skill_install');
   if(/(?:调用|call)[^。；\n，,]{0,40}?MCP|MCP[^。；\n，,]{0,40}?(?:调用|call)/i.test(intent))requiredTools.push('mcp_call');
   emit('agent.started',{phase:'act',promptSha256:createHash('sha256').update(o.prompt).digest('hex')});
-  const turnLimit=o.maxTurns??16;
-  for(let turn=0;turn<turnLimit;turn++){
+  // A turn is bounded by the durable activity signal/timeout, the context
+  // budget, explicit cancellation, and checkpoints. ClawsGO's shipped daemon
+  // spawns one turn process and does not expose a verified fixed model/tool
+  // iteration threshold, so do not impose an unproven local counter here.
+  for(let turn=0;;turn++){
     o.signal.throwIfAborted();
-    if(turn===turnLimit-2)messages.push({role:'user',content:'当前任务仅剩两轮模型调用预算。优先完成必要的证据登记和最终回答，停止可选分析。若必要操作尚未完成，请明确说明阻塞或部分完成，不得虚报成功。'});
     const guidance=o.guidance?.take()??[];
     if(guidance.length){
       for(const item of guidance){
@@ -197,12 +199,10 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
     // Serial dispatch is the conservative concurrency=1 policy. No duplicate external
     // writes; workspace updates also require the hash returned by read_file.
     for(const call of reply.toolCalls){
-      o.signal.throwIfAborted();if(++toolCount>(o.maxTools??18))throw new ValidationError('Agent tool-call budget exhausted');
-      const key=call.name+':'+call.arguments,count=(repeats.get(key)??0)+1;repeats.set(key,count);
+      o.signal.throwIfAborted();toolCount++;
       const at=Date.now();emit('tool.started',{turn,name:call.name,callId:call.id,argumentsSha256:createHash('sha256').update(call.arguments).digest('hex')});
       let observation:Json;
       try{
-        if(count>2)throw new ValidationError('Repeated identical tool call blocked; change strategy');
         let args:Record<string,Json>;try{args=JSON.parse(call.arguments);}catch{throw new ValidationError('Tool arguments are not valid JSON');}
         const result=await o.registry.execute(call.name,args,o.signal);
         if(result===undefined||result===null||result===''||(typeof result==='object'&&!Object.keys(result).length))throw new Error('Tool returned empty output');
@@ -211,7 +211,7 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
         emit('tool.completed',{turn,name:call.name,callId:call.id,durationMs:Date.now()-at,resultSha256:createHash('sha256').update(JSON.stringify(result)).digest('hex')});
       }catch(error){
         o.signal.throwIfAborted();const detail=safeError(error);
-        observation={ok:false,error:{category:error instanceof ValidationError?'validation':'tool',message:detail,retryable:!(error instanceof ValidationError)&&count<2}};
+        observation={ok:false,error:{category:error instanceof ValidationError?'validation':'tool',message:detail,retryable:!(error instanceof ValidationError)}};
         await o.persistTool(call,observation);emit('tool.failed',{turn,name:call.name,callId:call.id,durationMs:Date.now()-at,error:detail,category:error instanceof ValidationError?'validation':'tool'});
       }
       let content=JSON.stringify(observation);
@@ -222,5 +222,4 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
     await o.checkpoint?.(messages,[...sources.values()]);
     emit('agent.observed',{turn,toolCount,sourceCount:sources.size});
   }
-  throw new ValidationError('Agent turn budget exhausted without a verified final answer');
 }

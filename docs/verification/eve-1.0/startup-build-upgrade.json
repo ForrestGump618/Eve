@@ -1,0 +1,61 @@
+{
+  "kind": "real same-version detached runtime upgrade and formal product UI; no model requests",
+  "checks": [
+    {
+      "name": "old-daemon-outlives-window",
+      "ok": true
+    },
+    {
+      "name": "same-version-old-runtime-replaced",
+      "ok": true
+    },
+    {
+      "name": "current-build-and-code-root-match",
+      "ok": true
+    },
+    {
+      "name": "upgrade-preserves-user-data",
+      "ok": true
+    },
+    {
+      "name": "upgrade-preserves-paused-task-without-replaying-it",
+      "ok": true
+    },
+    {
+      "name": "diagnostic-bootstrap-has-no-visible-window",
+      "ok": true
+    },
+    {
+      "name": "matching-build-reuses-runtime",
+      "ok": true
+    },
+    {
+      "name": "rejected-historical-dependencies-do-not-override-runtime-selection",
+      "ok": true
+    },
+    {
+      "name": "only-one-formal-window-no-legacy-console",
+      "ok": true
+    },
+    {
+      "name": "formal-workbench-is-light",
+      "ok": true
+    },
+    {
+      "name": "no-renderer-errors",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "previous": {
+    "pid": 40740,
+    "version": "1.0.0",
+    "buildId": "0ede9adeda5b466010c7222e1c4c69f7f72c4e94a2f51ba2f0d222b96a085700"
+  },
+  "current": {
+    "pid": 54508,
+    "version": "1.0.0",
+    "buildId": "881aecce1a5edbde2a7f557e9d9d351b1ff974a4586627d5b17172330c290d3e",
+    "runtimeRoot": "<current desktop>/dist"
+  }
+}

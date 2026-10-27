@@ -328,7 +328,7 @@
   "product-ui-controlled.json": {
     "kind": "controlled model protocol fixture + real files and Python worker; not real-model acceptance",
     "packaged": false,
-    "at": "2026-10-27T03:10:41.949Z",
+    "at": "2026-10-27T12:34:53.010Z",
     "error": null,
     "checks": [
       {
@@ -345,6 +345,10 @@
       },
       {
         "name": "permission-selector-matches-toolbar",
+        "ok": true
+      },
+      {
+        "name": "composer-has-no-native-focus-outline",
         "ok": true
       },
       {
@@ -415,8 +419,8 @@
         "name": "composer-position-stable",
         "ok": true,
         "detail": {
-          "before": 876,
-          "after": 876
+          "before": 649,
+          "after": 649
         }
       },
       {
@@ -456,6 +460,10 @@
       },
       {
         "name": "formal-ui-mcp-is-callable-by-unified-agent",
+        "ok": true
+      },
+      {
+        "name": "sidebar-toggle-is-visible",
         "ok": true
       },
       {
@@ -628,8 +636,8 @@
       }
     ],
     "errors": [],
-    "passed": 70,
-    "total": 70
+    "passed": 72,
+    "total": 72
   },
   "product-ui-live-ssh-packaged.json": {
     "kind": "real model + real files and worker",

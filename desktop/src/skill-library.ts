@@ -19,6 +19,15 @@ const expand:Record<string,string> = {
   '绘图':'plot visualization figure', '技能':'skill', '实验':'experiment', '基线':'baseline',
   '分析':'analysis', '假设':'hypothesis idea', '写作':'writing paper', '临床':'clinical medical',
   '药物':'drug discovery', '分子':'molecular', '审核':'review', '调试':'debugging',
+  '文档':'document pdf parsing', '解析':'parsing extract', '转换':'convert conversion',
+  '表格':'table spreadsheet', '扫描':'ocr scanned', '识别':'ocr recognition',
+};
+/** Product-level synonyms steer the shared library without requiring a
+ * second semantic index. These are ranked as exact capability intents. */
+const preferredByName:Record<string,string[]> = {
+  pdf:['mineru','liteparse','markitdown'],
+  ocr:['mineru','liteparse'],
+  document:['mineru','liteparse','markitdown'],
 };
 function tokens(text:string):string[] {
   const translated=Object.entries(expand).filter(([key])=>text.includes(key)).map(([,value])=>value).join(' ');
@@ -30,6 +39,7 @@ export class SkillLibrary {
   readonly skills:ReadonlyArray<LibrarySkill>;
   private readonly byId:Map<string,LibrarySkill>;
   private readonly postings=new Map<string,Set<string>>();
+  private readonly sortedTerms:string[];
   private readonly cache=new Map<string,string>();
   private cachedBytes=0;
   private readonly index:LibraryIndex;
@@ -44,6 +54,7 @@ export class SkillLibrary {
       if(!this.postings.has(word))this.postings.set(word,new Set());
       this.postings.get(word)!.add(skill.id);
     }
+    this.sortedTerms=[...this.postings.keys()].sort();
   }
   has(id:string):boolean{return this.byId.has(id);}
   get(id:string):LibrarySkill {
@@ -52,17 +63,53 @@ export class SkillLibrary {
     return skill;
   }
   search(query:string,limit=8):Array<{id:string;score:number}> {
-    const words=tokens(query),scores=new Map<string,number>();
+    const words=tokens(query),scores=new Map<string,number>(),nameHits=new Set<string>();
+    const normalized=query.trim().toLowerCase();
+    // Prefer skills whose canonical name is directly relevant to the query.
+    // A large scientific library can otherwise fill the first page with
+    // generic PDF mentions before the specifically requested tool.
+    for(const skill of this.skills){
+      const name=skill.name.toLowerCase();
+      if(name===normalized||name.startsWith(normalized)){
+        nameHits.add(skill.id);
+        scores.set(skill.id,Math.max(scores.get(skill.id)??0,0.5));
+      }
+    }
+    for(const preferred of preferredByName[normalized]??[]){
+      for(const skill of this.skills){
+        if(skill.name.toLowerCase()!==preferred)continue;
+        nameHits.add(skill.id);
+        scores.set(skill.id,Math.max(scores.get(skill.id)??0,3));
+      }
+    }
     for(const word of words){
-      for(const id of this.postings.get(word)??[])scores.set(id,(scores.get(id)??0)+1);
-      // Small vocabulary prefix scan handles morphological queries without
-      // scanning instruction bodies or touching the filesystem.
-      if(word.length>=4)for(const [term,ids] of this.postings){
-        if(term!==word&&term.startsWith(word))for(const id of ids)scores.set(id,(scores.get(id)??0)+0.25);
+      for(const id of this.postings.get(word)??[]){
+        scores.set(id,(scores.get(id)??0)+1);
+        const name=this.get(id).name.toLowerCase();
+        if(name===normalized||name.startsWith(normalized))nameHits.add(id);
+      }
+      // Morphological matching uses a sorted vocabulary and binary search, so
+      // discovery remains bounded as the shared library grows.
+      if(word.length>=4){
+        let low=0,high=this.sortedTerms.length;
+        while(low<high){
+          const middle=(low+high)>>>1;
+          if(this.sortedTerms[middle]!<word)low=middle+1;else high=middle;
+        }
+        for(let index=low;index<this.sortedTerms.length;index++){
+          const term=this.sortedTerms[index]!;
+          if(!term.startsWith(word))break;
+          if(term===word)continue;
+          for(const id of this.postings.get(term)??[]){
+            scores.set(id,(scores.get(id)??0)+0.25);
+            const name=this.get(id).name.toLowerCase();
+            if(name===normalized||name.startsWith(normalized))nameHits.add(id);
+          }
+        }
       }
     }
     return [...scores].map(([id,score])=>({id,score:score+(this.get(id).name.toLowerCase()===query.toLowerCase()?20:0)}))
-      .sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,limit);
+      .sort((a,b)=>(Number(nameHits.has(b.id))-Number(nameHits.has(a.id)))||b.score-a.score||a.id.localeCompare(b.id)).slice(0,limit);
   }
   read(id:string,path:string):string {
     const files=this.get(id).files;

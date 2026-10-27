@@ -76,7 +76,6 @@ export async function mount(root, ctx = {}) {
     conn: root.querySelector('#wb-conn'),
     probeBtn: root.querySelector('#wb-probe'),
     newWsBtn: root.querySelector('#wb-new-ws'),
-    oldChatBtn: root.querySelector('#wb-old-chat'),
     center: root.querySelector('#wb-center'),
     convs: root.querySelector('#wb-convs'),
     newConvBtn: root.querySelector('#wb-new-conv'),
@@ -978,7 +977,6 @@ export async function mount(root, ctx = {}) {
   el.wsBtn.addEventListener('click', () => openWorkspaceSwitcher());
   el.probeBtn.addEventListener('click', () => void probeWorkspace());
   el.newWsBtn.addEventListener('click', () => openNewWorkspaceModal());
-  el.oldChatBtn.addEventListener('click', () => navigate('chat'));
   el.newConvBtn.addEventListener('click', () => {
     emit('chat:new-conversation');
     setTimeout(() => void loadConversations({ silent: true }), 800);
@@ -1177,7 +1175,6 @@ function layout() {
     '<button type="button" class="btn btn-ghost btn-sm" id="wb-layout">布局</button>' +
     `<button type="button" class="btn btn-ghost btn-sm" id="wb-probe">${icon('refresh', { size: 14 })}<span>刷新状态</span></button>` +
     `<button type="button" class="btn btn-ghost btn-sm" id="wb-new-ws">${icon('folderPlus', { size: 14 })}<span>新建工作区</span></button>` +
-    `<button type="button" class="btn btn-ghost btn-sm" id="wb-old-chat" title="聊天已集成在工作台">${icon('chat', { size: 14 })}<span>工作台对话</span></button>` +
     '</div>' +
     '</div>' +
     '<div class="wb-main">' +

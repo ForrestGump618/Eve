@@ -2,7 +2,7 @@
   "kind": "real Electron window lifecycle, no model requests",
   "packaged": false,
   "phase": "fixed",
-  "at": "2026-10-26T02:26:50.739Z",
+  "at": "2026-10-27T12:35:38.239Z",
   "results": [
     {
       "scenario": "owner-first",

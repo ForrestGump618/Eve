@@ -11,6 +11,13 @@ The research workflow adapts the stage/evidence mechanisms of ResearAI/DeepScien
 (b36624417f0c6b8238ec02db37b94d6db2faa5b0, Apache-2.0) to Eve's existing RunService.
 There is no second DeepScientist runner. No ClawsGO binaries or assets are shipped.
 
+The bundled MinerU skill is sourced from opendatalab/MinerU
+(b7f3dd0c5f6e6d66a298239ffd02b328b873918e). MinerU is licensed under
+Apache-2.0 with additional terms; the complete upstream license is retained
+inside the skill library as EVE-UPSTREAM-LICENSE.txt. Eve identifies MinerU in
+this notice and in the skill's source metadata wherever the skill is made
+available through an online service.
+
 Electron includes Chromium/Node.js with their separate third-party notices.
 Resolved Node runtime license texts are under third-party-licenses/.
 Python itself and its dependencies are not bundled; the managed dependency setup

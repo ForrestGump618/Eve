@@ -23,7 +23,7 @@ if(fixture){
 const profile=args.find(x=>x.startsWith('--profile='))?.slice(10)??mkdtempSync(join(tmpdir(),'suwen-formal-ui-'));
 const env={...process.env,SUWEN_TEST_HOME:profile};delete env.ELECTRON_RUN_AS_NODE;
 const packaged=args.includes('--packaged');
-const executablePath=packaged?join(root,'release/win-unpacked/SuWen.exe'):join(root,'node_modules/electron/dist/electron.exe');
+const executablePath=packaged?join(root,'release/win-unpacked/Eve.exe'):join(root,'node_modules/electron/dist/electron.exe');
 const launchArgs=packaged?[]:[root];
 const out=resolve(root,args.find(x=>x.startsWith('--output-dir='))?.slice(13)??'../docs/verification/harness-20261025');mkdirSync(out,{recursive:true});
 const report={kind:fixture?'controlled local model protocol fixture, REAL public PubMed tool, default product launch; NOT real-model acceptance':'real external model and public network; default product launch',checks:[],errors:[],screenshots:[]};
@@ -33,7 +33,7 @@ try{
   // Bootstrap only the encrypted credential configuration in this throwaway profile.
   if(fixture||!existsSync(join(profile,'runtime/model-config.enc'))){
   console.log('Preparing isolated encrypted model config');
-  app=await _electron.launch({executablePath,args:[...launchArgs,'--native'],env,timeout:60000});let shell=await app.firstWindow();
+  app=await _electron.launch({executablePath,args:[...launchArgs,'--native','--background'],env,timeout:60000});let shell=await app.firstWindow();
   await shell.waitForFunction(()=>window.suwen&&document.getElementById('health'));
   await shell.evaluate(async config=>{await window.suwen.call('configure',config);},{provider:'openai',baseUrl,apiKey,model:'deepseek-v4.1-flash-economy',contextWindow:65536,maxOutput:2048});
   await Promise.race([app.close(),new Promise(r=>setTimeout(r,5000))]);app=null;
@@ -43,28 +43,38 @@ try{
   app=await _electron.launch({executablePath,args:launchArgs,env,timeout:60000});
   let page;
   for(let i=0;i<180;i++){page=app.windows().find(p=>/^http:\/\/127\.0\.0\.1:/.test(p.url()));if(page)break;await new Promise(r=>setTimeout(r,500));}
-  if(!page){report.startupDiagnostics=await Promise.all(app.windows().map(async window=>({url:window.url(),error:await window.locator('#error').textContent().catch(()=>null)})));throw new Error('Default launch did not open the research workspace');}
+  if(!page){report.startupDiagnostics=await Promise.all(app.windows().map(async window=>({url:window.url().startsWith('data:')?'data:startup':window.url(),error:await window.locator('#startup-status').textContent({timeout:2000}).catch(()=>null)})));throw new Error('Default launch did not open the research workspace');}
   await page.waitForLoadState('domcontentloaded');page.on('pageerror',e=>report.errors.push(e.message));
-  await page.waitForSelector('[data-route="chat"]',{timeout:30000});
+  await page.waitForSelector('.view-root > .route-mount > .workbench-page',{timeout:30000});
   const onboarding=page.getByRole('button',{name:'先看看',exact:true});
   try{await onboarding.waitFor({state:'visible',timeout:8000});await onboarding.click();}catch{}
   check('default-launch-opens-formal-workspace',true);
   const visible=await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().filter(w=>w.isVisible()).map(w=>({title:w.getTitle(),url:w.webContents.getURL()})));
   check('single-visible-product-window',visible.length===1,JSON.stringify(visible));
-  await page.locator('[data-route="chat"]').first().click();
-  // The home workbench itself embeds a chat view. Wait for the top-level route,
-  // otherwise a locator can measure that outgoing embedded composer mid-navigation.
-  await page.waitForSelector('.view-root > .route-mount > .chat-view[data-ready="true"] #chat-input');
+  // The workbench is the formal home page and embeds the shared chat controller.
+  // Do not navigate to the retired standalone chat route.
+  await page.waitForSelector('.workbench-page .chat-view #chat-input',{timeout:30000});
   const before=await page.locator('.composer').boundingBox();
   await page.fill('#chat-input','实际检索 PubMed PMID 16904174，给出标题、年份、PMID 与来源链接，不超过150字。');await page.click('#send-btn');
-  await page.waitForFunction(()=>document.getElementById('messages')?.textContent?.includes('16904174')&&document.getElementById('send-btn')?.disabled===false,null,{timeout:180000});
-  const text=await page.locator('#messages').innerText();
   connection=JSON.parse(readFileSync(join(profile,'runtime/connection.json'),'utf8'));
-  const snap=await rpc(connection,'snapshot');const task=snap.tasks.find(t=>t.steps.some(s=>s.input?.prompt?.includes('16904174')));
+  let task=null;
+  for(let i=0;i<360;i++){
+    const snap=await rpc(connection,'snapshot');
+    task=snap.tasks.find(t=>t.steps.some(s=>s.input?.prompt?.includes('16904174')));
+    if(task&&['completed','failed','cancelled','interrupted'].includes(task.status))break;
+    await new Promise(r=>setTimeout(r,500));
+  }
+  if(!task)throw new Error('The formal chat did not create a harness task');
+  if(task.status!=='completed')throw new Error(`Harness task ended as ${task.status}: ${JSON.stringify(task.steps.map(s=>s.error).filter(Boolean)).slice(0,1200)}`);
+  await page.waitForFunction(()=>document.getElementById('send-btn')?.disabled===false&&document.querySelectorAll('.tool-card.is-running').length===0,null,{timeout:30000});
+  await page.waitForFunction(()=>{
+    const assistant=[...document.querySelectorAll('#messages .msg.msg-assistant')].at(-1);
+    return Boolean(assistant&&assistant.textContent.includes('16904174')&&!assistant.textContent.includes('正在执行'));
+  },null,{timeout:30000});
+  const text=await page.locator('#messages').innerText();
   check('formal-chat-uses-unified-harness',Boolean(task?.steps?.[0]?.output?.traceId),task?.status);
   check('formal-chat-executes-real-pubmed',task?.events?.some(e=>e.type==='tool.completed'&&e.data.name==='database_search'));
   check('formal-chat-verified-answer',task?.status==='completed'&&task.steps[0].output.verification.passed&&text.includes('16904174'));
-  await page.waitForFunction(()=>document.querySelectorAll('.tool-card.is-running').length===0,null,{timeout:10000}).catch(()=>{});
   check('tool-card-settled',await page.locator('.tool-card.is-ok').count()>=1&&await page.locator('.tool-card.is-running').count()===0);
   const after=await page.locator('.composer').boundingBox();check('formal-composer-stable',Math.abs(before.y-after.y)<=2,JSON.stringify({beforeY:before.y,afterY:after.y}));
   const screenshot=join(out,fixture?'formal-workspace-controlled.png':'formal-workspace-live.png');await page.screenshot({path:screenshot,fullPage:false});report.screenshots.push(screenshot);

@@ -1,14 +1,19 @@
 {
   "typescript": {
-    "total": 266,
-    "passed": 265,
+    "total": 275,
+    "passed": 274,
     "skipped": 1,
     "failed": 0,
-    "skipReason": "Windows symlink creation privilege unavailable"
+    "skipReason": "Windows symlink privilege unavailable",
+    "command": "npm test",
+    "log": "eve-tests-current.log (local)"
   },
   "python": {
-    "passed": 582,
-    "failed": 0
+    "passed": 584,
+    "failed": 0,
+    "warnings": 1,
+    "command": "python -m pytest -q",
+    "evidence": "terminal result 2026-10-27, 71.17 seconds"
   },
   "typecheck": "passed",
   "rpcLivePublicDatabases": {
@@ -24,5 +29,6 @@
     "Local protocol fixtures are not real external MCP services.",
     "Citation verification checks URL provenance, not semantic entailment.",
     "Research demonstration uses synthetic data, not a scientific discovery."
-  ]
+  ],
+  "verifiedAt": "2026-10-27"
 }

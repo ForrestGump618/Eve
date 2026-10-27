@@ -84,3 +84,24 @@ test('large resource directories paginate without decoding script bodies',t=>{
  assert.equal(first.resources.length,40);assert.equal(second.resources.length,40);assert.equal(third.resources.length,13);
  assert.equal(third.nextResourceOffset,null);assert.equal(registry.libraryStats()?.physicalReads,0);
 });
+test('skill discovery uses exact prefixes, exposes MinerU, and invalidates list caches',async t=>{
+ const root=mkdtempSync(join(tmpdir(),'eve-cache-'));t.after(()=>rmSync(root,{recursive:true,force:true}));
+ const store=new Store(':memory:');t.after(()=>store.close());
+ const registry=new SkillRegistry({store,home:root});registry.mountLibrary(resolve('skill-library'));
+ assert.equal((registry.search('pdf') as any[]).some(skill=>skill.name==='mineru'),true);
+ assert.equal((registry.search('ocr') as any[]).some(skill=>skill.name==='mineru'),true);
+ const mineru=registry.list().find(skill=>skill.name==='mineru');
+ assert.ok(mineru);
+ assert.equal(mineru.license,'Apache-2.0');
+ assert.match(mineru.source,/opendatalab\/MinerU\/tree\/b7f3dd0c5f6e6d66a298239ffd02b328b873918e/);
+ const instructions=registry.readResource(mineru.id,'SKILL.md') as any;
+ assert.match(instructions.content,/#|MinerU/i);
+ const license=registry.readResource(mineru.id,'EVE-UPSTREAM-LICENSE.txt') as any;
+ assert.match(license.content,/Apache License/i);
+ await registry.enable(mineru.id,false);
+ assert.equal(registry.get(mineru.id).enabled,false);
+ assert.equal((registry.search('mineru') as any[]).some(skill=>skill.id===mineru.id),false);
+ await registry.enable(mineru.id,true);
+ assert.equal(registry.get(mineru.id).enabled,true);
+ assert.equal((registry.search('mineru') as any[]).some(skill=>skill.id===mineru.id),true);
+});

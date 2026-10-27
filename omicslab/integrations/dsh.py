@@ -436,7 +436,6 @@ class DshBridge:
             "model": getattr(settings, "model", ""),
             "api_base": getattr(settings, "api_base", ""),
             "approval_policy": getattr(settings, "approval_policy", ""),
-            "max_iterations": getattr(settings, "max_iterations", 0),
             "language": getattr(settings, "language", ""),
             "default_agent": getattr(settings, "default_agent", ""),
             "workspace": str(getattr(settings, "workspace", "")),

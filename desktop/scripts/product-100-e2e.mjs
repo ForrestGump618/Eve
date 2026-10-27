@@ -91,7 +91,7 @@ try{
  const packagedDir=packaged?(packagedDirArg?resolve(root,packagedDirArg):join(root,'release/product-100')):null;
  const executablePath=packaged?join(packagedDir,'Eve.exe'):join(root,'node_modules/electron/dist/electron.exe');
  const args=packaged?[]:[root];
- app=await _electron.launch({executablePath,args:[...args,'--native'],env});let shell=await app.firstWindow();await shell.waitForFunction(()=>window.suwen&&document.getElementById('health'));
+ app=await _electron.launch({executablePath,args:[...args,'--native','--background'],env});let shell=await app.firstWindow();await shell.waitForFunction(()=>window.suwen&&document.getElementById('health'));
  await shell.evaluate(async config=>window.suwen.call('configure',config),{provider:'openai',baseUrl,apiKey,model:'deepseek-v4.1-flash-economy',contextWindow:65536,maxOutput:8192});await Promise.race([app.close(),new Promise(r=>setTimeout(r,5000))]);app=null;
  app=await _electron.launch({executablePath,args,env});
  let page;for(let i=0;i<180;i++){page=app.windows().find(p=>p.url().startsWith('http://127.0.0.1:'));if(page)break;await new Promise(r=>setTimeout(r,500));}if(!page)throw Error('Formal window unavailable');
@@ -106,7 +106,9 @@ try{
  check('formal-startup-has-only-one-window',await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().length===1));
  check('permission-selector-matches-toolbar',await page.locator('#chat-permission-mode').evaluate(x=>getComputedStyle(x).appearance==='none'&&!!x.closest('.permission-control')));
  await page.screenshot({path:join(out,'workbench-default-light.png')});
- await page.getByRole('link',{name:'聊天',exact:true}).click();await page.waitForSelector('.view-root > .route-mount > .chat-view[data-ready="true"] #chat-input');
+ await page.waitForSelector('.workbench-page.unified-workspace .chat-view[data-ready="true"] #chat-input');
+ await page.locator('#chat-input').focus();
+ check('composer-has-no-native-focus-outline',await page.locator('#chat-input').evaluate(x=>getComputedStyle(x).outlineStyle==='none'&&getComputedStyle(x).boxShadow==='none'));
  await page.click('#chat-workspace');await page.getByPlaceholder('输入本机文件夹的完整路径').fill(workspace);await page.getByRole('button',{name:'使用此目录',exact:true}).click();
  await page.waitForFunction(()=>document.querySelector('#chat-workspace span')?.textContent==='test-workspace');check('workspace-picker-selects-real-directory',true);
  await page.selectOption('#chat-permission-mode','full');
@@ -169,8 +171,8 @@ try{
   await page.waitForFunction(()=>[...document.querySelectorAll('.sw-card')].some(x=>x.textContent?.includes('UI installed MCP')&&x.textContent?.includes('e2e_ping')),null,{timeout:30000});
   const installedMcp=await page.evaluate(()=>fetch('/api/platform/registry/mcp').then(r=>r.json()).then(x=>x.items.find(s=>s.name==='UI installed MCP')));
   check('formal-ui-installs-and-discovers-mcp-tool',installedMcp?.enabled===true&&installedMcp?.status?.tools?.some(x=>x.name==='e2e_ping'));
-  await page.evaluate(()=>{location.hash='#/chat';});
-  await page.waitForSelector('.view-root > .route-mount > .chat-view[data-ready="true"] #chat-input');
+  await page.evaluate(()=>{location.hash='#/workbench';});
+  await page.waitForSelector('.workbench-page.unified-workspace .chat-view[data-ready="true"] #chat-input');
   const originalConversation=await page.locator('.conv-item.is-active').getAttribute('data-id');
   await page.click('#new-conv');await page.selectOption('#chat-permission-mode','full');
   await page.fill('#chat-input','调用 MCP 服务 UI installed MCP 的 e2e_ping，参数 message=UI_MCP_OK。UI_MCP_CASE，必须实际调用并报告返回结果，末尾写 UI_MCP_OK。');await page.click('#send-btn');
@@ -182,8 +184,9 @@ try{
   if(originalConversation)await page.locator(`.conv-item[data-id="${originalConversation}"] .conv-title`).click();
   await page.waitForFunction(()=>document.querySelector('#messages')?.textContent?.includes('RESULT_OK'),null,{timeout:30000});
  }
+ check('sidebar-toggle-is-visible',await page.locator('#chat-drawer-toggle').isVisible());
  await page.click('#chat-drawer-toggle');check('sidebar-collapses',await page.locator('.chat-view.sidebar-collapsed').count()===1);await page.click('#chat-drawer-toggle');
- await page.reload();await page.waitForSelector('.view-root > .route-mount > .chat-view[data-ready="true"] #chat-input');await page.waitForFunction(()=>document.querySelector('#messages')?.textContent?.includes('RESULT_OK'),null,{timeout:30000});
+ await page.reload();await page.waitForSelector('.workbench-page.unified-workspace .chat-view[data-ready="true"] #chat-input');await page.waitForFunction(()=>document.querySelector('#messages')?.textContent?.includes('RESULT_OK'),null,{timeout:30000});
  check('tool-history-survives-reload',await page.locator('.tool-run').count()===1&&await page.locator('.tool-card.is-running').count()===0&&await page.locator('.tool-card').count()===names.length);
  check('permission-selection-survives-reload',await page.locator('#chat-permission-mode').inputValue()==='full');
  check('workspace-selection-survives-reload',await page.locator('#chat-workspace span').textContent()==='test-workspace');
@@ -290,7 +293,7 @@ try{
   const second=join(profile,'parallel-workspace');mkdirSync(second);
   const added=await page.evaluate(path=>fetch('/api/workspaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Parallel B',local_path:path})}).then(r=>r.json()),second);
   const originalWorkspace=await page.locator('#project-workspace').inputValue();
-  const selectTaskModel=async(model,mode)=>{await page.getByRole('button',{name:'选择任务模型',exact:true}).click();await page.selectOption('#task-provider','custom_openai');await page.fill('#task-model',model);await page.selectOption('#task-permission',mode);await page.getByRole('button',{name:'保存任务配置',exact:true}).click();await page.locator('.task-selection-form').waitFor({state:'detached'});};
+  const selectTaskModel=async(model,mode)=>{await page.locator('#chat-model-chip').click({button:'right'});await page.selectOption('#task-provider','custom_openai');await page.fill('#task-model',model);await page.selectOption('#task-permission',mode);await page.getByRole('button',{name:'保存任务配置',exact:true}).click();await page.locator('.task-selection-form').waitFor({state:'detached'});};
   await page.click('#new-conv');await selectTaskModel('acceptance-model-A','full');await page.fill('#chat-input','执行两个写入步骤 MULTI_CASE_A');await page.click('#send-btn');
   for(let i=0;i<100&&!existsSync(join(workspace,'multi-before.txt'));i++)await new Promise(r=>setTimeout(r,50));
   const a=(await rpc(connection,'snapshot')).tasks.find(t=>t.name.includes('MULTI_CASE_A'));

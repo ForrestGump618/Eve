@@ -413,7 +413,7 @@ curl -s http://127.0.0.1:5077/api/runs/run_7ac1d2e3f401/children
 
 curl -s http://127.0.0.1:5077/api/agent-tasks/task_9b8c7d6e5f4a
 # {"task_id":"...","parent_run_id":"run_...","run_id":"run_...","profile":"data-critic",
-#  "status":"succeeded","goal":"...","budget":{"max_iterations":6,...},"result":{...},"position":0,...}
+#  "status":"succeeded","goal":"...","budget":{"timeout_s":900,"max_tokens":120000},"result":{...},"position":0,...}
 
 curl -s http://127.0.0.1:5077/api/agent-tasks/task_9b8c7d6e5f4a/runs
 # {"task":{...},"runs":[{...}]}
@@ -469,7 +469,7 @@ SSE 断线本身**不会**取消运行；重连用 `GET /api/runs/{run_id}/strea
 | `stream_end` | `run_id`, `status` | 运行已结束且事件发完，可关闭连接 |
 | `error` | `message`, `detail`, `retryable`, `code` | 错误；`retryable=true` 表示可重试 |
 | `discovery` | `kind`, `project_id`, … | 仅发现项目运行流（`/api/discovery/projects/{id}/run`）使用；`kind` 见 [§12](#12-rsi-科研发现discovery) |
-| `done` | `conversation_id`, `session_id`, `run_id`, `finish_reason`, `status`, `message_id` | 回合结束（`stop` / `cancelled` / `error` / `max_iterations` / `approvals`） |
+| `done` | `conversation_id`, `session_id`, `run_id`, `finish_reason`, `status`, `message_id`, `stop_reason` | 回合结束（`stop` / `cancelled` / `error` / `approvals`）；资源停止由 `stop_reason.code` 表示 |
 
 ### 3.2 完整示例
 
@@ -942,7 +942,6 @@ curl -s http://127.0.0.1:5077/api/settings
     "api_base": "",
     "temperature": 0.0,
     "max_tokens": 0,
-    "max_iterations": 24,
     "request_timeout_s": 180,
     "kernel_python": "",
     "kernel_timeout_s": 180,
@@ -1042,7 +1041,7 @@ curl -s -X PUT http://127.0.0.1:5077/api/settings \
   -d '{"patch": {"provider": "qwen", "model": "qwen-plus", "approval_policy": "ask"}}'
 ```
 
-返回结构同 `GET /api/settings`。也可以省略 `patch` 直接发扁平对象。允许的 key：`provider`、`model`、`api_base`、`temperature`、`max_tokens`、`max_iterations`、`request_timeout_s`、`vision_model`、`vision_base_url`、`vision_enabled`、`kernel_python`、`kernel_timeout_s`、`shell_timeout_s`、`approval_policy`、`allow_shell`、`allow_file_write`、`sandbox_root_only`、`max_child_tasks`、`max_child_depth`、`max_workspace_scopes`、`max_parallel_runs`、`default_agent`、`language`、`host`、`port`、`workspace`、`ui`（`ui` 为浅合并）。未知 key 被忽略。
+返回结构同 `GET /api/settings`。也可以省略 `patch` 直接发扁平对象。允许的 key：`provider`、`model`、`api_base`、`temperature`、`max_tokens`、`request_timeout_s`、`vision_model`、`vision_base_url`、`vision_enabled`、`kernel_python`、`kernel_timeout_s`、`shell_timeout_s`、`approval_policy`、`allow_shell`、`allow_file_write`、`sandbox_root_only`、`max_child_tasks`、`max_child_depth`、`max_workspace_scopes`、`max_parallel_runs`、`default_agent`、`language`、`host`、`port`、`workspace`、`ui`（`ui` 为浅合并）。未知 key 被忽略。旧设置文件中的 `max_iterations` 只用于兼容读取，不出现在 API 响应中，也不能通过更新接口设置；统一回合没有固定模型/工具迭代次数上限。
 
 其中四个并发/预算字段也提供了更贴近运行时的入口 `GET/PUT /api/runtime/config`（见 §16.6）：
 
@@ -1689,7 +1688,7 @@ curl -s http://127.0.0.1:5077/api/ssh/diagnostics
 | 字段 | 说明 |
 |---|---|
 | `status` | `queued`/`preparing`/`running`/`waiting_approval`/`stopping`/`succeeded`/`failed`/`cancelled`/`interrupted`/`unknown` |
-| `finish_reason` | 结束后为 `stop`/`max_iterations`/`cancelled`/`error`/`approvals`（等待审批超时等） |
+| `finish_reason` | 结束后为 `stop`/`cancelled`/`error`/`approvals`（等待审批超时等）；资源或传输停止见 `stop_reason.code` |
 | `error` | 失败时为 `{"message","code"}`，`code` 见 §16.4 |
 | `result_text` | 助手最后一段完整文本（没有则为空串） |
 | `children` | 子任务摘要数组（`task_id`/`run_id`/`profile`/`status`/`goal`/`result`） |
@@ -1923,7 +1922,7 @@ SSH 工作区的文件操作请走 §15 的 SSH 端点或智能体工具。
 
 ## 2.1.1：自动治理与微信扫码
 
-运行快照新增 `stop_reason`，SSE 新增 `stop_reason` 与 `resource_degraded` 事件。旧 `max_iterations` 更新项不再接受；资源阈值由每轮代码策略管理。受控停止记为 `interrupted`，不会作为成功工作流节点继续执行。
+运行快照新增 `stop_reason`，SSE 新增 `stop_reason` 与 `resource_degraded` 事件。旧 `max_iterations` 更新项不再接受；统一回合不设固定模型/工具迭代上限，由取消、单步超时、回合时长、Token 与上下文预算管理。重复调用仍执行并回传真实观察。受控停止记为 `interrupted`，不会作为成功工作流节点继续执行。
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |

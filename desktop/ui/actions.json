@@ -418,7 +418,6 @@
         "<mode-dependent steps>"
       ],
       "limits": {
-        "maxCalls": 10,
         "maxWallMs": 900000,
         "concurrency": 2,
         "maxTokens": 300000
@@ -437,7 +436,6 @@
         "<mode-dependent steps>"
       ],
       "limits": {
-        "maxCalls": 10,
         "maxWallMs": 900000,
         "concurrency": 2,
         "maxTokens": 300000
@@ -456,7 +454,6 @@
         "<mode-dependent steps>"
       ],
       "limits": {
-        "maxCalls": 10,
         "maxWallMs": 900000,
         "concurrency": 2,
         "maxTokens": 300000

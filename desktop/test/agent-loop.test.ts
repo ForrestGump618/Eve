@@ -48,15 +48,39 @@ test('embedded quest data cannot invent skill creation, execution or retrieval r
  const result=await runAgent({...options(model,registry),prompt});
  assert.equal(result.verification.passed,true);assert.equal(turns,2);
 });
-test('bounded loop warns before exhaustion without treating unfinished work as success',async()=>{
- let turns=0,warning=false;
+test('repeated tool plans are returned to the model without a local iteration cutoff',async()=>{
+ let turns=0;
  const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({value:42})});
+ const model=runtime(async()=>{
+  if(turns++<22)return {text:'',tokens:10,toolCalls:[{id:'call'+turns,name:'lookup',arguments:JSON.stringify({query:'query'+turns})}]};
+  return reply('All repeated observations were considered.');
+ });
+ const result=await runAgent(options(model,registry));
+ assert.equal(turns,23);assert.equal(result.completion,'verified');
+});
+test('identical successful calls remain real observations for the model',async()=>{
+ let turns=0,executions=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executions++;return {value:42};}});
  const model=runtime(async messages=>{
-  turns++;warning ||= messages.some(m=>m.role==='user'&&m.content.includes('仅剩两轮'));
+  if(turns++<4){
+   assert.equal(messages.filter(m=>m.role==='tool').length,turns-1);
+   return {text:'',tokens:10,toolCalls:[{id:'same'+turns,name:'lookup',arguments:JSON.stringify({query:'same'})}]};
+  }
+  assert.equal(messages.filter(m=>m.role==='tool').length,4);
+  return reply('Repeated result observed four times.');
+ });
+ const result=await runAgent(options(model,registry));
+ assert.equal(executions,4);assert.equal(result.completion,'verified');
+});
+test('explicit cancellation stops an otherwise unbounded loop',async()=>{
+ let turns=0;const controller=new AbortController();
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({value:42})});
+ const model=runtime(async()=>{
+  if(turns++===8)controller.abort(new Error('cancelled by user'));
   return {text:'',tokens:10,toolCalls:[{id:'call'+turns,name:'lookup',arguments:JSON.stringify({query:'query'+turns})}]};
  });
- await assert.rejects(runAgent({...options(model,registry),maxTurns:4}),/turn budget exhausted/);
- assert.equal(turns,4);assert.equal(warning,true);
+ await assert.rejects(runAgent({...options(model,registry),signal:controller.signal}),/cancelled by user/);
+ assert.equal(turns,9);
 });
 test('in-flight model is not aborted by guidance and its unstarted tool plan is reconsidered',async()=>{
  let pending=false,turns=0,executions=0;
@@ -144,10 +168,6 @@ test('schema errors are observable by the model and cannot execute a tool',async
   let executed=false,turns=0;const r=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executed=true;return {ok:true};}});
   const result=await runAgent(options(runtime(async messages=>{if(!turns++)return call('{"unexpected":1}');assert.equal(JSON.parse(messages.at(-1)!.content).ok,false);return reply('工具参数错误，任务未完成。');}),r));
   assert.equal(executed,false);assert.equal(result.completion,'partial');assert.ok(result.trace.some(x=>x.type==='tool.failed'));
-});
-test('repeated requests stop at the tool budget and never synthesize a success',async()=>{
-  const r=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({ok:true})});
-  await assert.rejects(runAgent({...options(runtime(async()=>call()),r),maxTools:3}),/tool-call budget/);
 });
 test('cancellation and timeout bound an uncooperative tool',async()=>{
   const r=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,timeoutMs:25,execute:async()=>new Promise(()=>{})});

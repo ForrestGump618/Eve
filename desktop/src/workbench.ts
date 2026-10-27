@@ -245,7 +245,7 @@ export class WorkbenchManager {
   async runtime():Promise<{ready:boolean;depsDir?:string}> {
     const managed=await this.status();if(managed.installed)return {ready:true,depsDir:this.depsDir};
     try {
-      const probe=await this.runner(['-E','-c','import uvicorn, fastapi, jupyter_client, ipykernel, nbformat, httpx, rich, yaml, prompt_toolkit, qrcode;print("suwen-ready")'],{timeoutMs:PROBE_TIMEOUT_MS,env:{}});
+      const probe=await this.runner(['-E','-c','import uvicorn, fastapi, jupyter_client, ipykernel, nbformat, httpx, rich, yaml, prompt_toolkit, qrcode, paramiko, keyring;print("suwen-ready")'],{timeoutMs:PROBE_TIMEOUT_MS,env:{}});
       return {ready:probe.code===0&&probe.stdout.includes('suwen-ready')};
     } catch { return {ready:false}; }
   }

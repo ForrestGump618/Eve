@@ -225,7 +225,7 @@ async function launchApp(profile, extraArgs = []) {
   env.SUWEN_E2E_LABEL = 'deterministic local fixture';
   const app = await _electron.launch({
     executablePath: electronPath,
-    args: [...extraArgs, project, '--native'],
+    args: [...extraArgs, project, '--native', '--background'],
     env,
     timeout: 60000,
   });
@@ -700,15 +700,12 @@ async function scenarioScroll(ctx) {
   const result = await measureStream(ctx, {
     size, run: 1, tag, pace: 2,
     hook: async () => {
-      const t0 = Date.now();
-      while (Date.now() - t0 < 8000) {
-        const len = await page.evaluate(() => {
-          const b = [...document.querySelectorAll('#timeline .message:not(.user) .body')];
-          return b.length ? (b[b.length - 1].textContent || '').length : 0;
-        });
-        if (len > 200) break;
-        await sleep(100);
-      }
+      // A short answer still fits the viewport: assigning scrollTop=0 then
+      // cannot express a scroll-up and would incorrectly fail auto-follow.
+      await page.waitForFunction(() => {
+        const tl = document.getElementById('timeline');
+        return tl && tl.scrollHeight - tl.clientHeight > 300 && tl.scrollTop > 120;
+      }, null, { timeout: 45000, polling: 100 });
       await page.evaluate(() => {
         window.__e2e.scrollSetAt = Date.now();
         const tl = document.getElementById('timeline');
@@ -1175,7 +1172,7 @@ async function scenarioKillReconnect(ctx) {
     if (target && ['waiting_approval', 'failed', 'completed', 'cancelled', 'retry_scheduled'].includes(target.status)) { taskAfter = target; break; }
     await sleep(500);
   }
-  const interruptedState = taskAfter ? { status: taskAfter.status, stepStatus: taskAfter.steps?.[0]?.status, error: taskAfter.steps?.[0]?.error || null } : null;
+  const interruptedState = taskAfter ? { status: taskAfter.status, stepStatus: taskAfter.steps?.[0]?.status, attempts: taskAfter.steps?.[0]?.attempts, error: taskAfter.steps?.[0]?.error || null } : null;
   log('kill', `interrupted task state=${interruptedState?.status}/${interruptedState?.stepStatus} error=${interruptedState?.error}`);
 
   // If reconciliation is required, perform the same retry action the evidence UI offers.
@@ -1275,6 +1272,7 @@ async function scenarioKillReconnect(ctx) {
       manualReconnectWorked: manualOk,
       noPageReload: true,
       taskReconciled: !!interruptedState && ['waiting_approval', 'failed', 'completed'].includes(interruptedState.status),
+      unknownEffectNotReplayedBeforeApproval: interruptedState?.status === 'waiting_approval' && interruptedState.attempts === 1,
       textRecoveredExactlyOnce: recovery.textRecovered === true && exact === 1,
       singlePersistedAssistantForTask: taskAssistantMessages.length === 1,
     },
@@ -1516,7 +1514,10 @@ async function main() {
         const severe = name === 'noPageReload' ? 'P0' : ['autoReconnected', 'textRecoveredExactlyOnce', 'singlePersistedAssistantForTask'].includes(name) ? 'P1' : 'P2';
         findings.push({ severity: severe, area: 'reconnect', evidence: k.label, detail: `${name}=false ${name === 'autoReconnected' ? `(events=${k.autoReconnect.eventStates.join('|') || 'none'})` : name === 'singlePersistedAssistantForTask' ? `(persisted assistant messages for task=${k.conversationRecord?.assistantMessagesForTask?.length})` : ''}` });
       }
-      if (k.interruptedTask?.status === 'waiting_approval') findings.push({ severity: 'P2', area: 'reconnect', evidence: k.label, detail: 'interrupted side-effect model step requires explicit reconciliation (waiting_approval) — by design, but recovery is not automatic' });
+      if (k.interruptedTask?.status === 'waiting_approval') {
+        report.limitations ??= [];
+        report.limitations.push('Unknown external effects require explicit reconciliation before retry. Automatic transport reconnection does not authorize replay of an interrupted side-effecting activity.');
+      }
     }
     report.findings = findings;
     if(findings.length)process.exitCode=1;

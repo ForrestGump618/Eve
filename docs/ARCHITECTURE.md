@@ -60,7 +60,7 @@
 | **WorkspaceService** | `omicslab/workspace/service.py` | 工作区注册表（`home/workspaces.json`）：本地/SSH 工作区、默认 `ws_main`、会话绑定、状态与 scope 解析。 |
 | **KernelPool** | `omicslab/server/state.py` | 按 scope（`main` / `ws:<id>` / `task:<task_id>`）懒启动与回收内核；每作用域一个常驻 IPython kernel 与锁。 |
 | **ExecutionBackend** | `omicslab/execution/**` | 统一执行接口：内核执行、Shell、文件读写、上传、变量内省；`LocalExecutionBackend` 与 `SSHExecutionBackend` 两实现；`BackendUnavailable` 时**禁止静默回退本地**。 |
-| **Agent Loop** | `omicslab/agent/loop.py` | 一次运行的回合状态机：组装上下文 → 调模型 → 解析工具调用 → 执行 → 回填 → 循环直到无工具调用或达到 `max_iterations`；可接收 steering 消息；子智能体走 `run_sub`。 |
+| **Agent Loop** | `omicslab/agent/loop.py` | 一次运行的回合状态机：组装上下文 → 调模型 → 解析工具调用 → 执行 → 回填 → 循环直到模型无工具调用；由取消、单步超时、回合时长和 Token/上下文预算约束。可接收 steering 消息；子智能体走 `run_sub`。 |
 | **Providers** | `omicslab/agent/providers/**` | OpenAI 兼容与 Anthropic 两族协议的流式适配，外加 `mock` provider（离线测试用）。统一输出文本增量 / 思维链增量 / 工具调用 / 用量。 |
 | **Tools** | `omicslab/agent/tools.py` | `ToolSpec` 注册表：名称、描述、JSON Schema 参数、所属 toolset、是否需审批、异步 handler；工具输出携带 `data.execution_target`。 |
 | **Templates** | `omicslab/agent/templates.py` | 加载 Agent 定义（包内 → 工作区 → 环境变量目录，后者覆盖同名 id）。 |
@@ -136,7 +136,7 @@ Server
  │ 2. 返回 200 + text/event-stream，立即发 "connected"（含 run_id / trace_id）
  ▼
 AgentLoop (asyncio task，绑定 run)
- │  for iteration in range(max_iterations):
+ │  loop until no tool calls, cancelled, deadline or resource budget:
  │    ├─ 取 steering 追加消息（POST /api/runs/{id}/messages）
  │    ├─ provider.stream(messages, tools) ──► "text" / "reasoning" / "tool_call"
  │    ├─ 无工具调用 ──► 收尾

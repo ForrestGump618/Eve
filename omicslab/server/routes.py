@@ -524,9 +524,12 @@ async def set_keys(request: Request) -> dict[str, Any]:
             continue
         keys[name.strip()] = str(value).strip()
     patch: dict[str, Any] = {}
-    if provider:
+    activate = payload.get("activate", True) is not False
+    if provider and activate:
         patch["provider"] = provider
     for field in ("model", "api_base"):
+        if not activate:
+            continue
         if isinstance(payload.get(field), str) and str(payload.get(field) or "").strip():
             patch[field] = str(payload[field]).strip()
     if not keys and not patch:
@@ -548,6 +551,7 @@ async def set_keys(request: Request) -> dict[str, Any]:
         "settings": public_settings(settings),
         "llm": state.llm_info(),
         "vision": state.vision_info(),
+        "providers": settings.provider_catalog_map(),
     }
 
 

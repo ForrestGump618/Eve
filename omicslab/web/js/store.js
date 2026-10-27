@@ -70,12 +70,13 @@ export function parseHash(hash = window.location.hash) {
   const raw = String(hash || '').replace(/^#\/?/, '').split('?')[0].trim();
   const preferred = getPref('homeRoute', 'workbench');
   if (raw === 'chat') return 'workbench';
+  if (raw === 'connections') return 'settings';
   return ROUTE_IDS.includes(raw) ? raw : ROUTE_IDS.includes(preferred) ? preferred : 'workbench';
 }
 
 /** Navigate to a view by updating the hash (the router reacts to hashchange). */
 export function navigate(route, params = null) {
-  const target = route === 'chat' ? 'workbench' : ROUTE_IDS.includes(route) ? route : 'workbench';
+  const target = route === 'chat' ? 'workbench' : route === 'connections' ? 'settings' : ROUTE_IDS.includes(route) ? route : 'workbench';
   if (params && typeof params === 'object') state.routeParams = { ...params };
   const next = `#/${target}`;
   if (window.location.hash === next) {

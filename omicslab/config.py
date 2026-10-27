@@ -293,7 +293,9 @@ class Settings:
     api_base: str = ""
     temperature: float = 0.0
     max_tokens: int = 0  # 0 -> provider default
-    max_iterations: int = 24
+    # Legacy read-only compatibility value from older settings files. The
+    # runtime does not use it as an iteration, tool-call, or no-progress limit.
+    max_iterations: int = 0
     request_timeout_s: int = 180
     vision_model: str = ""
     vision_base_url: str = ""
@@ -337,7 +339,6 @@ class Settings:
             "api_base": str,
             "temperature": float,
             "max_tokens": int,
-            "max_iterations": int,
             "request_timeout_s": int,
             "vision_model": str,
             "vision_base_url": str,
@@ -398,7 +399,6 @@ class Settings:
             "api_base": str,
             "temperature": float,
             "max_tokens": int,
-            "max_iterations": int,
             "request_timeout_s": int,
             "vision_model": str,
             "vision_base_url": str,
@@ -443,8 +443,6 @@ class Settings:
                 raise ConfigError(f"字段 {key} 的值无效: {value!r}") from exc
             if key == "port" and not (1 <= coerced <= 65535):
                 raise ConfigError("端口必须在 1-65535 之间")
-            if key == "max_iterations" and not (1 <= coerced <= 200):
-                raise ConfigError("max_iterations 必须在 1-200 之间")
             if key == "request_timeout_s" and not (5 <= coerced <= 3600):
                 raise ConfigError("request_timeout_s 必须在 5-3600 之间")
             if key == "kernel_timeout_s" and not (5 <= coerced <= 3600):

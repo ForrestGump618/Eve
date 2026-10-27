@@ -45,7 +45,7 @@ class Configuration:
             if key in value and value[key] not in choices:
                 raise ValueError(f'{key} 仅支持 {sorted(choices)}')
         ranges={'font_size':(12,22),'radius':(0,24),'context_window':(2048,2000000),'max_tokens':(1000,10000000),
-                'max_cost':(0,1000000),'concurrency':(1,8),'max_iterations':(1,200),'max_repairs':(0,5),'top_k':(1,20),'retention_days':(1,3650),'warn_ratio':(.1,1)}
+                'max_cost':(0,1000000),'concurrency':(1,8),'max_repairs':(0,5),'top_k':(1,20),'retention_days':(1,3650),'warn_ratio':(.1,1)}
         for key,(low,high) in ranges.items():
             if key in value and (isinstance(value[key],bool) or not isinstance(value[key],(int,float)) or not low<=value[key]<=high):
                 raise ValueError(f'{key} 必须在 {low}—{high} 之间')

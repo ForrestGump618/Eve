@@ -124,7 +124,12 @@ class DesktopHarness:
         workspace_id = getattr(getattr(backend, "workspace", None), "workspace_id", None)
         if isinstance(workspace_id, str) and workspace_id:
             task_input["projectId"] = workspace_id
-        task = await self.rpc("create", name=user_text[:120], steps=[{"id":"reply","kind":"model","input":task_input,"sideEffect":True,"maxAttempts":1,"timeoutMs":600000}], limits={"maxCalls":32,"maxTokens":240000,"maxWallMs":630000}, **({"modelConfig":model_config} if model_config else {}))
+        # ClawsGO's shipped daemon does not expose a fixed model/tool
+        # iteration threshold. Keep the real resource boundaries here: the
+        # per-step timeout, the turn wall clock and the token budget. Repeated
+        # calls remain real observations for the model; progress is judged by
+        # the durable runtime's cancellation, deadline and checkpoint state.
+        task = await self.rpc("create", name=user_text[:120], steps=[{"id":"reply","kind":"model","input":task_input,"sideEffect":True,"maxAttempts":1,"timeoutMs":600000}], limits={"maxTokens":240000,"maxWallMs":630000}, **({"modelConfig":model_config} if model_config else {}))
         task_id = task["id"]
         run_service = getattr(loop.registry, "run_service", None)
         if run_service is not None and handle is not None:
