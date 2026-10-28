@@ -1,13 +1,19 @@
 name: Eve Windows CI
 
 # Real Windows CI for the vNext desktop app + preserved Python baseline (round 3).
-# Builds, typechecks, tests, runs RPC E2E + UI DOM QA + security scan, packages an UNSIGNED NSIS
-# installer, generates an SBOM and SHA256SUMS, and uploads verifiable artifacts.
+# Builds, typechecks, tests, runs RPC E2E + UI DOM QA + security scan and uploads validation logs.
+# Installer builds/uploads require an explicit manual opt-in; ordinary source pushes upload no EXE.
 # It does NOT sign and does NOT claim a clean-VM install; those remain explicit external gates
 # (see docs/release/windows-installer-verification.md and docs/release/release-gates.md).
 
 on:
   workflow_dispatch:
+    inputs:
+      build_installer:
+        description: 'Build and upload the unsigned EXE installer'
+        type: boolean
+        required: false
+        default: false
   push:
     branches: [main]
     paths:
@@ -99,6 +105,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build NSIS installer (unsigned; x64)
+        if: github.event_name == 'workflow_dispatch' && inputs.build_installer
         run: npm run dist:win
 
       - name: Generate runtime SBOM (CycloneDX via npm)
@@ -109,6 +116,7 @@ jobs:
           Get-Content release/sbom.cdx.json -TotalCount 1 | Out-Null
 
       - name: Verify installer and publish SHA256SUMS
+        if: github.event_name == 'workflow_dispatch' && inputs.build_installer
         shell: pwsh
         run: |
           $exe = Get-ChildItem release -Filter 'Eve-Setup-*-win-x64.exe' | Select-Object -First 1
@@ -137,21 +145,30 @@ jobs:
             if (-not (Test-Path $p)) { throw "missing worker script: $p" }
           }
 
-      - name: Upload installer, checksums, SBOM, security scan and logs
+      - name: Upload SBOM, security scan and validation logs
         uses: actions/upload-artifact@v4
         with:
-          name: Eve-windows-x64-preview
+          name: Eve-windows-validation
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            desktop/release/sbom.cdx.json
+            desktop/release/security-scan.json
+            desktop/release/e2e-rpc.log
+            desktop/release/ui-dom-qa.log
+            desktop/release-test.log
+
+      - name: Upload explicitly requested installer
+        if: github.event_name == 'workflow_dispatch' && inputs.build_installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eve-windows-x64-installer
           if-no-files-found: error
           retention-days: 14
           path: |
             desktop/release/*.exe
             desktop/release/*.blockmap
             desktop/release/SHA256SUMS
-            desktop/release/sbom.cdx.json
-            desktop/release/security-scan.json
-            desktop/release/e2e-rpc.log
-            desktop/release/ui-dom-qa.log
-            desktop/release-test.log
 
   python-baseline:
     name: Python baseline regression (Windows)
