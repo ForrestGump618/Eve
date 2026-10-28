@@ -8,7 +8,7 @@ from typing import Any
 MODES = {"ask", "review", "full"}
 READ_TOOLS = {"workspace_info", "list_directory", "read_file", "search_files",
               "web_search", "web_fetch", "database_search", "skill_search",
-              "skill_load", "skill_read_resource", "mcp_tools"}
+              "skill_load", "skill_read_resource", "mcp_tools", "science_inspect"}
 
 
 def validate_mode(value: Any) -> str:

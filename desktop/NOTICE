@@ -34,3 +34,15 @@ Python itself and its dependencies are not bundled; the managed dependency setup
 uses an available interpreter. Original Python sources and LICENSE ship under
 resources/legacy. Renderers and workers use the existing isolation boundaries;
 subprocess isolation is not an operating-system security sandbox.
+
+Additional scientific workflows retain Apache-2.0 notices from
+anthropics/knowledge-work-plugins, revision 2574e29377c7173d0cecffef29a6ecbd7f8ccb5d.
+Specialist scientific model skills retain the original notices from
+NVIDIA-BioNeMo/bionemo-agent-toolkit, revision f9bb5bb3aacc881c89eb15e93fd119e91915eea8:
+Apache-2.0 source code, CC-BY-4.0 materials, and separately declared BSD-3-Clause
+workflow helpers. Complete upstream notices and source identities accompany
+each prepared skill. Eve's runtime adaptation metadata is separate from the
+unchanged original skill and script resources. Model weights and third-party
+services are not bundled and remain subject to their own access and terms.
+User-installed research packs with unspecified redistribution terms are kept
+in the user's runtime/science-library and are not included in this distribution.

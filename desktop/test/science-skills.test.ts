@@ -63,3 +63,45 @@ test('scientific execution cannot fall back to a local worker without a workspac
   await tools.execute('skill_load',{id:skill.id},AbortSignal.timeout(5000));
   await assert.rejects(tools.execute('skill_run',{id:skill.id,input:{}},AbortSignal.timeout(5000)),/bound workspace/);
 });
+test('new research scripts preserve licenses and use the existing bound scientific adapter',async t=>{
+  const library=new SkillLibrary(resolve('skill-library'));
+  const research=library.skills.filter(s=>s.bundle==='bio-research');
+  assert.equal(research.length,6);
+  for(const skill of research){
+    assert.equal(skill.license,'Apache-2.0');
+    assert.match(skill.source,/2574e29377c7173d0cecffef29a6ecbd7f8ccb5d/);
+    assert.ok(library.read(skill.id,'EVE-UPSTREAM-LICENSE.txt').includes('Apache License'));
+    for(const script of skill.runtime!.scripts)assert.ok(library.read(skill.id,script).includes('__main__'));
+  }
+  const home=mkdtempSync(join(tmpdir(),'eve-bio-registry-')),store=new Store(':memory:');
+  t.after(()=>{store.close();rmSync(home,{recursive:true,force:true});});
+  const skills=new SkillRegistry({home,store});skills.mountLibrary(resolve('skill-library'));
+  const skill=skills.list().find(s=>s.name==='science-bio-nextflow-development')!;
+  assert.ok(skills.isScience(skill.id));
+  const calls:string[]=[];
+  const tools=createAgentTools({skills} as ToolServices,new SearchService(),[],undefined,[],{
+    kind:'ssh',call:async operation=>{calls.push(operation);return {status:'inspected'};}
+  },'ask');
+  await tools.execute('skill_load',{id:skill.id},AbortSignal.timeout(5000));
+  await tools.execute('skill_run',{id:skill.id,input:{script:'scripts/detect_data_type.py',args:['.','--json']}},AbortSignal.timeout(5000));
+  await tools.execute('science_inspect',{kind:'environment'},AbortSignal.timeout(5000));
+  assert.deepEqual(calls,['run_science_skill','science_inspect']);
+});
+test('specialist model skills expose credentials and keep model-checkout scripts out of direct execution',()=>{
+  const library=new SkillLibrary(resolve('skill-library'));
+  const models=library.skills.filter(s=>s.bundle==='bionemo');
+  assert.equal(models.length,45);
+  for(const skill of models){
+    assert.match(skill.source,/f9bb5bb3aacc881c89eb15e93fd119e91915eea8/);
+    for(const path of ['EVE-UPSTREAM-LICENSE.txt','EVE-UPSTREAM-LICENSE-APACHE-2.0.txt','EVE-UPSTREAM-LICENSE-CC-BY-4.0.txt']){
+      assert.ok(library.read(skill.id,path).length>100);
+    }
+  }
+  const evo=models.find(s=>s.name==='science-bionemo-evo2-nim')!;
+  assert.ok(evo.runtime!.optionalCredentials.includes('NGC_API_KEY'));
+  assert.deepEqual(evo.runtime!.scriptDependencies!['scripts/generate.py'],['requests']);
+  const annotated=models.find(s=>s.name==='science-bionemo-rfd4-proteina-annotated-cif')!;
+  assert.equal(annotated.runtime!.scripts.length,0);
+  assert.ok(annotated.runtime!.externalRequirements?.length);
+  assert.ok(library.read(annotated.id,'scripts/inspect_cif.py').includes('rfproteina'));
+});

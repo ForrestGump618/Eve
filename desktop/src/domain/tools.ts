@@ -858,7 +858,7 @@ export class SkillRegistry {
     };
   }
 
-  mountLibrary(root:string):void { this.library=new SkillLibrary(root);this.diagramBundle=undefined;this.invalidateSkillCaches(); }
+  mountLibrary(root:string,additionalRoots:string[]=[]):void { this.library=new SkillLibrary(root,additionalRoots);this.diagramBundle=undefined;this.invalidateSkillCaches(); }
   libraryStats(){return this.library?.stats()??null;}
   private libraryView(id:string,state:RecordRow|undefined|null=this.store.getRecord(id)):SkillView {
     const skill=this.library!.get(id);
@@ -947,10 +947,10 @@ export class SkillRegistry {
           note:'skill_prepare materializes the verified package. skill_run invokes the pinned Node CLI in the bound local/SSH workspace. finalize requires real browser checks; validation alone is not delivery.',
         }:skill.runtime?.scripts.length?{
           language:'uv',scripts:skill.runtime.scripts,
-          input:{script:'one listed scripts/*.py path',args:'array of CLI strings',allowDependencyInstall:'explicit boolean; default false',timeoutSeconds:'1..120'},
+          input:{script:'one listed scripts/*.py path',args:'array of CLI strings',stdin:'optional JSON object for scripts reading sys.stdin',allowDependencyInstall:'explicit boolean; default false',timeoutSeconds:'1..120'},
           note:'skill_run uses the bound local/SSH workspace, verifies resources, and runs uv with argv (no shell). Dependencies are cached per host; first network resolution requires allowDependencyInstall:true under task approval.',
         }:null,
-        preparation:skill.runtime?{tool:'skill_prepare',requiredCredentials:skill.runtime.requiredCredentials,optionalCredentials:skill.runtime.optionalCredentials,project:skill.runtime.project}:null,
+        preparation:skill.runtime?{tool:'skill_prepare',requiredCredentials:skill.runtime.requiredCredentials,optionalCredentials:skill.runtime.optionalCredentials,externalRequirements:skill.runtime.externalRequirements??[],project:skill.runtime.project}:null,
         adaptation:skill.bundle==='archify'?'Eve: prefer skill_prepare, read the relevant bundled references/schema/example progressively, write a complete candidate with write_file, then skill_run {command:"finalize",type,candidate,output,quality:"showcase"}. All paths are relative to the bound workspace; explainer meta.output must be a filename only (destination directory belongs in input.output). No local fallback or global configuration edits. Return a short conclusion plus [descriptive title](eve-artifact:RELATIVE_ENCODED_HTML_PATH), using the exact artifact.link from the successful tool result. Chat opens it in an isolated interactive viewer. Never paste generated HTML/JS or huge JSON into the reply. Do not claim delivery when a gate fails, or visual review from automated checks. Use for complex workflows, experiment plans and structured explanations; ordinary replies stay text. Scientific plots retain their original numeric data, statistical method and plotting tools; this skill explains them without inventing data. Revisions preserve sources and use a fresh outDir for browser evidence.':skill.runtime?'Eve: use skill_prepare for this skill and its returned absolute resource paths. skill_run accepts {script,args,allowDependencyInstall}. Outputs resolve under the selected workspace, never the installation directory. Do not follow host-specific setup instructions, pipe installers to a shell, or modify global agent settings. Check credentials by presence only on the execution host; never read .env into context. Optional credentials must not block public queries. scientific predictions are not clinical or experimental validation.':null,
         dependencies:skill.runtime?[skill.runtime.manager]:[],dependencyStatus:'not-probed',nextStartChar:instructions.length>8000?8000:null};
     }
@@ -989,7 +989,7 @@ export class SkillRegistry {
     const end=Math.min(file.text.length,start+28000);
     return {id,path,startChar:start,content:file.text.slice(start,end),nextStartChar:end<file.text.length?end:null,sha256:file.sha256};
   }
-  isScience(id:string):boolean {return Boolean(this.library?.has(id)&&this.library.get(id).bundle==='science');}
+  isScience(id:string):boolean {return Boolean(this.library?.has(id)&&this.library.get(id).runtime?.manager==='uv');}
   isArchify(id:string):boolean {return Boolean(this.library?.has(id)&&this.library.get(id).bundle==='archify');}
   archifyBundle(id:string):Record<string,Json>{
     if(!this.isArchify(id))throw new ValidationError('This skill has no diagram runtime adapter');

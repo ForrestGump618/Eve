@@ -14,6 +14,48 @@ from ..suwen.tasks import validate_workflow
 router=APIRouter(prefix='/api/platform',tags=['Suwen platform'])
 
 
+@router.get('/science')
+async def science_catalog(request:Request,scope:str='ws_main'):
+    p=platform(request);ws=p.require_workspace(scope)
+    from ..suwen.science_workbench import catalog
+    _,skills=await desktop_skills(p)
+    return {'workflows':catalog(skills),'skills':len(skills),'workspace':scope,
+            'backend':ws.backend,'root':str(ws.remote.get('root','')) if ws.backend=='ssh' else str(ws.root),
+            'recent':p.store.list('science_inspection',scope)[:10]}
+
+
+@router.post('/science/inspect')
+async def science_inspect(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    from .routes_harness import execute_backend
+    try:
+        if set(data)-{'kind','path'}:raise ValueError('未知检查参数')
+        result=await execute_backend(await p.backend(scope),'science_inspect',data)
+        # Persist compact provenance, not full coordinates/sequences per check.
+        p.store.put('science_inspection',uid('inspect'),
+            {key:result[key] for key in ['kind','path','workspace','sha256','bytes','status'] if key in result},
+            scope,expected=0)
+        return result
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/science/launch')
+async def science_launch(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    from ..suwen.science_workbench import task_prompt
+    try:
+        _,skills=await desktop_skills(p)
+        flow,prompt=task_prompt(data.get('lane'),data.get('goal'),data.get('inputs',''),skills)
+        conversation=p.state.store.create(agent=p.state.default_agent_info()['agent_id'],
+            title=f"{flow['label']} · {data['goal'][:60]}")
+        from .chat import _workspace_binding
+        _workspace_binding(p.state,conversation,scope)
+        result=await p.state.runs.submit(session_id=conversation.id,message=prompt,
+            workspace_id=scope,conversation=conversation,permission_mode='ask')
+        return {'session_id':conversation.id,'run':result.get('run') or {}}
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
 @router.get('/quests')
 async def quest_list(request:Request,scope:str='ws_main'):
     return {'items':platform(request).research.list(scope)}

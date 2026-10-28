@@ -26,8 +26,11 @@ def execute_bundle(payload: dict) -> dict:
     runtime = bundle["runtime"]
     scripts = runtime.get("scripts", [])
     input_data = payload.get("input") or {}
-    if not isinstance(input_data, dict) or set(input_data) - {"script", "args", "allowDependencyInstall", "timeoutSeconds"}:
+    if not isinstance(input_data, dict) or set(input_data) - {"script", "args", "stdin", "allowDependencyInstall", "timeoutSeconds"}:
         raise ValueError("Invalid scientific skill input")
+    stdin_data = input_data.get("stdin")
+    if stdin_data is not None and (not isinstance(stdin_data, dict) or len(json.dumps(stdin_data)) > 28000):
+        raise ValueError("Scientific stdin must be a bounded JSON object")
     script, args = input_data.get("script"), input_data.get("args", [])
     execute = payload.get("operation") == "run"
     if execute and (script not in scripts or not isinstance(args, list) or len(args) > 60
@@ -70,6 +73,7 @@ def execute_bundle(payload: dict) -> dict:
         "runtime": {"uvAvailable": bool(uv_command), "installHint": None if uv_command else "python -m pip install --user uv==0.13.6",
                     "requiredCredentials": required,
                     "optionalCredentials": optional, "credentialPresence": credentials},
+        "externalRequirements": runtime.get("externalRequirements", []),
     }
     if not execute:
         return result
@@ -80,7 +84,16 @@ def execute_bundle(payload: dict) -> dict:
     command = uv_command + ["run", "--no-config", "--no-env-file"]
     if not allow_install:
         command += ["--offline"]
-    if runtime.get("project"):
+    script_dependencies = runtime.get("scriptDependencies", {}).get(script)
+    if script_dependencies is not None:
+        if (not isinstance(script_dependencies, list) or len(script_dependencies) > 20
+                or any(not isinstance(p, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+(?:==[A-Za-z0-9_.+-]+)?", p) for p in script_dependencies)):
+            raise ValueError("Invalid declared script dependencies")
+        command += ["--no-project"]
+        for dependency in script_dependencies:
+            command += ["--with", dependency]
+        command += ["--script"]
+    elif runtime.get("project"):
         command += ["--project", str(target)]
     else:
         command += ["--no-project", "--script"]
@@ -88,9 +101,12 @@ def execute_bundle(payload: dict) -> dict:
     # Output paths remain relative to the selected workspace; resources are immutable.
     env["UV_NO_PROGRESS"] = "1"
     timed_out = False
-    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err, tempfile.TemporaryFile() as inp:
+        if stdin_data is not None:
+            inp.write(json.dumps(stdin_data).encode("utf-8"))
+            inp.seek(0)
         proc = subprocess.Popen(command, cwd=workspace, env=env, stdout=out, stderr=err,
-                                stdin=subprocess.DEVNULL, start_new_session=os.name != "nt")
+                                stdin=inp if stdin_data is not None else subprocess.DEVNULL, start_new_session=os.name != "nt")
         try:
             proc.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -115,8 +131,19 @@ def execute_bundle(payload: dict) -> dict:
             if env.get(key):
                 text = text.replace(env[key], "[REDACTED]")
         return text
-    ok = proc.returncode == 0 and not timed_out and not clipped
+    ok = proc.returncode == 0 and not timed_out and not clipped and bool(stdout.strip())
+    structured = None
+    if not clipped:
+        try:
+            structured = json.loads(stdout.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            pass
+    if isinstance(structured, dict) and (
+            structured.get("ok") is False or structured.get("error")
+            or structured.get("status") in {"failed", "error", "blocked"}):
+        ok = False
     return {**result, "status": "executed" if ok else "failed", "executed": True, "ok": ok,
+            "error": "No scientific output was returned; artifact verification is required" if not stdout.strip() and proc.returncode == 0 else None,
             "exitCode": proc.returncode, "timedOut": timed_out, "truncated": clipped,
             "stdout": redact(stdout), "stderr": redact(stderr),
             "durationMs": round((time.monotonic() - started) * 1000),

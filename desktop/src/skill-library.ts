@@ -8,7 +8,7 @@ export interface LibrarySkill {
   id:string; name:string; description:string; version:string; source:string;
   license:string; sha256:string; files:Record<string,string>; omittedResources:string[];
   bundle?:string; keywords?:string;
-  runtime?:{manager:'uv'|'node';scripts:string[];project:boolean;requiredCredentials:string[];optionalCredentials:string[]};
+  runtime?:{manager:'uv'|'node';scripts:string[];project:boolean;requiredCredentials:string[];optionalCredentials:string[];scriptDependencies?:Record<string,string[]>;externalRequirements?:string[]};
 }
 interface LibraryIndex {
   version:number; skills:LibrarySkill[];
@@ -25,6 +25,8 @@ const expand:Record<string,string> = {
   '表格':'table spreadsheet', '扫描':'ocr scanned', '识别':'ocr recognition',
   '架构图':'archify architecture diagram', '流程图':'archify workflow diagram',
   '时序图':'archify sequence diagram', '一页说明':'archify explainer', '单页说明':'archify explainer',
+  '测序':'ngs sequencing fastq', '仪器':'instrument allotrope', '批次':'batch integration scvi',
+  '变异':'variant clinvar gnomad', '引物':'primer pcr', '系统发育':'phylogeny evolutionary',
 };
 /** Product-level synonyms steer the shared library without requiring a
  * second semantic index. These are ranked as exact capability intents. */
@@ -49,11 +51,21 @@ export class SkillLibrary {
   private cachedBytes=0;
   private readonly index:LibraryIndex;
   private reads=0;
+  private readonly overlays:SkillLibrary[];
+  private readonly owners=new Map<string,SkillLibrary>();
 
-  constructor(private readonly root:string) {
+  constructor(private readonly root:string,additionalRoots:string[] = []) {
+    if(additionalRoots.length>4)throw new ValidationError('Too many additional skill libraries');
+    this.overlays=additionalRoots.map(path=>new SkillLibrary(path));
     this.index=JSON.parse(readFileSync(join(root,'index.json'),'utf8')) as LibraryIndex;
     if(this.index.version!==1||!Array.isArray(this.index.skills))throw new ValidationError('Unsupported skill library');
-    this.skills=this.index.skills;
+    const ids=new Set(this.index.skills.map(skill=>skill.id));
+    const names=new Set(this.index.skills.map(skill=>skill.name.toLowerCase()));
+    for(const library of this.overlays)for(const skill of library.skills){
+      if(ids.has(skill.id)||names.has(skill.name.toLowerCase()))throw new ValidationError('Duplicate additional library skill');
+      ids.add(skill.id);names.add(skill.name.toLowerCase());this.owners.set(skill.id,library);
+    }
+    this.skills=[...this.index.skills,...this.overlays.flatMap(library=>library.skills)];
     this.byId=new Map(this.skills.map(skill=>[skill.id,skill]));
     for(const skill of this.skills)for(const word of tokens(skill.name+' '+skill.description+' '+(skill.keywords??''))){
       if(!this.postings.has(word))this.postings.set(word,new Set());
@@ -117,6 +129,8 @@ export class SkillLibrary {
       .sort((a,b)=>(Number(nameHits.has(b.id))-Number(nameHits.has(a.id)))||b.score-a.score||a.id.localeCompare(b.id)).slice(0,limit);
   }
   read(id:string,path:string):string {
+    const owner=this.owners.get(id);
+    if(owner)return owner.read(id,path);
     const files=this.get(id).files;
     const sha=Object.hasOwn(files,path)?files[path]:null;
     if(!sha||!/^[a-f0-9]{64}$/.test(sha))throw new ValidationError('Unknown skill resource');
@@ -143,5 +157,10 @@ export class SkillLibrary {
     this.cache.set(sha,text);this.cachedBytes+=content.length;
     return text;
   }
-  stats(){return {skills:this.skills.length,physicalReads:this.reads,cachedBytes:this.cachedBytes,cachedObjects:this.cache.size};}
+  stats():{skills:number;physicalReads:number;cachedBytes:number;cachedObjects:number}{
+    const extra=this.overlays.map(library=>library.stats());
+    return {skills:this.skills.length,physicalReads:this.reads+extra.reduce((n,s)=>n+s.physicalReads,0),
+      cachedBytes:this.cachedBytes+extra.reduce((n,s)=>n+s.cachedBytes,0),
+      cachedObjects:this.cache.size+extra.reduce((n,s)=>n+s.cachedObjects,0)};
+  }
 }

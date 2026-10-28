@@ -50,6 +50,15 @@ async def authorize(state: Any, handle: Any, tool: str, arguments: dict[str, Any
 
 
 async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) -> dict[str, Any]:
+    if operation == "science_inspect":
+        from ..execution.science_workbench import runtime_source
+        result = await backend.execute_python(runtime_source(str(backend.root), args), timeout_s=30)
+        if not result.get("ok") or result.get("truncated"):
+            raise ValueError("科学输入检查失败，未获得完整结果")
+        try:
+            return json.loads(backend_stdout(result))
+        except (ValueError, TypeError) as exc:
+            raise ValueError("科学输入检查未返回有效结果") from exc
     path = str(args.get("path") or ".")
     if operation == "list_directory":
         result = await backend.list_dir(path)
@@ -165,7 +174,20 @@ async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) ->
         except (ValueError, TypeError) as exc:
             raise ValueError("技能未返回有效结构化结果") from exc
         if run and output.get("ok") is not True:
-            raise ValueError(f"技能未成功：{json.dumps(output, ensure_ascii=False)[:6000]}")
+            failure = {k:output.get(k) for k in ["skillId","status","error","exitCode","timedOut","truncated"]}
+            # Identity/resource metadata must not crowd the actionable failure
+            # out of the model's observation budget.
+            failure["stderr"] = str(output.get("stderr") or "")[-1400:]
+            try:
+                observation = json.loads(output.get("stdout") or "")
+            except (ValueError, TypeError):
+                observation = None
+            if isinstance(observation, dict):
+                failure["observation"] = {k:observation[k] for k in
+                    ["ok","error","status","missing","runtime_missing","pipeline"] if k in observation}
+            else:
+                failure["stdout"] = str(output.get("stdout") or "")[-800:]
+            raise ValueError(f"技能未成功：{json.dumps(failure, ensure_ascii=False)[:2800]}")
         return output
     raise ValueError("不支持的工作区操作")
 

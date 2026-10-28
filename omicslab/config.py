@@ -16,6 +16,7 @@ import sys
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
+from .utils import atomic_write_text
 
 APP_SLUG = "omicslab"
 DEFAULT_PORT = 5077
@@ -202,10 +203,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _write_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    atomic_write_text(path, json.dumps(data, ensure_ascii=False, indent=2))
 
 
 def _probe_writable(directory: Path) -> bool:

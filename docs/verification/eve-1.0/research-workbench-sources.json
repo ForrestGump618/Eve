@@ -1,0 +1,47 @@
+{
+  "retrieved": "2026-10-28",
+  "scope": "Public documentation and pinned public skill repositories; no private implementation claimed.",
+  "productEvidence": [
+    {
+      "label": "Rosalind Workbench",
+      "url": "https://developers.openai.com/blog/rosalind-workbench.md",
+      "cachedContentSha256": "8e9c994fce69d49887f93ed1f9591e8e12d64d7eb82ae4cd882a96a9da57f31e",
+      "level": "confirmed public documentation; private implementation unknown"
+    },
+    {
+      "label": "Claude Science",
+      "url": "https://claude.com/product/claude-science",
+      "cachedContentSha256": "711e7aaba43463491a3eaee740df2fc137ccc24133fb04393ad496132207834d",
+      "level": "confirmed public documentation; private implementation unknown"
+    }
+  ],
+  "packs": [
+    {
+      "bundle": "bio-research",
+      "repository": "anthropics/knowledge-work-plugins",
+      "commit": "2574e29377c7173d0cecffef29a6ecbd7f8ccb5d",
+      "skills": 6,
+      "license": "Apache-2.0",
+      "distributed": true,
+      "source": "https://github.com/anthropics/knowledge-work-plugins"
+    },
+    {
+      "bundle": "bionemo",
+      "repository": "NVIDIA-BioNeMo/bionemo-agent-toolkit",
+      "commit": "f9bb5bb3aacc881c89eb15e93fd119e91915eea8",
+      "skills": 45,
+      "license": "Apache-2.0 AND CC-BY-4.0 AND BSD-3-Clause",
+      "distributed": true,
+      "source": "https://github.com/NVIDIA-BioNeMo/bionemo-agent-toolkit"
+    },
+    {
+      "bundle": "personal-research",
+      "repository": "openai/plugins",
+      "commit": "0722921d5542fc593105c27bd52630babd8b8c2a",
+      "skills": 76,
+      "license": "Mixed; 68 unspecified and 8 MIT. User-local installation only.",
+      "distributed": false,
+      "source": "https://github.com/openai/plugins"
+    }
+  ]
+}

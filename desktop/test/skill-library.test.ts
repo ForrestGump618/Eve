@@ -28,6 +28,19 @@ test('metadata discovery scales past 500 without loading instruction bodies',t=>
  assert.deepEqual(library.search('zxqv-no-match'),[]);
  assert.equal(library.stats().physicalReads,0);
 });
+test('personal overlays use their own offsets and join discovery without loading resources',t=>{
+ const {root,text}=fixture(t,1),extra=fixture(t,1);
+ const index=JSON.parse(readFileSync(join(extra.root,'index.json'),'utf8'));
+ index.skills[0].id='personal:one';index.skills[0].name='science-lab-bindingdb-skill';
+ writeFileSync(join(extra.root,'index.json'),JSON.stringify(index));
+ const library=new SkillLibrary(root,[extra.root]);
+ assert.equal(library.skills.length,2);
+ assert.equal(library.search('science-lab-bindingdb-skill')[0].id,'personal:one');
+ assert.equal(library.stats().physicalReads,0);
+ assert.equal(library.read('personal:one','SKILL.md'),text);
+ assert.equal(library.stats().physicalReads,1);
+ assert.throws(()=>new SkillLibrary(root,[root]),/Duplicate/);
+});
 test('resource reads are cached and paths must be declared',t=>{
  const {root,text}=fixture(t),library=new SkillLibrary(root);
  assert.equal(library.read('builtin:0','SKILL.md'),text);

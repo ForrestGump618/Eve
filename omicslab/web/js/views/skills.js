@@ -94,6 +94,8 @@ export async function mount(root, ctx = {}) {
               ? `<p>必需凭据：${skill.preparation.requiredCredentials.map(esc).join('、')}（运行时检查）</p>` : '') +
             (skill.preparation.optionalCredentials?.length
               ? `<p>可选凭据：${skill.preparation.optionalCredentials.map(esc).join('、')}；公开查询可不配置。</p>` : '') +
+            (skill.preparation.externalRequirements?.length
+              ? `<p>外部环境：${skill.preparation.externalRequirements.map(esc).join('；')}</p>` : '') +
             '</section>' : '') +
         (skill?.when_to_use
           ? `<div class="skill-when"><span class="skill-when-label">${icon('info', { size: 14 })}<span>适用场景</span></span><p>${esc(skill.when_to_use)}</p></div>`

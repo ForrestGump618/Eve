@@ -1,0 +1,728 @@
+{
+  "date": "2026-10-28",
+  "version": "1.0.0",
+  "buildId": "b9a3a961b97e2f9b2e2d6d54e9dad49bd183c8f3f65b2decaaaed267ae6ebebb",
+  "tests": {
+    "typescript": {
+      "passed": 287,
+      "skipped": 1,
+      "failed": 0
+    },
+    "python": {
+      "passed": 658,
+      "warnings": 1
+    }
+  },
+  "note": "Resource preparation, controlled-model UI and live scientific task acceptance are different categories.",
+  "compute": {
+    "sourceSha256": "e628529739d8efefec54563caad993595352e0abc83f0a09e8b3b780778bce40",
+    "kind": "real local Jupyter, immutable scripts, files and optional public APIs; no model-quality or live-SSH claim",
+    "checks": [
+      {
+        "name": "prepare:science-bio-instrument-data-to-allotrope",
+        "durationMs": 393
+      },
+      {
+        "name": "prepare:science-bio-nextflow-development",
+        "durationMs": 404
+      },
+      {
+        "name": "prepare:science-bio-scientific-problem-selection",
+        "durationMs": 269
+      },
+      {
+        "name": "prepare:science-bio-scvi-tools",
+        "durationMs": 363
+      },
+      {
+        "name": "prepare:science-bio-single-cell-rna-qc",
+        "durationMs": 192
+      },
+      {
+        "name": "prepare:science-bio-start",
+        "durationMs": 132
+      },
+      {
+        "name": "prepare:science-bionemo-cuequivariance",
+        "durationMs": 150
+      },
+      {
+        "name": "prepare:science-bionemo-genomics-workflow-acceleration",
+        "durationMs": 158
+      },
+      {
+        "name": "prepare:science-bionemo-nvmolkit-usage",
+        "durationMs": 158
+      },
+      {
+        "name": "prepare:science-bionemo-parabricks",
+        "durationMs": 446
+      },
+      {
+        "name": "prepare:science-bionemo-boltz2-nim",
+        "durationMs": 206
+      },
+      {
+        "name": "prepare:science-bionemo-diffdock-nim",
+        "durationMs": 256
+      },
+      {
+        "name": "prepare:science-bionemo-evo2-nim",
+        "durationMs": 154
+      },
+      {
+        "name": "prepare:science-bionemo-genmol-nim",
+        "durationMs": 163
+      },
+      {
+        "name": "prepare:science-bionemo-drug-discovery-pipeline",
+        "durationMs": 243
+      },
+      {
+        "name": "prepare:science-bionemo-msa-structure-prediction-pipeline",
+        "durationMs": 121
+      },
+      {
+        "name": "prepare:science-bionemo-molmim-nim",
+        "durationMs": 145
+      },
+      {
+        "name": "prepare:science-bionemo-msa-search-nim",
+        "durationMs": 167
+      },
+      {
+        "name": "prepare:science-bionemo-openfold2-nim",
+        "durationMs": 141
+      },
+      {
+        "name": "prepare:science-bionemo-openfold3-nim",
+        "durationMs": 156
+      },
+      {
+        "name": "prepare:science-bionemo-proteinmpnn-nim",
+        "durationMs": 761
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-nim",
+        "durationMs": 293
+      },
+      {
+        "name": "prepare:science-bionemo-rfdiffusion-nim",
+        "durationMs": 156
+      },
+      {
+        "name": "prepare:science-bionemo-codonfm-embed",
+        "durationMs": 157
+      },
+      {
+        "name": "prepare:science-bionemo-codonfm-finetune",
+        "durationMs": 137
+      },
+      {
+        "name": "prepare:science-bionemo-codonfm-score",
+        "durationMs": 136
+      },
+      {
+        "name": "prepare:science-bionemo-codonfm-setup",
+        "durationMs": 126
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-add-cmim-pretrain",
+        "durationMs": 109
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-continue-pretrain",
+        "durationMs": 144
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-embed",
+        "durationMs": 162
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-finetune",
+        "durationMs": 151
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-infer",
+        "durationMs": 129
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-monitor",
+        "durationMs": 121
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-pretrain-scratch",
+        "durationMs": 118
+      },
+      {
+        "name": "prepare:science-bionemo-kermt-setup",
+        "durationMs": 129
+      },
+      {
+        "name": "prepare:science-bionemo-complexa-design",
+        "durationMs": 159
+      },
+      {
+        "name": "prepare:science-bionemo-complexa-evaluate-pdbs",
+        "durationMs": 135
+      },
+      {
+        "name": "prepare:science-bionemo-complexa-setup",
+        "durationMs": 159
+      },
+      {
+        "name": "prepare:science-bionemo-complexa-sweep",
+        "durationMs": 157
+      },
+      {
+        "name": "prepare:science-bionemo-complexa-target",
+        "durationMs": 145
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-annotated-cif",
+        "durationMs": 173
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-autoresearch",
+        "durationMs": 133
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-campaign",
+        "durationMs": 219
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-commitment-curves",
+        "durationMs": 217
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-evaluate",
+        "durationMs": 171
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-generate",
+        "durationMs": 158
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-package",
+        "durationMs": 140
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-search",
+        "durationMs": 124
+      },
+      {
+        "name": "prepare:science-bionemo-rfd4-proteina-setup",
+        "durationMs": 162
+      },
+      {
+        "name": "prepare:science-bionemo-complexa-binder-design",
+        "durationMs": 387
+      },
+      {
+        "name": "prepare:science-bionemo-protein-binder-design",
+        "durationMs": 170
+      },
+      {
+        "name": "prepare:science-lab-boltz-check-status",
+        "durationMs": 112
+      },
+      {
+        "name": "prepare:science-lab-boltz-cli-setup",
+        "durationMs": 96
+      },
+      {
+        "name": "prepare:science-lab-boltz-protein-design",
+        "durationMs": 144
+      },
+      {
+        "name": "prepare:science-lab-boltz-protein-screen",
+        "durationMs": 117
+      },
+      {
+        "name": "prepare:science-lab-boltz-small-molecule-adme",
+        "durationMs": 117
+      },
+      {
+        "name": "prepare:science-lab-boltz-small-molecule-design",
+        "durationMs": 87
+      },
+      {
+        "name": "prepare:science-lab-boltz-small-molecule-screen",
+        "durationMs": 123
+      },
+      {
+        "name": "prepare:science-lab-boltz-structure-and-binding",
+        "durationMs": 138
+      },
+      {
+        "name": "prepare:science-lab-alphafold-skill",
+        "durationMs": 106
+      },
+      {
+        "name": "prepare:science-lab-bgee-skill",
+        "durationMs": 80
+      },
+      {
+        "name": "prepare:science-lab-bindingdb-skill",
+        "durationMs": 101
+      },
+      {
+        "name": "prepare:science-lab-biobankjapan-phewas-skill",
+        "durationMs": 110
+      },
+      {
+        "name": "prepare:science-lab-biorxiv-skill",
+        "durationMs": 83
+      },
+      {
+        "name": "prepare:science-lab-biostudies-arrayexpress-skill",
+        "durationMs": 138
+      },
+      {
+        "name": "prepare:science-lab-cbioportal-skill",
+        "durationMs": 108
+      },
+      {
+        "name": "prepare:science-lab-cellxgene-skill",
+        "durationMs": 126
+      },
+      {
+        "name": "prepare:science-lab-chebi-skill",
+        "durationMs": 104
+      },
+      {
+        "name": "prepare:science-lab-chembl-skill",
+        "durationMs": 82
+      },
+      {
+        "name": "prepare:science-lab-civic-skill",
+        "durationMs": 82
+      },
+      {
+        "name": "prepare:science-lab-clinicaltrials-skill",
+        "durationMs": 91
+      },
+      {
+        "name": "prepare:science-lab-clinvar-variation-skill",
+        "durationMs": 97
+      },
+      {
+        "name": "prepare:science-lab-efo-ontology-skill",
+        "durationMs": 100
+      },
+      {
+        "name": "prepare:science-lab-encode-skill",
+        "durationMs": 86
+      },
+      {
+        "name": "prepare:science-lab-ensembl-skill",
+        "durationMs": 99
+      },
+      {
+        "name": "prepare:science-lab-epigraphdb-skill",
+        "durationMs": 110
+      },
+      {
+        "name": "prepare:science-lab-eqtl-catalogue-skill",
+        "durationMs": 165
+      },
+      {
+        "name": "prepare:science-lab-eva-skill",
+        "durationMs": 113
+      },
+      {
+        "name": "prepare:science-lab-finngen-phewas-skill",
+        "durationMs": 100
+      },
+      {
+        "name": "prepare:science-lab-genebass-gene-burden-skill",
+        "durationMs": 95
+      },
+      {
+        "name": "prepare:science-lab-gnomad-graphql-skill",
+        "durationMs": 90
+      },
+      {
+        "name": "prepare:science-lab-gtex-eqtl-skill",
+        "durationMs": 105
+      },
+      {
+        "name": "prepare:science-lab-gwas-catalog-skill",
+        "durationMs": 87
+      },
+      {
+        "name": "prepare:science-lab-hmdb-skill",
+        "durationMs": 88
+      },
+      {
+        "name": "prepare:science-lab-human-protein-atlas-skill",
+        "durationMs": 105
+      },
+      {
+        "name": "prepare:science-lab-ipd-skill",
+        "durationMs": 126
+      },
+      {
+        "name": "prepare:science-lab-locus-to-gene-mapper-skill",
+        "durationMs": 188
+      },
+      {
+        "name": "prepare:science-lab-metabolights-skill",
+        "durationMs": 81
+      },
+      {
+        "name": "prepare:science-lab-mgnify-skill",
+        "durationMs": 96
+      },
+      {
+        "name": "prepare:science-lab-ncbi-blast-skill",
+        "durationMs": 120
+      },
+      {
+        "name": "prepare:science-lab-ncbi-clinicaltables-skill",
+        "durationMs": 107
+      },
+      {
+        "name": "prepare:science-lab-ncbi-datasets-skill",
+        "durationMs": 114
+      },
+      {
+        "name": "prepare:science-lab-ncbi-entrez-skill",
+        "durationMs": 101
+      },
+      {
+        "name": "prepare:science-lab-ncbi-pmc-skill",
+        "durationMs": 90
+      },
+      {
+        "name": "prepare:science-lab-opentargets-skill",
+        "durationMs": 117
+      },
+      {
+        "name": "prepare:science-lab-pharmgkb-skill",
+        "durationMs": 150
+      },
+      {
+        "name": "prepare:science-lab-pride-skill",
+        "durationMs": 104
+      },
+      {
+        "name": "prepare:science-lab-proteomexchange-skill",
+        "durationMs": 108
+      },
+      {
+        "name": "prepare:science-lab-pubchem-pug-skill",
+        "durationMs": 102
+      },
+      {
+        "name": "prepare:science-lab-quickgo-skill",
+        "durationMs": 95
+      },
+      {
+        "name": "prepare:science-lab-rcsb-pdb-skill",
+        "durationMs": 92
+      },
+      {
+        "name": "prepare:science-lab-reactome-skill",
+        "durationMs": 100
+      },
+      {
+        "name": "prepare:science-lab-research-router-skill",
+        "durationMs": 99
+      },
+      {
+        "name": "prepare:science-lab-rhea-skill",
+        "durationMs": 93
+      },
+      {
+        "name": "prepare:science-lab-rnacentral-skill",
+        "durationMs": 106
+      },
+      {
+        "name": "prepare:science-lab-string-skill",
+        "durationMs": 150
+      },
+      {
+        "name": "prepare:science-lab-tpmi-phewas-skill",
+        "durationMs": 122
+      },
+      {
+        "name": "prepare:science-lab-ukb-topmed-phewas-skill",
+        "durationMs": 103
+      },
+      {
+        "name": "prepare:science-lab-uniprot-skill",
+        "durationMs": 84
+      },
+      {
+        "name": "prepare:science-lab-ngs-amplicon-microbiome",
+        "durationMs": 1309
+      },
+      {
+        "name": "prepare:science-lab-ngs-analysis-router",
+        "durationMs": 1296
+      },
+      {
+        "name": "prepare:science-lab-ngs-atacseq-peaks-qc",
+        "durationMs": 1183
+      },
+      {
+        "name": "prepare:science-lab-ngs-bcl-to-fastq",
+        "durationMs": 1221
+      },
+      {
+        "name": "prepare:science-lab-ngs-bulk-rnaseq-counts-qc",
+        "durationMs": 1296
+      },
+      {
+        "name": "prepare:science-lab-ngs-bulk-rnaseq-differential-expression",
+        "durationMs": 1295
+      },
+      {
+        "name": "prepare:science-lab-ngs-bulk-rnaseq",
+        "durationMs": 1305
+      },
+      {
+        "name": "prepare:science-lab-ngs-chip-cutrun-peaks-qc",
+        "durationMs": 1250
+      },
+      {
+        "name": "prepare:science-lab-ngs-dna-germline-variants",
+        "durationMs": 1180
+      },
+      {
+        "name": "prepare:science-lab-ngs-dna-somatic-variants",
+        "durationMs": 1128
+      },
+      {
+        "name": "prepare:science-lab-ngs-dna-umi-panel-variants",
+        "durationMs": 1159
+      },
+      {
+        "name": "prepare:science-lab-ngs-dna-variant-calling",
+        "durationMs": 1172
+      },
+      {
+        "name": "prepare:science-lab-ngs-epigenomics-peaks",
+        "durationMs": 1219
+      },
+      {
+        "name": "prepare:science-lab-ngs-fastq-qc",
+        "durationMs": 1188
+      },
+      {
+        "name": "prepare:science-lab-ngs-runtime-env",
+        "durationMs": 1205
+      },
+      {
+        "name": "prepare:science-lab-ngs-scrna-seq",
+        "durationMs": 1187
+      },
+      {
+        "name": "prepare:science-lab-ngs-shotgun-metagenomics",
+        "durationMs": 1188
+      },
+      {
+        "name": "prepare:science-lab-scrna-seq-qc",
+        "durationMs": 1248
+      },
+      {
+        "name": "environment",
+        "durationMs": 310
+      },
+      {
+        "name": "fasta",
+        "durationMs": 29
+      },
+      {
+        "name": "fastq",
+        "durationMs": 25
+      },
+      {
+        "name": "counts",
+        "durationMs": 21
+      },
+      {
+        "name": "structure",
+        "durationMs": 24
+      },
+      {
+        "name": "codon-input-validator",
+        "durationMs": 289
+      },
+      {
+        "name": "detect-sequencing-input",
+        "durationMs": 1723
+      },
+      {
+        "name": "instrument-to-table",
+        "durationMs": 2606
+      },
+      {
+        "name": "public-protein-json-stdin",
+        "durationMs": 7775
+      },
+      {
+        "name": "ngs-missing-dependencies-cannot-succeed",
+        "negativeTest": true
+      }
+    ],
+    "failures": [],
+    "blocked": [
+      {
+        "workflow": "Full FASTQ analysis",
+        "reason": "FastQC/MultiQC/fastp and workflow runtimes missing; not accepted as passed"
+      },
+      {
+        "workflow": "Hosted/GPU model inference and full omics pipelines",
+        "reason": "Requires external model credentials, weights, suitable compute and real datasets; not executed or accepted"
+      }
+    ]
+  },
+  "installedWorkbench": {
+    "sourceSha256": "ff7df294686e7f8eca6279874663c1b4e8735939cd730a0a8b8d781ca6a2ae21",
+    "kind": "controlled model protocol; real Electron/API/Jupyter/input/viewer; no autonomous-science or SSH acceptance",
+    "checks": [
+      {
+        "name": "ten scientific lanes in formal workbench",
+        "passed": true
+      },
+      {
+        "name": "shared and personal skills enable lanes",
+        "passed": true
+      },
+      {
+        "name": "actual dependency presence displayed",
+        "passed": true
+      },
+      {
+        "name": "fasta renders actual scientific input",
+        "passed": true
+      },
+      {
+        "name": "fastq renders actual scientific input",
+        "passed": true
+      },
+      {
+        "name": "counts renders actual scientific input",
+        "passed": true
+      },
+      {
+        "name": "structure renders actual scientific input",
+        "passed": true
+      },
+      {
+        "name": "coordinate preview is keyboard interactive",
+        "passed": true
+      },
+      {
+        "name": "guided workflow uses existing harness and actual bound-host tool",
+        "passed": true
+      },
+      {
+        "name": "one formal window",
+        "passed": true
+      },
+      {
+        "name": "no renderer exceptions",
+        "passed": true
+      }
+    ],
+    "failures": []
+  },
+  "installedInteractivePreview": {
+    "sourceSha256": "49ec9089cc7298a510f1ed6b839101cde951e3f1aea9ac81eea84877d9a30922",
+    "kind": "controlled model protocol; real formal Electron, skill execution, browser validation and artifact preview; no paid-model quality claim",
+    "checks": [
+      {
+        "name": "catalogue shows Node and browser requirements",
+        "passed": true
+      },
+      {
+        "name": "real UI to tools to finalize to artifact card",
+        "passed": true
+      },
+      {
+        "name": "native SVG rendered in isolated viewer",
+        "passed": true
+      },
+      {
+        "name": "native interactive controls preserved",
+        "passed": true
+      },
+      {
+        "name": "preview initially follows application theme",
+        "passed": true
+      },
+      {
+        "name": "theme control responds",
+        "passed": true
+      },
+      {
+        "name": "preview excludes same-origin privileges",
+        "passed": true
+      },
+      {
+        "name": "artifact link survives conversation reload",
+        "passed": true
+      },
+      {
+        "name": "verified explainer survives isolated DOM serialization",
+        "passed": true
+      },
+      {
+        "name": "explainer reader controls run",
+        "passed": true
+      },
+      {
+        "name": "artifact cannot access parent DOM",
+        "passed": true
+      },
+      {
+        "name": "artifact network calls blocked",
+        "passed": true
+      },
+      {
+        "name": "frozen nested srcdoc remains available for explainers",
+        "passed": true
+      },
+      {
+        "name": "artifact self-navigation cannot reach authenticated API",
+        "passed": true
+      },
+      {
+        "name": "host unaffected",
+        "passed": true
+      },
+      {
+        "name": "one formal window",
+        "passed": true
+      },
+      {
+        "name": "no renderer exceptions",
+        "passed": true
+      }
+    ],
+    "failures": []
+  },
+  "skillDiscovery": {
+    "kind": "in-process discovery microbenchmark; not end-to-end agent latency",
+    "skills": 447,
+    "constructionMs": 21.9165,
+    "p50Ms": 0.04970000000000141,
+    "p95Ms": 0.19519999999999982,
+    "queries": 800,
+    "stats": {
+      "skills": 447,
+      "physicalReads": 0,
+      "cachedBytes": 0,
+      "cachedObjects": 0
+    },
+    "packBytes": 12742284
+  },
+  "installedResources": {
+    "filesChecked": 805,
+    "mismatches": [],
+    "buildIdMatches": true
+  }
+}

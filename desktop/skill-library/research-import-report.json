@@ -1,0 +1,9 @@
+{
+  "skills": 45,
+  "resources": 592,
+  "scripts": 19,
+  "repository": "NVIDIA-BioNeMo/bionemo-agent-toolkit",
+  "commit": "f9bb5bb3aacc881c89eb15e93fd119e91915eea8",
+  "packBytes": 12232630,
+  "personalOnly": false
+}
