@@ -18,7 +18,7 @@ Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数�
   <a href="#深度调研"><img alt="深度调研" src="https://img.shields.io/badge/深度调研-论文复现-202020" /></a>
   <a href="#实验设计"><img alt="实验设计" src="https://img.shields.io/badge/实验设计-引物与载体-202020" /></a>
   <a href="#多组学数据处理"><img alt="多组学" src="https://img.shields.io/badge/多组学-QC与整合-202020" /></a>
-  <a href="#图表批注"><img alt="图表批注" src="https://img.shields.io/badge/图表-可勾画批注-202020" /></a>
+  <a href="#7-图表批注"><img alt="图表批注" src="https://img.shields.io/badge/图表-可勾画批注-202020" /></a>
 </p>
 
 <details>

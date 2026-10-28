@@ -648,5 +648,14 @@
         "citation-provenance (not semantic entailment)"
       ]
     }
-  ]
+  ],
+  "actualUserProfile": {
+    "kind": "installed executable, actual user profile, read-only UI and build check; no model request",
+    "windowCount": 1,
+    "theme": "light",
+    "hasSkillsButton": true,
+    "buildId": "2b43ab1f10d7c315d4287c4127802df09a7c1f89628ee5cfdd67a539af98f51d",
+    "activeTasks": 0,
+    "passed": true
+  }
 }
