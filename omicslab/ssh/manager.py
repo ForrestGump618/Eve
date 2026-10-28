@@ -1050,6 +1050,21 @@ class SSHManager:
             if transport is None or not transport.is_active():
                 raise SSHError("SSH 连接建立失败：传输层未激活")
             transport.set_keepalive(15)
+            # SSH keepalives alone do not detect a half-open TCP path. Ask the
+            # operating system to expire dead peers so the next acquisition can
+            # reconnect rather than reuse an apparently active transport.
+            sock = getattr(transport, "sock", None)
+            if sock is not None:
+                try:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    if os.name == "nt" and hasattr(socket, "SIO_KEEPALIVE_VALS"):
+                        sock.ioctl(socket.SIO_KEEPALIVE_VALS, (1, 15000, 5000))
+                    elif hasattr(socket, "TCP_KEEPIDLE"):
+                        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 15)
+                        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5)
+                        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
+                except (OSError, AttributeError):
+                    logger.debug("TCP keepalive tuning unavailable; SSH keepalive remains enabled")
             server_key = transport.get_remote_server_key()
             fingerprint = _fingerprint_of(server_key)
             warning = self._remember_host(profile, fingerprint)

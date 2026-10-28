@@ -7,6 +7,56 @@ import { ContextBudgetError, ContextManager, CompactionService, encodingForConte
 
 const call: ContextMessage = { role: 'assistant', content: '', tool_calls: [{ id: 'c1', type: 'function', function: { name: 'analyze', arguments: '{}' } }] };
 
+test('fresh search evidence remains verbatim when the complete request fits',()=>{
+ const directory=mkdtempSync(join(tmpdir(),'eve-fresh-evidence-'));
+ try{
+  const manager=new ContextManager({directory,model:'unknown',contextWindow:65536,outputTokens:2048,accounting:'estimate'});
+  const content=JSON.stringify({source:'https://example.org/paper',text:'Relevant primary evidence. '.repeat(300),conclusion:'Measured endpoint 42.'});
+  const messages:ContextMessage[]=[{role:'user',content:'Summarize this source.'},call,{role:'tool',tool_call_id:'c1',content}];
+  const result=manager.prepare({messages});
+  assert.equal(result.action,'none');
+  assert.equal(result.messages.at(-1)!.content,content);
+  assert.ok(result.stats.afterTokens<65536*.82);
+ }finally{rmSync(directory,{recursive:true,force:true});}
+});
+
+test('active skill instructions stay in a fitting request rather than being prematurely archived',()=>{
+ const directory=mkdtempSync(join(tmpdir(),'eve-active-skill-'));
+ try{
+  const manager=new ContextManager({directory,model:'unknown',contextWindow:65536,outputTokens:2048,accounting:'estimate'});
+  const instructions='Check evidence and keep negative results. '.repeat(160);
+  const messages:ContextMessage[]=[{role:'system',content:'Workspace authority.'},{role:'user',content:'Use this procedure.'},
+   {role:'assistant',content:'Load chosen skill',tool_calls:[{id:'skill',type:'function',function:{name:'skill_load',arguments:'{"id":"selected"}'}}]},
+   {role:'tool',tool_call_id:'skill',content:JSON.stringify({ok:true,result:{instructions}})}];
+  const result=manager.prepare({messages});
+  assert.equal(result.action,'none');
+  assert.ok(result.messages.at(-1)!.content.includes(instructions));
+  assert.ok(result.stats.afterTokens<65536*.82);
+ }finally{rmSync(directory,{recursive:true,force:true});}
+});
+
+test('repeated actual compressed histories replace derived memory and retain recall of original constraints',()=>{
+ const directory=mkdtempSync(join(tmpdir(),'eve-context-growth-'));
+ try{
+  const manager=new ContextManager({directory,model:'gpt-4o',contextWindow:8192,outputTokens:512});
+  const tools=[{name:'read_file',description:'read workspace file',parameters:{type:'object',properties:{path:{type:'string'}}}}];
+  let messages:ContextMessage[]=[{role:'system',content:'Do not change permissions.'},{role:'user',content:'Original constraint: preserve cohort-original.csv.'}];
+  for(let turn=0;turn<12;turn++){
+   messages.push({role:'assistant',content:'Evidence PMID:12345 '+(' observation'.repeat(6000))},
+     {role:'user',content:`Current task ${turn}: validate result-${turn}.csv.`});
+   const result=manager.prepare({messages,tools,force:true,state:{facts:Array.from({length:100},(_,i)=>({value:'measured '.repeat(100),path:`f${i}.csv`}))}});
+   assert.ok(result.stats.afterTokens<8192*.82);
+   assert.equal(result.messages.filter(m=>m.content.startsWith('ARCHIVED CONTEXT DATA:')).length,1);
+   assert.ok(result.messages.some(m=>m.role==='user'&&m.content===`Current task ${turn}: validate result-${turn}.csv.`));
+   assert.ok(result.summary?.userGoals.some(g=>g.text.includes('preserve cohort-original.csv')));
+   messages=result.messages;
+  }
+  const found=manager.search('cohort-original.csv') as {matches:Array<{source:any}>};
+  assert.ok(found.matches.length);
+  assert.match(manager.readSource(found.matches[0]!.source).content,/cohort-original.csv/);
+ }finally{rmSync(directory,{recursive:true,force:true});}
+});
+
 test('large repeated context bodies are deduplicated while raw hashes and old inline records remain valid',()=>{
  const directory=mkdtempSync(join(tmpdir(),'eve-context-dedup-'));
  try{

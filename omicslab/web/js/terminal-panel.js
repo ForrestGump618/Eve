@@ -75,34 +75,42 @@ export async function createTerminalPanel(workspace,{onClose=()=>{}}={}){
  const status=node.querySelector('.terminal-status');
  const terminal=new window.Terminal({screenReaderMode:true,cursorBlink:true,scrollback:3000,fontSize:13,fontFamily:'Cascadia Mono, Consolas, monospace',allowProposedApi:false,theme:terminalTheme()});
  const fit=new window.FitAddon.FitAddon();terminal.loadAddon(fit);terminal.open(node.querySelector('.eve-terminal-screen'));
- let socket=null,disposed=false,frame=0;
+ let socket=null,disposed=false,frame=0,retryTimer=0,retries=0;
  const offTheme=on('theme:change',()=>{if(!disposed)terminal.options.theme=terminalTheme();});
  function resize(){
   if(disposed||!node.isConnected||!node.clientWidth||!node.clientHeight)return;
   fit.fit();if(socket?.readyState===WebSocket.OPEN)socket.send(JSON.stringify({type:'resize',cols:terminal.cols,rows:terminal.rows}));
  }
  function scheduleResize(){if(!frame)frame=requestAnimationFrame(()=>{frame=0;resize();});}
- function disconnect(){if(socket){socket.onclose=null;socket.close();socket=null;}}
+ function disconnect(){clearTimeout(retryTimer);if(socket){socket.onclose=null;socket.close();socket=null;}}
  function connect(){
   if(disposed)return;disconnect();status.textContent='连接中';
   const url=new URL('/ws/terminal',location.href);url.protocol=location.protocol==='https:'?'wss:':'ws:';
   url.searchParams.set('workspace_id',workspace.workspace_id);url.searchParams.set('cols',terminal.cols);url.searchParams.set('rows',terminal.rows);
   const current=socket=new WebSocket(url);
+  let ended=false,recover=false,readyAt=0;
   current.onmessage=event=>{
    if(socket!==current||disposed)return;
    let packet;try{packet=JSON.parse(event.data);}catch{status.textContent='协议错误';return;}
    if(packet.type==='output')terminal.write(packet.data);
-   else if(packet.type==='ready'){status.textContent=`${packet.shell} · ${packet.pty?'PTY':'兼容通道'}`;resize();}
-   else if(packet.type==='diagnostic'){status.textContent=packet.message;terminal.writeln(`\r\n${packet.message}`);}
-   else if(packet.type==='exit')status.textContent='已结束';
+   else if(packet.type==='ready'){readyAt=Date.now();status.textContent=`${packet.shell} · ${packet.pty?'PTY':'兼容通道'}`;resize();}
+   else if(packet.type==='diagnostic'){recover=['ssh_connection_lost','channel_error'].includes(packet.code);status.textContent=packet.message;terminal.writeln(`\r\n${packet.message}`);}
+   else if(packet.type==='exit'){ended=true;status.textContent=recover?'连接中断':'已结束';}
   };
-  current.onclose=()=>{if(socket===current){socket=null;status.textContent='已断开';}};
+  current.onclose=()=>{if(socket===current){
+   socket=null;
+   if(readyAt&&Date.now()-readyAt>60000)retries=0;
+   if(!disposed&&workspace.backend==='ssh'&&(!ended||recover)&&retries<3){
+    const delay=Math.min(15000,1500*2**retries++);status.textContent=`${Math.ceil(delay/1000)} 秒后重连 (${retries}/3)`;
+    retryTimer=setTimeout(()=>{terminal.writeln('\r\n—— 重连新终端，旧命令未重放 ——');connect();},delay);
+   }else status.textContent=ended&&!recover?'已结束':'已断开 · 点击重新连接';
+  }};
   current.onerror=()=>{if(socket===current)status.textContent='连接失败';};
  }
  const input=terminal.onData(data=>{if(socket?.readyState===WebSocket.OPEN)socket.send(JSON.stringify({type:'input',data}));});
  const observer=new ResizeObserver(scheduleResize);observer.observe(node);
  node.querySelector('[data-terminal-clear]').onclick=()=>terminal.clear();
- node.querySelector('[data-terminal-connect]').onclick=()=>{terminal.writeln('\r\n—— 新终端会话 ——');connect();};
+ node.querySelector('[data-terminal-connect]').onclick=()=>{retries=0;terminal.writeln('\r\n—— 新终端会话 ——');connect();};
  connect();
  const panel={node,focus(){scheduleResize();terminal.focus();},destroy(){if(disposed)return;disposed=true;offTheme();cancelAnimationFrame(frame);observer.disconnect();disconnect();input.dispose();terminal.dispose();node.remove();}};
  node.querySelector('[data-terminal-close]').onclick=()=>{panel.destroy();onClose();};

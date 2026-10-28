@@ -18,7 +18,7 @@ export class ModelTruncatedError extends Error {
 }
 export class ModelApiError extends Error {
  readonly definitive:boolean;readonly retryable:boolean;
- constructor(readonly status:number,readonly retryAfterMs=2000){super(`模型 API HTTP ${status}; provider request rejected${status===429?'（限流或额度不足）':''}`);this.name='ModelApiError';this.definitive=[400,401,403,404,409,422,429].includes(status);this.retryable=status===429;}
+ constructor(readonly status:number,readonly retryAfterMs=2000,readonly contextOverflow=false){super(`模型 API HTTP ${status}; provider request rejected${status===429?'（限流或额度不足）':''}`);this.name='ModelApiError';this.definitive=[400,401,403,404,409,422,429].includes(status);this.retryable=status===429;}
 }
 function anthropicMessages(messages:TurnMessage[]):any[] {
  const result:any[]=[];
@@ -37,7 +37,15 @@ async function streamReply(c:ModelConfig,messages:TurnMessage[],signal:AbortSign
  const body=anthropic?{model:c.model,max_tokens:c.maxOutput,system,messages:nativeMessages,stream:true,...(tools.length?{tools:tools.map(t=>({name:t.name,description:t.description,input_schema:t.parameters}))}:{})}:{model:c.model,max_tokens:c.maxOutput,messages,stream:true,stream_options:{include_usage:true},...(tools.length?{tools:tools.map(t=>({type:'function',function:t})),tool_choice:'auto'}:{})};
  const headers:Record<string,string>=anthropic?{'Content-Type':'application/json','x-api-key':c.apiKey,'anthropic-version':'2023-06-01'}:{'Content-Type':'application/json','Authorization':`Bearer ${c.apiKey}`};
  const response=await fetch(c.baseUrl+(anthropic?'/messages':'/chat/completions'),{method:'POST',headers,body:JSON.stringify(body),signal,redirect:'error'});
- if(!response.ok){const retry=Number(response.headers.get('retry-after'));await response.body?.cancel();throw new ModelApiError(response.status,Number.isFinite(retry)&&retry>0?Math.min(10000,retry*1000):2000);}
+ if(!response.ok){
+  const retry=Number(response.headers.get('retry-after'));let diagnostic='';
+  if([400,413,422].includes(response.status)&&response.body){
+   const reader=response.body.getReader();
+   try{while(diagnostic.length<16000){const part=await reader.read();if(part.done)break;diagnostic+=new TextDecoder().decode(part.value).slice(0,16000-diagnostic.length);}}finally{await reader.cancel();}
+  }else await response.body?.cancel();
+  const overflow=/context_length_exceeded|maximum context|context.{0,25}(?:too long|exceed)|prompt.{0,25}too long|上下文.{0,20}(?:超|长)/i.test(diagnostic);
+  throw new ModelApiError(response.status,Number.isFinite(retry)&&retry>0?Math.min(10000,retry*1000):2000,overflow);
+ }
  if(!response.body)throw new Error('模型返回空响应流');
  const decoder=new TextDecoder();let pending='',text='',tokens=0,complete=false,inputTokens=0,reasoningContent='',finishReason='';
  const calls=new Map<number,ToolCall>();let dataLines:string[]=[];

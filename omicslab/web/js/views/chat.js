@@ -6,6 +6,8 @@ import {openHtmlArtifact} from '../artifact-viewer.js?v=1.0.0';
 import {workspaceSidebarHtml,conversationListHtml} from '../workspace-sidebar.js?v=2.1.1';
 import {mountProjectFiles} from '../project-files.js?v=2.1.1';
 import {mountGuidance} from '../guidance-ui.js?v=2.1.1';
+import {mountFileChanges} from '../file-changes.js?v=1.0.0';
+import {chooseComposerSkills} from '../composer-skills.js?v=1.0.0';
 import { icon, brandMark } from '../icons.js?v=2.1.1';
 import {
   esc,
@@ -568,6 +570,7 @@ export async function mount(root, ctx = {}) {
         }
       }
       local.messages = Array.isArray(conv?.messages) ? conv.messages : Array.isArray(raw?.messages) ? raw.messages : [];
+      void fileChanges.refresh();
       local.lastChildren = [];
       renderMessages();
       updateHeader();
@@ -729,6 +732,7 @@ export async function mount(root, ctx = {}) {
       '<div class="msg msg-assistant">' +
         `<div class="msg-avatar">${getPref('agentAvatar','') ? esc(getPref('agentAvatar','')) : brandMark(26, `a-${esc(msg.id || uid('m'))}`)}</div>` +
         '<div class="msg-col">' +
+        '<div class="eve-live-progress" hidden aria-live="polite"></div>' +
         (toolsHtml ? toolGroupHtml(toolsHtml) : '') +
         `<div class="msg-bubble">${contentHtml}${figuresHtml}</div>` +
         usageHtml +
@@ -875,9 +879,12 @@ export async function mount(root, ctx = {}) {
     });
   }
 
-  function toolCardHtml(call, result) {
+  function toolDisplayName(name) {
     const names={web_search:'搜索网页',web_fetch:'读取网页',database_search:'检索文献',read_file:'读取文件',list_directory:'查看目录',search_files:'搜索文件',write_file:'保存文件',skill_search:'查找技能',skill_load:'加载技能',skill_read_resource:'读取技能参考',skill_prepare:'准备工具环境',skill_run:'运行技能',skill_create:'创建技能',skill_install:'安装技能',workspace_info:'查看工作目录',mcp_tools:'发现 MCP 工具',mcp_call:'调用 MCP 工具'};
-    const label=names[call.name]||call.name||'执行工具';
+    return names[name]||name||'执行工具';
+  }
+  function toolCardHtml(call, result) {
+    const label=toolDisplayName(call.name);
     const ok = result ? result.ok !== false : null;
     const stateClass = result ? (ok ? 'is-ok' : 'is-fail') : 'is-running';
     const stateIcon = result
@@ -936,6 +943,7 @@ export async function mount(root, ctx = {}) {
       '<div class="msg msg-assistant msg-live">' +
         `<div class="msg-avatar">${getPref('agentAvatar','') ? esc(getPref('agentAvatar','')) : brandMark(26, 'live')}</div>` +
         '<div class="msg-col">' +
+        '<div class="eve-live-progress" hidden aria-live="polite"></div>' +
         '<details class="reasoning-block" hidden><summary>' +
         `<span class="reasoning-label">${icon('brain', { size: 13 })}<span>推理过程</span></span>` +
         `<span class="reasoning-count"></span>${icon('chevronDown', { size: 13, cls: 'reasoning-chev' })}</summary>` +
@@ -1021,6 +1029,14 @@ export async function mount(root, ctx = {}) {
       replaceText(text) {
         state.text=String(text||'');
         scheduleTextRender();
+      },
+      addProgress(text) {
+        if(!text)return;
+        const host=node.querySelector('.eve-live-progress');
+        if(!host||host.lastChild?.textContent===text)return;
+        host.hidden=false;const line=document.createElement('p');line.textContent=String(text).slice(0,1600);host.append(line);
+        while(host.children.length>6)host.firstChild.remove();
+        autoScroll();
       },
       appendReasoning(delta) {
         if (!delta) return;
@@ -1637,6 +1653,9 @@ export async function mount(root, ctx = {}) {
       case 'reasoning':
         local.live?.appendReasoning(data.delta || '');
         break;
+      case 'commentary':
+        local.live?.addProgress(data.text||'');
+        break;
       case 'tool_call':
         local.live?.addToolCall(data);
         setStatus(`调用工具：${data.name || ''}`);
@@ -1646,6 +1665,8 @@ export async function mount(root, ctx = {}) {
         local.live?.applyToolResult(data);
         setStatus('正在生成…');
         updateRunState({ status: 'running', phase: '核对工具结果', tool: '' });
+        local.live?.addProgress(`${toolDisplayName(data.name||'工具')}：${data.ok===false?'未完成，正在处理错误':'结果已返回'}`);
+        if(data.name==='write_file')void fileChanges.refresh();
         break;
       case 'approval_request':
         local.live?.addApproval(data);
@@ -2654,7 +2675,9 @@ export async function mount(root, ctx = {}) {
     if(window.innerWidth<=900){openDrawer(!el.view.classList.contains('drawer-open'));return;}
     const collapsed=el.view.classList.toggle('sidebar-collapsed');setPref('chatSidebarCollapsed',collapsed);if(ctx.shellSidebar)document.body.classList.toggle('workspace-sidebar-collapsed',collapsed);el.drawerBtn.setAttribute('aria-expanded',String(!collapsed));
   });
-  root.querySelector('#chat-skills-open')?.addEventListener('click',()=>navigate('skills'));
+  root.querySelector('#chat-skills-open')?.addEventListener('click',()=>chooseComposerSkills(el.input).catch(error=>toastError(errorMessage(error))));
+  const fileChanges=mountFileChanges(root,()=>({workspaceId:getState().workspaceId,sessionId:local.activeId}));
+  void fileChanges.refresh();
   const permissionSelect = root.querySelector('#chat-permission-mode');
   let executionSelectionPending = Promise.resolve(true);
   const guidanceUI=mountGuidance({root,context:()=>({runId:local.run?.runId||local.guidanceRunId,epoch:observerEpoch,running:local.streaming}),clearInput:()=>{el.input.value='';autoGrow();},startTask:content=>void sendMessage({text:content})});
@@ -2932,6 +2955,7 @@ export async function mount(root, ctx = {}) {
 
   return {
     destroy() {
+      fileChanges.destroy();
       guidanceUI.dispose();
       detachActiveView();
       sidebarController.abort();

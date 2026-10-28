@@ -1,6 +1,8 @@
 import { mkdirSync, chmodSync, existsSync, writeFileSync, renameSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { randomBytes, timingSafeEqual, createHash } from 'node:crypto';
+import { writeFile, rename, unlink } from 'node:fs/promises';
+import { setTimeout as delay } from 'node:timers/promises';
 import { join } from 'node:path';
 export function protect(path:string):void {
   if(process.platform==='win32') {
@@ -14,6 +16,22 @@ export function ensureHome(home:string):void {mkdirSync(home,{recursive:true,mod
 export function atomicJson(path:string,value:unknown):void {
  const temp=path+'.'+randomBytes(6).toString('hex')+'.tmp';
  writeFileSync(temp,JSON.stringify(value),{mode:0o600,flag:'wx'});renameSync(temp,path);
+}
+/** Windows readers/antivirus can briefly deny an atomic replacement. Retry
+ * without deleting the old connection record or blocking the daemon event loop. */
+export async function atomicJsonAsync(path:string,value:unknown):Promise<void> {
+ const temp=path+'.'+randomBytes(6).toString('hex')+'.tmp';
+ try {
+  await writeFile(temp,JSON.stringify(value),{mode:0o600,flag:'wx'});
+  for(let attempt=0;;attempt++){
+   try { await rename(temp,path);return; }
+   catch(error){
+    const code=(error as NodeJS.ErrnoException).code;
+    if(process.platform!=='win32'||!['EPERM','EACCES','EBUSY'].includes(code??'')||attempt>=6)throw error;
+    await delay(25*2**attempt);
+   }
+  }
+ }finally{await unlink(temp).catch(()=>{});}
 }
 export function secretEqual(a:unknown,b:string):boolean {return typeof a==='string'&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));}
 export interface Connection { pipe:string; token:string; pid:number; version:number }

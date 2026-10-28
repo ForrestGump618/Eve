@@ -53,7 +53,9 @@ export class WorkspaceFiles {
   if(!previous&&expectedSha256)throw new ValidationError('Expected existing file does not exist');
   const tmp=join(dirname(path),`.suwen-${randomUUID()}.tmp`);
   try{await writeFile(tmp,content,{encoding:'utf8',flag:'wx'});await rename(tmp,path);}finally{await unlink(tmp).catch(()=>{});}
-  return {path,bytes:Buffer.byteLength(content),sha256:digest(content),created:!previous};
+  const confirmed=await readFile(path);
+  if(!confirmed.equals(Buffer.from(content,'utf8')))throw new ValidationError('File read-back verification failed after write; inspect the current file before retrying');
+  return {path,bytes:Buffer.byteLength(content),sha256:digest(content),created:!previous,verified:true};
  }
 }
 

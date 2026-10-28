@@ -14,6 +14,7 @@ import { ContextManager, encodingForContextModel, type ContextMessage } from '..
 import { prepareContextAsync } from '../context-async.js';
 import {queryContextAsync} from '../context-query.js';
 import type { ModelRuntime } from '../model-runtime.js';
+import type {TurnMessage} from '../providers.js';
 import type { StreamBuffer } from '../shared/contract.js';
 import type { ToolServices } from './tools.js';
 import { createAgentTools } from '../agent-tools.js';
@@ -74,11 +75,11 @@ export function createModelActivity(deps: ModelActivityDeps): ActivityHandler {
       if (record && record.kind === 'conversation' && record.data && typeof record.data === 'object' && !Array.isArray(record.data)) {
         const history = (record.data as Record<string, Json>).messages;
         if (Array.isArray(history) && history.length) {
-          const transcript = history.slice(-40).map(item => {
+          const transcript = history.map(item => {
             const message = (item && typeof item === 'object' && !Array.isArray(item) ? item : {}) as Record<string, Json>;
             const role = message.role === 'assistant' ? 'assistant' : message.role === 'system' ? 'system' : 'user';
             const text = typeof message.text === 'string' ? message.text : '';
-            return { role, content: text.length > 6000 ? `${text.slice(0, 6000)}…[truncated for context; full text in conversation record]` : text };
+            return { role, content: text };
           }).filter(message => message.content);
           messages = [{ role: 'system', content: SYSTEM_PROMPT }, ...transcript];
           if (promptText && messages.at(-1)?.content.trim() !== promptText) messages.push({ role:'user', content:promptText });
@@ -109,12 +110,12 @@ export function createModelActivity(deps: ModelActivityDeps): ActivityHandler {
     try { encodingForContextModel(current.model); } catch { accounting = 'estimate'; }
     let prepared: Awaited<ReturnType<typeof prepareContextAsync>>;
     try {
-      prepared = await prepareContextAsync({ directory: join(home, 'contexts', contextId), model: current.model, contextWindow: current.contextWindow, outputTokens: current.maxOutput, accounting }, { messages: messages as ContextMessage[], state }, ctx.signal);
+      prepared = await prepareContextAsync({ directory: join(home, 'contexts', contextId), model: current.model, contextWindow: current.contextWindow, outputTokens: current.maxOutput, accounting }, { messages: messages as ContextMessage[], state, recordOnly:Boolean(deps.tools) }, ctx.signal);
     } catch {
       throw new ValidationError('上下文准备失败或预算不足；保留原始记录，未发送模型请求。');
     }
     store.activityProgress(ctx.task.id,ctx.step,'agent.context_prepared',{model:current.model,contextWindow:current.contextWindow,maxOutput:current.maxOutput,action:prepared.action,stats:prepared.stats,summaryVersion:prepared.summary?.version??null});
-    if (ctx.task.limits.maxTokens !== undefined && ctx.task.tokens + prepared.stats.afterTokens > ctx.task.limits.maxTokens) throw new ValidationError('当前请求及输出预留超过剩余 token 预算');
+    if (!deps.tools && ctx.task.limits.maxTokens !== undefined && ctx.task.tokens + prepared.stats.afterTokens > ctx.task.limits.maxTokens) throw new ValidationError('当前请求及输出预留超过剩余 token 预算');
 
     streams.set(ctx.task.id, { text: '', updatedAt: Date.now(), stepId: ctx.step.id });
     try {
@@ -123,8 +124,9 @@ export function createModelActivity(deps: ModelActivityDeps): ActivityHandler {
       const traceId = `${ctx.task.id}:${ctx.step.id}:${ctx.step.fence}`;
       const toolArtifacts: Awaited<ReturnType<typeof writeArtifact>>[] = [];
       const progress = (type:string,data:Json,usage:Parameters<Store['activityProgress']>[4]={}) => store.activityProgress(ctx.task.id,ctx.step,type,data,usage);
-      let lastPaint=0;
-      const updateText = (text:string) => { if (!ctx.signal.aborted && Date.now()-lastPaint>=40) { lastPaint=Date.now(); streams.set(ctx.task.id,{text,updatedAt:Date.now(),stepId:ctx.step.id}); } };
+      // Readers already poll/coalesce snapshots. Never drop the last chunk of a
+      // short model turn: it may precede a slow tool or approval by several minutes.
+      const updateText = (text:string) => { if (!ctx.signal.aborted) streams.set(ctx.task.id,{text,updatedAt:Date.now(),stepId:ctx.step.id}); };
       const allowedFiles=environment?.kind==='ssh'?[]:[...(Array.isArray(input.allowedFiles)?input.allowedFiles.filter((x):x is string=>typeof x==='string').slice(0,20):[]),...await userFileGrants(promptText)];
       const workspaceRoots=Array.isArray(input.workspaceRoots)?input.workspaceRoots.filter((x):x is string=>typeof x==='string').slice(0,8):[];
       const priorEvidence=ctx.step.dependsOn.map(id=>store.getStep(ctx.task.id,id)).filter(step=>step?.status==='completed'&&['pubmed','uniprot','knowledge'].includes(step.kind));
@@ -137,6 +139,11 @@ export function createModelActivity(deps: ModelActivityDeps): ActivityHandler {
         initialEvidence:[...priorEvidence.map(step=>step!.output??null),resume?.sources??null],
         priorActions:[...priorEvidence.map(()=> 'database_search'),...resume?.actions??[]],
         resumeHistory:resume?.history,
+        admitContext:async(history,tools,outputTokens,force,window)=>{
+          const admitted=await prepareContextAsync({directory:join(home,'contexts',contextId),model:current.model,contextWindow:window,outputTokens,accounting},
+            {messages:history as ContextMessage[],tools,state,force},ctx.signal);
+          return {messages:admitted.messages as TurnMessage[],stats:admitted.stats,compacted:admitted.action==='compacted'};
+        },
         guidance:{take:()=>takeGuidance(store,ctx.task.id),pending:()=>listGuidance(store,ctx.task.id).some(x=>x.status==='queued')},
         contextJournal:{
           record:async(history,tools,metadata)=>{

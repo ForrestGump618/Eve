@@ -94,7 +94,9 @@ class DesktopHarness:
         if selected.provider != "mock" and key:
             requested_output = int(capability.get("max_output", settings.max_tokens or 8192))
             model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=context_window, maxOutput=max(128, min(requested_output, 32767, context_window//2-1)))
-        messages = [{"role": m.role, "content": m.content} for m in conv.messages[-40:] if m.role in ("user", "assistant") and m.content]
+        # Admission/compaction owns the budget. Dropping turns here prevents
+        # search_context from recovering older goals and evidence at all.
+        messages = [{"role": m.role, "content": m.content} for m in conv.messages if m.role in ("user", "assistant") and m.content]
         conv.messages.append(ChatMessage(role="user", content=user_text))
         if not conv.title or conv.title == "新会话":
             conv.title = user_text[:80]
@@ -165,7 +167,13 @@ class DesktopHarness:
                     seen.add(trace["sequence"])
                     data = trace.get("data") or {}
                     kind = trace["type"]
-                    if kind == "tool.started":
+                    if kind == "agent.commentary":
+                        await event("commentary", {"text": data.get("text", "")})
+                    elif kind in {"agent.context_compacted", "agent.context_recovered"}:
+                        await event("status", {"text": "已整理上下文，继续执行"})
+                    elif kind == "model.started":
+                        await event("status", {"text": "正在生成下一步"})
+                    elif kind == "tool.started":
                         await event("tool_call", {"id":data.get("callId"),"name":data.get("name"),"arguments":{},"trace_id":data.get("traceId")})
                     elif kind in ("tool.completed", "tool.failed"):
                         preview = data.get("error") or "执行完成；原始结果保存在 Harness 产物中"

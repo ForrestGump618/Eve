@@ -18,7 +18,7 @@ import {workspaceFailure} from './execution-environment.js';
 import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
 import { ValidationError, type TaskDefinition, type Json } from './harness/types.js';
-import { ensureHome, newConnection, connectionPath, atomicJson, secretEqual, safeError } from './security.js';
+import { ensureHome, newConnection, connectionPath, atomicJson, atomicJsonAsync, secretEqual, safeError } from './security.js';
 import {queryContextAsync} from './context-query.js';
 import { ContextManager } from './context.js';
 import { prepareContextAsync } from './context-async.js';
@@ -488,7 +488,12 @@ const server = createServer(socket => {
 });
 server.maxConnections = 32;
 server.on('error', err => { console.error(safeError(err)); void shutdown(); });
-server.listen(connection.pipe, () => atomicJson(connectionPath(home), connection));
+server.listen(connection.pipe, () => {
+  void atomicJsonAsync(connectionPath(home),connection).catch(error=>{
+    console.error('Connection publication failed',safeError(error));
+    void shutdown();
+  });
+});
 
 let stopping = false;
 async function shutdown(): Promise<void> {

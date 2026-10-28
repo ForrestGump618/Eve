@@ -36,10 +36,10 @@ const sshApi = {
     api.request(`/api/ssh/profiles/${encodeURIComponent(id)}`, { method: 'PATCH', body }),
   deleteProfile: (id) =>
     api.request(`/api/ssh/profiles/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-  testProfile: (id, password) =>
+  testProfile: (id, password, remember=false) =>
     api.request(`/api/ssh/profiles/${encodeURIComponent(id)}/test`, {
       method: 'POST',
-      body: password ? { password } : {},
+      body: { ...(password ? {password} : {}), remember_password:remember },
       timeout: 60000,
     }),
   exec: (body, timeout) => api.request('/api/ssh/exec', { method: 'POST', body, timeout }),
@@ -588,7 +588,8 @@ function createView(root) {
           ? '密钥认证无需密码'
           : '未保存密码，请输入以完成测试'
       }"></div>` +
-      '<p class="field-hint">输入的密码仅用于本次测试并暂存在服务进程内存，不会写入磁盘。</p>' +
+      `<label class="ssh-check"><input type="checkbox" id="ssh-test-remember" ${profile.credential_stored?'checked':''}/>记住密码，重启后自动复用</label>` +
+      '<p class="field-hint">保存到系统凭据库；不可持久保存时会明确提示。</p>' +
       '<div class="ssh-test-result" data-role="test-result"></div>' +
       '</div>';
     const modal = openModal({
@@ -608,7 +609,7 @@ function createView(root) {
             state.testingId = profile.id;
             render();
             try {
-              const result = await sshApi.testProfile(profile.id, password);
+              const result = await sshApi.testProfile(profile.id, password, Boolean(body.querySelector('#ssh-test-remember')?.checked));
               state.lastTest.set(profile.id, result || {});
               renderTestResult(resultNode, result || {});
               if (result && result.ok) {

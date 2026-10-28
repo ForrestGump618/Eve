@@ -6,11 +6,32 @@ import { parseMcpResult } from '../src/mcp-result.js';
 import { ModelRuntime } from '../src/model-runtime.js';
 import type { ModelTurn, TurnMessage } from '../src/providers.js';
 import { extractText, publicUrl, fetchedSource } from '../src/search.js';
-import {ModelTruncatedError} from '../src/providers.js';
+import {ModelTruncatedError,ModelApiError} from '../src/providers.js';
+import {ContextManager,type ContextMessage} from '../src/context.js';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 
 const parameters={type:'object',properties:{query:{type:'string',minLength:1}},required:['query'],additionalProperties:false} as const;
 function runtime(turn:(messages:TurnMessage[])=>Promise<ModelTurn>):ModelRuntime {const m=new ModelRuntime();m.turn=async(messages)=>turn(messages);return m;}
 const reply=(text:string):ModelTurn=>({text,tokens:20,toolCalls:[]});
+test('unified admission receives the original large observed call before any fallback pruning',async()=>{
+ let turns=0,sawOriginal=false,executions=0;
+ const content='original scientific result '.repeat(2000);
+ const registry=new ToolRegistry().register({name:'write_file',kind:'tool',description:'write',parameters:{type:'object',properties:{path:{type:'string'},content:{type:'string'}},required:['path','content']},execute:async()=>{executions++;return {verified:true};}});
+ const model=runtime(async()=>!turns++?{text:'',tokens:10,toolCalls:[{id:'large-write',name:'write_file',arguments:JSON.stringify({path:'result.md',content})}]}:reply('Verified actual write.'));
+ const result=await runAgent({...options(model,registry),contextWindow:6000,admitContext:async messages=>{
+  const observed=messages.find(m=>m.role==='tool');
+  if(observed){
+   const args=JSON.parse(messages.find(m=>m.tool_calls)!.tool_calls![0]!.function.arguments);
+   assert.equal(args.content,content);sawOriginal=true;
+  }
+  return {messages,stats:{afterTokens:1500},compacted:false};
+ }});
+ assert.equal(sawOriginal,true);assert.equal(executions,1);
+ assert.equal(result.trace.some(e=>e.type==='agent.request_compacted'||e.type==='agent.compacted'),false);
+});
+
 test('completed long write arguments compact after the original decision is checkpointed',async()=>{
  let turns=0,executions=0,originalSaved=false;
  const content='实测报告'.repeat(1500);
@@ -143,6 +164,64 @@ test('reference skill discovery does not manufacture a requirement for skill_run
  assert.equal(result.completion,'verified');
 });
 function options(model:ModelRuntime,registry=new ToolRegistry()) {return {model,registry,signal:new AbortController().signal,traceId:'trace-test',messages:[{role:'user',content:'hello'}] as TurnMessage[],prompt:'hello',contextWindow:32000,maxOutput:512,onText:()=>{},onEvent:()=>{},beforeModel:()=>{},afterModel:()=>{},persistTool:async()=>{}};}
+
+test('composer-selected skill loads actual instructions before the first model decision',async()=>{
+ let loads=0;
+ const registry=new ToolRegistry()
+  .register({name:'skill_search',kind:'skill',description:'search',parameters:parameters as any,execute:async()=>({skills:[{name:'cohort-check',id:'actual-id'}]})})
+  .register({name:'skill_load',kind:'skill',description:'load',parameters:{type:'object',properties:{id:{type:'string'}},required:['id']},execute:async args=>{assert.equal(args.id,'actual-id');loads++;return {instructions:'Inspect current cohort before further analysis.'};}});
+ const model=runtime(async messages=>{
+  assert.equal(loads,1);
+  assert.ok(messages.some(m=>m.role==='tool'&&m.content.includes('Inspect current cohort')));
+  return reply('Ready to discuss the cohort plan.');
+ });
+ const result=await runAgent({...options(model,registry),prompt:'[选用技能: cohort-check]\nDiscuss the plan.'});
+ assert.equal(result.completion,'verified');
+});
+test('explicit skill discovery can finish without executing code; it cannot satisfy an execution request',async()=>{
+ const registry=()=>new ToolRegistry().register({name:'skill_search',kind:'skill',description:'search skills',parameters:parameters as any,execute:async()=>({skills:[{id:'mean',name:'mean',version:'1.0.0'}]})});
+ const model=()=>{let turn=0;return runtime(async()=>turn++?reply('Found mean 1.0.0.'):({text:'',tokens:10,toolCalls:[{id:'find',name:'skill_search',arguments:'{"query":"mean"}'}]}));};
+ assert.equal((await runAgent({...options(model(),registry()),prompt:'查找均值计算技能，不要执行脚本。'})).completion,'verified');
+ await assert.rejects(runAgent({...options(model(),registry()),prompt:'查找并实际执行均值计算技能。'}),/verification failed/);
+});
+
+test('context rejection uses bounded admission recovery and never replays a completed tool',async()=>{
+ let calls=0,executions=0,admissions=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>{executions++;return {value:42};}});
+ const model=runtime(async()=>{
+  calls++;
+  if(calls===1)return call();
+  if(calls===2)throw new ModelApiError(400,0,true);
+  return reply('Value 42 verified.');
+ });
+ const result=await runAgent({...options(model,registry),admitContext:async(messages,_tools,_output,_force,window)=>{
+  admissions++;return {messages,compacted:false,stats:{afterTokens:Math.min(window*.7,4000)}};
+ }});
+ assert.equal(calls,3);assert.equal(executions,1);assert.equal(admissions,3);
+ assert.ok(result.trace.some(e=>e.type==='agent.context_recovered'));
+});
+
+test('a 4K model can read a file with a large installed catalog through complete-request admission',async()=>{
+ const directory=mkdtempSync(join(tmpdir(),'eve-small-window-'));
+ try{
+  let turns=0;
+  const registry=new ToolRegistry().register({name:'read_file',kind:'tool',description:'Read workspace text',parameters:{type:'object',properties:{path:{type:'string'}},required:['path']},execute:async()=>({content:'ACTUAL_OBSERVATION'})});
+  for(let i=0;i<60;i++)registry.register({name:`unrelated_${i}`,kind:'tool',description:'Long optional feature '.repeat(50),parameters:{type:'object',properties:{}},execute:async()=>({})});
+  const model=runtime(async messages=>{
+   if(!turns++)return {text:'Reading workspace file',tokens:10,toolCalls:[{id:'read',name:'read_file',arguments:'{"path":"data.txt"}'}]};
+   assert.ok(messages.some(m=>m.role==='tool'&&m.content.includes('ACTUAL_OBSERVATION')));
+   return reply('File content checked.');
+  });
+  const result=await runAgent({...options(model,registry),prompt:'read file data.txt',contextWindow:4096,
+   admitContext:async(messages,tools,outputTokens,force,window)=>{
+    const manager=new ContextManager({directory,model:'small-unknown-model',contextWindow:window,outputTokens,accounting:'estimate'});
+    const result=manager.prepare({messages:messages as ContextMessage[],tools,force});
+    assert.ok(result.stats.afterTokens<4096*.82);
+    return {messages:result.messages as TurnMessage[],stats:result.stats,compacted:result.action==='compacted'};
+   }});
+  assert.equal(result.verification.passed,true);assert.equal(turns,2);
+ }finally{rmSync(directory,{recursive:true,force:true});}
+});
 
 test('real tool observations, including errors, are returned with matching call ids before final output',async()=>{
   let turns=0;const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:parameters as any,execute:async()=>({url:'https://example.org/paper',title:'Actual paper',abstract:'Actual evidence'})});

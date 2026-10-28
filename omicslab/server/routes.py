@@ -575,9 +575,13 @@ async def set_keys(request: Request) -> dict[str, Any]:
             continue
         if isinstance(payload.get(field), str) and str(payload.get(field) or "").strip():
             patch[field] = str(payload[field]).strip()
-    if not keys and not patch:
+    has_connection = bool(provider and ("models" in payload or payload.get("model") or payload.get("api_base")))
+    if not keys and not patch and not has_connection:
         raise _error("没有可保存的 Key 或配置")
     try:
+        if has_connection:
+            settings.save_provider_connection(provider, str(payload.get("model") or "").strip(),
+                str(payload.get("api_base") or "").strip(), payload.get("models"))
         if keys:
             settings.set_keys(keys)
         if patch:
@@ -598,6 +602,19 @@ async def set_keys(request: Request) -> dict[str, Any]:
     }
 
 
+@router.post("/api/settings/models")
+async def list_provider_models(request: Request):
+    from ..provider_models import discover_models
+    payload = await _json(request)
+    try:
+        target = _test_llm_target(_state(request), payload)
+        return await discover_models(target)
+    except ConfigError as exc:
+        raise _error(str(exc), "model_discovery_failed") from exc
+    except Exception:
+        raise _error("无法获取模型列表，请检查网络或手动填写；已保存配置保持不变", "model_discovery_failed")
+
+
 def _test_llm_target(state, payload: dict[str, Any]):
     """Build the target to test, honouring values typed but not yet saved."""
     settings = state.settings
@@ -610,7 +627,7 @@ def _test_llm_target(state, payload: dict[str, Any]):
     if not any((provider, model, api_base, api_key)):
         return settings.resolve_llm()
     effective_provider = provider or str(settings.provider or "").strip() or "auto"
-    meta = PROVIDERS.get(effective_provider) or {}
+    meta = settings.provider_meta(effective_provider)
     # A test of the *currently selected* provider must use the stored endpoint/model
     # too, otherwise "测试连接" would silently test a different base URL (the classic
     # "配置了 API 后依然无效" symptom).
@@ -623,7 +640,7 @@ def _test_llm_target(state, payload: dict[str, Any]):
         )
     if not api_base:
         saved_base = str(settings.api_base or "").strip() if same_as_saved else ""
-        api_base = saved_base or str(meta.get("api_base") or "")
+        api_base = str(settings.provider_connections.get(effective_provider, {}).get("api_base") or "") or saved_base or str(meta.get("api_base") or "")
     api_base = api_base.rstrip("/")
     family = str(meta.get("family") or "")
     if not family:
@@ -635,7 +652,7 @@ def _test_llm_target(state, payload: dict[str, Any]):
         if saved_model in {"", "auto"}:
             saved_model = ""
         model = saved_model or str(meta.get("default_model") or "") or "default"
-    if not api_key and family != "mock":
+    if not api_key and family != "mock" and not meta.get("no_key_required"):
         raise ConfigError(
             f"provider '{effective_provider or 'custom'}' 缺少 API Key：请填写后重试。"
         )

@@ -8,6 +8,7 @@ import { applyAppearance } from '../suwen.js?v=2.1.1';
 import { renderChannels } from './channel-setup.js?v=2.1.1';
 import {mountResearchWorkspace} from './research-workspace.js?v=1.0.0';
 import {mountScienceWorkbench} from './science-workbench.js?v=1.0.0';
+import {mountProviderModels} from '../provider-models.js?v=1.0.0';
 
 const GROUPS={
  settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']],
@@ -70,20 +71,21 @@ export async function mount(root){
   const data=await api.settings.get();const providers=Object.values(data.providers||{});const selected=providers.find(p=>p.id===providerId)||providers[0]||{};
   const modelOptions=[selected.default_model,...(selected.models||[])].filter(Boolean).filter((m,i,a)=>a.indexOf(m)===i);
   const providerSelect=providers.map(p=>`<option value="${escAttr(p.id)}" ${p.id===selected.id?'selected':''}>${esc(p.label||p.id)}</option>`).join('');
-  const html=`<div class="eve-provider-editor"><div class="eve-provider-step"><span class="eve-provider-step-number">1</span><div><strong>选择供应商</strong><small>每个供应商独立保存连接状态，其他 Key 不会被覆盖。</small></div></div><label class="sw-field"><span>供应商</span><select id="provider-editor-provider">${providerSelect}</select></label><div class="eve-provider-step"><span class="eve-provider-step-number">2</span><div><strong>填写模型连接</strong><small>先测试，再决定是否设为默认路由。</small></div></div><div class="sw-form-grid">${field('模型名称','provider-editor-model',selected.default_model||modelOptions[0]||'','例如 deepseek-chat')}${field('API Base（自定义端点必填）','provider-editor-base',selected.api_base||'','留空使用供应商默认地址')}</div>${field('API Key','provider-editor-key', '',selected.has_key?'已保存，留空保持不变':'粘贴 API Key','','password')}<label class="sw-check"><input type="checkbox" id="provider-editor-default" ${data.llm?.provider===selected.id?'checked':''}/>设为默认供应商与模型</label><label class="sw-check"><input type="checkbox" id="provider-editor-test" checked/>保存后立即测试连接</label></div>`;
+  const html=`<div class="eve-provider-editor"><div class="eve-provider-step"><span class="eve-provider-step-number">1</span><div><strong>选择供应商</strong><small>每个供应商独立保存连接状态，其他 Key 不会被覆盖。</small></div></div><label class="sw-field"><span>供应商</span><select id="provider-editor-provider">${providerSelect}</select></label><div class="eve-provider-step"><span class="eve-provider-step-number">2</span><div><strong>填写模型连接</strong><small>先测试，再决定是否设为默认路由。</small></div></div><div class="sw-form-grid">${field('模型名称','provider-editor-model',selected.default_model||modelOptions[0]||'','例如 deepseek-chat')}${field('API Base（自定义端点必填）','provider-editor-base',selected.api_base||'','留空使用供应商默认地址')}</div>${field('API Key','provider-editor-key', '',selected.has_key?'已保存，留空保持不变':'粘贴 API Key','password')}<label class="sw-check"><input type="checkbox" id="provider-editor-default" ${data.llm?.provider===selected.id?'checked':''}/>设为默认供应商与模型</label><label class="sw-check"><input type="checkbox" id="provider-editor-test" checked/>保存后立即测试连接</label></div>`;
   const modal=modalForm('添加 / 编辑供应商',html,async body=>{
     const provider=modalValue(body,'provider-editor-provider'),model=modalValue(body,'provider-editor-model').trim(),base=modalValue(body,'provider-editor-base').trim(),key=modalValue(body,'provider-editor-key').trim(),activate=body.querySelector('#provider-editor-default')?.checked===true;
     const meta=providers.find(p=>p.id===provider)||{};
     if(meta.needs_model&&!model)throw new Error('该供应商需要填写模型名称');
     if(meta.needs_api_base&&!base)throw new Error('该供应商需要填写 API Base');
     if(!meta.no_key_required&&!meta.has_key&&!key)throw new Error('请填写 API Key');
-    const payload={provider,model,api_base:base,key,activate};
+    const payload={provider,model,models:providerModels.values(),api_base:base,key,activate};
     const saved=await api.settings.saveKeys(payload);
     if(body.querySelector('#provider-editor-test')?.checked){const tested=await api.settings.testLLM({provider,model,api_base:base,api_key:key});if(!tested?.ok)throw new Error(tested?.error||'连接测试失败');}
     toastSuccess(activate?'供应商已保存并设为默认':'供应商连接已保存');
     await models();
     return saved;
-  },'保存并测试');
+  },'保存');
+  const providerModels=mountProviderModels(modal.body,modelOptions);
   modal?.body?.querySelector('#provider-editor-provider')?.addEventListener('change',(event)=>{
     const next=providers.find(p=>p.id===event.target.value)||{};
     const model=next.default_model||(next.models||[])[0]||'';
@@ -93,6 +95,8 @@ export async function mount(root){
     if(modelInput)modelInput.value=model;
     if(baseInput)baseInput.value=next.api_base||'';
     if(keyInput)keyInput.placeholder=next.has_key?'已保存，留空保持不变':'粘贴 API Key';
+    if(keyInput)keyInput.value='';
+    providerModels.reset([...new Set([next.default_model,...(next.models||[])].filter(Boolean))]);
   });
  }
  async function models(){

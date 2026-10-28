@@ -28,6 +28,21 @@ test('workspace files paginate, search, refuse escape, and protect unseen update
  await assert.rejects(exact.list(other),/outside/);
  if(process.platform==='win32')assert.deepEqual(await userFileGrants(`请读取 ${join(root,'data.txt')} 并总结`),[join(root,'data.txt')]);
 });
+test('all built-in workbench workflows seed into the native registry and load with runtime adaptation',async()=>{
+ const home=mkdtempSync(join(tmpdir(),'eve-workflow-seed-')),store=new Store(join(home,'test.sqlite'));
+ try{
+  const registry=new SkillRegistry({home,store});
+  const root=resolve('dist/bundled-skills');
+  const first=await installBundledSkills(registry,root) as any;
+  await installBundledSkills(registry,root);
+  assert.equal(first.count,35);assert.equal(registry.list().length,35);
+  for(const name of ['biomedical-discovery','primer-design','remote-compute-ssh','statistical-rigor']){
+   const skill=registry.list().find(s=>s.name===name)!;assert.ok(skill);
+   assert.match((registry.load(skill.id) as any).instructions,/Eve 运行适配/);
+   assert.equal(skill.executable,false);
+  }
+ }finally{store.close();}
+});
 test('bundled skills seed idempotently and generated skills actually execute',async()=>{
  const home=mkdtempSync(join(tmpdir(),'suwen-skill-test-')),store=new Store(join(home,'test.sqlite'));
  const worker=createResearchWorker({python:'python',scriptPath:resolve('worker/research_worker.py')});

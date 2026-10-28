@@ -14,6 +14,23 @@ from ..suwen.tasks import validate_workflow
 router=APIRouter(prefix='/api/platform',tags=['Suwen platform'])
 
 
+@router.get('/file-changes')
+async def file_changes(request:Request,scope:str='ws_main',session_id:str=''):
+    p=platform(request);p.require_workspace(scope)
+    rows=p.store.list('file_change',scope,limit=100,session_id=session_id or None)
+    return {'items':[{k:v for k,v in row.items() if k!='before'} for row in rows]}
+
+
+@router.post('/file-changes/{change_id}/restore')
+async def restore_file_change(request:Request,change_id:str,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope)
+    from ..suwen.file_changes import restore
+    try:
+        return await restore(p,scope,change_id)
+    except ValueError as exc:
+        raise HTTPException(409,str(exc)) from exc
+
+
 @router.get('/science')
 async def science_catalog(request:Request,scope:str='ws_main'):
     p=platform(request);ws=p.require_workspace(scope)

@@ -4,11 +4,11 @@ Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数�
 
 [![Release](https://img.shields.io/badge/release-1.0.0-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
-[![License](https://img.shields.io/badge/license-MIT-202020)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
 [![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
-> Windows 安装包：前往 [Releases](https://github.com/ForrestGump618/suwen/releases) 下载 `Eve-Setup-1.0.0-win-x64.exe`。
+> 当前更新提供源码，暂不上传新的 EXE。已有桌面版用户应核对构建标识，避免启动旧安装包；源码运行方法见下文。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
@@ -189,7 +189,7 @@ flowchart LR
 | --- | --- |
 | 版本 | `1.0.0` |
 | 平台 | Windows x64 |
-| 安装包 | `Eve-Setup-1.0.0-win-x64.exe` |
+| 当前交付 | 源码更新；本次不上传 EXE |
 | 默认界面 | 浅色工作台 |
 | 任务执行 | 本地目录或 SSH 工作区 |
 | 数据策略 | 结果、轨迹和证据保存在本机工作区 |
@@ -204,13 +204,17 @@ flowchart LR
 
 ### 1. 连接模型
 
-安装 Eve 后打开正式工作台，进入“设置 → 模型连接”，选择供应商，填写模型、API 地址和凭据并保存。可以配置多个供应商和模型，在会话或团队成员设置中分别选择。
+打开正式工作台，进入“设置 → 模型连接”，添加供应商，填写 API 地址和凭据。点击「获取模型列表」，勾选要保留的模型，指定首选模型，再点击「保存」。同一供应商可以保存多个模型，供应商之间独立保存连接信息；会话或团队成员可以分别选择模型。
+
+如果供应商不支持模型列表接口，可以手动添加模型名称。获取失败会显示原因，保留之前保存的列表。凭据输入框默认遮蔽内容。
 
 默认权限为“请求批准”。只读分析可以使用“帮我审核”；只有在理解风险时才使用“完全权限”。
 
 ### 2. 创建工作区
 
 在左侧项目文件区域选择本地目录，或在“SSH”中保存主机后创建远程工作区。点击“刷新状态”确认目录可访问。之后的文件读取、搜索、编辑、终端和技能都会使用当前工作区。
+
+Windows 上选择「记住密码」后，凭据保存在系统凭据库，重新打开程序时按主机档案读取。也可以使用密钥或系统 SSH Agent。断线后会尝试有限重连；终端命令不会自动重放，避免重复执行。连接仍失败时检查网络、主机状态和档案配置。
 
 ### 3. 普通分析
 
@@ -219,6 +223,27 @@ flowchart LR
 ```
 
 Eve 会按需选择工具。工具结果会显示在运行轨迹中，最终回答只有在结果非空且通过验证后才会标记为完成。
+
+输入框的技能选择器可以把已安装流程加入当前任务；所选技能会先加载，再由同一个任务继续调用工具。加载指引或安装依赖只表示准备完成，实际分析结果仍需核验。运行期间，输入框上方显示模型的中间回复和工具进度。
+
+通过文件写入工具完成的修改会显示在「文件变更」中。展开可看差异、查看文件，或在内容没有再次改动时恢复旧内容。新建文件不会自动删除；Shell、Python 等命令产生的任意文件改动目前不自动计入该栏。
+
+<details>
+<summary>从源码运行桌面版</summary>
+
+需要 Node.js、npm 和 Python 3.11 及以上版本。在项目根目录安装 Python 依赖，再构建桌面端：
+
+```powershell
+python -m pip install -e .
+cd desktop
+npm ci
+npm run build
+npm start
+```
+
+首次启动会检查工作台依赖，按界面提示完成安装。用户配置、凭据与历史会话使用独立数据目录，不放在源码中。
+
+</details>
 
 ### 4. 深度文献调研
 

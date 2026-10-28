@@ -248,6 +248,10 @@ async def _run_ssh_terminal(
                     _push({"type": "output", "data": text})
                     continue
                 if not channel.is_active():
+                    transport = channel.client.get_transport() if getattr(channel, "client", None) else None
+                    if transport is not None and not transport.is_active():
+                        _push({"type": "diagnostic", "code": "ssh_connection_lost",
+                               "message": "SSH 连接中断；可重连新终端，旧命令不会自动重放。"})
                     break
                 time.sleep(_SSH_POLL_INTERVAL)
         except Exception as exc:  # pragma: no cover - transport race

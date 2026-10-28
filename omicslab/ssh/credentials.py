@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import threading
 from typing import Any
 
@@ -48,6 +49,15 @@ class CredentialStore:
 
     # -- backend detection -------------------------------------------------
     def _init_backend(self) -> None:
+        if os.name == "nt":
+            try:
+                from .windows_credentials import WindowsCredentials
+                self._keyring = WindowsCredentials()
+                self._backend = "windows-credential-manager"
+                self._message = "密码保存在 Windows 系统凭据库，重启后可复用"
+                return
+            except Exception:
+                pass
         try:
             import keyring  # type: ignore[import-not-found]
         except Exception as exc:  # keyring 未安装：最常见的情况
@@ -84,7 +94,7 @@ class CredentialStore:
 
     @property
     def persistent(self) -> bool:
-        return self._backend == "keyring"
+        return self._backend in {"keyring", "windows-credential-manager"}
 
     def status(self) -> dict[str, Any]:
         return {
@@ -155,6 +165,16 @@ class CredentialStore:
             return None
         try:
             secret = self._keyring.get_password(SERVICE_NAME, credential_id)
+            if secret is None and self._backend == "windows-credential-manager":
+                # Adopt credentials written by a previously installed optional
+                # keyring backend without changing their references.
+                try:
+                    import keyring
+                    secret = keyring.get_password(SERVICE_NAME, credential_id)
+                    if secret:
+                        self._keyring.set_password(SERVICE_NAME, credential_id, secret)
+                except Exception:
+                    pass
         except Exception as exc:
             logger.warning("读取系统凭据库失败：%s", exc)
             return None

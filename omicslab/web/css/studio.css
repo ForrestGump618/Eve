@@ -134,3 +134,36 @@ textarea.composer-input { border: 0; background: transparent; box-shadow: none; 
 .science-structure { display:block; width:100%; height:auto; max-height:400px; background:var(--bg-soft); border:1px solid var(--border-soft); border-radius:10px; touch-action:none; cursor:grab; }
 .science-structure:focus-visible { outline:2px solid var(--border-strong); outline-offset:3px; }
 @media(max-width:700px) { .science-path { align-items:stretch; flex-direction:column; } }
+
+/* Task controls share the desktop's neutral surfaces and type scale. */
+.eve-provider-model-list { margin:16px 0; padding:14px; border:1px solid var(--border-soft); border-radius:10px; background:var(--panel); }
+.eve-model-manual { display:flex; align-items:center; gap:8px; margin:12px 0; }
+.eve-model-manual input { min-width:0; flex:1; }
+.eve-model-options,.eve-task-skill-list { max-height:300px; overflow:auto; overscroll-behavior:contain; }
+.eve-model-option { display:flex; align-items:center; gap:10px; padding:8px 2px; border-bottom:1px solid var(--border-soft); font-size:13px; }
+.eve-model-option > span { flex:1; overflow-wrap:anywhere; }
+.eve-model-option input,.eve-task-skill input { accent-color:var(--text); }
+.eve-task-skill { display:flex; align-items:flex-start; gap:12px; padding:13px 5px; border-bottom:1px solid var(--border-soft); cursor:pointer; }
+.eve-task-skill > span { flex:1; min-width:0; }
+.eve-task-skill strong,.eve-task-skill small { display:block; overflow-wrap:anywhere; }
+.eve-task-skill strong { font-size:13px; font-weight:550; }
+.eve-task-skill small { color:var(--text-3); font-size:12px; line-height:1.6; margin-top:3px; }
+.eve-live-progress { margin:4px 0 14px; padding-left:12px; border-left:2px solid var(--border); color:var(--text-2); font-size:13px; line-height:1.7; }
+.eve-live-progress p { margin:4px 0; white-space:pre-wrap; }
+.eve-file-changes { margin:0 0 10px; border:1px solid var(--border-soft); border-radius:10px; background:var(--panel); font-size:12px; }
+.eve-file-changes summary { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; cursor:pointer; color:var(--text-2); }
+.eve-file-changes [data-change-items] { max-height:180px; overflow:auto; padding:0 8px 8px; }
+.eve-change-row { display:flex; width:100%; align-items:center; gap:10px; padding:8px; background:transparent; border:0; border-radius:6px; color:var(--text); cursor:pointer; font:inherit; text-align:left; }
+.eve-change-row:hover { background:var(--bg-soft); }
+.eve-change-row > span:first-child { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.eve-change-row small { color:var(--text-3); }
+.eve-change-added { color:#387b52; }.eve-change-deleted { color:#ad5257; }
+.eve-diff { max-height:60vh; overflow:auto; font:12px/1.7 ui-monospace,Consolas,monospace; tab-size:4; }
+.eve-diff > div { white-space:pre; min-width:max-content; padding:0 10px; }
+.eve-diff .is-added { background:#458f5d18; }.eve-diff .is-deleted { background:#a9545918; }
+.eve-provider-editor .btn,.sw-modal-form .btn { min-height:34px; border-radius:8px; font-size:13px; }
+.sw-modal-form .sw-field > span { font-weight:500; line-height:1.5; }
+@media(prefers-reduced-motion:no-preference) {
+ .eve-file-changes,.eve-live-progress { animation:eve-task-enter .16s ease-out; }
+ @keyframes eve-task-enter { from {opacity:0;transform:translateY(3px);} to {opacity:1;transform:none;} }
+}

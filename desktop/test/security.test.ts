@@ -6,8 +6,29 @@ import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
-import { newConnection, safeError, secretEqual, connectionPath, readConnection } from '../src/security.js';
+import { newConnection, safeError, secretEqual, connectionPath, readConnection, atomicJson, atomicJsonAsync } from '../src/security.js';
 import { rpc } from '../src/rpc.js';
+
+test('connection publication survives a real Windows sharing lock without blocking timers',
+  {skip:process.platform!=='win32',timeout:15000},async t=>{
+ const directory=mkdtempSync(join(tmpdir(),'eve-connection-lock-')),path=join(directory,'connection.json');
+ atomicJson(path,{generation:1});
+ const child=spawn('powershell.exe',['-NoProfile','-Command',
+  '$stream=[IO.File]::Open($env:EVE_TEST_LOCK_PATH,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read); try {[Console]::WriteLine("LOCKED"); [Console]::ReadLine() | Out-Null} finally {$stream.Dispose()}'],
+  {windowsHide:true,env:{...process.env,EVE_TEST_LOCK_PATH:path},stdio:['pipe','pipe','pipe']});
+ const exited=once(child,'exit');
+ t.after(async()=>{if(child.exitCode===null){child.kill();await exited;}rmSync(directory,{recursive:true,force:true});});
+ let output='';
+ while(!output.includes('LOCKED')){const [chunk]=await once(child.stdout,'data');output+=chunk.toString();}
+ const started=Date.now();let timerFired=false;
+ const timer=setTimeout(()=>{timerFired=true;child.stdin.end('\n');},250);
+ try{await atomicJsonAsync(path,{generation:2});}finally{clearTimeout(timer);}
+ await exited;
+ assert.equal(timerFired,true,'replacement must await release without blocking timers');
+ assert.ok(Date.now()-started>=240);
+ assert.deepEqual(JSON.parse(readFileSync(path,'utf8')),{generation:2});
+ assert.deepEqual(readdirSync(directory),['connection.json']);
+});
 
 test('authentication comparison fails closed for wrong types and unequal secrets', () => {
   const value = 'fixture-auth-token';

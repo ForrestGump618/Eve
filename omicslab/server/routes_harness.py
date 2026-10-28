@@ -49,7 +49,7 @@ async def authorize(state: Any, handle: Any, tool: str, arguments: dict[str, Any
         raise HTTPException(403, "操作未获批准或审批已取消/过期；未执行")
 
 
-async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) -> dict[str, Any]:
+async def execute_backend(backend: Any, operation: str, args: dict[str, Any], on_change=None) -> dict[str, Any]:
     if operation == "science_inspect":
         from ..execution.science_workbench import runtime_source
         result = await backend.execute_python(runtime_source(str(backend.root), args), timeout_s=30)
@@ -81,6 +81,7 @@ async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) ->
                 "startLine": start, "truncated": clipped or start-1+limit < len(lines),
                 "nextStartLine": start+limit if not clipped and start-1+limit < len(lines) else None}
     if operation == "write_file":
+        before = ""
         content = args.get("content")
         if not isinstance(content, str) or len(content) > 200_000:
             raise ValueError("文件内容无效或超过上限")
@@ -91,6 +92,7 @@ async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) ->
         exists = any(e.get("name") == name for e in listing.get("entries", []))
         if exists:
             old = await backend.read_text(path, max_bytes=2_000_000)
+            before = str(old.get("content", old.get("text", "")) or "")
             actual = hashlib.sha256(str(old.get("content", old.get("text", "")) or "").encode()).hexdigest()
             if old.get("truncated") or actual != args.get("expectedSha256"):
                 raise ValueError("文件已变化；请重新读取并提供匹配的 expectedSha256")
@@ -101,7 +103,11 @@ async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) ->
         sha = hashlib.sha256(content.encode()).hexdigest()
         if confirmed.get("content", confirmed.get("text")) != content:
             raise ValueError("写入后读取验证失败，不能标记成功")
-        return {**result, "sha256": sha, "verified": True, "created": not exists}
+        from ..suwen.file_changes import describe
+        change = await asyncio.to_thread(describe, path, before, content, not exists)
+        if on_change is not None:
+            on_change({**change, "before": before})
+        return {**result, "sha256": sha, "verified": True, "created": not exists, "change": change}
     if operation == "search_files":
         query = str(args.get("query") or "").casefold()
         if not query:
@@ -283,7 +289,12 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
             await authorize(state, handle, "skill_run" if operation in {"run_skill", "run_science_skill", "run_archify"}
                             else "skill_prepare" if operation in {"prepare_science_skill", "prepare_archify"} else operation, approval_args)
         try:
-            result = await execute_backend(handle.backend, operation, args)
+            def record_change(change):
+                from ..suwen.store import uid
+                state.platform.store.put("file_change", uid("change"),
+                    {**change, "run_id": run_id, "session_id": handle.session_id},
+                    handle.workspace.workspace_id, expected=0)
+            result = await execute_backend(handle.backend, operation, args, on_change=record_change)
             return {**result, "execution_target": {"kind": handle.workspace.backend,
                     "workspace_id": handle.workspace.workspace_id, "root": str(handle.backend.root)}}
         except (ValueError, RuntimeError) as exc:

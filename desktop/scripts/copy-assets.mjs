@@ -1,9 +1,24 @@
-import { cpSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 mkdirSync('dist/ui', {recursive:true});
 cpSync('ui','dist/ui',{recursive:true});
 cpSync('bundled-skills','dist/bundled-skills',{recursive:true});
+// The workbench's built-in Markdown workflows must be loadable by the same
+// registry as scientific packages, rather than appearing only in a second UI.
+// Generate ordinary, versioned instruction bundles; no second execution loop.
+for(const entry of readdirSync('../omicslab/skills',{withFileTypes:true}).filter(e=>e.isDirectory())){
+  const source=join('../omicslab/skills',entry.name,'SKILL.md');
+  const target=join('dist/bundled-skills',entry.name);
+  if(!existsSync(source)||existsSync(join('bundled-skills',entry.name)))continue;
+  const instructions=readFileSync(source,'utf8');
+  const description=instructions.match(/^description:\s*(.+)$/m)?.[1]??entry.name;
+  mkdirSync(target,{recursive:true});
+  writeFileSync(join(target,'skill.json'),JSON.stringify({name:entry.name,description,version:'1.0.0',
+    license:'Apache-2.0',entry:'SKILL.md',permissions:['network','filesystem','exec']},null,2));
+  writeFileSync(join(target,'SKILL.md'),
+    'Eve 运行适配：这是按需加载的流程指引，加载不代表完成计算。只使用当前已注册工具。文中历史工具名不能直接调用；先 discover_tools 查询对应能力。文献/蛋白查询使用 database_search，数据检查使用 science_inspect；复杂计算先 write_file 保存脚本，再 run_shell 在当前工作区执行，SSH 不得回退本地。依赖缺失应明确报告。研究记录使用 research_list/research_create/research_record，但模型不能代替用户复核结题。\n\n'+instructions);
+}
 cpSync('skill-library','dist/skill-library',{recursive:true});
 // main lives under src/ because tests and application share one typecheck.
 cpSync('src-entry.cjs','dist/main.js');
@@ -40,4 +55,5 @@ function hashTree(dir) {
 }
 for (const dir of ['src','ui','worker','bundled-skills','skill-library','../omicslab']) hashTree(dir);
 digest.update(readFileSync('package.json'));
+digest.update(readFileSync('scripts/copy-assets.mjs'));
 writeFileSync('dist/build-info.json', JSON.stringify({ buildId: digest.digest('hex') }) + '\n');

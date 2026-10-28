@@ -25,7 +25,9 @@ async def test_authenticated_adapter_returns_after_disconnect_monitor_cleanup(tm
     async def emit(*args): frames.append(args)
     runs=SimpleNamespace(_handles={'run_adapter':handle},_emit=emit,_on_loop_event=emit,approver=Approver('auto',timeout_s=.03))
     app=FastAPI();app.include_router(router);app.state.harness_token='adapter-secret'
-    app.state.omicslab=SimpleNamespace(runs=runs)
+    from omicslab.suwen.store import PlatformStore
+    platform_store = PlatformStore(settings.home)
+    app.state.omicslab=SimpleNamespace(runs=runs, platform=SimpleNamespace(store=platform_store))
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://127.0.0.1') as client:
         headers={'authorization':'Bearer adapter-secret'}
         async def call(operation,args,timeout=1):
@@ -35,6 +37,9 @@ async def test_authenticated_adapter_returns_after_disconnect_monitor_cleanup(tm
         assert approved.status_code==200
         saved=await call('write_file',{'path':'result.txt','content':'ACTUAL_DISK_DATA'})
         assert saved.status_code==200 and saved.json()['verified']
+        changes = platform_store.list("file_change", workspace.workspace_id)
+        assert len(changes) == 1 and changes[0]["session_id"] == "session"
+        assert changes[0]["afterSha256"] == saved.json()["sha256"]
         read=await call('read_file',{'path':'result.txt'})
         assert read.json()['content']=='ACTUAL_DISK_DATA'
         assert read.json()['execution_target']['kind']=='local'
@@ -68,6 +73,7 @@ async def test_authenticated_adapter_returns_after_disconnect_monitor_cleanup(tm
         handle.cancel_event.set()
         cancelled=await call('read_file',{'path':'result.txt'})
         assert cancelled.status_code==409
+    platform_store.close()
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('remote',[False,True])

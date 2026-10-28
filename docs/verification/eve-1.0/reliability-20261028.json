@@ -1,0 +1,652 @@
+{
+  "date": "2026-10-28",
+  "model": "deepseek-v4.1-flash-economy",
+  "taskSetSha256": "08e2cc0eddd7db3d0bd87c4f0027e9825e7fccd0fa1f68a0015f3d4776caf2e6",
+  "taskLimits": {
+    "maxTokens": 160000,
+    "stepTimeoutMs": 240000
+  },
+  "comparisonScope": "same-day intermediate build before fresh-evidence retention fix versus final build; not a complete pre-project baseline; one stochastic run each",
+  "before": {
+    "passed": 20,
+    "total": 22,
+    "p50Ms": 9108,
+    "p95Ms": 68007,
+    "tokens": 773428,
+    "toolCompleted": 73,
+    "toolFailed": 14,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review.",
+    "toolSuccessRate": 0.8391,
+    "tasksWithToolError": 6,
+    "tasksRecoveredAfterToolError": 4,
+    "errorRecoveryRate": 0.6667,
+    "citationCount": 13
+  },
+  "after": {
+    "passed": 21,
+    "total": 22,
+    "p50Ms": 11802,
+    "p95Ms": 24259,
+    "tokens": 360077,
+    "toolCompleted": 57,
+    "toolFailed": 7,
+    "cost": null,
+    "costNote": "Provider did not report monetary cost; no invented price estimate.",
+    "citationNote": "URL membership/provenance check; semantic entailment requires answer review.",
+    "toolSuccessRate": 0.8906,
+    "tasksWithToolError": 4,
+    "tasksRecoveredAfterToolError": 3,
+    "errorRecoveryRate": 0.75,
+    "citationCount": 16
+  },
+  "build": {
+    "buildId": "2b43ab1f10d7c315d4287c4127802df09a7c1f89628ee5cfdd67a539af98f51d"
+  },
+  "checks": {
+    "installedUI": {
+      "kind": "controlled model; real formal Electron/API/files/skills; no paid-model quality claim",
+      "checks": [
+        {
+          "name": "default light theme",
+          "passed": true
+        },
+        {
+          "name": "provider key input is masked",
+          "passed": true
+        },
+        {
+          "name": "real provider model list appears in app",
+          "passed": true
+        },
+        {
+          "name": "multiple models persisted for one provider",
+          "passed": true
+        },
+        {
+          "name": "intermediate model text visible before completion",
+          "passed": true
+        },
+        {
+          "name": "selected skill loaded into real model request",
+          "passed": true
+        },
+        {
+          "name": "tool and followup requests reached provider",
+          "passed": true
+        },
+        {
+          "name": "actual file patch rendered",
+          "passed": true
+        },
+        {
+          "name": "only one formal product window",
+          "passed": true
+        },
+        {
+          "name": "no renderer exceptions",
+          "passed": true
+        }
+      ]
+    },
+    "researchUI": {
+      "kind": "controlled model protocol; real Electron/API/Jupyter/input/viewer; no autonomous-science or SSH acceptance",
+      "checks": [
+        {
+          "name": "ten scientific lanes in formal workbench",
+          "passed": true
+        },
+        {
+          "name": "shared and personal skills enable lanes",
+          "passed": true
+        },
+        {
+          "name": "actual dependency presence displayed",
+          "passed": true
+        },
+        {
+          "name": "fasta renders actual scientific input",
+          "passed": true
+        },
+        {
+          "name": "fastq renders actual scientific input",
+          "passed": true
+        },
+        {
+          "name": "counts renders actual scientific input",
+          "passed": true
+        },
+        {
+          "name": "structure renders actual scientific input",
+          "passed": true
+        },
+        {
+          "name": "coordinate preview is keyboard interactive",
+          "passed": true
+        },
+        {
+          "name": "guided workflow uses existing harness and actual bound-host tool",
+          "passed": true
+        },
+        {
+          "name": "one formal window",
+          "passed": true
+        },
+        {
+          "name": "no renderer exceptions",
+          "passed": true
+        }
+      ]
+    },
+    "trayUI": {
+      "kind": "real Electron lifecycle and application modal UI",
+      "checks": [
+        {
+          "name": "native-tray-created",
+          "ok": true
+        },
+        {
+          "name": "close-confirmation-is-in-existing-window",
+          "ok": true
+        },
+        {
+          "name": "repeated-close-keeps-single-dialog",
+          "ok": true
+        },
+        {
+          "name": "cancel-keeps-window-visible",
+          "ok": true
+        },
+        {
+          "name": "escape-cancels-close",
+          "ok": true
+        },
+        {
+          "name": "unknown-backend-status-keeps-app-open",
+          "ok": true
+        },
+        {
+          "name": "shutdown-failure-keeps-app-open",
+          "ok": true
+        },
+        {
+          "name": "close-hides-to-tray",
+          "ok": true
+        },
+        {
+          "name": "tray-keeps-daemon-and-task-alive",
+          "ok": true
+        },
+        {
+          "name": "remember-choice-is-persisted",
+          "ok": true
+        },
+        {
+          "name": "tray-show-restores-same-window",
+          "ok": true
+        },
+        {
+          "name": "unfinished-task-exit-can-continue-in-tray",
+          "ok": true
+        },
+        {
+          "name": "tray-quit-shows-window-for-confirmation",
+          "ok": true
+        },
+        {
+          "name": "active-task-requires-explicit-stop",
+          "ok": true
+        },
+        {
+          "name": "no-native-close-dialogs",
+          "ok": true
+        },
+        {
+          "name": "exit-drains-runtime-and-closes-app",
+          "ok": true,
+          "detail": {
+            "exitCode": 0,
+            "connectionFileRemaining": false
+          }
+        }
+      ]
+    },
+    "ssh": {
+      "kind": "real SSH transport and remote files, shell, Python and skill; no mock backend",
+      "checks": [
+        {
+          "name": "password authentication",
+          "passed": true
+        },
+        {
+          "name": "create and read-back verify",
+          "passed": true
+        },
+        {
+          "name": "remote read never reads local twin",
+          "passed": true
+        },
+        {
+          "name": "remote text search",
+          "passed": true
+        },
+        {
+          "name": "stale hash rejects overwrite",
+          "passed": true
+        },
+        {
+          "name": "hash guarded edit",
+          "passed": true
+        },
+        {
+          "name": "scoped shell working directory",
+          "passed": true
+        },
+        {
+          "name": "remote Python worker",
+          "passed": true
+        },
+        {
+          "name": "remote skill actual execution",
+          "passed": true
+        },
+        {
+          "name": "SFTP reconnect reuses in-memory credential",
+          "passed": true
+        },
+        {
+          "name": "dead transport replaced",
+          "passed": true
+        },
+        {
+          "name": "worker recreates after transport loss",
+          "passed": true
+        },
+        {
+          "name": "second host profile is independent",
+          "passed": true
+        },
+        {
+          "name": "second profile does not close first profile",
+          "passed": true
+        },
+        {
+          "name": "workspace traversal rejected",
+          "passed": true
+        },
+        {
+          "name": "local twin remains untouched",
+          "passed": true
+        },
+        {
+          "name": "research stage hashes SSH evidence rather than local twin",
+          "passed": true
+        },
+        {
+          "name": "research baseline reads metrics computed on SSH host",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "performance": {
+    "startupMs": 16856,
+    "windowCount": 1,
+    "trackedWorkingSetMB": 553.4,
+    "mainTimerLag": {
+      "p50Ms": 5.626199999998789,
+      "p95Ms": 6.75619999999617
+    },
+    "rendererTimerLag": {
+      "p50Ms": 0,
+      "p95Ms": 1.4000000059604645
+    },
+    "idleWindowMs": 7793,
+    "singleTaskSnapshotMs": 0.7200999999986379,
+    "processes": [
+      {
+        "role": "main",
+        "processName": "electron",
+        "workingSetMB": 201.3,
+        "cpuOneCorePercent": 0.200495226417174,
+        "electronReportedPercent": 0.02440614639837761,
+        "eventLoopUtilization": 0
+      },
+      {
+        "role": "daemon",
+        "processName": "electron",
+        "workingSetMB": 123.7,
+        "cpuOneCorePercent": 0.200495226417174,
+        "daemonSelfCpuOneCorePercent": 3.207923622674784,
+        "eventLoopUtilization": 0.0009775197868850997
+      },
+      {
+        "role": "renderer",
+        "processName": "electron",
+        "workingSetMB": 134.4,
+        "cpuOneCorePercent": 0
+      },
+      {
+        "role": "legacy-bridge",
+        "processName": "python",
+        "workingSetMB": 94,
+        "cpuOneCorePercent": 0
+      }
+    ],
+    "pairedBaseline": false,
+    "scope": "source formal desktop, isolated profile, hidden idle; OS working sets, excludes some auxiliary processes and is not unique physical RAM"
+  },
+  "tasks": [
+    {
+      "id": "web-electron",
+      "category": "web",
+      "status": "passed",
+      "latencyMs": 12342,
+      "tokens": 21723,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "web-typescript",
+      "category": "web",
+      "status": "passed",
+      "latencyMs": 40267,
+      "tokens": 35506,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "web-dsh",
+      "category": "web",
+      "status": "passed",
+      "latencyMs": 19045,
+      "tokens": 18466,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "web-mcp",
+      "category": "web",
+      "status": "passed",
+      "latencyMs": 22224,
+      "tokens": 20439,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "pubmed-reprogramming",
+      "category": "pubmed",
+      "status": "passed",
+      "latencyMs": 12070,
+      "tokens": 16284,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "pubmed-crispr",
+      "category": "pubmed",
+      "status": "passed",
+      "latencyMs": 10823,
+      "tokens": 17361,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "pubmed-spatial",
+      "category": "pubmed",
+      "status": "passed",
+      "latencyMs": 13560,
+      "tokens": 21201,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "pubmed-summary",
+      "category": "summary",
+      "status": "passed",
+      "latencyMs": 6666,
+      "tokens": 8071,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "pubmed-compare",
+      "category": "comparison",
+      "status": "passed",
+      "latencyMs": 13664,
+      "tokens": 8939,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "uniprot-human",
+      "category": "database",
+      "status": "passed",
+      "latencyMs": 4191,
+      "tokens": 7683,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "uniprot-egfr",
+      "category": "database",
+      "status": "passed",
+      "latencyMs": 12351,
+      "tokens": 16360,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "fetch-electron",
+      "category": "fetch",
+      "status": "passed",
+      "latencyMs": 6485,
+      "tokens": 8735,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "fetch-mcp",
+      "category": "fetch",
+      "status": "passed",
+      "latencyMs": 5078,
+      "tokens": 9943,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "read-file",
+      "category": "file",
+      "status": "passed",
+      "latencyMs": 4811,
+      "tokens": 11659,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "file-summary",
+      "category": "file",
+      "status": "passed",
+      "latencyMs": 8477,
+      "tokens": 11970,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "mcp-discovery",
+      "category": "mcp",
+      "status": "passed",
+      "latencyMs": 8768,
+      "tokens": 12111,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "mcp-execute",
+      "category": "mcp",
+      "status": "passed",
+      "latencyMs": 9070,
+      "tokens": 11950,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "skill-discover",
+      "category": "skill",
+      "status": "passed",
+      "latencyMs": 8828,
+      "tokens": 13822,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "skill-load",
+      "category": "skill",
+      "status": "passed",
+      "latencyMs": 11802,
+      "tokens": 19550,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "skill-execute",
+      "category": "skill",
+      "status": "passed",
+      "latencyMs": 14707,
+      "tokens": 25947,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "multi-file-skill",
+      "category": "multi-step",
+      "status": "passed",
+      "latencyMs": 15674,
+      "tokens": 26286,
+      "missingTools": [],
+      "missingContent": [],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    },
+    {
+      "id": "multi-search-fetch",
+      "category": "multi-step",
+      "status": "failed",
+      "latencyMs": 24259,
+      "tokens": 16071,
+      "missingTools": [],
+      "missingContent": [
+        "contextIsolation"
+      ],
+      "verification": [
+        "nonempty",
+        "requested-operation-executed",
+        "citation-provenance (not semantic entailment)"
+      ]
+    }
+  ]
+}

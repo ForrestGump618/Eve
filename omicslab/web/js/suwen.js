@@ -29,7 +29,7 @@ export async function initPlatform(){
   const data=await api.request(`/api/platform/bootstrap?scope=${encodeURIComponent(scope)}`);
   applyAppearance(data.settings.appearance.value);
   if(!data.settings.appearance.value.onboarded&&!getPref('onboardingDismissed',false)){
-   openModal({title:'欢迎来到Eve',size:'md',html:'<div class="sw-onboarding"><div class="sw-kicker">MAKE ROOM FOR DISCOVERY</div><h2>从一个目标开始。</h2><p>先连接模型，再选择本机或 SSH 工作区。文件、计算和任务会留在所选工作区，外部操作由你授权。</p><ol><li>连接模型：mock 仅用于演示与测试</li><li>选择工作目录：支持 SSH 远程目录</li><li>检查权限：默认询问高风险工具操作</li></ol></div>',actions:[
+   openModal({title:'开始使用 Eve',size:'md',html:'<div class="sw-onboarding"><p>连接模型，选择工作目录，即可开始任务。</p><ol><li>在设置中添加供应商与模型</li><li>选择本地文件夹或 SSH 远程目录</li><li>按需调整任务权限</li></ol></div>',actions:[
     {label:'先看看',kind:'ghost',onClick:()=>{setPref('onboardingDismissed',true);}},
     {label:'配置模型连接',kind:'primary',onClick:()=>{setPref('onboardingDismissed',true);navigate('connections');}},
    ]});

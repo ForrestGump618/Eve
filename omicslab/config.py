@@ -289,6 +289,7 @@ class Settings:
     provider: str = "auto"
     model: str = "auto"
     api_base: str = ""
+    provider_connections: dict[str, Any] = field(default_factory=dict)
     temperature: float = 0.0
     max_tokens: int = 0  # 0 -> provider default
     # Legacy read-only compatibility value from older settings files. The
@@ -365,6 +366,9 @@ class Settings:
                 continue
         if isinstance(data.get("ui"), dict):
             self.ui = data["ui"]
+        if isinstance(data.get("provider_connections"), dict):
+            self.provider_connections = {k: v for k, v in data["provider_connections"].items()
+                                         if k in PROVIDERS and isinstance(v, dict)}
         if data.get("workspace"):
             try:
                 self.workspace = Path(data["workspace"]).expanduser().resolve()
@@ -473,10 +477,7 @@ class Settings:
         if requested_provider is not None and requested_provider != previous_provider:
             if "model" not in patch or not str(patch.get("model") or "").strip():
                 self.model = "auto"
-            if (
-                "api_base" not in patch
-                and not requested_provider.startswith("custom")
-            ):
+            if "api_base" not in patch:
                 self.api_base = ""
         if isinstance(patch.get("ui"), dict):
             merged = dict(self.ui or {})
@@ -582,7 +583,29 @@ class Settings:
 
     # -- LLM resolution ----------------------------------------------------
     def provider_meta(self, provider: str) -> dict[str, Any]:
-        return PROVIDERS.get(provider, {})
+        return {**PROVIDERS.get(provider, {}), **self.provider_connections.get(provider, {})}
+
+    def save_provider_connection(self, provider, model="", api_base="", models=None):
+        from urllib.parse import urlsplit
+        if provider not in PROVIDERS or provider == "mock":
+            raise ConfigError("请选择有效的供应商")
+        current = dict(self.provider_connections.get(provider, {}))
+        if api_base:
+            url = urlsplit(api_base)
+            if (url.scheme != "https" and not (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"})) or url.username or url.password or url.query or url.fragment:
+                raise ConfigError("模型地址需要 HTTPS 或本地 HTTP，且不能包含凭据或查询参数")
+            current["api_base"] = api_base.rstrip("/")
+        values = models if models is not None else current.get("models", [])
+        if not isinstance(values, list) or len(values) > 500:
+            raise ConfigError("模型列表必须是最多 500 项的数组")
+        values = [model, *values]
+        if any(not isinstance(x, str) or len(x) > 160 or any(ord(c) < 32 for c in x) for x in values):
+            raise ConfigError("模型名称无效")
+        values = list(dict.fromkeys(values))
+        current["models"] = [x.strip() for x in values if x.strip()]
+        if model:
+            current["default_model"] = model
+        self.provider_connections[provider] = current
 
     def _infer_provider(self, model: str, keys: dict[str, str]) -> str:
         """Infer a provider from an explicit model name hint or the first known key."""
@@ -647,7 +670,7 @@ class Settings:
         """
         requested_provider = (provider or "").strip()
         provider = requested_provider or (self.provider or "auto").strip()
-        model = (model or "").strip() or (self.model or "auto").strip()
+        model = (model or "").strip() or ((self.model or "auto").strip() if not requested_provider or requested_provider == self.provider else "auto")
 
         env_provider = _env_first("OMICSLAB_LLM_PROVIDER", "OMICSLAB_PROVIDER")
         if provider in {"", "auto"} and env_provider:
@@ -664,9 +687,9 @@ class Settings:
                 f"未知 provider: {provider}。可用: {', '.join(sorted(PROVIDERS))}"
             )
 
-        meta = PROVIDERS[provider]
+        meta = self.provider_meta(provider)
         family = str(meta.get("family", "openai"))
-        api_base = (api_base_override if api_base_override is not None else self.api_base or "").strip()
+        api_base = (api_base_override if api_base_override is not None else self.provider_connections.get(provider, {}).get("api_base") or (self.api_base if provider == self.provider else "") or "").strip()
         if not api_base:
             if provider == "custom_openai":
                 api_base = _env_first("CUSTOM_OPENAI_API_BASE") or str(meta.get("api_base") or "")
@@ -733,6 +756,9 @@ class Settings:
         saved_base = (self.api_base or "").strip()
         out: list[dict[str, Any]] = []
         for provider, meta in PROVIDERS.items():
+            meta = self.provider_meta(provider)
+            connection_base = str(meta.get("api_base") or "")
+            effective_base = connection_base or (saved_base if provider == self.provider else "")
             env_key = str(meta.get("env_key", ""))
             fallback = str(meta.get("fallback_env_key") or "")
             has_key = bool(keys.get(env_key)) or bool(fallback and keys.get(fallback))
@@ -740,9 +766,9 @@ class Settings:
             needs_api_base = provider.startswith("custom")
             needs_model = bool(meta.get("needs_model")) or not str(meta.get("default_model") or "")
             if provider == "custom_openai":
-                has_base = bool(saved_base or _env_first("CUSTOM_OPENAI_API_BASE") or meta.get("api_base"))
+                has_base = bool(effective_base or _env_first("CUSTOM_OPENAI_API_BASE"))
             elif provider == "custom_anthropic":
-                has_base = bool(saved_base or _env_first("CUSTOM_ANTHROPIC_API_BASE"))
+                has_base = bool(effective_base or _env_first("CUSTOM_ANTHROPIC_API_BASE"))
             else:
                 has_base = True
             configured = no_key_required or (has_key and has_base)
@@ -751,7 +777,7 @@ class Settings:
                     "id": provider,
                     "label": meta.get("label", provider),
                     "family": meta.get("family"),
-                    "api_base": saved_base if provider.startswith("custom") and saved_base else meta.get("api_base"),
+                    "api_base": effective_base,
                     "default_model": meta.get("default_model"),
                     "models": meta.get("models", []),
                     "env_key": env_key,

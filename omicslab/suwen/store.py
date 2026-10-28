@@ -65,9 +65,18 @@ class PlatformStore:
     def _decode(row):
         return dict(json.loads(row['data']), id=row['id'], scope=row['scope'], revision=row['revision'], updated_at=row['updated'])
 
-    def list(self, kind, scope='global'):
+    def list(self, kind, scope='global', *, limit=None, session_id=None):
+        query = 'SELECT * FROM records WHERE kind=? AND scope=?'
+        params = [kind, scope]
+        if session_id is not None:
+            query += " AND json_extract(data,'$.session_id')=?"
+            params.append(session_id)
+        query += ' ORDER BY updated DESC'
+        if limit is not None:
+            query += ' LIMIT ?'
+            params.append(min(1000, max(1, int(limit))))
         with self.lock:
-            rows = self.db.execute('SELECT * FROM records WHERE kind=? AND scope=? ORDER BY updated DESC',(kind,scope)).fetchall()
+            rows = self.db.execute(query, params).fetchall()
         return [self._decode(r) for r in rows]
 
     def put(self, kind, id, data, scope='global', expected=None):

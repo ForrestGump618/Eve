@@ -15,7 +15,9 @@ export function createAgentTools(services:ToolServices, search:SearchService, al
   const remoteFiles=new Set(['list_directory','read_file','search_files','write_file','run_shell']);
   const readOnly=new Set(['web_search','web_fetch','database_search','workspace_info','list_directory','read_file','search_files','skill_search','skill_load','skill_list_resources','skill_read_resource','mcp_tools','research_list','team_status','team_mailbox','science_inspect']);
   const add=(name:string,description:string,parameters:Record<string,Json>,execute:(a:Record<string,Json>,s:AbortSignal)=>Promise<Json>,kind:'tool'|'mcp'|'skill'='tool',timeoutMs=25000)=>registry.register({name,description,parameters,kind,timeoutMs:environment&&!readOnly.has(name)?Math.max(timeoutMs,150000):timeoutMs,execute:async(a,s)=>{
-    if(environment?.kind==='ssh'&&remoteFiles.has(name))return environment.call(name,a,s);
+    // Bound writes share one approval, read-back verification and change journal
+    // for both hosts. Local file reads still support explicit attachment grants.
+    if(environment&&(name==='write_file'||environment.kind==='ssh'&&remoteFiles.has(name)))return environment.call(name,a,s);
     if(!environment&&!readOnly.has(name)&&mode!=='full')throw new ValidationError('Approval channel unavailable; operation was not executed');
     if(environment&&!readOnly.has(name)&&name!=='run_shell'&&name!=='skill_prepare'&&!name.startsWith('research_')&&!name.startsWith('team_')&&!(name==='skill_run'&&(environment.kind==='ssh'||services.skills.isScience(String(a.id))||services.skills.isArchify(String(a.id)))))await environment.call('authorize',{tool:name,arguments:a},s);
     return execute(a,s);
