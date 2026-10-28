@@ -382,6 +382,33 @@ async def ws_raw(request: Request, workspace_id: str, path: str) -> FileResponse
     return FileResponse(str(resolved), media_type=fileops.guess_mime(resolved), filename=resolved.name)
 
 
+@router.get("/api/workspaces/{workspace_id}/artifacts/html")
+async def ws_html_artifact(request: Request, workspace_id: str, path: str) -> dict[str, Any]:
+    """Return inert JSON for an isolated viewer, never same-origin executable HTML."""
+    import hashlib
+    if not path.lower().endswith((".html", ".htm")) or len(path) > 2000:
+        raise _error("只支持工作区内的 HTML 产物", "invalid_artifact")
+    state = _state(request)
+    workspace = _workspace(state, workspace_id)
+    if workspace.backend == "ssh":
+        data = await _remote_call(state, workspace, "read_text", path, max_bytes=2_000_000)
+        text = data.get("content", data.get("text", ""))
+        if data.get("truncated") or data.get("binary"):
+            raise _error("页面不完整或不是文本，无法预览", "invalid_artifact")
+    else:
+        try:
+            resolved = fileops.resolve_path(state.settings, path, root=_local_root(workspace))
+            if not resolved.is_file() or resolved.stat().st_size > 2_000_000:
+                raise ValueError("页面不存在或超过 2 MB")
+            text = await asyncio.to_thread(resolved.read_text, encoding="utf-8")
+        except (ValueError, OSError) as exc:
+            raise _error(f"读取产物失败：{exc}", "invalid_artifact") from exc
+    if not isinstance(text, str) or not text.strip() or len(text.encode("utf-8")) > 2_000_000 or "\0" in text:
+        raise _error("页面超出预算或不是完整文本", "invalid_artifact")
+    return {"workspace_id": workspace_id, "path": path, "content": text,
+            "sha256": hashlib.sha256(text.encode()).hexdigest(), "bytes": len(text.encode())}
+
+
 @router.post("/api/workspaces/{workspace_id}/files/write")
 async def ws_write(request: Request, workspace_id: str) -> dict[str, Any]:
     state = _state(request)

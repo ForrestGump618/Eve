@@ -26,6 +26,10 @@ includes EVE-UPSTREAM-LICENSE.txt, EVE-MATERIALS-LICENSE.txt and
 EVE-DATA-SOURCE-TERMS.md. Individual databases retain their own terms.
 Eve is not an official Google product.
 Resolved Node runtime license texts are under third-party-licenses/.
+The interactive visualization skill contains Archify v3.2.0
+(tt-a1i/archify, 208acba8d412335185b2056fedf54b3405df43fb, MIT).
+Its complete license, instructions and executable resources remain in the
+verified shared library; EVE-UPSTREAM-LICENSE.txt accompanies prepared files.
 Python itself and its dependencies are not bundled; the managed dependency setup
 uses an available interpreter. Original Python sources and LICENSE ship under
 resources/legacy. Renderers and workers use the existing isolation boundaries;

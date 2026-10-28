@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { launchLegacy, type LegacyModelConfig } from './legacy-worker.js';
 import { runtimeIdentity } from './runtime-identity.js';
+import {workspaceFailure} from './execution-environment.js';
 import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
 import { ValidationError, type TaskDefinition, type Json } from './harness/types.js';
@@ -198,7 +199,7 @@ const activities = createAllActivities(services, {
       if(legacy!==owner)throw new ValidationError('Workspace process restarted; reconcile the original task before resuming');
       const response=await fetch(`http://127.0.0.1:${owner.port}/api/harness/runs/${encodeURIComponent(runId)}/tool`,{method:'POST',redirect:'error',headers:{Authorization:'Bearer '+owner.token,'Content-Type':'application/json'},body:JSON.stringify({operation,arguments:args}),signal});
       const data=await response.json() as Record<string,Json>;
-      if(!response.ok)throw new ValidationError(String(data.detail??data.error??'Workspace operation failed').slice(0,3000));
+      if(!response.ok)throw new ValidationError(workspaceFailure(data));
       return data;
     }};
   } },

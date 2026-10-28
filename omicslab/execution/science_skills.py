@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import inspect
 import json
+from .skill_resources import prepare_resources
 
 
 def execute_bundle(payload: dict) -> dict:
@@ -20,36 +21,10 @@ def execute_bundle(payload: dict) -> dict:
     import time
 
     started = time.monotonic()
-    workspace = pathlib.Path(payload["workspace"]).expanduser().resolve(strict=True)
     bundle = payload["bundle"]
     name, version = bundle["name"], bundle["version"]
-    if not re.fullmatch(r"science-[a-z0-9-]{1,100}", name):
-        raise ValueError("Invalid scientific skill name")
-    if not re.fullmatch(r"[a-zA-Z0-9.+-]{1,100}", version):
-        raise ValueError("Invalid scientific skill version")
-    runtime, files = bundle["runtime"], bundle["files"]
-    if runtime.get("manager") != "uv" or not isinstance(files, list) or not 1 <= len(files) <= 100:
-        raise ValueError("Invalid scientific skill bundle")
-    checked, total = {}, 0
-    for entry in files:
-        path, content = entry["path"], entry["content"]
-        if (not isinstance(path, str) or not isinstance(content, str)
-                or not re.fullmatch(r"[a-zA-Z0-9_./-]+", path)
-                or any(p in {"", ".", ".."} for p in path.split("/"))
-                or pathlib.PurePosixPath(path).is_absolute() or path in checked):
-            raise ValueError("Invalid or duplicate scientific resource path")
-        data = content.encode("utf-8")
-        total += len(data)
-        if len(data) > 2_000_000 or total > 4_000_000:
-            raise ValueError("Scientific bundle exceeds resource budget")
-        if hashlib.sha256(data).hexdigest() != entry["sha256"]:
-            raise ValueError("Scientific resource digest mismatch")
-        checked[path] = data
-    if "SKILL.md" not in checked or hashlib.sha256(checked["SKILL.md"]).hexdigest() != bundle["sha256"]:
-        raise ValueError("Scientific skill instruction digest mismatch")
+    runtime = bundle["runtime"]
     scripts = runtime.get("scripts", [])
-    if not isinstance(scripts, list) or any(p not in checked or not p.startswith("scripts/") or not p.endswith(".py") for p in scripts):
-        raise ValueError("Invalid declared scientific entry point")
     input_data = payload.get("input") or {}
     if not isinstance(input_data, dict) or set(input_data) - {"script", "args", "allowDependencyInstall", "timeoutSeconds"}:
         raise ValueError("Invalid scientific skill input")
@@ -62,46 +37,8 @@ def execute_bundle(payload: dict) -> dict:
     timeout = input_data.get("timeoutSeconds", 90)
     if type(allow_install) is not bool or type(timeout) not in (int, float) or not 1 <= timeout <= 120:
         raise ValueError("Invalid scientific execution policy")
-    # Never follow an existing cache link out of the selected workspace.
-    cache = workspace
-    for component in (".eve", "skills", name):
-        cache = cache / component
-        if cache.is_symlink() or (cache.exists() and not cache.is_dir()):
-            raise ValueError("Scientific cache is not a real workspace directory")
-        cache.mkdir(exist_ok=True)
-    resource_digest = hashlib.sha256(json.dumps(
-        sorted((p, hashlib.sha256(b).hexdigest()) for p, b in checked.items()),
-        separators=(",", ":")).encode()).hexdigest()
-    target = cache / f"{version}-{resource_digest[:12]}"
-    if target.is_symlink():
-        raise ValueError("Scientific cache is a symlink")
-    if not target.exists():
-        staging = pathlib.Path(tempfile.mkdtemp(prefix=".prepare-", dir=cache))
-        try:
-            for path, data in checked.items():
-                destination = staging / path
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                destination.write_bytes(data)
-            for attempt in range(5):
-                try:
-                    staging.rename(target)
-                    break
-                except OSError:
-                    if target.is_dir() and not target.is_symlink():
-                        break
-                    if os.name != "nt" or attempt == 4:
-                        raise
-                    # Windows scanners can briefly hold a newly written script open.
-                    time.sleep(0.05 * (attempt + 1))
-        finally:
-            if staging.exists():
-                shutil.rmtree(staging)
-    for path, data in checked.items():
-        destination = target / path
-        if (any(p.is_symlink() for p in [destination, *destination.parents] if p != workspace)
-                or not destination.resolve().is_relative_to(target)
-                or not destination.is_file() or destination.read_bytes() != data):
-            raise ValueError("Prepared scientific resource changed; refusing to overwrite or execute")
+    prepared = prepare_resources(payload["workspace"], bundle, "uv")
+    workspace, target = pathlib.Path(prepared["workspace"]), pathlib.Path(prepared["directory"])
     uv = shutil.which("uv")
     if not uv:
         candidate = pathlib.Path.home() / ".local" / "bin" / ("uv.exe" if os.name == "nt" else "uv")
@@ -127,9 +64,9 @@ def execute_bundle(payload: dict) -> dict:
     credentials = {k: bool(env.get(k)) for k in [*required, *optional]}
     result = {
         "skillId": bundle["id"], "version": version, "sha256": bundle["sha256"],
-        "source": bundle["source"], "resourceDigest": resource_digest,
+        "source": bundle["source"], "resourceDigest": prepared["resourceDigest"],
         "status": "prepared", "executed": False, "directory": str(target),
-        "workspace": str(workspace), "scripts": scripts, "verifiedFiles": len(checked),
+        "workspace": str(workspace), "scripts": scripts, "verifiedFiles": prepared["verifiedFiles"],
         "runtime": {"uvAvailable": bool(uv_command), "installHint": None if uv_command else "python -m pip install --user uv==0.13.6",
                     "requiredCredentials": required,
                     "optionalCredentials": optional, "credentialPresence": credentials},
@@ -189,6 +126,6 @@ def execute_bundle(payload: dict) -> dict:
 def runtime_source(bundle: dict, workspace: str, *, input_data: dict | None = None, run: bool = False) -> str:
     payload = {"bundle": bundle, "workspace": workspace, "input": input_data,
                "operation": "run" if run else "prepare"}
-    return (inspect.getsource(execute_bundle)
+    return (inspect.getsource(prepare_resources) + "\n" + inspect.getsource(execute_bundle)
             + "\nprint(__import__('json').dumps(execute_bundle(__import__('json').loads("
             + repr(json.dumps(payload)) + "))))\n")

@@ -204,6 +204,11 @@ async function openResearchWorkspace(primary=false):Promise<{ok:boolean}> {
  });
  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  window.webContents.on('will-navigate',(navigation,url)=>{try{if(new URL(url).origin!==origin)navigation.preventDefault();}catch{navigation.preventDefault();}});
+ window.webContents.on('will-frame-navigate',details=>{
+  // Standalone artifacts stay inside their opaque srcdoc frame. A scripted
+  // self-navigation must not reach authenticated APIs or an external website.
+  if(!details.isMainFrame&&!/^about:(?:srcdoc|blank)(?:#|$)/.test(details.url))details.preventDefault();
+ });
  await window.loadURL(origin);if(quitting||!liveWindow(window))return {ok:false};if(activationPending||!process.argv.includes('--background')){activationPending=false;window.show();window.focus();}if(primary&&liveWindow(win))win.hide();return {ok:true};
  }catch(error){if(!quitting&&liveWindow(window)){try{window.webContents.removeAllListeners('will-navigate');await window.loadURL(startupPage('工作台启动失败：'+safeError(error),true));}catch{/* closed while reporting failure */}}return {ok:false};}
 }

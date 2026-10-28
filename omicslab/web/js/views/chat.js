@@ -2,6 +2,7 @@
 // tool cards, approval prompts, figures, retry/stop and the composer.
 
 import { renderMarkdown } from '../markdown.js?v=2.1.1';
+import {openHtmlArtifact} from '../artifact-viewer.js?v=1.0.0';
 import {workspaceSidebarHtml,conversationListHtml} from '../workspace-sidebar.js?v=2.1.1';
 import {mountProjectFiles} from '../project-files.js?v=2.1.1';
 import {mountGuidance} from '../guidance-ui.js?v=2.1.1';
@@ -853,6 +854,16 @@ export async function mount(root, ctx = {}) {
   }
 
   function bindMessageContent(node) {
+    const workspaceId=local.conversations.find(c=>c.id===local.activeId)?.meta?.workspace_id||getState().workspaceId;
+    node.querySelectorAll('.artifact-card').forEach(button=>{
+      if(button.dataset.bound)return;button.dataset.bound='true';
+      button.addEventListener('click',async()=>{
+        button.disabled=true;
+        try{await openHtmlArtifact(workspaceId,button.dataset.artifactPath,button.querySelector('strong')?.textContent||'交互页面');}
+        catch(error){toastError(errorMessage(error));}
+        finally{button.disabled=false;}
+      });
+    });
     node.querySelectorAll('.chat-figure img').forEach((img) => {
       img.addEventListener('click', () => {
         openLightbox({
@@ -865,7 +876,7 @@ export async function mount(root, ctx = {}) {
   }
 
   function toolCardHtml(call, result) {
-    const names={web_search:'搜索网页',web_fetch:'读取网页',database_search:'检索文献',read_file:'读取文件',list_directory:'查看目录',search_files:'搜索文件',write_file:'保存文件',skill_search:'查找技能',skill_load:'加载技能',skill_read_resource:'读取技能参考',skill_prepare:'准备科学工具',skill_run:'运行技能',skill_create:'创建技能',skill_install:'安装技能',workspace_info:'查看工作目录',mcp_tools:'发现 MCP 工具',mcp_call:'调用 MCP 工具'};
+    const names={web_search:'搜索网页',web_fetch:'读取网页',database_search:'检索文献',read_file:'读取文件',list_directory:'查看目录',search_files:'搜索文件',write_file:'保存文件',skill_search:'查找技能',skill_load:'加载技能',skill_read_resource:'读取技能参考',skill_prepare:'准备工具环境',skill_run:'运行技能',skill_create:'创建技能',skill_install:'安装技能',workspace_info:'查看工作目录',mcp_tools:'发现 MCP 工具',mcp_call:'调用 MCP 工具'};
     const label=names[call.name]||call.name||'执行工具';
     const ok = result ? result.ok !== false : null;
     const stateClass = result ? (ok ? 'is-ok' : 'is-fail') : 'is-running';
@@ -991,6 +1002,7 @@ export async function mount(root, ctx = {}) {
         state.pendingRender = false;
         const follow=isNearBottom();
         refs.text.innerHTML = renderMarkdown(state.text) + (state.done ? '' : '<span class="stream-cursor"></span>');
+        bindMessageContent(refs.text);
         if(follow)scrollToBottom(true);
       });
     };

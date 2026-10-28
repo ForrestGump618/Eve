@@ -88,8 +88,8 @@ export async function mount(root, ctx = {}) {
         '</div></div>' +
         (skill?.preparation
           ? '<section class="skill-when"><span class="skill-when-label">执行环境</span>' +
-            `<p>在当前本地或 SSH 工作区运行 · uv 独立依赖环境${skill.run?.scripts?.length ? ` · ${skill.run.scripts.length} 个脚本` : ' · 工作流指引'}</p>` +
-            '<p>首次运行检查依赖和凭据；安装依赖遵循当前任务权限。</p>' +
+            `<p>在当前本地或 SSH 工作区运行 · ${skill.run?.language==='node'?'Node.js 18+ · 最终生成需要当前主机的浏览器':'uv 独立依赖环境'}${skill.run?.scripts?.length ? ` · ${skill.run.scripts.length} 个入口` : ' · 工作流指引'}</p>` +
+            '<p>先检查执行环境，运行遵循当前任务权限。</p>' +
             (skill.preparation.requiredCredentials?.length
               ? `<p>必需凭据：${skill.preparation.requiredCredentials.map(esc).join('、')}（运行时检查）</p>` : '') +
             (skill.preparation.optionalCredentials?.length

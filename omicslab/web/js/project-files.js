@@ -5,6 +5,7 @@ import {esc,escAttr} from './util.js?v=2.1.1';
 import {icon} from './icons.js?v=2.1.1';
 import {openModal,toastError,toastInfo} from './ui.js?v=2.1.1';
 import {openWorkspaceEditor,openWorkspaceSearch,openWorkspaceGit} from './workspace-editor.js?v=1.0.0';
+import {openHtmlArtifact} from './artifact-viewer.js?v=1.0.0';
 
 /** Lazy, bounded file tree. No polling, recursive preload or cross-workspace cache. */
 export async function mountProjectFiles(root,{busy,changed}){
@@ -58,7 +59,7 @@ export async function mountProjectFiles(root,{busy,changed}){
    await listing(path,children,Math.min(10,Number(button.style.getPropertyValue('--file-depth'))+1));
   }else{
    const id=getState().workspaceId,version=epoch;
-   try{if(disposed||version!==epoch)return;await openWorkspaceEditor({...getState().workspace,workspace_id:id},path);}catch(error){toastError(errorMessage(error));}
+   try{if(disposed||version!==epoch)return;if(/\.html?$/i.test(path))await openHtmlArtifact(id,path,path.split('/').at(-1));else await openWorkspaceEditor({...getState().workspace,workspace_id:id},path);}catch(error){toastError(errorMessage(error));}
   }
  }
  select.addEventListener('change',change);tree.addEventListener('click',click);

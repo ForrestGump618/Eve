@@ -6447,3 +6447,9 @@ body.is-resizing-y {
     display: none;
   }
 }
+.artifact-card{display:inline-flex;align-items:center;gap:12px;max-width:100%;min-width:230px;margin:10px 0;padding:13px 16px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);text-align:left;font:inherit;cursor:pointer}
+.artifact-card:hover{background:var(--panel-2)}.artifact-card:disabled{opacity:.65;cursor:wait}
+.artifact-card span{display:grid;gap:3px;min-width:0}.artifact-card strong{font-size:14px;font-weight:550;overflow-wrap:anywhere}
+.artifact-card small,.artifact-note{color:var(--text-3);font-size:12px}.artifact-card>svg:last-child{margin-left:auto}
+.artifact-preview-body{padding:14px!important}.artifact-note{margin:0 0 10px;overflow-wrap:anywhere}
+.artifact-frame{display:block;width:100%;height:65vh;min-height:300px;background:var(--panel);border:1px solid var(--border-soft);border-radius:8px}

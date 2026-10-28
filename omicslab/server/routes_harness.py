@@ -150,19 +150,22 @@ async def execute_backend(backend: Any, operation: str, args: dict[str, Any]) ->
         if output.get("exitCode") != 0 or output.get("timedOut") or output.get("truncated"):
             raise ValueError(f"远程技能未成功：{str(output)[:2500]}")
         return output
-    if operation in {"prepare_science_skill", "run_science_skill"}:
-        from ..execution.science_skills import runtime_source
-        run = operation == "run_science_skill"
+    if operation in {"prepare_science_skill", "run_science_skill", "prepare_archify", "run_archify"}:
+        if "archify" in operation:
+            from ..execution.archify import runtime_source
+        else:
+            from ..execution.science_skills import runtime_source
+        run = operation in {"run_science_skill", "run_archify"}
         source = runtime_source(args["bundle"], str(backend.root), input_data=args.get("input"), run=run)
         result = await backend.execute_python(source, timeout_s=140)
         if not result.get("ok") or result.get("truncated"):
-            raise ValueError("科学技能运行环境异常；未获得可验证结果")
+            raise ValueError("技能运行环境异常；未获得可验证结果")
         try:
             output = json.loads(backend_stdout(result))
         except (ValueError, TypeError) as exc:
-            raise ValueError("科学技能未返回有效结构化结果") from exc
+            raise ValueError("技能未返回有效结构化结果") from exc
         if run and output.get("ok") is not True:
-            raise ValueError(f"科学技能未成功：{json.dumps(output, ensure_ascii=False)[:6000]}")
+            raise ValueError(f"技能未成功：{json.dumps(output, ensure_ascii=False)[:6000]}")
         return output
     raise ValueError("不支持的工作区操作")
 
@@ -248,15 +251,15 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
                 return await service.record(scope, str(args.get("id") or ""), args, run_id=run_id)
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from exc
-        if operation in {"write_file", "run_shell", "run_skill", "prepare_science_skill", "run_science_skill"}:
+        if operation in {"write_file", "run_shell", "run_skill", "prepare_science_skill", "run_science_skill", "prepare_archify", "run_archify"}:
             approval_args = args
-            if operation in {"prepare_science_skill", "run_science_skill"}:
+            if operation in {"prepare_science_skill", "run_science_skill", "prepare_archify", "run_archify"}:
                 # The permission UI receives identity and execution intent, not an entire source bundle.
                 bundle = args.get("bundle") or {}
                 approval_args = {"id": bundle.get("id"), "source": bundle.get("source"),
                                  "sha256": bundle.get("sha256"), "input": args.get("input", {})}
-            await authorize(state, handle, "skill_run" if operation in {"run_skill", "run_science_skill"}
-                            else "skill_prepare" if operation == "prepare_science_skill" else operation, approval_args)
+            await authorize(state, handle, "skill_run" if operation in {"run_skill", "run_science_skill", "run_archify"}
+                            else "skill_prepare" if operation in {"prepare_science_skill", "prepare_archify"} else operation, approval_args)
         try:
             result = await execute_backend(handle.backend, operation, args)
             return {**result, "execution_target": {"kind": handle.workspace.backend,

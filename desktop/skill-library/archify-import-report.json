@@ -1,0 +1,24 @@
+{
+  "version": "3.2.0",
+  "commit": "208acba8d412335185b2056fedf54b3405df43fb",
+  "files": 189,
+  "omitted": [
+    "examples/class-payment-processors-rendered.html",
+    "examples/class-payments-rendered.html",
+    "examples/dataflow-product-analytics.html",
+    "examples/erd-orders-rendered.html",
+    "examples/lifecycle-agent-run.html",
+    "examples/sequence-cache-miss-request.html",
+    "examples/subscription-billing-rendered.html",
+    "examples/timeline-archify-dev-activity-rendered.html",
+    "examples/timeline-payment-incident-rendered.html",
+    "examples/tree-archify-repository-rendered.html",
+    "examples/tree-payment-platform-rendered.html",
+    "examples/waterfall-checkout-request-rendered.html",
+    "examples/waterfall-example-rebuild-rendered.html",
+    "examples/web-app-rendered.html",
+    "examples/workflow-agent-tool-call-rendered.html"
+  ],
+  "packSha256": "3bdb42c5efabfd6dff27fbd3d61d4988392cad2eae970d1d49503a97803d9f7f",
+  "packBytes": 11070120
+}

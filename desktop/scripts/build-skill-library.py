@@ -226,3 +226,7 @@ if __name__ == "__main__":
     if science.is_dir():
         subprocess.run([sys.executable, str(Path(__file__).with_name("import-science-skills.py")),
                         "--checkout", str(science), "--output", str(args.output)], check=True)
+    archify = args.cache / "archify-source"
+    if archify.is_dir():
+        subprocess.run([sys.executable, str(Path(__file__).with_name("import-archify.py")),
+                        "--checkout", str(archify), "--output", str(args.output)], check=True)

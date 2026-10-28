@@ -11,6 +11,7 @@ import { parseMcpResult } from '../mcp-result.js';
 import { validateArguments } from '../harness/tool-registry.js';
 import type { McpServerView, RecordRow, RecordStore, SkillView, WorkerClient } from '../shared/contract.js';
 import {SkillLibrary} from '../skill-library.js';
+import {gzipSync} from 'node:zlib';
 
 /** Minimal injectable fetch surface; tests pass a deterministic fake and never touch the public network. */
 export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
@@ -816,6 +817,7 @@ export class SkillRegistry {
   private readonly sandboxRoot: string;
   private readonly maxFiles: number;
   private library?:SkillLibrary;
+  private diagramBundle?:{id:string;value:Record<string,Json>};
   private installedCache?:SkillView[];
   private bundledStateCache?:Map<string,RecordRow>;
 
@@ -856,7 +858,7 @@ export class SkillRegistry {
     };
   }
 
-  mountLibrary(root:string):void { this.library=new SkillLibrary(root);this.invalidateSkillCaches(); }
+  mountLibrary(root:string):void { this.library=new SkillLibrary(root);this.diagramBundle=undefined;this.invalidateSkillCaches(); }
   libraryStats(){return this.library?.stats()??null;}
   private libraryView(id:string,state:RecordRow|undefined|null=this.store.getRecord(id)):SkillView {
     const skill=this.library!.get(id);
@@ -866,7 +868,7 @@ export class SkillRegistry {
     return {id,name:skill.name,description:skill.description,version:skill.version,source:skill.source,license:skill.license,
       entry:'SKILL.md',permissions:[],enabled:stateData?.enabled!==false,
       sha256:skill.sha256,test:{status:'not_run',at:null},installedAt:0,
-      executable:Boolean(skill.runtime?.scripts.length),dependencies:skill.runtime?['uv']:[]};
+      executable:Boolean(skill.runtime?.scripts.length),dependencies:skill.runtime?[skill.runtime.manager]:[]};
   }
   private installedRows():RecordRow[]{
     const rows:RecordRow[]=[];
@@ -939,14 +941,18 @@ export class SkillRegistry {
         instructions:instructions.slice(0,8000),
         ...this.resources(id) as Record<string,Json>,
         omittedResources:skill.omittedResources.slice(0,40),omittedResourceCount:skill.omittedResources.length,
-        run:skill.runtime?.scripts.length?{
+        run:skill.bundle==='archify'?{
+          language:'node',scripts:skill.runtime!.scripts,
+          input:{command:'finalize | validate | check',type:'architecture | workflow | sequence | dataflow | lifecycle | erd | class | tree | timeline | waterfall | explainer',candidate:'workspace-relative JSON or .archify.md',output:'workspace-relative .html',quality:'showcase (default) | standard',outDir:'new workspace-relative review directory when revising',repoRoot:'workspace-relative repository root, optional'},
+          note:'skill_prepare materializes the verified package. skill_run invokes the pinned Node CLI in the bound local/SSH workspace. finalize requires real browser checks; validation alone is not delivery.',
+        }:skill.runtime?.scripts.length?{
           language:'uv',scripts:skill.runtime.scripts,
           input:{script:'one listed scripts/*.py path',args:'array of CLI strings',allowDependencyInstall:'explicit boolean; default false',timeoutSeconds:'1..120'},
           note:'skill_run uses the bound local/SSH workspace, verifies resources, and runs uv with argv (no shell). Dependencies are cached per host; first network resolution requires allowDependencyInstall:true under task approval.',
         }:null,
         preparation:skill.runtime?{tool:'skill_prepare',requiredCredentials:skill.runtime.requiredCredentials,optionalCredentials:skill.runtime.optionalCredentials,project:skill.runtime.project}:null,
-        adaptation:skill.runtime?'Eve: use skill_prepare for this skill and its returned absolute resource paths. skill_run accepts {script,args,allowDependencyInstall}. Outputs resolve under the selected workspace, never the installation directory. Do not follow host-specific setup instructions, pipe installers to a shell, or modify global agent settings. Check credentials by presence only on the execution host; never read .env into context. Optional credentials must not block public queries. scientific predictions are not clinical or experimental validation.':null,
-        dependencies:skill.runtime?['uv']:[],dependencyStatus:'not-probed',nextStartChar:instructions.length>8000?8000:null};
+        adaptation:skill.bundle==='archify'?'Eve: prefer skill_prepare, read the relevant bundled references/schema/example progressively, write a complete candidate with write_file, then skill_run {command:"finalize",type,candidate,output,quality:"showcase"}. All paths are relative to the bound workspace; explainer meta.output must be a filename only (destination directory belongs in input.output). No local fallback or global configuration edits. Return a short conclusion plus [descriptive title](eve-artifact:RELATIVE_ENCODED_HTML_PATH), using the exact artifact.link from the successful tool result. Chat opens it in an isolated interactive viewer. Never paste generated HTML/JS or huge JSON into the reply. Do not claim delivery when a gate fails, or visual review from automated checks. Use for complex workflows, experiment plans and structured explanations; ordinary replies stay text. Scientific plots retain their original numeric data, statistical method and plotting tools; this skill explains them without inventing data. Revisions preserve sources and use a fresh outDir for browser evidence.':skill.runtime?'Eve: use skill_prepare for this skill and its returned absolute resource paths. skill_run accepts {script,args,allowDependencyInstall}. Outputs resolve under the selected workspace, never the installation directory. Do not follow host-specific setup instructions, pipe installers to a shell, or modify global agent settings. Check credentials by presence only on the execution host; never read .env into context. Optional credentials must not block public queries. scientific predictions are not clinical or experimental validation.':null,
+        dependencies:skill.runtime?[skill.runtime.manager]:[],dependencyStatus:'not-probed',nextStartChar:instructions.length>8000?8000:null};
     }
     const row=this.row(id),data=recordData(row);
     if(data.enabled===false)throw new ValidationError('Skill is disabled');
@@ -984,6 +990,17 @@ export class SkillRegistry {
     return {id,path,startChar:start,content:file.text.slice(start,end),nextStartChar:end<file.text.length?end:null,sha256:file.sha256};
   }
   isScience(id:string):boolean {return Boolean(this.library?.has(id)&&this.library.get(id).bundle==='science');}
+  isArchify(id:string):boolean {return Boolean(this.library?.has(id)&&this.library.get(id).bundle==='archify');}
+  archifyBundle(id:string):Record<string,Json>{
+    if(!this.isArchify(id))throw new ValidationError('This skill has no diagram runtime adapter');
+    if(!this.libraryView(id).enabled)throw new ValidationError('Skill is disabled');
+    if(this.diagramBundle?.id===id)return this.diagramBundle.value;
+    const skill=this.library!.get(id);
+    const archive=gzipSync(Buffer.from(JSON.stringify(Object.entries(skill.files).map(([path,sha256])=>({path,sha256,content:this.library!.read(id,path)})))));
+    const value={id:skill.id,name:skill.name,version:skill.version,sha256:skill.sha256,source:skill.source,
+      runtime:skill.runtime as unknown as Json,archive:archive.toString('base64'),archiveSha256:createHash('sha256').update(archive).digest('hex')};
+    this.diagramBundle={id,value};return value;
+  }
   scienceBundle(id:string):Record<string,Json> {
     if(!this.isScience(id))throw new ValidationError('This skill has no scientific runtime adapter');
     if(!this.libraryView(id).enabled)throw new ValidationError('Skill is disabled');

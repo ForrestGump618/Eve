@@ -44,6 +44,7 @@ const PROBE_TIMEOUT_MS = 20_000;
 const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'keyring', ...(process.platform==='win32'?['winpty']:[])];
 const SAFE_ENV_KEYS = [
   'SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA',
+  'PROGRAMFILES', 'PROGRAMFILES(X86)', 'ARCHIFY_CHROME',
   'HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'PIP_INDEX_URL', 'PIP_TRUSTED_HOST', 'PIP_EXTRA_INDEX_URL',
   'REQUESTS_CA_BUNDLE', 'SSL_CERT_FILE',
 ];

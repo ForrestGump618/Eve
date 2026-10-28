@@ -8,7 +8,7 @@ export interface LibrarySkill {
   id:string; name:string; description:string; version:string; source:string;
   license:string; sha256:string; files:Record<string,string>; omittedResources:string[];
   bundle?:string; keywords?:string;
-  runtime?:{manager:'uv';scripts:string[];project:boolean;requiredCredentials:string[];optionalCredentials:string[]};
+  runtime?:{manager:'uv'|'node';scripts:string[];project:boolean;requiredCredentials:string[];optionalCredentials:string[]};
 }
 interface LibraryIndex {
   version:number; skills:LibrarySkill[];
@@ -23,6 +23,8 @@ const expand:Record<string,string> = {
   '药物':'drug discovery', '分子':'molecular', '审核':'review', '调试':'debugging',
   '文档':'document pdf parsing', '解析':'parsing extract', '转换':'convert conversion',
   '表格':'table spreadsheet', '扫描':'ocr scanned', '识别':'ocr recognition',
+  '架构图':'archify architecture diagram', '流程图':'archify workflow diagram',
+  '时序图':'archify sequence diagram', '一页说明':'archify explainer', '单页说明':'archify explainer',
 };
 /** Product-level synonyms steer the shared library without requiring a
  * second semantic index. These are ranked as exact capability intents. */
@@ -30,6 +32,7 @@ const preferredByName:Record<string,string[]> = {
   pdf:['mineru','liteparse','markitdown'],
   ocr:['mineru','liteparse'],
   document:['mineru','liteparse','markitdown'],
+  architecture:['archify'],workflow:['archify'],explainer:['archify'],
 };
 function tokens(text:string):string[] {
   const translated=Object.entries(expand).filter(([key])=>text.includes(key)).map(([,value])=>value).join(' ');

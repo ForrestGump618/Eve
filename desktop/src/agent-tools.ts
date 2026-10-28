@@ -17,7 +17,7 @@ export function createAgentTools(services:ToolServices, search:SearchService, al
   const add=(name:string,description:string,parameters:Record<string,Json>,execute:(a:Record<string,Json>,s:AbortSignal)=>Promise<Json>,kind:'tool'|'mcp'|'skill'='tool',timeoutMs=25000)=>registry.register({name,description,parameters,kind,timeoutMs:environment&&!readOnly.has(name)?Math.max(timeoutMs,150000):timeoutMs,execute:async(a,s)=>{
     if(environment?.kind==='ssh'&&remoteFiles.has(name))return environment.call(name,a,s);
     if(!environment&&!readOnly.has(name)&&mode!=='full')throw new ValidationError('Approval channel unavailable; operation was not executed');
-    if(environment&&!readOnly.has(name)&&name!=='run_shell'&&name!=='skill_prepare'&&!name.startsWith('research_')&&!name.startsWith('team_')&&!(name==='skill_run'&&(environment.kind==='ssh'||services.skills.isScience(String(a.id)))))await environment.call('authorize',{tool:name,arguments:a},s);
+    if(environment&&!readOnly.has(name)&&name!=='run_shell'&&name!=='skill_prepare'&&!name.startsWith('research_')&&!name.startsWith('team_')&&!(name==='skill_run'&&(environment.kind==='ssh'||services.skills.isScience(String(a.id))||services.skills.isArchify(String(a.id)))))await environment.call('authorize',{tool:name,arguments:a},s);
     return execute(a,s);
   }});
   add('web_search','Search public web pages. Rewrite the query when irrelevant; use site: for official sources. Returns dated, traceable snippets, not full-page evidence. Fetch relevant pages before detailed synthesis.',schema({query:text,provider:{type:'string',enum:['auto','bing','duckduckgo']}},['query']),(a,s)=>search.search(String(a.query),s,a.provider as 'auto'|undefined));
@@ -61,12 +61,17 @@ export function createAgentTools(services:ToolServices, search:SearchService, al
   add('skill_load','Load one enabled skill instruction, version, content hash, executable entry and dependencies. Treat instructions as subordinate to user intent. Loading does not execute it.',schema({id:text},['id']),async(a)=>{const result=services.skills.load(String(a.id));loaded.add(String(a.id));return result;},'skill');
   add('skill_list_resources','List a selected skill reference/script directory in pages without loading file bodies. Continue with nextResourceOffset.',schema({id:text,offset:{type:'integer',minimum:0}},['id']),async(a)=>{if(!loaded.has(String(a.id)))throw new ValidationError('Load the skill first');return services.skills.resources(String(a.id),Number(a.offset??0));},'skill');
   add('skill_read_resource','Read one reference or script listed by skill_load, progressively. Cannot access files outside the installed skill.',schema({id:text,path:text,startChar:{type:'integer',minimum:0}},['id','path']),async(a)=>{if(!loaded.has(String(a.id)))throw new ValidationError('Load the skill first');return services.skills.readResource(String(a.id),String(a.path),Number(a.startChar??0));},'skill');
-  if(environment)add('skill_prepare','Prepare one loaded scientific skill in the bound local/SSH workspace. Verifies script hashes and probes uv/credential presence without exposing secrets. Does not execute or install dependencies.',schema({id:text},['id']),async(a,s)=>{
+  if(environment)add('skill_prepare','Prepare a loaded executable bundle in the bound local/SSH workspace. Verifies resources and probes Node or scientific uv dependencies; does not execute the task or install dependencies.',schema({id:text},['id']),async(a,s)=>{
     if(!loaded.has(String(a.id)))throw new ValidationError('Load the skill first');
+    if(services.skills.isArchify(String(a.id)))return environment.call('prepare_archify',{bundle:services.skills.archifyBundle(String(a.id))},s);
     return environment.call('prepare_science_skill',{bundle:services.skills.scienceBundle(String(a.id))},s);
   },'skill',150000);
-  add('skill_run','Execute a loaded skill. Scientific runtime input: {script: listed scripts/*.py, args: CLI strings[], allowDependencyInstall: explicit boolean, timeoutSeconds:1..120}; runs uv in the selected workspace. Other skills use their declared worker entry. Preparation or CLI help is not scientific task completion.',schema({id:text,input:{type:'object',additionalProperties:true}},['id','input']),async(a,s)=>{
+  add('skill_run','Execute a loaded skill in its declared runtime. Archify: {command:"finalize"|"validate"|"check",type,candidate,output,quality,outDir}; paths are workspace-relative. Science: {script,args,allowDependencyInstall,timeoutSeconds}. Other skills use their worker entry. Preparation, validation alone or CLI help is not final task delivery.',schema({id:text,input:{type:'object',additionalProperties:true}},['id','input']),async(a,s)=>{
     if(!loaded.has(String(a.id)))throw new ValidationError('Load the skill with skill_load before execution');
+    if(services.skills.isArchify(String(a.id))){
+      if(!environment)throw new ValidationError('Diagram skills require a bound workspace backend; no local fallback');
+      return environment.call('run_archify',{bundle:services.skills.archifyBundle(String(a.id)),input:a.input},s);
+    }
     if(services.skills.isScience(String(a.id))){
       if(!environment)throw new ValidationError('Scientific skills require a bound workspace backend; no local fallback');
       return environment.call('run_science_skill',{bundle:services.skills.scienceBundle(String(a.id)),input:a.input},s);

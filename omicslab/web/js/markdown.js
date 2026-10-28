@@ -28,8 +28,14 @@ export function renderInline(text) {
   src = esc(src);
 
   // 3) Links: [label](url)
-  src = src.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (m, label, rawUrl) => {
-    const url = safeUrl(decodeEntities(rawUrl));
+  src = src.replace(/\[([^\]\n]+)\]\((<[^>\n]+>|[^)\s]+)\)/g, (m, label, rawUrl) => {
+    const raw=decodeEntities(rawUrl).replace(/^<|>$/g,'');
+    if(raw.startsWith('eve-artifact:')){
+      let path;try{path=decodeURIComponent(raw.slice(13));}catch{return m;}
+      if(!path||path.length>2000||!/\.html?$/i.test(path)||/[\0\r\n]/.test(path))return m;
+      return stash(`<button type="button" class="artifact-card" data-artifact-path="${esc(path)}">${icon('file',{size:18})}<span><strong>${renderInline(label)}</strong><small>交互页面 · 点击查看</small></span>${icon('chevronRight',{size:16})}</button>`);
+    }
+    const url = safeUrl(raw);
     if (!url) return m;
     return stash(linkHtml(url, renderInline(label)));
   });
