@@ -657,5 +657,12 @@
     "buildId": "2b43ab1f10d7c315d4287c4127802df09a7c1f89628ee5cfdd67a539af98f51d",
     "activeTasks": 0,
     "passed": true
+  },
+  "liveProviderDiscovery": {
+    "kind": "real authenticated provider model discovery, no configuration mutation",
+    "success": true,
+    "count": 138,
+    "requestedModelPresent": false,
+    "truncated": false
   }
 }
