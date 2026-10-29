@@ -46,6 +46,8 @@ class Skill:
     path: Path
     source: str = "bundled"
     files: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise for the REST API (``GET /api/skills``)."""
@@ -56,6 +58,7 @@ class Skill:
             "source": self.source,
             "path": str(self.path),
             "files": list(self.files),
+            "dependencies": list(self.dependencies),
         }
 
 
@@ -180,6 +183,14 @@ def _parse_skill_dir(skill_dir: Path, source: str) -> Skill | None:
     body_text = body.strip()
     description = str(meta.get("description") or "").strip()
     when_to_use = str(meta.get("when_to_use") or "").strip()
+    raw_dependencies = meta.get("depends_on", meta.get("dependencies", [])) or []
+    if isinstance(raw_dependencies, str):
+        raw_dependencies = re.split(r"[,;\s]+", raw_dependencies)
+    dependencies = [
+        str(item).strip()
+        for item in raw_dependencies
+        if isinstance(item, str) and str(item).strip()
+    ] if isinstance(raw_dependencies, list) else []
     if not description:
         description = _first_sentence(body_text) or name
     if not body_text:
@@ -194,6 +205,8 @@ def _parse_skill_dir(skill_dir: Path, source: str) -> Skill | None:
         path=skill_file,
         source=source,
         files=_list_files(skill_dir),
+        metadata=dict(meta),
+        dependencies=dependencies,
     )
 
 

@@ -1,11 +1,12 @@
 // Shell-level application state shared by the router, top bar and views.
 // Views never import app.js; they read/write this store and emit events via bus.js.
 
-import { emit } from './bus.js?v=1.3.0';
-import { getPref, setPref } from './util.js?v=1.3.0';
+import { emit } from './bus.js?v=1.4.0';
+import { getPref, setPref } from './util.js?v=1.4.0';
 
 export const ROUTES = [
   {id:'dashboard',label:'研究总览',icon:'discovery',subtitle:'课题、运行、会话与待审建议'},
+  {id:'literature',label:'文献雷达',icon:'book',subtitle:'检索、精读、反思与课题联动'},
   {id:'evolution',label:'自我改进',icon:'discovery',subtitle:'Proteus 实验、回归与版本'},
   {id:'context',label:'上下文',icon:'memory',subtitle:'上下文组成、压缩与原文'},
   // Team collaboration is agent-autonomous and surfaced in the chat sidebar

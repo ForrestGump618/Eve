@@ -57,25 +57,35 @@ class ModelGateway:
     def __init__(self,platform):
         self.platform=platform
 
-    def prepare(self,settings,provider,model,agent,backend,task_text=''):
+    def prepare(self,settings,provider,model,agent,backend,task_text='',task_tag=''):
         scope=getattr(getattr(backend,'workspace',None),'workspace_id','ws_main')
         config=self.platform.config.get('models',scope)['value']
         role='reasoning' if config['mode']=='deep' else 'text'
-        if 'code' in getattr(agent,'category','') or re.search(r'写代码|编写.*(?:代码|脚本)|修复.*(?:代码|程序)|debug|implement|write.*(?:code|script)',task_text,re.I):
+        if task_tag:
+            role='embedding' if task_tag.endswith('.embedding') else 'reasoning'
+        elif 'code' in getattr(agent,'category','') or re.search(r'写代码|编写.*(?:代码|脚本)|修复.*(?:代码|程序)|debug|implement|write.*(?:code|script)',task_text,re.I):
             role='code'
         role_model=config['roles'].get(role,{})
         profile=self.platform.store.get('agent',agent.id)
-        if profile:
+        if profile and not task_tag:
             if profile.get('workspaces') and scope not in profile['workspaces']:
                 raise LLMError('此 Agent 未授权访问当前工作区')
             if not provider:provider=profile.get('provider') or None
             if not model:model=profile.get('model') or None
-        use_role=not provider and not model
-        if not provider and role_model:
-            provider=role_model.get('provider') or None
-        if not model and role_model:
-            model=role_model.get('model') or None
-        target=self.resolve_target(dict(role_model,provider=provider,model=model) if use_role else {'provider':provider,'model':model})
+        auxiliary=config.get('auxiliary_profiles',{}).get(task_tag,{}) if task_tag else {}
+        task_route={k:v for k,v in auxiliary.items() if v}
+        if task_route:
+            route=dict(role_model)
+            route.update(task_route)
+            target=self.resolve_target(route)
+            use_role=False
+        else:
+            use_role=not provider and not model
+            if not provider and role_model:
+                provider=role_model.get('provider') or None
+            if not model and role_model:
+                model=role_model.get('model') or None
+            target=self.resolve_target(dict(role_model,provider=provider,model=model) if use_role else {'provider':provider,'model':model})
         caps=config['capabilities'].get(target.model,{})
         maximum={'fast':1024,'balanced':4096,'deep':8192}[config['mode']]
         temperature=None
@@ -93,7 +103,12 @@ class ModelGateway:
             extra={'supported_parameters':caps.get('supported_parameters',[]),'token_parameter':caps.get('token_parameter','max_tokens'),
                    'modalities':caps.get('modalities',[]),'model_context_window':ctx_window})
         routed_config=dict(config);routed_config['context_window']=ctx_window
-        return RoutedProvider(self,target,scope,agent.id,routed_config),cfg,target
+        routed=RoutedProvider(self,target,scope,agent.id,routed_config)
+        routed.task_tag=task_tag
+        if task_tag:
+            self.platform.store.audit('model.task_route',{'task_tag':task_tag,'model':target.model,
+                'source':'auxiliary' if task_route else 'fallback'},scope)
+        return routed,cfg,target
 
     def resolve_target(self,item):
         return self.platform.settings.resolve_llm(item.get('provider'),item.get('model'),

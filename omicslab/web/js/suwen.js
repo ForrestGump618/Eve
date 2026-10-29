@@ -1,8 +1,8 @@
 /** Shared appearance and workspace-local layout preferences. Legacy keys remain readable. */
-import { api } from './api.js?v=1.3.0';
-import { getPref, setPref } from './util.js?v=1.3.0';
-import { getState, navigate } from './store.js?v=1.3.0';
-import { applyTheme, openModal } from './ui.js?v=1.3.0';
+import { api } from './api.js?v=1.4.0';
+import { getPref, setPref } from './util.js?v=1.4.0';
+import { getState, navigate } from './store.js?v=1.4.0';
+import { applyTheme, openModal } from './ui.js?v=1.4.0';
 
 export function applyAppearance(settings){
  if(!settings)return;
@@ -30,10 +30,10 @@ export async function initPlatform(){
   applyAppearance(data.settings.appearance.value);
   if(!data.settings.appearance.value.onboarded&&!getPref('onboardingDismissed',false)){
    const onboarding=openModal({
-    title:'开始使用 Eve',
+    title:'连接模型',
     size:'sm',
     bodyClass:'sw-onboarding-body',
-    html:'<div class="sw-onboarding"><p class="sw-onboarding-purpose">连接模型后，Eve 才能读取项目并执行任务。</p><label class="sw-onboarding-optout"><input type="checkbox" data-onboarding-optout checked/><span>下次不再提示</span></label></div>',
+    html:'<div class="sw-onboarding"><p class="sw-onboarding-purpose">连接后即可对话和运行任务。</p><label class="sw-onboarding-optout"><input type="checkbox" data-onboarding-optout checked/><span>下次不再提示</span></label></div>',
     actions:[
      {label:'连接模型',kind:'primary',onClick:()=>navigate('settings')},
     ],

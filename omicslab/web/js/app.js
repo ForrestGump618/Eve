@@ -1,9 +1,9 @@
 // Application shell: sidebar navigation, hash router, health polling,
 // offline banner, theme switching and the Ctrl/Cmd+K command palette.
 
-import { icon, brandMark } from './icons.js?v=1.3.0';
-import { esc, getPref, relTime } from './util.js?v=1.3.0';
-import { api, errorMessage } from './api.js?v=1.3.0';
+import { icon, brandMark } from './icons.js?v=1.4.0';
+import { esc, getPref, relTime } from './util.js?v=1.4.0';
+import { api, errorMessage } from './api.js?v=1.4.0';
 import {
   initUi,
   toastError,
@@ -17,11 +17,11 @@ import {
   confirmDialog,
   closeAllModals,
   h,
-} from './ui.js?v=1.3.0';
-import { on, emit } from './bus.js?v=1.3.0';
-import {workspaceSidebarHtml,mountSidebarNavigation} from './workspace-sidebar.js?v=1.3.0';
-import { initApprovalCenter } from './approvals.js?v=1.3.0';
-import { mountEveSelects } from './eve-select.js?v=1.3.0';
+} from './ui.js?v=1.4.0';
+import { on, emit } from './bus.js?v=1.4.0';
+import {workspaceSidebarHtml,mountSidebarNavigation} from './workspace-sidebar.js?v=1.4.0';
+import { initApprovalCenter } from './approvals.js?v=1.4.0';
+import { mountEveSelects } from './eve-select.js?v=1.4.0';
 import {
   ROUTES,
   state,
@@ -31,34 +31,35 @@ import {
   parseHash,
   routeMeta,
   requestShellRefresh,
-} from './store.js?v=1.3.0';
+} from './store.js?v=1.4.0';
 
 const HEALTH_INTERVAL_MS = 15000;
 
 const VIEW_LOADERS = {
-  dashboard: () => import('./views/dashboard.js?v=1.3.0'),
-  evolution: () => import('./views/evolution.js?v=1.3.0'),
-  context: () => import('./views/context-dashboard.js?v=1.3.0'),
-  teams: () => import('./views/teams.js?v=1.3.0'),
-  settings: () => import('./views/platform.js?v=1.3.0'),
-  tasks2: () => import('./views/platform.js?v=1.3.0'),
-  extensions: () => import('./views/platform.js?v=1.3.0'),
-  knowledge: () => import('./views/platform.js?v=1.3.0'),
-  workflow: () => import('./views/platform.js?v=1.3.0'),
-  research: () => import('./views/platform.js?v=1.3.0'),
-  artifacts: () => import('./views/platform.js?v=1.3.0'),
-  diagnostics: () => import('./views/platform.js?v=1.3.0'),
-  connections: () => import('./views/settings.js?v=1.3.0'),
-  workbench: () => import('./views/workbench.js?v=1.3.0'),
-  chat: () => import('./views/chat.js?v=1.3.0'),
-  discovery: () => import('./views/discovery.js?v=1.3.0'),
-  vars: () => import('./views/vars.js?v=1.3.0'),
-  files: () => import('./views/files.js?v=1.3.0'),
-  figures: () => import('./views/figures.js?v=1.3.0'),
-  jobs: () => import('./views/jobs.js?v=1.3.0'),
-  skills: () => import('./views/skills.js?v=1.3.0'),
-  registry: () => import('./views/registry.js?v=1.3.0'),
-  memory: () => import('./views/memory.js?v=1.3.0'),
+  dashboard: () => import('./views/dashboard.js?v=1.4.0'),
+  literature: () => import('./views/literature.js?v=1.4.0'),
+  evolution: () => import('./views/evolution.js?v=1.4.0'),
+  context: () => import('./views/context-dashboard.js?v=1.4.0'),
+  teams: () => import('./views/teams.js?v=1.4.0'),
+  settings: () => import('./views/platform.js?v=1.4.0'),
+  tasks2: () => import('./views/platform.js?v=1.4.0'),
+  extensions: () => import('./views/platform.js?v=1.4.0'),
+  knowledge: () => import('./views/platform.js?v=1.4.0'),
+  workflow: () => import('./views/platform.js?v=1.4.0'),
+  research: () => import('./views/platform.js?v=1.4.0'),
+  artifacts: () => import('./views/platform.js?v=1.4.0'),
+  diagnostics: () => import('./views/platform.js?v=1.4.0'),
+  connections: () => import('./views/settings.js?v=1.4.0'),
+  workbench: () => import('./views/workbench.js?v=1.4.0'),
+  chat: () => import('./views/chat.js?v=1.4.0'),
+  discovery: () => import('./views/discovery.js?v=1.4.0'),
+  vars: () => import('./views/vars.js?v=1.4.0'),
+  files: () => import('./views/files.js?v=1.4.0'),
+  figures: () => import('./views/figures.js?v=1.4.0'),
+  jobs: () => import('./views/jobs.js?v=1.4.0'),
+  skills: () => import('./views/skills.js?v=1.4.0'),
+  registry: () => import('./views/registry.js?v=1.4.0'),
+  memory: () => import('./views/memory.js?v=1.4.0'),
   ssh: () => loadSshView(),
 };
 
@@ -68,7 +69,7 @@ const VIEW_LOADERS = {
 async function loadSshView() {
   let mod = null;
   try {
-    mod = await import('./views/ssh.js?v=1.3.0');
+    mod = await import('./views/ssh.js?v=1.4.0');
   } catch (err) {
     console.warn('[app] views/ssh.js 尚未就绪', err);
     return sshPlaceholderView();
@@ -138,7 +139,7 @@ const app = {
 /* ------------------------------------------------------------------ */
 
 function shellHtml() {
-  const order = ['dashboard','workbench','chat','tasks2','teams','context','research','knowledge','workflow','artifacts','extensions','discovery','ssh','settings','diagnostics'];
+  const order = ['dashboard','literature','workbench','chat','tasks2','teams','context','research','knowledge','workflow','artifacts','extensions','discovery','ssh','settings','diagnostics'];
   const navItems = ROUTES.filter(route => !route.hidden).sort((a,b) => order.indexOf(a.id)-order.indexOf(b.id)).map(
     (route) =>
       `<button type="button" class="nav-item" data-route="${route.id}" title="${esc(route.label)}">` +
@@ -656,7 +657,7 @@ function bindGlobalKeys() {
   });
   // Bridge: CustomEvent from the palette -> bus event (chat view subscribes).
   window.addEventListener('omicslab:new-conversation', async () => {
-    const { emit } = await import('./bus.js?v=1.3.0');
+    const { emit } = await import('./bus.js?v=1.4.0');
     emit('chat:new-conversation', {});
   });
 }
@@ -700,7 +701,7 @@ async function boot() {
     titlebar.innerHTML=`<button type="button" class="desktop-history" id="desktop-back" aria-label="返回">←</button><button type="button" class="desktop-history" id="desktop-forward" aria-label="前进">→</button><span class="desktop-app-label">Eve</span>`;
     titlebar.querySelector('#desktop-back').addEventListener('click',()=>history.back());titlebar.querySelector('#desktop-forward').addEventListener('click',()=>history.forward());
     const rail=document.createElement('nav');rail.className='desktop-rail';rail.setAttribute('aria-label','快捷导航');
-    rail.innerHTML=[['workbench','layers','工作台'],['tasks2','clock','任务'],['extensions','skills','技能'],['ssh','terminal','SSH'],['settings','settings','设置']].map(([route,name,label])=>`<a href="#/${route}" title="${label}" aria-label="${label}">${icon(name,{size:22})}</a>`).join('');
+    rail.innerHTML=[['workbench','layers','工作台'],['literature','book','文献'],['tasks2','clock','任务'],['extensions','skills','技能'],['ssh','terminal','SSH'],['settings','settings','设置']].map(([route,name,label])=>`<a href="#/${route}" title="${label}" aria-label="${label}">${icon(name,{size:22})}</a>`).join('');
     document.body.prepend(titlebar,rail);
   }
   initUi();
@@ -718,7 +719,7 @@ async function boot() {
 
   const bootRoute = parseHash();
   await renderRoute(bootRoute);
-  const { initPlatform } = await import("./suwen.js?v=1.3.0");
+  const { initPlatform } = await import("./suwen.js?v=1.4.0");
   await initPlatform();
   document.documentElement.dataset.ready='true';
   window.addEventListener('beforeunload', () => {

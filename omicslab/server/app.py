@@ -29,6 +29,7 @@ from .terminal import run_terminal
 from .routes_workspace_tools import router as workspace_tools_router
 from .routes_sidebar import router as sidebar_router
 from .routes_evolution import router as evolution_router
+from .routes_literature import router as literature_router
 
 logger = logging.getLogger("omicslab.server")
 
@@ -146,6 +147,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(workspace_tools_router)
     app.include_router(sidebar_router)
     app.include_router(evolution_router)
+    app.include_router(literature_router)
     for optional_router in _load_optional_routers():
         app.include_router(optional_router)
 

@@ -51,6 +51,12 @@ class Platform:
         from .dreaming import Dreaming
         self.dreaming=Dreaming(self)
         self.dreaming.register()
+        from .literature import LiteratureCoordinator,LiteratureService
+        self.literature=LiteratureService(self)
+        self.literature_coordinator=LiteratureCoordinator(self)
+        from .skill_graph import SkillGraph
+        self.skill_graph=SkillGraph(self)
+        self._closed=False
         self.sandbox.register()
         for server in self.store.list('mcp'):
             discovered=self.store.get('mcp_status',server['id'])
@@ -72,10 +78,21 @@ class Platform:
     async def start(self):
         await self.tasks.start()
         await self.channels.wechat.start()
+        await self.literature_coordinator.start()
     async def close(self):
-        await self.channels.wechat.close()
-        await self.tasks.close()
-        self.store.close()
+        if self._closed:
+            return
+        self._closed=True
+        try:
+            await self.literature_coordinator.close()
+        finally:
+            try:
+                await self.channels.wechat.close()
+            finally:
+                try:
+                    await self.tasks.close()
+                finally:
+                    self.store.close()
 
     def workspace_ids(self):return [w.workspace_id for w in self.state.workspaces.list()]
     def require_workspace(self,scope):

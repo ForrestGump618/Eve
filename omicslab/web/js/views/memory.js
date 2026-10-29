@@ -1,9 +1,9 @@
 // Memory view: long-lived project notes stored as slugged markdown documents.
 
-import { icon } from '../icons.js?v=1.3.0';
-import { renderMarkdown } from '../markdown.js?v=1.3.0';
-import { esc, relTime, fmtBytes } from '../util.js?v=1.3.0';
-import { api, errorMessage } from '../api.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.4.0';
+import { renderMarkdown } from '../markdown.js?v=1.4.0';
+import { esc, relTime, fmtBytes } from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
 import {
   toastSuccess,
   toastError,
@@ -11,7 +11,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.3.0';
+} from '../ui.js?v=1.4.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();

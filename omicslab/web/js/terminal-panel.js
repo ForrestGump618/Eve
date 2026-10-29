@@ -1,6 +1,6 @@
-import {esc,escAttr} from './util.js?v=1.3.0';
-import {on,emit} from './bus.js?v=1.3.0';
-import {terminalPolicy as policy,terminalAppearance,TerminalOutputBuffer} from './terminal-policy.js?v=1.3.0';
+import {esc,escAttr} from './util.js?v=1.4.0';
+import {on,emit} from './bus.js?v=1.4.0';
+import {terminalPolicy as policy,terminalAppearance,TerminalOutputBuffer} from './terminal-policy.js?v=1.4.0';
 
 // Session ownership belongs to the workspace, not to a route's DOM lifetime.
 // Bounded retained renderers keep PTY output/state while visiting other panels.

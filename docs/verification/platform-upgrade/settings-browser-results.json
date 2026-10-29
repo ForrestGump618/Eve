@@ -4,7 +4,13 @@
     "verification": "sage",
     "orchestration": true,
     "strategy": "quality",
-    "roles": {},
+    "roles": {
+      "reasoning": {
+        "provider": "",
+        "model": "reasoning-with-default-provider"
+      }
+    },
+    "auxiliary_profiles": {},
     "capabilities": {
       "research-model": {
         "temperature": 0.4,

@@ -1,8 +1,8 @@
 // Variables view: kernel workspace variables with a detail inspector.
 
-import { icon } from '../icons.js?v=1.3.0';
-import { esc, fmtBytes, fmtShape, debounce, truncate } from '../util.js?v=1.3.0';
-import { api, errorMessage } from '../api.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.4.0';
+import { esc, fmtBytes, fmtShape, debounce, truncate } from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
 import {
   h,
   toast,
@@ -12,7 +12,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.3.0';
+} from '../ui.js?v=1.4.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();
@@ -53,7 +53,7 @@ export async function mount(root, ctx = {}) {
         title: local.vars.length ? '没有匹配的变量' : '内核中还没有变量',
         hint: local.vars.length
           ? '换个关键词试试'
-          : '在对话中执行代码或使用后台任务后，变量会出现在这里。',
+          : '暂无变量。',
       });
       return;
     }

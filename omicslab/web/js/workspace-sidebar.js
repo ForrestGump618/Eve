@@ -1,12 +1,12 @@
-import {icon} from './icons.js?v=1.3.0';
-import {api,errorMessage} from './api.js?v=1.3.0';
-import {esc,escAttr} from './util.js?v=1.3.0';
-import {getState,setState} from './store.js?v=1.3.0';
-import {getPref,setPref,relTime} from './util.js?v=1.3.0';
-import {on} from './bus.js?v=1.3.0';
-import {promptDialog,confirmDialog,toastError} from './ui.js?v=1.3.0';
-import {mountProjectFiles} from './project-files.js?v=1.3.0';
-import {artifactConfig} from './artifact-config.js?v=1.3.0';
+import {icon} from './icons.js?v=1.4.0';
+import {api,errorMessage} from './api.js?v=1.4.0';
+import {esc,escAttr} from './util.js?v=1.4.0';
+import {getState,setState} from './store.js?v=1.4.0';
+import {getPref,setPref,relTime} from './util.js?v=1.4.0';
+import {on} from './bus.js?v=1.4.0';
+import {promptDialog,confirmDialog,toastError} from './ui.js?v=1.4.0';
+import {mountProjectFiles} from './project-files.js?v=1.4.0';
+import {artifactConfig} from './artifact-config.js?v=1.4.0';
 
 export const conversationFlag = (conversation, key) => Boolean(conversation[key] ?? conversation.meta?.[key]);
 
@@ -16,7 +16,7 @@ export function workspaceSidebarHtml(){return `
  <div class="conv-search">${icon('search',{size:14})}<input type="search" id="conv-filter" placeholder="搜索会话" aria-label="搜索会话"/></div></div>
  <section class="project-files" aria-label="项目文件"><div class="sidebar-section-label"><span>项目文件</span><div class="project-tools"><button type="button" class="icon-btn" id="project-search" aria-label="检索项目文件">${icon('search',{size:13})}</button><button type="button" class="icon-btn" id="project-git" aria-label="Git 状态与历史">${icon('gitBranch',{size:13})}</button><button type="button" class="icon-btn" id="project-refresh" aria-label="刷新项目文件">${icon('refresh',{size:13})}</button></div></div><select id="project-workspace" aria-label="当前项目工作区"></select><div id="project-file-tree" class="project-file-tree"></div></section>
  ${conversationControlsHtml()}<div class="conv-list" id="conv-list"></div>
- <div class="chat-sidebar-foot"><a href="#/workbench">工作台</a><a href="#/research">科研</a><a href="#/extensions">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/context">上下文</a><a href="#/teams">协作</a><a href="#/evolution">自我改进</a><a href="#/settings">设置</a></div>
+ <div class="chat-sidebar-foot"><a href="#/workbench">工作台</a><a href="#/research">科研</a><a href="#/extensions">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/context">上下文</a><a href="#/evolution">自我改进</a><a href="#/settings">设置</a></div>
  <div class="sidebar-actions sidebar-utilities"><button type="button" class="icon-btn" id="theme-toggle" aria-label="切换主题">${icon('sun',{size:16})}</button><button type="button" class="icon-btn" id="palette-open" aria-label="打开命令面板">${icon('command',{size:16})}</button></div>`;}
 
 export function conversationControlsHtml(){return `<div class="sidebar-section-label"><span>会话</span><span id="sidebar-conv-count"></span></div><div class="sidebar-conv-tools"><select id="conv-view" aria-label="会话视图"><option value="recent">最近</option><option value="archived">已归档</option><option value="all">全部</option></select><label title="只显示当前工作区"><input id="conv-workspace-only" type="checkbox"/>当前项目</label></div>`;}

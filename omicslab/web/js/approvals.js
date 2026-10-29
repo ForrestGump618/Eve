@@ -6,11 +6,11 @@
 //  * GET /api/approvals?status=pending polling as a safety net (page reload,
 //    approvals raised while the chat view was unmounted).
 
-import { icon } from './icons.js?v=1.3.0';
-import { esc, cleanValue } from './util.js?v=1.3.0';
-import { api, errorMessage } from './api.js?v=1.3.0';
-import { on, emit } from './bus.js?v=1.3.0';
-import { toastWarn, toastError, openModal, emptyStateHtml, spinnerHtml } from './ui.js?v=1.3.0';
+import { icon } from './icons.js?v=1.4.0';
+import { esc, cleanValue } from './util.js?v=1.4.0';
+import { api, errorMessage } from './api.js?v=1.4.0';
+import { on, emit } from './bus.js?v=1.4.0';
+import { toastWarn, toastError, openModal, emptyStateHtml, spinnerHtml } from './ui.js?v=1.4.0';
 
 const POLL_MS = 12000;
 
@@ -138,7 +138,7 @@ function renderPanelBody() {
     panelBody.innerHTML = emptyStateHtml({
       iconName: 'shield',
       title: '暂无待审批的操作',
-      hint: '需要授权的工具调用会出现在这里。子任务的审批同样会汇总到本中心。',
+      hint: '待授权操作。',
     });
     return;
   }

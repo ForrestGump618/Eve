@@ -1,0 +1,74 @@
+{
+    "at":  "2026-10-29T11:00:17.7509950Z",
+    "version":  "1.4.0",
+    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\Eve-Setup-1.4.0-win-x64.exe",
+    "installerBytes":  144531378,
+    "installerSha256":  "BF3C62276DD66FB3993B705F467EECE6638D63AE1FB53E4001B85797180A3374",
+    "upgradeFrom":  "",
+    "steps":  [
+                  {
+                      "name":  "install",
+                      "status":  "PASS",
+                      "detail":  "exit=0 installerBytes=144531378 sha256=BF3C62276DD66FB3993B705F467EECE6638D63AE1FB53E4001B85797180A3374 duration=~43s",
+                      "at":  "2026-10-29T10:58:26.8820246Z"
+                  },
+                  {
+                      "name":  "files",
+                      "status":  "PASS",
+                      "detail":  "Eve.exe bytes=249797632 FileVersion=1.4.0 ProductVersion=1.4.0.0",
+                      "at":  "2026-10-29T10:58:26.9025961Z"
+                  },
+                  {
+                      "name":  "registry",
+                      "status":  "PASS",
+                      "detail":  "DisplayName=Eve DisplayVersion=1.4.0",
+                      "at":  "2026-10-29T10:58:27.0310531Z"
+                  },
+                  {
+                      "name":  "app_launch",
+                      "status":  "PASS",
+                      "detail":  "pid=50584 alive after 12s",
+                      "at":  "2026-10-29T10:58:45.6186997Z"
+                  },
+                  {
+                      "name":  "daemon_health",
+                      "status":  "PASS",
+                      "detail":  "version=1.4.0 mode=user-background pid=49804",
+                      "at":  "2026-10-29T10:58:45.9040160Z"
+                  },
+                  {
+                      "name":  "daemon_survives_ui_close",
+                      "status":  "PASS",
+                      "detail":  "version=1.4.0 pid=49804",
+                      "at":  "2026-10-29T10:58:49.1116188Z"
+                  },
+                  {
+                      "name":  "reinstall",
+                      "status":  "PASS",
+                      "detail":  "same-version reinstall kept the app executable",
+                      "at":  "2026-10-29T10:59:52.7370721Z"
+                  },
+                  {
+                      "name":  "uninstall",
+                      "status":  "PASS",
+                      "detail":  "exit=0 install directory removed",
+                      "at":  "2026-10-29T11:00:17.6108768Z"
+                  },
+                  {
+                      "name":  "user_data_preserved",
+                      "status":  "PASS",
+                      "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Roaming\\Eve",
+                      "at":  "2026-10-29T11:00:17.6123847Z"
+                  },
+                  {
+                      "name":  "registry_removed",
+                      "status":  "PASS",
+                      "detail":  "HKCU uninstall entry removed",
+                      "at":  "2026-10-29T11:00:17.7252759Z"
+                  }
+              ],
+    "passed":  10,
+    "failed":  0,
+    "ok":  true,
+    "note":  "Host-level lifecycle only. Not a clean Windows VM, no code signature, no cross-major upgrade matrix."
+}

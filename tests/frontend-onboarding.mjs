@@ -90,10 +90,10 @@ try {
     return window.openOnboarding();
   });
 
-  const dialog = page.getByRole('dialog', {name: '开始使用 Eve'});
+  const dialog = page.getByRole('dialog', {name: '连接模型'});
   await dialog.waitFor();
   await page.waitForTimeout(250);
-  assert.equal(await dialog.locator('.modal-title').textContent(), '开始使用 Eve');
+  assert.equal(await dialog.locator('.modal-title').textContent(), '连接模型');
   assert.equal(await dialog.locator('.modal-foot .btn').count(), 1);
   assert.equal(await dialog.locator('.modal-foot .btn').textContent(), '连接模型');
   assert.equal(await dialog.locator('.modal-foot .btn-primary').count(), 1);
@@ -132,7 +132,7 @@ try {
   assert.equal(desktop.purposeLines, 1);
   assert.ok(desktop.purposeFontSize >= 15);
   assert.ok(desktop.purposeLineHeight / desktop.purposeFontSize >= 1.55);
-  assert.ok(desktop.buttonHeight >= 40);
+  assert.ok(desktop.buttonHeight >= 40, JSON.stringify(desktop));
   assert.equal(desktop.optoutFocused, true);
   assert.ok(desktop.modalWidth <= 464.5);
   assert.ok(desktop.modalLeft >= 0 && desktop.modalRight <= desktop.viewportWidth);

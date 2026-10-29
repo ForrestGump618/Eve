@@ -2,13 +2,13 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
-[![Release](https://img.shields.io/badge/release-1.3.0-202020)](https://github.com/ForrestGump618/suwen/releases/tag/eve-v1.3.0)
+[![Release](https://img.shields.io/badge/release-1.4.0-202020)](https://github.com/ForrestGump618/suwen/releases/tag/eve-v1.4.0)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
 [![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
-> 本轮交付 Eve 1.3.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/eve-1.3.0/README.md)。
+> 本轮交付 Eve 1.4.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/literature-1.4.0/README.md)。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
@@ -52,7 +52,7 @@ flowchart LR
 <details>
 <summary>30 秒上手清单</summary>
 
-- [ ] 下载并安装 Eve 1.3.0
+- [ ] 下载并安装 Eve 1.4.0
 - [ ] 在“设置 → 模型连接”保存一个可用模型
 - [ ] 选择本地目录或 SSH 工作区
 - [ ] 在输入框发送一个只读任务
@@ -64,9 +64,19 @@ flowchart LR
 
 启动后先进入「研究总览」：进行中的课题、运行任务、最近会话和待确认经验建议都在一页显示。每个入口继续使用既有运行、科研愿望或会话服务，不会另建任务队列。
 
-![研究总览](docs/verification/eve-1.3.0/dashboard-desktop.png)
+![研究总览](docs/verification/literature-1.4.0/dashboard-desktop.png)
 
 「设置 → 做梦与经验整理」默认关闭。开启后由用户手动发起整理；Eve 只读取当前工作区脱敏后的资料，候选必须通过 Sage 证据门禁并由用户逐条确认。记忆与修正进入可检索知识库，技能草稿保持停用，后续课题保持未启动。
+
+## 文献雷达
+
+「文献」页每天在后台扫描 Europe PMC、OpenAlex、bioRxiv 与 arXiv，按相关度、时效、跨学科桥接和先验工作接地的新颖性排序。可检索研究论文与方法论文、投喂 PDF、查看待审反思和技能候选，并把有价值的结果发布到智能体朋友圈或主动对话队列。
+
+![文献雷达](docs/verification/literature-1.4.0/literature-desktop.png)
+
+文献循环使用独立的辅助模型配置；未配置时回退到主模型，不影响原有模型接口。新方法先作为孤立技能候选写入技能图，只有经过运行证据和人工确认后才可接入检索入口。每日额度、冷却时间、分享强度和自动做梦均可在「设置 → 文献雷达」调整。
+
+接口、技能图与生命周期边界见 [文献雷达与技能图](docs/LITERATURE.md)。
 
 ## 能做什么
 
@@ -221,7 +231,7 @@ Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其�
 
 | 项目 | 当前值 |
 | --- | --- |
-| 版本 | `1.3.0` |
+| 版本 | `1.4.0` |
 | 平台 | Windows x64 |
 | 当前交付 | 源码更新 + 本机构建的无签名安装包 |
 | 默认界面 | 浅色工作台 |

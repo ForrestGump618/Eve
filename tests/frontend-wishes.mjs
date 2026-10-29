@@ -122,7 +122,7 @@ try {
   const desktopStarted = performance.now();
   await page.goto(base + '/__wish-test');
   const desktopMountMs = await page.evaluate(async () => {
-    const {setState} = await import('/js/store.js?v=1.3.0');
+    const {setState} = await import('/js/store.js?v=1.4.0');
     setState({route: 'research', workspaceId: 'ws_main', workspace: {name: 'Research'}});
     const {mount} = await import('/js/views/platform.js');
     const started = performance.now();
@@ -155,7 +155,7 @@ try {
   const mobileStarted = performance.now();
   await page.goto(base + '/__wish-test');
   const mobileMountMs = await page.evaluate(async () => {
-    const {setState} = await import('/js/store.js?v=1.3.0');
+    const {setState} = await import('/js/store.js?v=1.4.0');
     setState({route: 'research', workspaceId: 'ws_main', workspace: {name: 'Research'}});
     const {mount} = await import('/js/views/platform.js');
     const started = performance.now();

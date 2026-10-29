@@ -35,7 +35,7 @@ const fixture = `<!doctype html><html lang="zh-CN" data-theme="light"><head><met
 <main id="view"></main>
 <script type="module">
   window.runAgents = async () => {
-    const {mountAgentsPanel} = await import('/js/agents-panel.js?v=1.0.0');
+    const {mountAgentsPanel} = await import('/js/agents-panel.js?v=1.4.0');
     window.opened = [];
     window.panel = await mountAgentsPanel(document.querySelector('#app-sidebar'), {
       getContext: () => ({conversationId: 'captain-session', scope: 'ws_main'}),
@@ -43,7 +43,7 @@ const fixture = `<!doctype html><html lang="zh-CN" data-theme="light"><head><met
     });
   };
   window.renderBlock = async (text) => {
-    const {renderMarkdown} = await import('/js/markdown.js?v=2.1.1');
+    const {renderMarkdown} = await import('/js/markdown.js?v=1.4.0');
     document.querySelector('#view').innerHTML = renderMarkdown(text);
   };
 </script></body></html>`;
@@ -130,6 +130,8 @@ test('chat composer contract hides standalone team entry points', async () => {
   assert.ok(chat.includes('chat-agents-open'), 'sidebar child-agent toggle must exist');
   const store = await readFile(path.join(root, 'omicslab/web/js/store.js'), 'utf8');
   assert.match(store, /\{id:'teams',[^}]*hidden:true/);
+  const sidebar = await readFile(path.join(root, 'omicslab/web/js/workspace-sidebar.js'), 'utf8');
+  assert.ok(!sidebar.includes('href="#/teams"'), 'standalone team navigation must be gone');
   const markdown = await readFile(path.join(root, 'omicslab/web/js/markdown.js'), 'utf8');
   assert.match(markdown, /data-summary-json/);
 });

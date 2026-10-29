@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/eve-1.3.0/', import.meta.url));
+const output = fileURLToPath(new URL('../docs/verification/literature-1.4.0/', import.meta.url));
 const calls = [];
 const fixtureNow = 1_793_246_400;
 
@@ -107,6 +107,16 @@ const dashboard = {
     title: '先核对样本过滤规则',
     summary: '多次会话出现相同遗漏，建议在分析前统一检查数据字典。',
   }],
+  literature: {
+    enabled: true,
+    daily_enabled: true,
+    today: {papers: 18, deep_read: 4, feed: 3},
+    reflections_pending: 2,
+    skill_candidates_pending: 1,
+    feed_posts: 7,
+    proactive: {queued: 2, silent: 1, sent_today: 1},
+    last_run: {status: 'completed', selected: 18, deep_read: 4, finished_at: fixtureNow - 900},
+  },
   dreaming: {enabled: true, auto: false, last_run: {finished_at: fixtureNow - 1_800}},
 };
 
@@ -150,19 +160,19 @@ const dreamStatus = {
 
 const fixture = `<!doctype html><html lang="zh-CN" data-theme="light"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-${['base', 'components', 'views', 'platform'].map(name => `<link rel="stylesheet" href="/css/${name}.css">`).join('')}
+${['base', 'components', 'views', 'platform', 'literature'].map(name => `<link rel="stylesheet" href="/css/${name}.css">`).join('')}
 <style>html,body{height:100%;margin:0}#view{height:100%}</style>
 </head><body><main id="view"></main><script type="module">
 window.mountDashboard = async () => {
   window.view?.destroy?.();
-  const {setState} = await import('/js/store.js?v=1.3.0');
+  const {setState} = await import('/js/store.js?v=1.4.0');
   setState({route:'dashboard',routeParams:{},workspaceId:'ws_main',workspace:{name:'肿瘤微环境项目'}});
   const {mount} = await import('/js/views/dashboard.js');
   window.view = await mount(document.querySelector('#view'));
 };
 window.mountDreaming = async () => {
   window.view?.destroy?.();
-  const {setState} = await import('/js/store.js?v=1.3.0');
+  const {setState} = await import('/js/store.js?v=1.4.0');
   setState({route:'settings',routeParams:{section:'dreaming',candidateId:'dream-2'},workspaceId:'ws_main',workspace:{name:'肿瘤微环境项目'}});
   const {mount} = await import('/js/views/platform.js');
   window.view = await mount(document.querySelector('#view'));
@@ -298,6 +308,8 @@ test('research dashboard and review-gated reflection render without raw JSON', {
   assert.match(await page.locator('.dashboard-plans').innerText(), /核对证据矩阵/);
   assert.match(await page.locator('.dashboard-plans').innerText(), /确认分析边界/);
   assert.match(await page.locator('.dashboard-insights').innerText(), /先核对样本过滤规则/);
+  assert.match(await page.locator('.dashboard-literature').innerText(), /今日入库/);
+  assert.match(await page.locator('.dashboard-literature').innerText(), /主动分享/);
   assert.equal(await page.locator('.dashboard-chart-point').count(), 7);
   assert.match(await page.locator('.dashboard-chart-summary').innerText(), /Token/);
   measurements.chartSwitchMs = await page.evaluate(async () => {
@@ -322,7 +334,7 @@ test('research dashboard and review-gated reflection render without raw JSON', {
   await page.locator('.dashboard-project').click();
   assert.equal(await page.evaluate(() => location.hash), '#/research');
   assert.deepEqual(await page.evaluate(async () => {
-    const {getState} = await import('/js/store.js?v=1.3.0');
+    const {getState} = await import('/js/store.js?v=1.4.0');
     return getState().routeParams;
   }), {section: 'wishes', wishId: 'wish-1'});
 
@@ -373,14 +385,14 @@ test('research dashboard and review-gated reflection render without raw JSON', {
   assert.deepEqual(calls.find(call => call.kind === 'settings').body, {enabled: true});
 
   await page.locator('[data-action="dream-run"]').click();
-  const runDialog = page.getByRole('dialog', {name: '开始整理历史记录'});
+  const runDialog = page.getByRole('dialog', {name: '整理历史记录'});
   await runDialog.waitFor();
   await runDialog.locator('.modal-foot .btn-primary').click();
   await page.waitForFunction(() => document.querySelector('[data-action="dream-run"]'));
   assert.equal(calls.find(call => call.kind === 'run').body.focus, 'all');
 
   await page.locator('[data-candidate-id="dream-2"] [data-action="dream-accept"]').click();
-  const acceptDialog = page.getByRole('dialog', {name: '采纳这条经验建议'});
+  const acceptDialog = page.getByRole('dialog', {name: '采纳经验建议'});
   await acceptDialog.waitFor();
   await acceptDialog.locator('.modal-foot .btn-primary').click();
   await page.waitForFunction(() => !document.querySelector('.modal-backdrop'));

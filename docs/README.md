@@ -2,7 +2,7 @@
 
 素问 Suwen 是面向日常工作与科研的本地 AI Agent 工作室：在本机或 SSH 工作区里运行持久的 Agent 任务，用技能扩展分析方法，并对科研结论执行证据门控。本目录是它的公开文档入口。
 
-> 当前版本 **1.3.0**（Python 发行包名仍为 `omicslab`）。项目根目录的 [README](../README.md) 给出定位、启动方式和能力边界；本页负责把文档按读者和主题组织起来。
+> 当前版本 **1.4.0**（Python 发行包名仍为 `omicslab`）。项目根目录的 [README](../README.md) 给出定位、启动方式和能力边界；本页负责把文档按读者和主题组织起来。
 
 消息渠道：[微信扫码与引导设置](CHANNELS.md)。
 
@@ -75,6 +75,8 @@
 | [VALIDATION-V2.md](VALIDATION-V2.md) | 2.0.0 自动回归与实测记录 | 当前 |
 | [BIOMEDICAL-EVIDENCE.md](BIOMEDICAL-EVIDENCE.md) | Biomni 思路与科研证据门控设计 | 当前 |
 | [WISH-RESEARCH.md](WISH-RESEARCH.md) | 一句话愿望到持久科研项目、证据门禁与工作区 | 当前 |
+| [LITERATURE.md](LITERATURE.md) | 文献雷达、辅助模型、技能图、主动分享与生命周期 | 当前 |
+| [verification/literature-1.4.0/README.md](verification/literature-1.4.0/README.md) | 1.4.0 文献雷达、技能图、界面与安装包验收 | 当前 |
 | [REFERENCES-V2.md](REFERENCES-V2.md) | 参考项目清单、借鉴点与许可证边界 | 当前 |
 | [COMPARISON.md](COMPARISON.md) | 与商业组学工作台的功能对照及边界声明（内容整理于 1.3.0 时期） | 当前 |
 | [UPGRADE-1.3.md](UPGRADE-1.3.md) | 1.3.0 SSH 工作区升级说明与验证范围 | 当前 |

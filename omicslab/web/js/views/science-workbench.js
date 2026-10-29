@@ -1,6 +1,6 @@
-import {esc,escAttr,setPref} from '../util.js?v=1.3.0';
-import {navigate} from '../store.js?v=1.3.0';
-import {openModal,toastError} from '../ui.js?v=1.3.0';
+import {esc,escAttr,setPref} from '../util.js?v=1.4.0';
+import {navigate} from '../store.js?v=1.4.0';
+import {openModal,toastError} from '../ui.js?v=1.4.0';
 
 const kinds={fasta:'序列',fastq:'FASTQ 质控',counts:'计数矩阵',structure:'蛋白结构'};
 const names={reads:'读数',bases:'碱基数',lengthMin:'最短读长',lengthMax:'最长读长',gcFraction:'GC 比例',

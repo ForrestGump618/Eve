@@ -1,11 +1,11 @@
 // Research overview. All figures come from the platform dashboard projection;
 // controls only change the local presentation and never start a second runner.
-import {api, errorMessage} from '../api.js?v=1.3.0';
-import {icon} from '../icons.js?v=1.3.0';
-import {esc, escAttr, fmtDuration, fmtNum, getPref, relTime, setPref, truncate} from '../util.js?v=1.3.0';
-import {getState, navigate, setState} from '../store.js?v=1.3.0';
-import {emit} from '../bus.js?v=1.3.0';
-import {spinnerHtml} from '../ui.js?v=1.3.0';
+import {api, errorMessage} from '../api.js?v=1.4.0';
+import {icon} from '../icons.js?v=1.4.0';
+import {esc, escAttr, fmtDuration, fmtNum, getPref, relTime, setPref, truncate} from '../util.js?v=1.4.0';
+import {getState, navigate, setState} from '../store.js?v=1.4.0';
+import {emit} from '../bus.js?v=1.4.0';
+import {spinnerHtml} from '../ui.js?v=1.4.0';
 
 const RUN_LABELS = {
   queued: '排队中',
@@ -378,6 +378,33 @@ function insightRows(insights) {
     </button>`).join('');
 }
 
+function literatureCard(literature) {
+  const today = literature?.today || {};
+  const proactive = literature?.proactive || {};
+  const last = literature?.last_run || {};
+  const items = [
+    {label: '今日入库', value: fmtNum(today.papers), note: '公开文献'},
+    {label: '精读', value: fmtNum(today.deep_read), note: '待审核方法'},
+    {label: '反思', value: fmtNum(literature?.reflections_pending), note: '待你审核'},
+    {label: '技能候选', value: fmtNum(literature?.skill_candidates_pending), note: '默认停用'},
+    {label: '朋友圈', value: fmtNum(literature?.feed_posts), note: `今日 ${fmtNum(today.feed)} 条`},
+    {label: '主动分享', value: fmtNum(proactive.queued), note: `今日已发 ${fmtNum(proactive.sent_today)}`},
+  ];
+  return `<section class="dashboard-card dashboard-literature" id="dashboard-literature" tabindex="-1">
+    <header class="dashboard-card-head">
+      <div><h2>文献雷达</h2></div>
+      <button type="button" class="btn btn-ghost btn-sm" data-dashboard="literature">打开文献雷达</button>
+    </header>
+    <div class="dashboard-literature-grid">
+      ${items.map(item => `<div class="dashboard-literature-stat"><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong><small>${esc(item.note)}</small></div>`).join('')}
+    </div>
+    <footer class="dashboard-card-foot">
+      <span>${last.finished_at ? `上次循环 ${esc(when(last.finished_at))}` : (literature?.enabled ? '等待首次循环' : '文献雷达已关闭')}</span>
+      ${Array.isArray(last.warnings) && last.warnings.length ? `<span class="is-warning">${fmtNum(last.warnings.length)} 个来源提示</span>` : '<span>来源故障彼此隔离</span>'}
+    </footer>
+  </section>`;
+}
+
 function render(data) {
   const metrics = data.metrics || {};
   const wishes = Array.isArray(data.wishes) ? data.wishes : [];
@@ -386,6 +413,7 @@ function render(data) {
   const insights = Array.isArray(data.insights) ? data.insights : [];
   const plans = Array.isArray(data.plans) ? data.plans : [];
   const dream = data.dreaming || {};
+  const literature = data.literature || {};
   const brief = data.brief || {};
   const averageProgress = wishes.length
     ? wishes.reduce((sum, wish) => sum + boundedPercent(wish.progress?.percent), 0) / wishes.length
@@ -454,7 +482,7 @@ function render(data) {
           <div><h2>进行中的课题</h2><p>阶段进度与下一步。</p></div>
           ${wishes.length ? `<button type="button" class="btn btn-ghost btn-sm" data-dashboard="research">查看全部</button>` : ''}
         </header>
-        <div class="dashboard-project-list">${projectRows(wishes) || emptyCard('建立课题后，进度会显示在这里。', 'new-wish', '新建课题')}</div>
+        <div class="dashboard-project-list">${projectRows(wishes) || emptyCard('暂无课题。', 'new-wish', '新建课题')}</div>
       </section>
 
       <section class="dashboard-card dashboard-plans" id="dashboard-plans" tabindex="-1">
@@ -480,12 +508,14 @@ function render(data) {
         <div class="dashboard-conversation-list">${conversationRows(conversations) || '<p class="dashboard-card-empty">还没有会话记录。</p>'}</div>
       </section>
 
+      ${literatureCard(literature)}
+
       <section class="dashboard-card dashboard-insights" id="dashboard-insights" tabindex="-1">
         <header class="dashboard-card-head">
           <div><h2>经验建议</h2><p>确认后写入记忆或技能。</p></div>
           <button type="button" class="btn btn-ghost btn-sm" data-dashboard="dreaming">${dream.enabled ? '管理经验整理' : '设置经验整理'}</button>
         </header>
-        <div class="dashboard-insight-list">${insightRows(insights) || `<div class="dashboard-empty"><p>${dream.enabled ? '暂无待确认建议。' : '开启后，会从历史记录中整理可复用经验。'}</p><button type="button" class="btn btn-ghost btn-sm" data-dashboard="dreaming">${dream.enabled ? '立即整理' : '查看设置'}</button></div>`}</div>
+        <div class="dashboard-insight-list">${insightRows(insights) || `<div class="dashboard-empty"><p>${dream.enabled ? '暂无待确认建议。' : '经验整理未开启。'}</p><button type="button" class="btn btn-ghost btn-sm" data-dashboard="dreaming">${dream.enabled ? '立即整理' : '查看设置'}</button></div>`}</div>
         ${dream.last_run?.finished_at ? `<footer class="dashboard-card-foot">上次整理：${esc(when(dream.last_run.finished_at))}</footer>` : ''}
       </section>
     </div>
@@ -626,6 +656,7 @@ export async function mount(root) {
     if (action === 'refresh') void load();
     else if (action === 'new-wish') navigate('research', {section: 'wishes'});
     else if (action === 'dreaming') navigate('settings', {section: 'dreaming'});
+    else if (action === 'literature') navigate('literature');
     else if (action === 'research') navigate('research');
     else if (action === 'workbench') navigate('workbench');
   };

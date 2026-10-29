@@ -1,5 +1,5 @@
-import { esc } from './util.js?v=1.3.0';
-import { icon } from './icons.js?v=1.3.0';
+import { esc } from './util.js?v=1.4.0';
+import { icon } from './icons.js?v=1.4.0';
 
 let active = null;
 let sequence = 0;

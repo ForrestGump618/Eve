@@ -75,11 +75,16 @@ test('model parameters and permission form save real structured values', {timeou
   assert.equal(await cap.locator('[data-cap-field="temperature"]').inputValue(), '0.7');
   assert.equal(await cap.locator('[data-cap-field="context_window"]').inputValue(), '64000');
   await cap.locator('[data-cap-field="temperature"]').fill('0.4');
+  await page.locator('[data-role-key="reasoning"] [data-role-model]').fill('reasoning-with-default-provider');
   await page.locator('#model-verification').selectOption('sage');
   await page.locator('[data-action="save-models"]').click();
   await page.waitForFunction(() => document.querySelector('#model-verification').value === 'sage');
   const savedModel = calls.find(call => call.section === 'models').body.value;
   assert.equal(savedModel.capabilities['research-model'].temperature, 0.4);
+  assert.deepEqual(savedModel.roles.reasoning, {
+    provider: '',
+    model: 'reasoning-with-default-provider',
+  });
   assert.equal(savedModel.verification, 'sage');
   assert.equal(savedModel.orchestration, true);
   await page.screenshot({path: path.join(output,'settings-models-desktop.png'),fullPage: true});

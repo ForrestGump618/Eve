@@ -9,16 +9,16 @@
     "mobile overflow"
   ],
   "timings": {
-    "desktopMountMs": 9.4,
-    "desktopVisibleMs": 199.37,
-    "mobileMountMs": 4.6,
-    "mobileVisibleMs": 84.76,
+    "desktopMountMs": 7.9,
+    "desktopVisibleMs": 182.03,
+    "mobileMountMs": 6.1,
+    "mobileVisibleMs": 67.79,
     "note": "Local loopback fixture and in-process API response; this does not include model or scientific workload latency."
   },
   "browserMetrics": {
     "domNodes": 239,
     "resourceEntries": 22,
-    "resourceEncodedBytes": 476654
+    "resourceEncodedBytes": 485975
   },
   "calls": [
     {

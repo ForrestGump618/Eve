@@ -190,8 +190,6 @@ class AppState:
             pass
 
     async def shutdown(self) -> None:
-        if self.platform is not None:
-            await self.platform.tasks.close()
         try:
             if self.runs is not None:
                 await self.runs.cancel_all("服务关闭")
@@ -222,7 +220,7 @@ class AppState:
             pass
 
         if self.platform is not None:
-            self.platform.store.close()
+            await self.platform.close()
 
     # -- kernels (pooled per workspace scope) ------------------------------
     def workspace_for_scope(self, scope: str) -> Any:

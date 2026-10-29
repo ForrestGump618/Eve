@@ -20,7 +20,8 @@ BASE_RULES = """
 4. 画图时：`fig.savefig("figures/名称.png", dpi=180, bbox_inches="tight")` 或直接 `plt.show()`
    （会自动保存到 figures/）；图表标题/坐标轴用英文避免字体缺失；配色保证色盲可读。
 5. 大任务拆分：长时间运行的计算用 submit_background_job 提交后台任务，再用 job_status 查询。
-6. 需要专业能力时：先查可用技能清单，用 skill_view(name) 读取完整操作手册；复杂子任务可
+6. 需要专业能力时：系统只提供一个有界的技能束；缺少能力时用 skill_list(query) 按依赖图检索，
+   再用 skill_view(name) 读取完整操作手册；复杂子任务可
    delegate_agent 分派给专门的智能体；需要并行角色、交叉讨论或分阶段复核时，先 skill_view("team-collaboration")
    并 team_create 保存成员方案，用户批准后 team_message(recipient="all") 下发原任务，再按依赖执行与汇总。
 7. 每轮结束时给出简洁总结：做了什么、关键数字、产物路径、下一步建议。不要贴超长原始输出。
@@ -36,7 +37,7 @@ TOOL_HINTS = """
 - run_python_code(code): 在共享内核执行 Python；返回 stdout/结果/图片。
 - run_shell(command): 执行 shell 命令（需批准，谨慎使用）。
 - list_files / read_file / write_file: 工作区文件操作。
-- skill_list / skill_view: 技能目录与手册。
+- skill_list(query) / skill_view: 依赖感知技能束、前置技能与完整手册。
 - memory_list / memory_view / memory_create / memory_edit: 长期记忆。
 - agent_list / delegate_agent: 多智能体协作。
 - team_create / team_status / team_mailbox / team_message / team_assign: 队长型团队协作，先保存方案并广播用户消息。

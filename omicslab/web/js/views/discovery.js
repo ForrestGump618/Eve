@@ -1,8 +1,8 @@
 // Discovery (RSI) view: project list, live run timeline (7 steps), hypothesis
 // ledger, evidence, insights, strategy library and report preview.
 
-import { renderMarkdown } from '../markdown.js?v=1.3.0';
-import { icon } from '../icons.js?v=1.3.0';
+import { renderMarkdown } from '../markdown.js?v=1.4.0';
+import { icon } from '../icons.js?v=1.4.0';
 import {
   esc,
   escAttr,
@@ -13,9 +13,9 @@ import {
   uid,
   copyText,
   downloadText,
-} from '../util.js?v=1.3.0';
-import { api, errorMessage } from '../api.js?v=1.3.0';
-import { streamSSE } from '../sse.js?v=1.3.0';
+} from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
+import { streamSSE } from '../sse.js?v=1.4.0';
 import {
   toastSuccess,
   toastError,
@@ -24,8 +24,8 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.3.0';
-import { getState } from '../store.js?v=1.3.0';
+} from '../ui.js?v=1.4.0';
+import { getState } from '../store.js?v=1.4.0';
 
 const STEP_ORDER = [
   'observe',

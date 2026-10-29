@@ -1,18 +1,18 @@
 /** Eve platform: every control talks to a real, scoped service. */
-import { api, errorMessage } from '../api.js?v=1.3.0';
-import { getState, navigate } from '../store.js?v=1.3.0';
-import { esc, escAttr, getPref, setPref } from '../util.js?v=1.3.0';
-import { icon } from '../icons.js?v=1.3.0';
-import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.3.0';
-import { applyAppearance } from '../suwen.js?v=1.3.0';
-import { renderChannels } from './channel-setup.js?v=1.3.0';
-import {mountResearchWorkspace} from './research-workspace.js?v=1.3.0';
-import {mountWishResearch} from './wish-research.js?v=1.3.0';
-import {mountScienceWorkbench} from './science-workbench.js?v=1.3.0';
-import {mountProviderModels} from '../provider-models.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
+import { getState, navigate } from '../store.js?v=1.4.0';
+import { esc, escAttr, getPref, setPref } from '../util.js?v=1.4.0';
+import { icon } from '../icons.js?v=1.4.0';
+import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.4.0';
+import { applyAppearance } from '../suwen.js?v=1.4.0';
+import { renderChannels } from './channel-setup.js?v=1.4.0';
+import {mountResearchWorkspace} from './research-workspace.js?v=1.4.0';
+import {mountWishResearch} from './wish-research.js?v=1.4.0';
+import {mountScienceWorkbench} from './science-workbench.js?v=1.4.0';
+import {mountProviderModels} from '../provider-models.js?v=1.4.0';
 
 const GROUPS={
- settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['dreaming','做梦与经验整理','memory'],['advanced','版本与迁移','settings']],
+ settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['literature','文献雷达','book'],['dreaming','做梦与经验整理','memory'],['advanced','版本与迁移','settings']],
  extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']],
  tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']],
  knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']],
@@ -55,7 +55,7 @@ export async function mount(root){
   try{
    if(!bootstrap)bootstrap=await request('/bootstrap');
    if(section==='models')await models();
-   else if(['appearance','permissions','budget','vision','memory'].includes(section))await settings(section);
+   else if(['appearance','permissions','budget','vision','memory','literature'].includes(section))await settings(section);
    else if(section==='advanced')await advanced();
    else if(section==='dreaming')await dreaming();
    else if(section==='channel')channelView=await renderChannels(content,{request,scope,reload:load});
@@ -113,20 +113,32 @@ export async function mount(root){
   const capModels=Object.keys(c.capabilities||{});
   const capRows=capModels.map(name=>capabilityRow(name,c.capabilities[name]||{})).join('');
   const fallbackRows=(c.fallbacks||[]).map((f,index)=>`<div class="sw-fallback-row" data-fallback-row="${index}"><input class="input" data-fallback-provider placeholder="Provider" value="${escAttr(f.provider||'')}"/><input class="input" data-fallback-model placeholder="模型名" value="${escAttr(f.model||'')}"/><button type="button" class="btn btn-ghost btn-sm" data-fallback-remove>移除</button></div>`).join('');
+  const auxiliaryNames=[
+   ['literature.embedding','文献语义嵌入','用于相关性排序；可指定科学领域嵌入服务'],
+   ['literature.classification','文献分类评分','校正研究类型、领域与兴趣度'],
+   ['literature.extraction','文献精读抽取','提炼方法、课题映射与实验建议'],
+   ['skill.extraction','技能抽取','把方法学压缩成待审核技能候选'],
+   ['reflection.reasoning','反思与做梦','从历史记录和文献中生成候选洞察'],
+  ];
+  const auxiliaryRows=auxiliaryNames.map(([tag,label,hint])=>{
+   const profile=(c.auxiliary_profiles||{})[tag]||{};
+   return `<div class="sw-aux-row" data-aux-tag="${escAttr(tag)}"><div class="sw-aux-copy"><strong>${esc(label)}</strong><code>${esc(tag)}</code><small>${esc(hint)}</small></div><div class="sw-aux-fields"><input class="input" data-aux-provider placeholder="Provider（留空沿用角色模型）" value="${escAttr(profile.provider||'')}"/><input class="input" data-aux-model placeholder="模型名" value="${escAttr(profile.model||'')}"/><input class="input" data-aux-base placeholder="API Base（可选）" value="${escAttr(profile.api_base||'')}"/><input class="input" data-aux-ref placeholder="凭据引用（可选）" value="${escAttr(profile.credential_ref||'')}"/></div></div>`;
+  }).join('');
   const verification=c.verification||(c.sage_verification?'sage':'standard');
-  content.innerHTML=`<section class="sw-card sw-hero"><h2>模型连接</h2><p>多个供应商可以同时保存。当前任务只使用启动时选定的模型，切换默认路由不会中断运行中的任务。</p><div class="sw-mode-grid">${[['fast','快速','日常问答与简单处理'],['balanced','均衡','分析、写作与大多数工作'],['deep','深度','复杂问题与科研推理']].map(([id,label,desc])=>`<button class="sw-mode ${c.mode===id?'is-active':''}" data-action="mode" data-id="${id}">${icon(id==='fast'?'wand':id==='deep'?'brain':'layers',{size:22})}<strong>${label}</strong><span>${desc}</span></button>`).join('')}</div><div class="sw-inline">${button('provider-add','添加供应商','btn-primary')}${button('model-test','测试当前默认模型')}<span class="sw-muted">当前默认：${esc(active.provider||'未设置')} / ${esc(active.model||'未设置')}</span></div></section><section class="sw-card eve-provider-manager"><div class="sw-toolbar"><div><h3>供应商连接</h3><p class="sw-muted">Key 按供应商独立保存，支持 DeepSeek、OpenAI、Anthropic、通义、Ollama、自定义端点等。</p></div>${button('provider-add','添加供应商','btn-primary')}</div><div class="eve-provider-grid">${cards||blank('还没有供应商连接','添加一个供应商开始使用 Eve。')}</div></section><section class="sw-card"><h3>路由策略</h3>${select('优先考虑','model-strategy',[['quality','质量'],['latency','响应速度'],['cost','经济'],['privacy','本地隐私']],c.strategy)}<p class="sw-muted">隐私策略禁止路由到远程模型；速度与经济策略按已测延迟、价格和可用模型排序。</p>${field('全局上下文窗口（字符预算采用保守估算）','model-context',c.context_window,'','number')}</section><section class="sw-card"><h3>角色模型</h3><p class="sw-muted">按任务类型指定默认模型连接，留空沿用全局默认。</p><div class="sw-model-roles">${roleRows}</div></section><section class="sw-card"><h3>模型能力</h3><p class="sw-muted">按模型名配置温度、上下文、最大输出与输入模态；运行时以每模型设置为准，未填写的字段沿用默认。</p><div class="sw-model-caps" id="model-cap-rows">${capRows||'<p class="sw-muted">尚未配置模型能力。</p>'}</div><div class="sw-inline">${button('model-cap-add','添加模型能力')}</div></section><section class="sw-card"><h3>备用模型</h3><p class="sw-muted">主连接失败时按顺序尝试，仅用于可重试错误；不会降级到 mock。</p><div id="model-fallback-rows">${fallbackRows||'<p class="sw-muted">没有备用模型。</p>'}</div><div class="sw-inline">${button('model-fallback-add','添加备用连接')}</div></section><section class="sw-card"><h3>验证与自我改进</h3>${select('验证模式','model-verification',[['standard','RSI 基础自检（默认）：每次执行校验工具结果与来源'],['sage','Sage-A1.5 兼容自检：该模型上启用验证模板（需兼容服务）'],['off','关闭额外自检']],verification)}<label class="sw-check"><input type="checkbox" id="sage-orchestration" ${c.orchestration?'checked':''}/>允许智能体按任务需要自行组建协作团队（受预算与权限约束，无需手动开启）</label><p class="sw-muted">Sage 是 RSI 验证体系的可选内核，不是独立的第四层自我改进；引用核验与人工确认始终保留。</p>${button('save-models','保存路由配置','btn-primary')}</section>`;
+  content.innerHTML=`<section class="sw-card sw-hero"><h2>模型连接</h2><p>多个供应商可以同时保存。当前任务只使用启动时选定的模型，切换默认路由不会中断运行中的任务。</p><div class="sw-mode-grid">${[['fast','快速','日常问答与简单处理'],['balanced','均衡','分析、写作与大多数工作'],['deep','深度','复杂问题与科研推理']].map(([id,label,desc])=>`<button class="sw-mode ${c.mode===id?'is-active':''}" data-action="mode" data-id="${id}">${icon(id==='fast'?'wand':id==='deep'?'brain':'layers',{size:22})}<strong>${label}</strong><span>${desc}</span></button>`).join('')}</div><div class="sw-inline">${button('provider-add','添加供应商','btn-primary')}${button('model-test','测试当前默认模型')}<span class="sw-muted">当前默认：${esc(active.provider||'未设置')} / ${esc(active.model||'未设置')}</span></div></section><section class="sw-card eve-provider-manager"><div class="sw-toolbar"><div><h3>供应商连接</h3><p class="sw-muted">Key 按供应商独立保存，支持 DeepSeek、OpenAI、Anthropic、通义、Ollama、自定义端点等。</p></div>${button('provider-add','添加供应商','btn-primary')}</div><div class="eve-provider-grid">${cards||blank('还没有供应商连接','添加一个供应商开始使用 Eve。')}</div></section><section class="sw-card"><h3>路由策略</h3>${select('优先考虑','model-strategy',[['quality','质量'],['latency','响应速度'],['cost','经济'],['privacy','本地隐私']],c.strategy)}<p class="sw-muted">隐私策略禁止路由到远程模型；速度与经济策略按已测延迟、价格和可用模型排序。</p>${field('全局上下文窗口（字符预算采用保守估算）','model-context',c.context_window,'','number')}</section><section class="sw-card"><h3>角色模型</h3><p class="sw-muted">按任务类型指定默认模型连接，留空沿用全局默认。</p><div class="sw-model-roles">${roleRows}</div></section><section class="sw-card"><h3>辅助任务模型</h3><p class="sw-muted">按任务标签覆盖模型；留空时回退到角色模型或全局默认。嵌入与反思可以使用不同供应商。</p><div class="sw-aux-list">${auxiliaryRows}</div><p class="sw-muted">凭据引用请在凭据入口加密保存；这里只保存引用名，不保存 API Key。</p></section><section class="sw-card"><h3>模型能力</h3><p class="sw-muted">按模型名配置温度、上下文、最大输出与输入模态；运行时以每模型设置为准，未填写的字段沿用默认。</p><div class="sw-model-caps" id="model-cap-rows">${capRows||'<p class="sw-muted">尚未配置模型能力。</p>'}</div><div class="sw-inline">${button('model-cap-add','添加模型能力')}</div></section><section class="sw-card"><h3>备用模型</h3><p class="sw-muted">主连接失败时按顺序尝试，仅用于可重试错误；不会降级到 mock。</p><div id="model-fallback-rows">${fallbackRows||'<p class="sw-muted">没有备用模型。</p>'}</div><div class="sw-inline">${button('model-fallback-add','添加备用连接')}</div></section><section class="sw-card"><h3>验证与自我改进</h3>${select('验证模式','model-verification',[['standard','RSI 基础自检（默认）：每次执行校验工具结果与来源'],['sage','Sage-A1.5 兼容自检：该模型上启用验证模板（需兼容服务）'],['off','关闭额外自检']],verification)}<label class="sw-check"><input type="checkbox" id="sage-orchestration" ${c.orchestration?'checked':''}/>允许智能体按任务需要自行组建协作团队（受预算与权限约束，无需手动开启）</label><p class="sw-muted">Sage 是 RSI 验证体系的可选内核，不是独立的第四层自我改进；引用核验与人工确认始终保留。</p>${button('save-models','保存路由配置','btn-primary')}</section>`;
  }
  function capabilityRow(name,caps={}){
   const modalities=['text','image','audio'];
-  const temp=caps.temperature===true?'':caps.temperature;
-  return `<div class="sw-cap-row" data-cap-model="${escAttr(name)}"><div class="sw-cap-head"><strong>${esc(name)}</strong><button type="button" class="btn btn-ghost btn-sm" data-cap-remove>移除</button></div><div class="sw-cap-fields"><label><span>温度</span><input class="input" data-cap-field="temperature" type="number" min="0" max="2" step="0.1" value="${escAttr(temp)}" placeholder="默认"/></label><label><span>上下文窗口</span><input class="input" data-cap-field="context_window" type="number" min="2048" max="2000000" value="${escAttr(caps.context_window||'')}" placeholder="沿用全局"/></label><label><span>最大输出</span><input class="input" data-cap-field="max_output" type="number" min="32" max="200000" value="${escAttr(caps.max_output||'')}" placeholder="按模式默认"/></label><label><span>Token 参数</span><select class="input" data-cap-field="token_parameter"><option value="max_tokens" ${caps.token_parameter==='max_completion_tokens'?'':'selected'}>max_tokens</option><option value="max_completion_tokens" ${caps.token_parameter==='max_completion_tokens'?'selected':''}>max_completion_tokens</option></select></label></div><div class="sw-cap-modalities"><span>输入模态</span>${modalities.map(m=>`<label class="sw-check"><input type="checkbox" data-cap-modal="${m}" ${(caps.modalities||[]).includes(m)?'checked':''}/>${m}</label>`).join('')}</div><label class="sw-field"><span>受支持参数（逗号分隔，可选）</span><input class="input" data-cap-field="supported_parameters" value="${escAttr((caps.supported_parameters||[]).join(', '))}" placeholder="temperature, max_tokens"/></label></div>`;
+  const temperatureEnabled=caps.temperature===true||typeof caps.temperature==='number';
+  const temp=typeof caps.temperature==='number'?caps.temperature:'';
+  return `<div class="sw-cap-row" data-cap-model="${escAttr(name)}"><div class="sw-cap-head"><strong>${esc(name)}</strong><button type="button" class="btn btn-ghost btn-sm" data-cap-remove>移除</button></div><div class="sw-cap-fields"><div class="sw-field"><span>温度</span><div class="sw-inline"><input class="input" data-cap-field="temperature" type="number" min="0" max="2" step="0.1" value="${escAttr(temp)}" placeholder="自动"/><label class="sw-check"><input type="checkbox" data-cap-temperature-enabled ${temperatureEnabled?'checked':''}/>启用</label></div></div><label><span>上下文窗口</span><input class="input" data-cap-field="context_window" type="number" min="2048" max="2000000" value="${escAttr(caps.context_window||'')}" placeholder="沿用全局"/></label><label><span>最大输出</span><input class="input" data-cap-field="max_output" type="number" min="32" max="200000" value="${escAttr(caps.max_output||'')}" placeholder="按模式默认"/></label><label><span>Token 参数</span><select class="input" data-cap-field="token_parameter"><option value="max_tokens" ${caps.token_parameter==='max_completion_tokens'?'':'selected'}>max_tokens</option><option value="max_completion_tokens" ${caps.token_parameter==='max_completion_tokens'?'selected':''}>max_completion_tokens</option></select></label></div><div class="sw-cap-modalities"><span>输入模态</span>${modalities.map(m=>`<label class="sw-check"><input type="checkbox" data-cap-modal="${m}" ${(caps.modalities||[]).includes(m)?'checked':''}/>${m}</label>`).join('')}</div><label class="sw-field"><span>受支持参数（逗号分隔，可选）</span><input class="input" data-cap-field="supported_parameters" value="${escAttr((caps.supported_parameters||[]).join(', '))}" placeholder="temperature, max_tokens"/></label></div>`;
  }
  function rolesFromDom(){
   const out={};
   content.querySelectorAll('[data-role-key]').forEach(row=>{
    const provider=row.querySelector('[data-role-provider]')?.value.trim()||'';
    const model=row.querySelector('[data-role-model]')?.value.trim()||'';
-   if(provider&&model)out[row.dataset.roleKey]={provider,model};
+   if(provider||model)out[row.dataset.roleKey]={provider,model};
   });
   return out;
  }
@@ -136,7 +148,8 @@ export async function mount(root){
    const name=row.dataset.capModel;if(!name)return;
    const caps={};
    const temperature=parseFloat(row.querySelector('[data-cap-field="temperature"]')?.value||'');
-   if(Number.isFinite(temperature))caps.temperature=temperature;
+   const temperatureEnabled=row.querySelector('[data-cap-temperature-enabled]')?.checked||false;
+   if(temperatureEnabled||Number.isFinite(temperature))caps.temperature=Number.isFinite(temperature)?temperature:true;
    const context=Number(row.querySelector('[data-cap-field="context_window"]')?.value||'');
    if(Number.isInteger(context)&&context>=2048)caps.context_window=context;
    const output=Number(row.querySelector('[data-cap-field="max_output"]')?.value||'');
@@ -155,17 +168,74 @@ export async function mount(root){
   content.querySelectorAll('[data-fallback-row]').forEach(row=>{
    const provider=row.querySelector('[data-fallback-provider]')?.value.trim()||'';
    const model=row.querySelector('[data-fallback-model]')?.value.trim()||'';
-   if(provider&&model)out.push({provider,model});
+   if(provider||model)out.push({provider,model});
+  });
+  return out;
+ }
+ function auxiliaryProfilesFromDom(){
+  const out={};
+  content.querySelectorAll('[data-aux-tag]').forEach(row=>{
+   const tag=row.dataset.auxTag;
+   const profile={
+    provider:row.querySelector('[data-aux-provider]')?.value.trim()||'',
+    model:row.querySelector('[data-aux-model]')?.value.trim()||'',
+    api_base:row.querySelector('[data-aux-base]')?.value.trim()||'',
+    credential_ref:row.querySelector('[data-aux-ref]')?.value.trim()||'',
+   };
+   if(Object.values(profile).some(Boolean))out[tag]=profile;
   });
   return out;
  }
  async function settings(key){
   const c=await config(key);let html='';
-  if(key==='appearance')html=`<div class="sw-form-grid">${select('主题','theme',[['system','跟随系统'],['light','浅色'],['dark','深色']],c.theme)}${select('字体','font',[['system','系统字体'],['sans','无衬线'],['mono','等宽']],c.font)}${field('字号','font-size',c.font_size,'','number')}${field('强调色','accent',c.accent,'','color')}${select('界面密度','density',[['comfortable','舒适'],['compact','紧凑']],c.density)}${field('圆角','radius',c.radius,'','number')}${select('工作模式','ui-mode',[['research','科研'],['minimal','极简'],['developer','开发者']],c.mode)}${select('默认首页','home',[['dashboard','研究总览'],['workbench','工作台'],['tasks2','任务中心'],['research','科研证据'],['knowledge','知识与记忆']],c.home)}${field('助手名称','agent-name',c.agent_name)}${field('助手头像（单个字符或 Emoji）','avatar',c.avatar)}${field('命令面板快捷键（Ctrl / ⌘ + 字母）','shortcut-palette',c.shortcuts?.palette||'k')}</div><p class="sw-muted">面板宽度和隐藏状态分别保存到当前工作区，可从工作台“布局”调整。</p>${button('reset-layout','恢复当前工作区布局')}`;
+  if(key==='appearance')html=`<div class="sw-form-grid">${select('主题','theme',[['system','跟随系统'],['light','浅色'],['dark','深色']],c.theme)}${select('字体','font',[['system','系统字体'],['sans','无衬线'],['mono','等宽']],c.font)}${field('字号','font-size',c.font_size,'','number')}${field('强调色','accent',c.accent,'','color')}${select('界面密度','density',[['comfortable','舒适'],['compact','紧凑']],c.density)}${field('圆角','radius',c.radius,'','number')}${select('工作模式','ui-mode',[['research','科研'],['minimal','极简'],['developer','开发者']],c.mode)}${select('默认首页','home',[['dashboard','研究总览'],['literature','文献雷达'],['workbench','工作台'],['tasks2','任务中心'],['research','科研证据'],['knowledge','知识与记忆']],c.home)}${field('助手名称','agent-name',c.agent_name)}${field('助手头像（单个字符或 Emoji）','avatar',c.avatar)}${field('命令面板快捷键（Ctrl / ⌘ + 字母）','shortcut-palette',c.shortcuts?.palette||'k')}</div><p class="sw-muted">面板宽度和隐藏状态分别保存到当前工作区，可从工作台“布局”调整。</p>${button('reset-layout','恢复当前工作区布局')}`;
   if(key==='permissions'){const names={files:'文件系统',shell:'Shell',network:'外部网络',browser:'浏览器',messages:'消息发送',mcp:'MCP',memory:'记忆',skills:'技能',agents:'Agent 协作',python:'Python',system:'环境信息',notebook:'Notebook',jobs:'后台进程'};const modeOptions=[['allow','允许执行'],['ask','需确认'],['read_only','只读'],['deny','禁止使用']];html=`<div class="sw-notice">默认全部开放（新安装即启用）。Python 与 Shell 仍有系统级能力，目录隔离不等于安全沙箱；需要更严格环境时可选择断网 Docker 隔离执行。</div><div class="sw-permission-grid"><div class="permissions-bulk">${button('permissions-allow-all','一键全部允许')}</div>${Object.entries(c).filter(([k])=>k!=='tools').map(([k,v])=>`<label class="sw-permission-card"><span>${esc(names[k]||k)}</span><select class="input" id="permission-${escAttr(k)}">${modeOptions.map(([value,label])=>`<option value="${value}" ${v===value?'selected':''}>${label}</option>`).join('')}</select></label>`).join('')}</div><details class="sw-card"><summary>逐工具权限覆盖</summary><div class="permission-tools" id="permission-tools">${Object.entries(c.tools||{}).map(([name,mode])=>`<div class="sw-tool-permission" data-tool-permission="${escAttr(name)}"><code>${esc(name)}</code><select class="input">${modeOptions.map(([value,label])=>`<option value="${value}" ${mode===value?'selected':''}>${label}</option>`).join('')}</select><button type="button" class="btn btn-ghost btn-sm" data-tool-remove>移除</button></div>`).join('')||(Object.keys(c.tools||{}).length?'':'<p class="sw-muted">没有工具级覆盖。</p>')}</div><div class="sw-inline">${button('permissions-add-tool','添加工具覆盖')}</div></details>`;}
   if(key==='budget')html=`<div class="sw-notice">按工作区设置并发数。运行时保留取消、超时与 Token 预算，停止原因可在运行记录中查看。</div><div class="sw-form-grid">${field('任务并发数','budget-concurrency',c.concurrency,'','number')}</div><details><summary>费用统计价格（可选，不影响自动停止策略）</summary>${area('模型名 → 每百万输入 / 输出 Token 价格','budget-prices',c.prices)}</details>`;
   if(key==='vision')html=`<label class="sw-check"><input type="checkbox" id="vision-enabled" ${c.enabled?'checked':''}/>启用独立视觉复核</label><label class="sw-check"><input type="checkbox" id="vision-auto" ${c.auto_review?'checked':''}/>图表生成后自动复核</label><div class="sw-form-grid">${field('视觉模型','vision-model',c.model)}${field('API Base URL','vision-base',c.api_base)}${field('加密凭据引用','vision-ref',c.credential_ref,'例如 vision')}${field('最多修正轮次','vision-repairs',c.max_repairs,'','number')}</div>${button('credential','保存视觉 API Key')}<p class="sw-muted">视觉模型可检查布局与文字；不能仅凭图片确认科学事实。缺少原始数据会标记人工复核。</p>`;
   if(key==='memory')html=`<label class="sw-check"><input type="checkbox" id="memory-enabled" ${c.enabled?'checked':''}/>启用当前工作区记忆</label><label class="sw-check"><input type="checkbox" id="memory-auto" ${c.auto_capture?'checked':''}/>选择性保存较长的任务结论（默认关闭）</label>${select('检索方式','memory-embedding',[['keyword','本地关键词与中文二元词检索'],['api','关键词 + 独立嵌入 API']],c.embedding)}<div class="sw-form-grid">${field('Embedding API Base URL','memory-url',c.embedding_url)}${field('Embedding 模型','memory-model',c.embedding_model)}${field('检索条数','memory-top',c.top_k,'','number')}${field('记忆有效天数','memory-retention',c.retention_days,'','number')}</div>${button('embedding-key','保存 Embedding API Key')}${button('reembed','重新嵌入当前工作区')}<p class="sw-muted">API 嵌入会向指定服务发送文本；敏感凭据会被筛出。默认本地检索不会传出知识正文。</p>`;
+  if(key==='literature'){
+   const sources=[['europe_pmc','Europe PMC'],['openalex','OpenAlex'],['biorxiv','bioRxiv'],['arxiv','arXiv']];
+   html=`<div class="sw-notice">每日循环在后台读取公开文献，生成待审核反思与技能候选。</div>
+   <div class="sw-settings-switches">
+    <label class="sw-check"><input type="checkbox" id="lit-enabled" ${c.enabled?'checked':''}/>启用文献雷达</label>
+    <label class="sw-check"><input type="checkbox" id="lit-daily-enabled" ${c.daily_enabled?'checked':''}/>每天自动运行一次</label>
+    <label class="sw-check"><input type="checkbox" id="lit-proactive-enabled" ${c.proactive_enabled?'checked':''}/>允许主动分享候选</label>
+    <label class="sw-check"><input type="checkbox" id="lit-auto-dream" ${c.auto_dream?'checked':''}/>文献循环后自动整理经验（仍需开启做梦）</label>
+   </div>
+   <div class="sw-field"><span>文献来源</span><div class="sw-check-grid">${sources.map(([id,label])=>`<label class="sw-check"><input type="checkbox" data-lit-source value="${id}" ${c.sources?.[id]!==false?'checked':''}/>${label}</label>`).join('')}</div></div>
+   ${select('主动分享强度','lit-proactive-intensity',[['off','关闭'],['low','低'],['balanced','均衡'],['high','高']],c.proactive_intensity)}
+   <div class="sw-form-grid">
+    ${field('启动后等待（秒）','lit-startup',c.startup_delay_seconds,'','number')}
+    ${field('检查间隔（秒）','lit-interval',c.check_interval_seconds,'','number')}
+    ${field('回看窗口（小时）','lit-lookback',c.lookback_hours,'','number')}
+    ${field('每日入库上限','lit-daily',c.daily_limit,'','number')}
+    ${field('每日精读上限','lit-deep',c.deep_read_limit,'','number')}
+    ${field('先验工作检索数','lit-prior',c.prior_art_limit,'','number')}
+    ${field('最低兴趣度','lit-threshold',c.min_interestingness,'','number')}
+    ${field('跨学科权重','lit-cross',c.cross_discipline_weight,'','number')}
+    ${field('朋友圈每日条数','lit-feed',c.feed_daily_limit,'','number')}
+    ${field('主动消息每日上限','lit-proactive-limit',c.proactive_daily_limit,'','number')}
+    ${field('主动消息冷却（分钟）','lit-cooldown',c.proactive_cooldown_minutes,'','number')}
+    ${field('主动消息有效期（小时）','lit-ttl',c.proactive_ttl_hours,'','number')}
+   </div>
+   <details class="sw-card"><summary>数据与网络边界</summary><div class="sw-form-grid">
+    ${field('PDF 上限（MB）','lit-max-upload',c.max_upload_mb,'','number')}
+    ${field('全文保留字符数','lit-fulltext',c.fulltext_char_limit,'','number')}
+    ${field('HTTP 超时（秒）','lit-timeout',c.http_timeout_seconds,'','number')}
+    ${field('单次检索结果上限','lit-search-limit',c.search_result_limit,'','number')}
+    ${field('扫描记录上限','lit-scan-limit',c.scan_limit,'','number')}
+    ${field('反馈记录上限','lit-feedback-limit',c.feedback_limit,'','number')}
+    ${field('主动消息历史上限','lit-proactive-history',c.proactive_history_limit,'','number')}
+   </div></details>
+   <details class="sw-card" open><summary>阅读配额</summary><p class="sw-muted">四项总和必须为 100。</p><div class="sw-form-grid">
+    ${field('生物医学 %','lit-quota-biology',c.quota?.biology??50,'','number')}
+    ${field('方法学 %','lit-quota-methods',c.quota?.methods??20,'','number')}
+    ${field('跨学科 %','lit-quota-cross_disciplinary',c.quota?.cross_disciplinary??15,'','number')}
+    ${field('会议论文 %','lit-quota-conference',c.quota?.conference??15,'','number')}
+   </div></details>
+   <div class="sw-form-grid">${area('重点期刊（每行一个）','lit-top-journals',(c.top_journals||[]).join('\n'),5)}${area('桥接概念（每行一个）','lit-bridge-concepts',(c.bridge_concepts||[]).join('\n'),5)}</div>
+   <div class="sw-inline">${button('save-literature','保存文献设置','btn-primary')}<a class="btn btn-ghost btn-sm" href="#/literature">打开文献雷达</a></div>`;
+  }
   if(key==='appearance' && window.suwenDesktop){
    const closeAction=await window.suwenDesktop.getCloseAction();
    html+=`<div class="sw-field"><label>关闭窗口时</label><select class="input" id="desktop-close-action"><option value="ask">每次询问</option><option value="tray">最小化到系统托盘</option><option value="quit">退出程序</option></select><p class="sw-muted">退出前会提示未完成任务；托盘保持后台任务和 SSH 连接。</p></div>`;
@@ -231,10 +301,10 @@ export async function mount(root){
  function memoryCard(item){return `<article class="sw-card"><header><h3>${esc(item.title)}</h3>${badge(item.kind)}</header><p class="sw-memory-body">${esc(item.text.slice(0,500))}</p><div class="sw-muted">${esc(item.source||'用户记忆')} ${esc(item.locator||'')}${item.score!==undefined?' · relevance '+esc(item.score):''}</div>${item.conflicts?.length?'<p class="sw-error">检测到同标题的不同内容，请检查冲突。</p>':''}<div class="sw-inline">${button('edit-memory','查看 / 编辑','',item.id)}${button('delete-memory','删除','',item.id)}</div></article>`;}
  async function research(){
   const data=await request('/research');items=data.claims;
-  content.innerHTML=`<section class="sw-card sw-hero"><div class="sw-kicker">EVIDENCE BEFORE CONCLUSIONS</div><h2>让每一项发现，都能回到证据。</h2><p>文献元数据、代码运行与科学验证是不同层次。执行成功不会自动把生物学结论标为成立。</p><div class="sw-metrics"><div><strong>${data.sources.length}</strong><span>可追溯来源</span></div><div><strong>${data.claims.length}</strong><span>登记结论</span></div><div><strong>${data.gates.filter(g=>g.status==='needs_review').length}</strong><span>待复核运行</span></div></div></section><div class="sw-toolbar">${button('literature','检索文献','btn-primary')}${button('record-claim','登记结论')}${button('reload','刷新')}</div><div class="sw-stack">${data.claims.map(c=>`<article class="sw-card"><header><h3>${esc(c.statement)}</h3>${badge(c.validation_status)}</header><p>类型：${esc(c.kind)} · 来源 ${c.sources.length} 条 · 运行 ${esc(c.run||'未关联')}</p>${code(c.checks)}<p class="sw-muted">${esc(c.limitations)}</p><div class="sw-inline">${button('verify-claim','执行独立指标检查','',c.id)}${button('review-claim','人工复核','',c.id)}</div></article>`).join('')||blank('还没有登记的结论','科研 Agent 可在执行过程中登记结论，系统在任务结束时检查证据状态。')}</div><details class="sw-card"><summary>证据门禁与来源列表</summary>${code(data.gates)}${code(data.sources)}</details>`;
+  content.innerHTML=`<section class="sw-card sw-hero"><h2>科研证据</h2><p>来源、结论与验证状态分开记录。</p><div class="sw-metrics"><div><strong>${data.sources.length}</strong><span>可追溯来源</span></div><div><strong>${data.claims.length}</strong><span>登记结论</span></div><div><strong>${data.gates.filter(g=>g.status==='needs_review').length}</strong><span>待复核运行</span></div></div></section><div class="sw-toolbar">${button('literature','检索文献','btn-primary')}${button('record-claim','登记结论')}${button('reload','刷新')}</div><div class="sw-stack">${data.claims.map(c=>`<article class="sw-card"><header><h3>${esc(c.statement)}</h3>${badge(c.validation_status)}</header><p>类型：${esc(c.kind)} · 来源 ${c.sources.length} 条 · 运行 ${esc(c.run||'未关联')}</p>${code(c.checks)}<p class="sw-muted">${esc(c.limitations)}</p><div class="sw-inline">${button('verify-claim','执行独立指标检查','',c.id)}${button('review-claim','人工复核','',c.id)}</div></article>`).join('')||blank('还没有登记结论','执行后可在此登记来源、检查与限制。')}</div><details class="sw-card"><summary>证据门禁与来源列表</summary>${code(data.gates)}${code(data.sources)}</details>`;
  }
  async function experiments(){items=(await request('/experiments')).items;
-  content.innerHTML=`<section class="sw-card"><h2>让候选方案接受同一把尺子。</h2><p>读取工作区中实际的 JSON 指标文件。只有数据集、评估协议和目标指标一致，才允许比较；排序不会自动验证科学结论。</p>${button('new-experiment','登记实验','btn-primary')}${button('compare-experiments','比较已登记实验')}<div class="sw-stack">${items.map(item=>`<article class="sw-card"><label class="sw-check"><input type="checkbox" data-exp-id="${escAttr(item.id)}"/>选择实验</label><h3>${esc(item.name)}</h3><p>${esc(item.dataset)} · ${esc(item.protocol)} · ${esc(item.metric)} = ${esc(item.score)}</p><details><summary>来源与指标摘要</summary>${code(item)}</details></article>`).join('')||blank('尚无实验记录','先运行分析，将指标保存为 JSON，再登记比较。')}</div></section>`;
+  content.innerHTML=`<section class="sw-card"><h2>实验比较</h2><p>仅比较数据集、评估协议和目标指标一致的实验。</p>${button('new-experiment','登记实验','btn-primary')}${button('compare-experiments','比较已登记实验')}<div class="sw-stack">${items.map(item=>`<article class="sw-card"><label class="sw-check"><input type="checkbox" data-exp-id="${escAttr(item.id)}"/>选择实验</label><h3>${esc(item.name)}</h3><p>${esc(item.dataset)} · ${esc(item.protocol)} · ${esc(item.metric)} = ${esc(item.score)}</p><details><summary>来源与指标摘要</summary>${code(item)}</details></article>`).join('')||blank('尚无实验记录','运行分析并保存指标 JSON 后登记。')}</div></section>`;
  }
  async function biomni(){const data=await request('/biomedical');content.innerHTML=`<section class="sw-card"><div class="sw-kicker">BIOMEDICAL TOOLBOX</div><h2>检索规划 + 代码执行 + 证据检查</h2><p>借鉴 Biomni 的工具检索与可执行分析模式。本地轻量实现已接入Eve工具链；不会假称安装了完整 Biomni E1 或数据湖。</p>${badge(data.upstream_installed?'upstream_detected':'upstream_not_installed')}<a href="${escAttr(data.source)}" target="_blank" rel="noopener"> Biomni 官方仓库 ↗</a><div class="sw-search-row"><input class="input" id="bio-query" placeholder="例如：DNA 质量检查、蛋白注释、证据验证…"/>${button('bio-search','检索工具')}</div><div id="bio-results">${code(data.tools)}</div><div class="sw-inline">${button('sequence','DNA 序列检查')}${button('protein','UniProt 查询')}${button('literature','文献检索')}</div></section>`;}
  async function diagnostics(){const d=await request('/diagnostics');content.innerHTML=`<div class="sw-toolbar"><div><h2>系统运行中</h2><p>诊断读取真实状态；模型与外部服务测试会独立进行。</p></div>${button('reload','健康检查','btn-primary')}${button('export-diagnostics','导出报告')}</div><div class="sw-metrics">${[['队列',d.tasks.queued||0],['运行任务',d.tasks.running||0],['异常',d.tasks.failed||0],['累计 Token',d.usage.tokens||0]].map(([l,v])=>`<div><strong>${esc(v)}</strong><span>${l}</span></div>`).join('')}</div><section class="sw-card"><h3>组件状态</h3><div class="sw-status-grid"><div>Agent Runtime ${badge(d.runtime)}</div><div>Model Gateway ${badge(d.gateway)}</div><div>模型 ${badge(d.model.provider==='mock'?'mock_test_mode':d.model.configured?'configured':'unconfigured')}</div><div>MCP 服务 ${d.mcp.length}</div><div>消息渠道 ${d.channels.length}</div><div>OS 安全沙箱 ${badge(d.sandbox.binary_available?'docker_daemon_not_probed':'docker_unavailable')}</div></div>${button('model-test','实测当前模型连接')}<details><summary>资源、用量与依赖</summary>${code(d.resources)}${code(d.usage)}${code(d.external_dependencies)}${code(d.sandbox)}</details></section><section class="sw-card"><h3>最近日志与追踪</h3>${d.logs.length?d.logs.map(log=>`<div class="sw-log"><time>${new Date(log.created*1000).toLocaleString()}</time><strong>${esc(log.kind)}</strong>${code(log.data)}</div>`).join(''):blank('暂无异常记录')}</section>`;}
@@ -295,7 +365,7 @@ export async function mount(root){
     else if(action==='provider-edit')await openProviderEditor(id);
     else if(action==='provider-default'){const [provider,model]=(id||'').split('::');await api.settings.update({provider,model});toastSuccess('默认模型已切换');await models();}
    else if(action==='mode'){await save('models',{mode:id});await models();}
-   else if(action==='save-models'){const verification=val('model-verification');await save('models',{verification,orchestration:checked('sage-orchestration'),strategy:val('model-strategy'),roles:rolesFromDom(),capabilities:capsFromDom(),fallbacks:fallbacksFromDom(),context_window:Number(val('model-context')),sage_verification:verification==='sage'});}
+   else if(action==='save-models'){const verification=val('model-verification');await save('models',{verification,orchestration:checked('sage-orchestration'),strategy:val('model-strategy'),roles:rolesFromDom(),auxiliary_profiles:auxiliaryProfilesFromDom(),capabilities:capsFromDom(),fallbacks:fallbacksFromDom(),context_window:Number(val('model-context')),sage_verification:verification==='sage'});}
    else if(action==='model-cap-add'){const name=(await promptDialog({title:'添加模型能力',message:'输入模型名称（与模型连接中的名称一致）',placeholder:'例如 deepseek-chat'})||'').trim();if(!name)return;const rows=content.querySelector('#model-cap-rows');if(!rows)return;rows.insertAdjacentHTML('beforeend',capabilityRow(name));rows.querySelector('.sw-muted')?.remove();}
    else if(action==='model-fallback-add'){const html=content.querySelector('#model-fallback-rows');if(!html)return;const index=html.querySelectorAll('[data-fallback-row]').length;html.insertAdjacentHTML('beforeend',`<div class="sw-fallback-row" data-fallback-row="${index}"><input class="input" data-fallback-provider placeholder="Provider"/><input class="input" data-fallback-model placeholder="模型名"/><button type="button" class="btn btn-ghost btn-sm" data-fallback-remove>移除</button></div>`);html.querySelector('.sw-muted')?.remove();}
    else if(action==='save-appearance')await save('appearance',{theme:val('theme'),font:val('font'),font_size:Number(val('font-size')),accent:val('accent'),density:val('density'),radius:Number(val('radius')),mode:val('ui-mode'),home:val('home'),agent_name:val('agent-name'),avatar:val('avatar'),shortcuts:{palette:val('shortcut-palette')}});
@@ -305,10 +375,19 @@ export async function mount(root){
    else if(action==='save-budget')await save('budget',{concurrency:Number(val('budget-concurrency')),prices:json('budget-prices')});
    else if(action==='save-vision')await save('vision',{enabled:checked('vision-enabled'),auto_review:checked('vision-auto'),model:val('vision-model'),api_base:val('vision-base'),credential_ref:val('vision-ref'),max_repairs:Number(val('vision-repairs'))});
    else if(action==='save-memory'){if(val('memory-embedding')==='api'&&!await confirmDialog({title:'启用外部嵌入服务',message:'检索和索引时，会向你配置的 API 发送当前工作区的文本。确认已完成敏感数据检查。',confirmText:'确认启用'}))return;await save('memory',{enabled:checked('memory-enabled'),auto_capture:checked('memory-auto'),embedding:val('memory-embedding'),embedding_url:val('memory-url'),embedding_model:val('memory-model'),top_k:Number(val('memory-top')),retention_days:Number(val('memory-retention'))});}
+   else if(action==='save-literature'){
+    const sources={};content.querySelectorAll('[data-lit-source]').forEach(input=>{sources[input.value]=input.checked;});
+    if(!Object.values(sources).some(Boolean))throw new Error('至少启用一个文献来源');
+    const quota={biology:Number(val('lit-quota-biology')),methods:Number(val('lit-quota-methods')),cross_disciplinary:Number(val('lit-quota-cross_disciplinary')),conference:Number(val('lit-quota-conference'))};
+    if(Object.values(quota).some(value=>!Number.isInteger(value)||value<0)||Object.values(quota).reduce((sum,value)=>sum+value,0)!==100)throw new Error('阅读配额必须是非负整数，且总和为 100');
+    const lines=id=>val(id).split(/\r?\n|,/).map(value=>value.trim()).filter(Boolean);
+    await save('literature',{enabled:checked('lit-enabled'),daily_enabled:checked('lit-daily-enabled'),proactive_enabled:checked('lit-proactive-enabled'),auto_dream:checked('lit-auto-dream'),startup_delay_seconds:Number(val('lit-startup')),check_interval_seconds:Number(val('lit-interval')),lookback_hours:Number(val('lit-lookback')),daily_limit:Number(val('lit-daily')),deep_read_limit:Number(val('lit-deep')),prior_art_limit:Number(val('lit-prior')),min_interestingness:Number(val('lit-threshold')),cross_discipline_weight:Number(val('lit-cross')),feed_daily_limit:Number(val('lit-feed')),proactive_intensity:val('lit-proactive-intensity'),proactive_daily_limit:Number(val('lit-proactive-limit')),proactive_cooldown_minutes:Number(val('lit-cooldown')),proactive_ttl_hours:Number(val('lit-ttl')),max_upload_mb:Number(val('lit-max-upload')),fulltext_char_limit:Number(val('lit-fulltext')),http_timeout_seconds:Number(val('lit-timeout')),search_result_limit:Number(val('lit-search-limit')),scan_limit:Number(val('lit-scan-limit')),feedback_limit:Number(val('lit-feedback-limit')),proactive_history_limit:Number(val('lit-proactive-history')),quota,top_journals:lines('lit-top-journals'),bridge_concepts:lines('lit-bridge-concepts'),sources});
+    await load();
+   }
    else if(action==='dream-save'){const enabled=checked('dream-enabled');await request('/dreaming/settings','PATCH',{enabled});toastSuccess(enabled?'经验整理已开启':'经验整理已关闭');await load();}
    else if(action==='dream-run'){
     if(!checked('dream-enabled'))throw new Error('请先保存并启用经验整理');
-    if(!await confirmDialog({title:'开始整理历史记录',message:'将读取当前工作区脱敏后的会话、记忆与科研项目，只生成待确认建议；不会自动写入或启动任务。',confirmText:'开始整理'}))return;
+    if(!await confirmDialog({title:'整理历史记录',message:'读取脱敏会话、记忆与科研项目，生成待审核建议。',confirmText:'开始整理'}))return;
     const result=await request('/dreaming/run','POST',{focus:val('dream-focus')});
     if(!result.ok)toastWarn(result.run?.error||'经验整理未完成，请检查模型连接');else toastSuccess(result.run?.summary||'经验整理完成，建议等待确认');
     await load();
@@ -316,7 +395,7 @@ export async function mount(root){
    else if(action==='dream-accept'){
     const candidate=(dreamStatus?.candidates||[]).find(row=>row.id===id);
     const effects={memory:'写入当前工作区的长期记忆',correction:'写入一条可检索的修正记录',skill:'生成一个默认停用、尚未测试的技能草稿',follow_up:'创建一个尚未启动的科研愿望',workflow:'生成一个尚未执行的流程草稿'};
-    if(!await confirmDialog({title:'采纳这条经验建议',message:`${effects[candidate?.kind]||'生成一条待继续处理的草稿'}。此操作不会自动运行技能、命令或科研任务。`,confirmText:'确认采纳'}))return;
+    if(!await confirmDialog({title:'采纳经验建议',message:`${effects[candidate?.kind]||'生成一条待处理草稿'}。`,confirmText:'确认采纳'}))return;
     await request(`/dreaming/candidates/${encodeURIComponent(id)}/accept`,'POST',{confirmed:true,note:'用户从设置页确认采纳'});
     toastSuccess('建议已采纳；相关能力仍按各自的安全边界保持停用或未启动');
     await load();

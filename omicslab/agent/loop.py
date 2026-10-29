@@ -274,6 +274,8 @@ class AgentLoop:
         workspace: Any | None = None,
         backend: Any | None = None,
         agent_task_id: str | None = None,
+        all_skills: dict[str, "Skill"] | None = None,
+        selected_skills: dict[str, "Skill"] | None = None,
     ) -> "ToolContext":
         from .tools import ToolContext
 
@@ -300,9 +302,24 @@ class AgentLoop:
         ctx.inherited_toolsets = conv.meta.get("inherited_toolsets")
         platform = getattr(self.registry, "platform", None)
         if platform is not None:
-            ctx.scoped_skills = dict(self.skills, **platform.skills.load(workspace_id or "ws_main"))
-            if agent.skills:
-                ctx.scoped_skills = {k:v for k,v in ctx.scoped_skills.items() if k in agent.skills}
+            available = all_skills
+            if available is None:
+                available = dict(
+                    self.skills,
+                    **platform.skills.load(workspace_id or "ws_main"),
+                )
+                if agent.skills:
+                    available = {
+                        key: value
+                        for key, value in available.items()
+                        if key in agent.skills
+                    }
+            ctx.all_skills = dict(available)
+            ctx.scoped_skills = dict(
+                available if selected_skills is None else selected_skills
+            )
+            ctx.skill_scope = workspace_id or "ws_main"
+            ctx.platform = platform
         extras = {
             "run_sub": run_sub,
             "run_id": str(run_id or ""),
@@ -360,7 +377,36 @@ class AgentLoop:
             query = next((m.content for m in reversed(conv.messages) if m.role == "user"), "")
             llm, cfg, target = platform.models.prepare(self.settings, provider, model, agent, backend, query)
             llm.task = run_id or conv.id
-            scoped_skills = dict(self.skills, **platform.skills.load(workspace_id))
+            available_skills = dict(
+                self.skills,
+                **platform.skills.load(workspace_id),
+            )
+            if agent.skills:
+                available_skills = {
+                    key: value
+                    for key, value in available_skills.items()
+                    if key in agent.skills
+                }
+            scoped_skills = available_skills
+            try:
+                scoped_skills = platform.skill_graph.select(
+                    workspace_id,
+                    query,
+                    available_skills,
+                )
+                platform.skill_graph.record_retrieval(
+                    workspace_id,
+                    run_id or conv.id,
+                    query,
+                    scoped_skills,
+                )
+            except Exception as exc:
+                platform.store.audit(
+                    "skills.graph_retrieval_failed",
+                    {"error": str(exc)},
+                    workspace_id,
+                )
+                scoped_skills = available_skills
             try:
                 retrieved = await platform.knowledge.search(workspace_id, query, 5)
             except Exception as exc:
@@ -409,6 +455,16 @@ class AgentLoop:
                 output += note
                 conv.messages.append(ChatMessage(role="assistant", content=note, meta={"stop_reason": reason}))
                 await emit(AgentEvent("text", {"delta": note}))
+            if platform is not None:
+                try:
+                    platform.skill_graph.finish_run(
+                        workspace_id,
+                        run_id or conv.id,
+                        code == "completed",
+                        message or code,
+                    )
+                except Exception:
+                    pass
             self._save(conv)
             return {"finish_reason": "error" if error else "stop", "text": output, "usage": total_usage,
                     "tool_calls": tool_call_count, "stop_reason": reason, **({"error": error} if error else {})}
@@ -558,6 +614,8 @@ class AgentLoop:
                         backend=backend,
                         agent_task_id=agent_task_id,
                         turn_guard=guard,
+                        all_skills=available_skills if platform is not None else None,
+                        selected_skills=scoped_skills if platform is not None else None,
                     )
                 self._save(conv)
                 if guard.finalizing:
@@ -588,6 +646,8 @@ class AgentLoop:
         backend: Any | None = None,
         agent_task_id: str | None = None,
         turn_guard: TurnGuard | None = None,
+        all_skills: dict[str, "Skill"] | None = None,
+        selected_skills: dict[str, "Skill"] | None = None,
     ) -> None:
         fn = tc.get("function") or {}
         name = str(fn.get("name") or "")
@@ -629,6 +689,8 @@ class AgentLoop:
             workspace=workspace,
             backend=backend,
             agent_task_id=agent_task_id,
+            all_skills=all_skills,
+            selected_skills=selected_skills,
         )
         started = time.perf_counter()
         ctx.turn_guard = turn_guard
@@ -682,6 +744,16 @@ class AgentLoop:
         if platform is not None:
             scope = getattr(getattr(backend, "workspace", None), "workspace_id", "ws_main")
             platform.biomedical.record_execution(scope, run_id or conv.id, name, args, result)
+            if name == "skill_view" and result.ok:
+                try:
+                    skill_name = str((result.data or {}).get("name") or args.get("name") or "")
+                    platform.skill_graph.record_view(
+                        scope,
+                        run_id or conv.id,
+                        skill_name,
+                    )
+                except Exception:
+                    pass
             if result.ok:
                 reports = await platform.auto_review(scope, run_id or conv.id, result.data.get("figures", []))
                 if reports:

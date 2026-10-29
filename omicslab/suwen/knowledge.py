@@ -50,21 +50,40 @@ class Knowledge:
     def __init__(self,platform):
         self.platform=platform;self.store=platform.store
 
-    async def vector(self,text,scope):
+    async def embedding(self,text,scope,task_tag='memory.embedding'):
+        """Return ``{vector, model}`` for a task-tagged embedding request.
+
+        Literature and memory can deliberately use different endpoints. A
+        missing auxiliary profile falls back to the existing embedding role,
+        then to the legacy memory embedding configuration. Keyword-only mode
+        never sends text to a remote service.
+        """
         config=self.platform.config.get('memory',scope)['value']
         models=self.platform.config.get('models',scope)['value']
+        auxiliary=models.get('auxiliary_profiles',{}).get(task_tag,{})
         role=models['roles'].get('embedding',{})
-        if config['embedding']!='api':
-            return None
+        use_legacy=task_tag=='memory.embedding'
+        # The legacy memory switch is authoritative for memory retrieval. A
+        # configured role must not turn keyword-only memory into a remote call.
+        if use_legacy and not auxiliary and config['embedding']!='api':
+            return {'vector':None,'model':''}
+        if not auxiliary and not role and not use_legacy:
+            return {'vector':None,'model':''}
         if sensitive(text):
             raise ValueError('检测到可能的敏感凭据，禁止发送到嵌入服务')
-        base=config['embedding_url'] or role.get('api_base','')
-        model=config['embedding_model'] or role.get('model','')
+        provider=auxiliary.get('provider') or role.get('provider','')
+        model=auxiliary.get('model') or role.get('model','') or config['embedding_model']
+        base=auxiliary.get('api_base') or role.get('api_base','') or (config['embedding_url'] if use_legacy else '')
+        credential_ref=auxiliary.get('credential_ref') or role.get('credential_ref') or 'embedding'
+        if auxiliary and not base and (provider or model):
+            target=self.platform.settings.resolve_llm(provider or None,model or None)
+            base=target.api_base
+            model=target.model
         if not base or not model:
             raise ValueError('独立嵌入服务未配置 URL 或模型')
         from .models import require_private_endpoint
-        require_private_endpoint(models['strategy'],base)
-        key=self.platform.vault.get(role.get('credential_ref') or 'embedding')
+        require_private_endpoint(models['strategy'],base,provider)
+        key=self.platform.vault.get(credential_ref)
         async with httpx.AsyncClient(timeout=30) as client:
             response=await client.post(base.rstrip('/')+'/embeddings',
                 json={'model':model,'input':text[:12000]},
@@ -74,7 +93,10 @@ class Knowledge:
             vector=response.json()['data'][0]['embedding']
             if not isinstance(vector,list) or not vector or not all(type(v) in {int,float} and math.isfinite(v) for v in vector):
                 raise ValueError('嵌入返回格式无效')
-            return vector
+            return {'vector':vector,'model':model}
+
+    async def vector(self,text,scope,task_tag='memory.embedding'):
+        return (await self.embedding(text,scope,task_tag))['vector']
 
     async def add(self,scope,title,text,kind='memory',source='',locator='',auto=False):
         config=self.platform.config.get('memory',scope)['value']

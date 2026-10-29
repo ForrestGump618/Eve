@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-29T11:05:00Z",
+  "browser": "Microsoft Edge 156.0.4314.50",
+  "test": "tests/frontend-literature.mjs",
+  "result": "passed",
+  "durationMs": 2979.1387,
+  "viewports": [
+    "1440x1000",
+    "390x844"
+  ],
+  "checks": [
+    "literature radar renders four metrics and four workspace tabs",
+    "search sends typed source, date, type and scoring fields",
+    "the result card renders novelty, bridge and prior-art evidence",
+    "PDF upload uses multipart and keeps persistent ingest feedback",
+    "accepted content remains free of raw JSON",
+    "proactive messages require a dismissal reason and can open an existing chat route",
+    "mobile layout has no page-level horizontal overflow",
+    "desktop and mobile produce no page errors"
+  ],
+  "errors": []
+}

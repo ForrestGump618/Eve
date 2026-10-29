@@ -1,8 +1,8 @@
 // Figures view: thumbnail gallery of generated plots with lightbox / download / delete.
 
-import { icon } from '../icons.js?v=1.3.0';
-import { esc, fmtBytes, relTime, fmtTime, baseName } from '../util.js?v=1.3.0';
-import { api, errorMessage } from '../api.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.4.0';
+import { esc, fmtBytes, relTime, fmtTime, baseName } from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
 import {
   toastSuccess,
   toastError,
@@ -10,9 +10,9 @@ import {
   openLightbox,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.3.0';
-import { setState } from '../store.js?v=1.3.0';
-import {annotateFigure} from '../figure-annotator.js?v=1.3.0';
+} from '../ui.js?v=1.4.0';
+import { setState } from '../store.js?v=1.4.0';
+import {annotateFigure} from '../figure-annotator.js?v=1.4.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();
@@ -34,7 +34,7 @@ export async function mount(root, ctx = {}) {
         title: local.figures.length ? '没有匹配的图表' : '还没有生成图表',
         hint: local.figures.length
           ? '换个关键词试试'
-          : '运行绘图代码后，图表会保存在这里。',
+          : '暂无图表。',
       });
       return;
     }
@@ -141,7 +141,7 @@ function layout() {
     '<header class="page-head">' +
     '<div class="page-heading">' +
     '<h1 class="page-title">图库</h1>' +
-    '<p class="page-subtitle">智能体在分析过程中生成的所有图表</p>' +
+    '<p class="page-subtitle">分析过程中生成的图表</p>' +
     '</div>' +
     '<div class="page-actions">' +
     '<span class="toolbar-meta" id="figures-count"></span>' +

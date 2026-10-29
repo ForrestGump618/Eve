@@ -91,6 +91,7 @@ async def test_settings_keys_keep_multiple_provider_credentials(p,client_app):
 async def test_dashboard_returns_scoped_research_overview(p,client_app):
     store=ConversationStore(p.settings)
     p.state.store=store
+    other=p.state.workspaces.create('其他项目')
     conversation=store.create(agent='lead',title='既往分析')
     conversation.messages.append(ChatMessage(role='user',content='检查表达矩阵'))
     conversation.meta['workspace_id']='ws_main'
@@ -102,6 +103,11 @@ async def test_dashboard_returns_scoped_research_overview(p,client_app):
             'INSERT INTO usage(scope,task,agent,model,input,output,cost,estimated,latency,created) '
             'VALUES(?,?,?,?,?,?,?,?,?,?)',
             ('ws_main','dashboard-test','lead','mock-model',1200,300,0.0123,1,1.25,created),
+        )
+        p.store.db.execute(
+            'INSERT INTO usage(scope,task,agent,model,input,output,cost,estimated,latency,created) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?)',
+            (other.workspace_id,'other-test','lead','other-model',9999,9999,9.99,1,9.99,created),
         )
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
         response=await client.get('/api/platform/dashboard?scope=ws_main')
@@ -131,6 +137,22 @@ async def test_dashboard_returns_scoped_research_overview(p,client_app):
     assert today['latency_ms']==1250.0
     assert any(plan['wish_id']==wish['id'] for plan in data['plans'])
     assert data['dreaming']['enabled'] is False
+
+
+@pytest.mark.asyncio
+async def test_dashboard_empty_scope_is_stable(p,client_app):
+    p.state.store=ConversationStore(p.settings)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        response=await client.get('/api/platform/dashboard?scope=ws_main')
+    assert response.status_code==200
+    data=response.json()
+    assert data['metrics']['tokens']==0
+    assert data['metrics']['total_runs']==0
+    assert data['metrics']['success_rate']==0
+    assert data['wishes']==[]
+    assert data['plans']==[]
+    assert len(data['trends']['days'])==30
+    assert data['literature']['today']=={'papers':0,'deep_read':0,'feed':0}
 
 
 def test_migration_is_backed_up_and_repeatable(p):

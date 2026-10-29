@@ -7,6 +7,19 @@
 :root {
   color-scheme: dark;
 
+  /* neutral scale: one shared 11-step ramp */
+  --neutral-50: #f7f8fa;
+  --neutral-130: #f0f2f5;
+  --neutral-200: #e8ebef;
+  --neutral-260: #d9dde3;
+  --neutral-380: #a8b0bb;
+  --neutral-480: #7f8895;
+  --neutral-560: #666f7c;
+  --neutral-680: #4b5563;
+  --neutral-780: #343b45;
+  --neutral-880: #242a32;
+  --neutral-980: #171b21;
+
   /* surfaces */
   --bg: #0f1117;
   --bg-deep: #0b0d13;
@@ -29,12 +42,13 @@
   --text-4: #5e6982;
 
   /* accents */
-  --accent: #a78bfa;
-  --accent-strong: #8b5cf6;
-  --accent-2: #22d3ee;
-  --accent-soft: rgba(167, 139, 250, 0.14);
-  --accent-soft-2: rgba(167, 139, 250, 0.22);
-  --cyan-soft: rgba(34, 211, 238, 0.12);
+  --accent: #8ea8ff;
+  --accent-strong: #afc2ff;
+  --accent-2: #8ea8ff;
+  --accent-soft: rgba(142, 168, 255, 0.14);
+  --accent-soft-2: rgba(142, 168, 255, 0.22);
+  --cyan-soft: rgba(142, 168, 255, 0.12);
+  --accent-contrast: #171b21;
 
   /* status */
   --green: #34d399;
@@ -45,6 +59,14 @@
   --amber-soft: rgba(251, 191, 36, 0.13);
   --blue: #60a5fa;
   --blue-soft: rgba(96, 165, 250, 0.13);
+  --success-bg: #173d2b;
+  --success-text: #8fe0b2;
+  --warning-bg: #4a3512;
+  --warning-text: #ffd58a;
+  --danger-bg: #4a2222;
+  --danger-text: #ffaaaa;
+  --info-bg: #1d3558;
+  --info-text: #b7d2ff;
 
   /* geometry */
   --radius-xl: 20px;
@@ -110,12 +132,13 @@
   --text-3: #6a768f;
   --text-4: #97a1b6;
 
-  --accent: #7c5cf5;
-  --accent-strong: #6d4bea;
-  --accent-2: #0891b2;
-  --accent-soft: rgba(124, 92, 245, 0.1);
-  --accent-soft-2: rgba(124, 92, 245, 0.17);
-  --cyan-soft: rgba(8, 145, 178, 0.1);
+  --accent: #3157d5;
+  --accent-strong: #2445b0;
+  --accent-2: #3157d5;
+  --accent-soft: rgba(49, 87, 213, 0.1);
+  --accent-soft-2: rgba(49, 87, 213, 0.17);
+  --cyan-soft: rgba(49, 87, 213, 0.1);
+  --accent-contrast: #ffffff;
 
   --green: #059669;
   --green-soft: rgba(5, 150, 105, 0.1);
@@ -125,6 +148,14 @@
   --amber-soft: rgba(180, 83, 9, 0.1);
   --blue: #2563eb;
   --blue-soft: rgba(37, 99, 235, 0.09);
+  --success-bg: #eaf7ef;
+  --success-text: #17663a;
+  --warning-bg: #fff7e6;
+  --warning-text: #7a4b00;
+  --danger-bg: #fff0f0;
+  --danger-text: #9e2f2f;
+  --info-bg: #eef4ff;
+  --info-text: #2553a6;
 
   --shadow-1: 0 1px 2px rgba(20, 30, 55, 0.06);
   --shadow-2: 0 12px 30px -14px rgba(20, 30, 55, 0.22);

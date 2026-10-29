@@ -1,7 +1,7 @@
 // Function registry view: search installed packages' functions, filter by module,
 // copy a usage example and rebuild the index.
 
-import { icon } from '../icons.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.4.0';
 import {
   esc,
   escAttr,
@@ -9,8 +9,8 @@ import {
   truncate,
   debounce,
   copyText,
-} from '../util.js?v=1.3.0';
-import { api, errorMessage } from '../api.js?v=1.3.0';
+} from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
 import {
   toastSuccess,
   toastError,
@@ -18,7 +18,7 @@ import {
   openModal,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.3.0';
+} from '../ui.js?v=1.4.0';
 
 const SEARCH_LIMIT = 40;
 const KIND_LABELS = { function: '函数', class: '类', method: '方法', module: '模块' };

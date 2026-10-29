@@ -1160,9 +1160,31 @@ async def _tool_write_file(ctx: ToolContext, arguments: dict[str, Any]) -> ToolR
 
 
 async def _tool_skill_list(ctx: ToolContext, arguments: dict[str, Any]) -> ToolResult:
-    skills = getattr(ctx, "scoped_skills", None)
-    if skills is None:
-        skills = await asyncio.to_thread(load_skills, ctx.settings)
+    available = getattr(ctx, "all_skills", None)
+    if available is None:
+        available = getattr(ctx, "scoped_skills", None)
+    if available is None:
+        available = await asyncio.to_thread(load_skills, ctx.settings)
+    scoped = getattr(ctx, "scoped_skills", None)
+    skills = available if scoped is None else scoped
+    query = _arg_str(arguments, "query").strip()
+    platform = getattr(ctx, "platform", None)
+    if query and platform is not None:
+        try:
+            skills = platform.skill_graph.select(
+                getattr(ctx, "skill_scope", "ws_main"),
+                query,
+                available,
+            )
+            ctx.scoped_skills = dict(skills)
+            platform.skill_graph.record_retrieval(
+                getattr(ctx, "skill_scope", "ws_main"),
+                str(getattr(ctx, "run_id", "") or ctx.conversation_id),
+                query,
+                skills,
+            )
+        except Exception:
+            skills = available
     if not skills:
         return ToolResult(
             tool_call_id="",
@@ -1183,7 +1205,9 @@ async def _tool_skill_list(ctx: ToolContext, arguments: dict[str, Any]) -> ToolR
 
 async def _tool_skill_view(ctx: ToolContext, arguments: dict[str, Any]) -> ToolResult:
     name = _arg_str(arguments, "name", required=True).strip()
-    skills = getattr(ctx, "scoped_skills", None)
+    skills = getattr(ctx, "all_skills", None)
+    if skills is None:
+        skills = getattr(ctx, "scoped_skills", None)
     if skills is None:
         skills = await asyncio.to_thread(load_skills, ctx.settings)
     skill = skills.get(name)
@@ -1930,8 +1954,13 @@ def build_default_specs() -> list[ToolSpec]:
         ),
         ToolSpec(
             name="skill_list",
-            description="列出所有可用的领域技能（SKILL.md 指南）及其适用场景。",
-            parameters=_schema({}),
+            description=(
+                "列出当前有界技能束；提供 query 时按技能依赖图检索，"
+                "同时返回必需的前置技能。"
+            ),
+            parameters=_schema(
+                {"query": _prop("string", "可选任务描述或检索词。")},
+            ),
             toolset="skills",
             handler=_tool_skill_list,
         ),
@@ -2086,6 +2115,7 @@ def build_registry(settings: Settings) -> ToolRegistry:
         ("omicslab.agent.vision_tools", "register_vision_tools"),
         ("omicslab.discovery.tools", "register_discovery_tools"),
         ("omicslab.ssh.tools", "register_ssh_tools"),
+        ("omicslab.suwen.literature_tools", "register_literature_tools"),
     )
     for module_name, attr in extra_registrars:
         try:

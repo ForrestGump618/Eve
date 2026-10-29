@@ -1,6 +1,6 @@
-import {esc,escAttr,setPref} from '../util.js?v=1.3.0';
-import {navigate} from '../store.js?v=1.3.0';
-import {openModal,toastError,toastSuccess} from '../ui.js?v=1.3.0';
+import {esc,escAttr,setPref} from '../util.js?v=1.4.0';
+import {navigate} from '../store.js?v=1.4.0';
+import {openModal,toastError,toastSuccess} from '../ui.js?v=1.4.0';
 
 const statuses={pending:'未开始',running:'执行中',needs_evidence:'待登记证据',recorded:'证据已登记',failed:'失败',cancelled:'已取消',interrupted:'待恢复'};
 const mappings=[

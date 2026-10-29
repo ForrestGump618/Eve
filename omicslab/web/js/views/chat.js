@@ -1,15 +1,15 @@
 // Chat view: conversation list, message stream, markdown rendering, SSE consumption,
 // tool cards, approval prompts, figures, retry/stop and the composer.
 
-import { renderMarkdown } from '../markdown.js?v=1.3.0';
-import {openHtmlArtifact} from '../artifact-viewer.js?v=1.3.0';
-import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.3.0';
-import {mountProjectFiles} from '../project-files.js?v=1.3.0';
-import {mountGuidance} from '../guidance-ui.js?v=1.3.0';
-import {mountFileChanges} from '../file-changes.js?v=1.3.0';
-import {chooseComposerSkills} from '../composer-skills.js?v=1.3.0';
-import {mountAgentsPanel} from '../agents-panel.js?v=1.3.0';
-import { icon, brandMark } from '../icons.js?v=1.3.0';
+import { renderMarkdown } from '../markdown.js?v=1.4.0';
+import {openHtmlArtifact} from '../artifact-viewer.js?v=1.4.0';
+import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.4.0';
+import {mountProjectFiles} from '../project-files.js?v=1.4.0';
+import {mountGuidance} from '../guidance-ui.js?v=1.4.0';
+import {mountFileChanges} from '../file-changes.js?v=1.4.0';
+import {chooseComposerSkills} from '../composer-skills.js?v=1.4.0';
+import {mountAgentsPanel} from '../agents-panel.js?v=1.4.0';
+import { icon, brandMark } from '../icons.js?v=1.4.0';
 import {
   esc,
   escAttr,
@@ -23,9 +23,9 @@ import {
   removePref,
   uid,
   truncate,
-} from '../util.js?v=1.3.0';
-import { api, errorMessage } from '../api.js?v=1.3.0';
-import { streamChat, streamTrace } from '../sse.js?v=1.3.0';
+} from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.4.0';
+import { streamChat, streamTrace } from '../sse.js?v=1.4.0';
 import {
   toast,
   toastSuccess,
@@ -39,10 +39,10 @@ import {
   emptyStateHtml,
   openLightbox,
   spinnerHtml,
-} from '../ui.js?v=1.3.0';
-import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.3.0';
-import { on, emit } from '../bus.js?v=1.3.0';
-import { openRunDetail, openRunList } from '../runview.js?v=1.3.0';
+} from '../ui.js?v=1.4.0';
+import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.4.0';
+import { on, emit } from '../bus.js?v=1.4.0';
+import { openRunDetail, openRunList } from '../runview.js?v=1.4.0';
 
 const SIDEBAR_MIN = 210;
 const SIDEBAR_MAX = 420;
@@ -394,7 +394,7 @@ export async function mount(root, ctx = {}) {
     if (conv?.agent) parts.push(agentLabel(conv.agent));
     if (conv?.message_count != null) parts.push(`${conv.message_count} 条消息`);
     if (conv?.updated_at) parts.push(`更新于 ${relTime(conv.updated_at)}`);
-    if (!parts.length) parts.push('选择或新建会话开始对话');
+    if (!parts.length) parts.push('选择或新建会话');
     el.subtitle.textContent = parts.join(' · ');
     el.resendBtn.disabled = local.streaming || !local.messages.some((m) => m.role === 'user');
   }
@@ -2366,7 +2366,7 @@ export async function mount(root, ctx = {}) {
           `<button type="button" class="eve-model-provider${provider.id === providerId ? ' is-active' : ''}" data-provider="${escAttr(provider.id)}"><span>${esc(provider.label)}</span><small>${provider.models.length || 1} 个模型</small>${provider.id === selected.provider ? icon('check', { size: 13 }) : ''}</button>`
         ).join('') || '<div class="eve-model-empty">没有匹配的供应商</div>'}</div><div class="eve-model-models" role="listbox" aria-label="模型">${models.map((model) =>
           `<button type="button" class="eve-model-option${active.id === selected.provider && model === (selected.model || active.defaultModel) ? ' is-selected' : ''}" data-provider="${escAttr(active.id)}" data-model="${escAttr(model)}"><span class="eve-model-option-main"><strong>${esc(model)}</strong><small>${model === active.defaultModel ? '推荐模型' : active.label}</small></span>${active.id === selected.provider && model === (selected.model || active.defaultModel) ? icon('check', { size: 15 }) : ''}</button>`
-        ).join('') || '<div class="eve-model-empty">该供应商还没有模型建议，请使用高级配置。</div>'}</div>`;
+        ).join('') || '<div class="eve-model-empty">暂无模型建议。</div>'}</div>`;
       };
       const rect = el.modelChip.getBoundingClientRect();
       popover.style.top = `${Math.min(window.innerHeight - 420, rect.bottom + 8)}px`;

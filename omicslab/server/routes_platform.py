@@ -385,6 +385,7 @@ async def dashboard(request:Request,scope:str='ws_main'):
     ][:6]
     runs=_dashboard_scoped_runs(p.state,scope)
     dream=p.dreaming.status(scope)
+    literature=p.literature.status(scope)
     usage=p.models.usage(scope)
     usage_days=_dashboard_usage_days(p.store,scope,30)
     trend_by_day={item['date']:item for item in usage_days}
@@ -506,6 +507,10 @@ async def dashboard(request:Request,scope:str='ws_main'):
             'avg_latency_ms':round(float(usage.get('latency') or 0)*1000,1),
             'cost':round(float(usage.get('cost') or 0),4),
             'pricing_configured':pricing_configured,
+            'literature_deep_read':literature['today']['deep_read'],
+            'literature_pending':literature['reflections_pending'],
+            'skill_candidates_pending':literature['skill_candidates_pending'],
+            'proactive_messages':literature['proactive']['queued'],
         },
         'brief':{
             'user_actions':user_actions,
@@ -536,6 +541,16 @@ async def dashboard(request:Request,scope:str='ws_main'):
             'enabled':dream['enabled'],
             'auto':dream['auto'],
             'last_run':dream['last_run'],
+        },
+        'literature':{
+            'enabled':literature['enabled'],
+            'daily_enabled':literature['daily_enabled'],
+            'last_run':literature['last_run'],
+            'today':literature['today'],
+            'reflections_pending':literature['reflections_pending'],
+            'skill_candidates_pending':literature['skill_candidates_pending'],
+            'feed_posts':literature['feed_posts'],
+            'proactive':literature['proactive'],
         },
     }
 
@@ -879,6 +894,51 @@ async def skill_install(request:Request,scope:str='ws_main'):
     directory=(root/str(data.get('subpath') or '.')).resolve()
     if not directory.is_relative_to(root) or not (directory/'skill.json').is_file():raise HTTPException(400,'本地技能目录需要 skill.json 与 SKILL.md；Codex 技能可使用 GitHub tree 目录链接安装')
     return await adapter.rpc('skill.import',path=str(directory))
+
+
+@router.get('/skills/graph')
+async def skill_graph_status(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope)
+    skills=dict(p.state.loop.skills,p.skills.load(scope))
+    p.skill_graph.sync(scope,skills)
+    return p.skill_graph.status(scope,len(skills))
+
+
+@router.post('/skills/graph/select')
+async def skill_graph_select(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    query=str(data.get('query') or '').strip()
+    if not query:
+        raise HTTPException(400,'需要检索任务描述')
+    skills=dict(p.state.loop.skills,p.skills.load(scope))
+    selected=p.skill_graph.select(scope,query,skills)
+    return {
+        'query':query,
+        'skills':[
+            {
+                'name':skill.name,
+                'description':skill.description,
+                'dependencies':skill.dependencies,
+                'source':skill.source,
+            }
+            for skill in selected.values()
+        ],
+    }
+
+
+@router.post('/skills/graph/feedback')
+async def skill_graph_feedback(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    run_id=str(data.get('run_id') or '').strip()
+    if not run_id or not isinstance(data.get('success'),bool):
+        raise HTTPException(400,'需要 run_id 与 success 布尔值')
+    p.skill_graph.finish_run(
+        scope,
+        run_id,
+        data['success'],
+        str(data.get('summary') or ''),
+    )
+    return p.skill_graph.status(scope,len(dict(p.state.loop.skills,p.skills.load(scope))))
 
 
 @router.post('/skills/{id}/rollback')

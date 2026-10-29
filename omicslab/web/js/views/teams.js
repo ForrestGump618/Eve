@@ -1,10 +1,10 @@
-import {api, errorMessage} from '../api.js?v=1.3.0';
-import {esc, escAttr, setPref} from '../util.js?v=1.3.0';
-import {getState, navigate, setState} from '../store.js?v=1.3.0';
-import {on, emit} from '../bus.js?v=1.3.0';
-import {openModal, toastError, confirmDialog, promptDialog} from '../ui.js?v=1.3.0';
-import {openRunDetail} from '../runview.js?v=1.3.0';
-import {teamConfig, teamLabels, deliveryLabels, teamActions, ensureTeamStyles} from '../team-config.js?v=1.3.0';
+import {api, errorMessage} from '../api.js?v=1.4.0';
+import {esc, escAttr, setPref} from '../util.js?v=1.4.0';
+import {getState, navigate, setState} from '../store.js?v=1.4.0';
+import {on, emit} from '../bus.js?v=1.4.0';
+import {openModal, toastError, confirmDialog, promptDialog} from '../ui.js?v=1.4.0';
+import {openRunDetail} from '../runview.js?v=1.4.0';
+import {teamConfig, teamLabels, deliveryLabels, teamActions, ensureTeamStyles} from '../team-config.js?v=1.4.0';
 
 const actionLabels = {approve: '批准并运行', pause: '暂停', resume: '恢复', cancel: '取消任务', archive: '归档'};
 const statusLabel = status => teamLabels[status] || status || '任务缺失';
@@ -120,7 +120,7 @@ export async function mount(root) {
       updateComposer(card);
       if (list.children[index] !== card.el) list.insertBefore(card.el, list.children[index] || null);
     });
-    if (!items.length) list.innerHTML = `<div class="eve-empty"><h2>${archived ? '没有已归档团队' : '还没有团队'}</h2><p>${archived ? '归档的团队、讨论和执行记录会保留在这里。' : '新建团队，为成员分配目标，并设置汇总与复核依赖。'}</p></div>`;
+    if (!items.length) list.innerHTML = `<div class="eve-empty"><h2>${archived ? '暂无归档团队。' : '暂无团队。'}</h2></div>`;
   }
 
   function updateComposer(card) {

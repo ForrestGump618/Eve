@@ -3,6 +3,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import httpx
@@ -11,7 +12,7 @@ import pytest
 from omicslab.execution.science_workbench import inspect_scientific, runtime_source
 from omicslab.execution.science_skills import execute_bundle
 from omicslab.server.routes_harness import execute_backend
-from omicslab.suwen.science_workbench import catalog, task_prompt
+from omicslab.suwen.science_workbench import WORKFLOWS, catalog, task_prompt
 from test_science_skill_runtime import bundle, payload
 from test_suwen_platform import p, client_app
 
@@ -118,6 +119,16 @@ def test_catalog_and_task_prompt_require_enabled_skills():
     flow, prompt = task_prompt("instrument", "Convert data", "samples.csv", [skill])
     assert flow["id"] == "instrument" and skill["name"] in prompt and "samples.csv" in prompt
     assert "不得转到本地" in prompt
+
+
+def test_every_workbench_skill_exists_in_the_packaged_library():
+    root = Path(__file__).resolve().parents[1]
+    index = json.loads(
+        (root / "desktop" / "skill-library" / "index.json").read_text(encoding="utf-8")
+    )
+    available = {skill["name"] for skill in index["skills"]}
+    referenced = {name for flow in WORKFLOWS for name in flow["skills"]}
+    assert referenced <= available, sorted(referenced - available)
 
 
 @pytest.mark.asyncio

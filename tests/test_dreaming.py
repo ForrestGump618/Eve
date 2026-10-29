@@ -57,8 +57,9 @@ async def test_dreaming_is_opt_in_and_acceptance_creates_only_a_memory(platform,
     row = conversation(platform, "这个项目反复遗漏同一条样本过滤规则。")
     with pytest.raises(ValueError, match="做梦已关闭"):
         await platform.dreaming.run("ws_main")
-    with pytest.raises(ValueError, match="只能修改经验整理开关"):
-        platform.dreaming.update("ws_main", {"auto": True})
+    assert platform.dreaming.update("ws_main", {"auto": True})["auto"] is True
+    with pytest.raises(ValueError, match="布尔值"):
+        platform.dreaming.update("ws_main", {"auto": "yes"})
     platform.dreaming.update("ws_main", {"enabled": True})
     monkeypatch.setattr(platform.dreaming, "_model", fake_model([{
         "kind": "memory",
