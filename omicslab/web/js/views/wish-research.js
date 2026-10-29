@@ -1,6 +1,6 @@
-import {closeAllModals,confirmDialog,openModal,toastError,toastSuccess} from '../ui.js?v=1.4.0';
-import {esc,escAttr,setPref} from '../util.js?v=1.4.0';
-import {navigate} from '../store.js?v=1.4.0';
+import {closeAllModals,confirmDialog,openModal,toastError,toastSuccess} from '../ui.js?v=1.5.0';
+import {esc,escAttr,setPref} from '../util.js?v=1.5.0';
+import {navigate} from '../store.js?v=1.5.0';
 
 const statusLabels={
  active:'进行中',blocked:'等待条件',awaiting_review:'等待用户复核',completed:'已人工结题',

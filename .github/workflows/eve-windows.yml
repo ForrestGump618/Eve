@@ -1,7 +1,7 @@
 name: Eve Windows CI
 
 # Real Windows CI for the vNext desktop app + preserved Python baseline (round 3).
-# Builds, typechecks, tests, runs RPC E2E + UI DOM QA + security scan and uploads validation logs.
+# Builds, typechecks, tests, runs RPC E2E + the single hosted-UI smoke + security scan.
 # Installer builds/uploads require an explicit manual opt-in; ordinary source pushes upload no EXE.
 # It does NOT sign and does NOT claim a clean-VM install; those remain explicit external gates
 # (see docs/release/windows-installer-verification.md and docs/release/release-gates.md).
@@ -86,12 +86,6 @@ jobs:
           node scripts/e2e-rpc.mjs --dist dist --live 2>&1 | Tee-Object -FilePath release/e2e-rpc.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: UI DOM QA (actions.json + i18n + streaming basics)
-        shell: pwsh
-        run: |
-          node scripts/ui-dom-qa.mjs 2>&1 | Tee-Object -FilePath release/ui-dom-qa.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
       - name: Verify documented installer hashes (docs mirror when release artifacts absent)
         shell: pwsh
         run: |
@@ -138,9 +132,10 @@ jobs:
       - name: Smoke-check compiled daemon entry and fixed Python worker scripts
         shell: pwsh
         run: |
-          foreach ($p in 'dist/main.js','dist/src/daemon.js','dist/ui/index.html') {
+          foreach ($p in 'dist/main.js','dist/src/daemon.js','dist/src/desktop-preload.cjs') {
             if (-not (Test-Path $p)) { throw "missing build output: $p" }
           }
+          if (Test-Path 'dist/ui') { throw 'legacy desktop UI must not exist in the build' }
           foreach ($p in 'worker/legacy_server.py','worker/research_worker.py') {
             if (-not (Test-Path $p)) { throw "missing worker script: $p" }
           }
@@ -155,7 +150,6 @@ jobs:
             desktop/release/sbom.cdx.json
             desktop/release/security-scan.json
             desktop/release/e2e-rpc.log
-            desktop/release/ui-dom-qa.log
             desktop/release-test.log
 
       - name: Upload explicitly requested installer

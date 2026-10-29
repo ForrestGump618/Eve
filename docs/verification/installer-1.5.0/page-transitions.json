@@ -1,0 +1,841 @@
+{
+    "at":  "2026-10-29T21:36:36.8350711Z",
+    "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\Eve-Setup-1.5.0-win-x64.exe",
+    "welcome":  {
+                    "text":  [
+                                 "Eve",
+                                 "科研工作台",
+                                 "−",
+                                 "×",
+                                 "安装 Eve",
+                                 "安装到当前账户，无需管理员权限。",
+                                 "安装位置",
+                                 "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                 "更改",
+                                 "已有会话、技能和科研项目会保留。",
+                                 "Eve 1.5.0",
+                                 "取消",
+                                 "安装"
+                             ],
+                    "allText":  [
+                                    "\u0026Next \u003e",
+                                    "Cancel",
+                                    "Eve 1.5.0 ",
+                                    "Eve 1.5.0",
+                                    "Eve",
+                                    "科研工作台",
+                                    "−",
+                                    "×",
+                                    "安装 Eve",
+                                    "安装到当前账户，无需管理员权限。",
+                                    "安装位置",
+                                    "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                    "更改",
+                                    "已有会话、技能和科研项目会保留。",
+                                    "Eve 1.5.0",
+                                    "取消",
+                                    "安装"
+                                ],
+                    "buttons":  [
+                                    {
+                                        "id":  3,
+                                        "text":  "",
+                                        "visible":  false,
+                                        "enabled":  false
+                                    },
+                                    {
+                                        "id":  1,
+                                        "text":  "\u0026Next \u003e",
+                                        "visible":  false,
+                                        "enabled":  true
+                                    },
+                                    {
+                                        "id":  2,
+                                        "text":  "Cancel",
+                                        "visible":  false,
+                                        "enabled":  true
+                                    }
+                                ],
+                    "allControls":  [
+                                        {
+                                            "id":  3,
+                                            "class":  "Button",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  false
+                                        },
+                                        {
+                                            "id":  1,
+                                            "class":  "Button",
+                                            "text":  "\u0026Next \u003e",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  2,
+                                            "class":  "Button",
+                                            "text":  "Cancel",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1018,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1044,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1035,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1036,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1045,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1256,
+                                            "class":  "Static",
+                                            "text":  "Eve 1.5.0 ",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1028,
+                                            "class":  "Static",
+                                            "text":  "Eve 1.5.0",
+                                            "visible":  false,
+                                            "enabled":  false
+                                        },
+                                        {
+                                            "id":  1034,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1037,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1038,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1039,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "#32770",
+                                            "text":  "",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "Eve",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "科研工作台",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1200,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1201,
+                                            "class":  "Static",
+                                            "text":  "−",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1202,
+                                            "class":  "Static",
+                                            "text":  "×",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "安装 Eve",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "安装到当前账户，无需管理员权限。",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "安装位置",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Edit",
+                                            "text":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "更改",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1203,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  false,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "已有会话、技能和科研项目会保留。",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "Eve 1.5.0",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  0,
+                                            "class":  "Static",
+                                            "text":  "取消",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1204,
+                                            "class":  "Static",
+                                            "text":  "",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        },
+                                        {
+                                            "id":  1205,
+                                            "class":  "Static",
+                                            "text":  "安装",
+                                            "visible":  true,
+                                            "enabled":  true
+                                        }
+                                    ],
+                    "backgroundImage":  "1980055627",
+                    "pageWidth":  620,
+                    "pageHeight":  450
+                },
+    "progress":  {
+                     "text":  [
+                                  "Eve",
+                                  "科研工作台",
+                                  "正在安装 Eve",
+                                  "正在写入应用文件，请保持窗口开启。",
+                                  "完成后可立即打开 Eve，已有科研数据不会受到影响。",
+                                  "取消"
+                              ],
+                     "allText":  [
+                                     "\u003c \u0026Back",
+                                     "\u0026Next \u003e",
+                                     "Cancel",
+                                     "Eve 1.5.0 ",
+                                     "Eve 1.5.0",
+                                     "Installing",
+                                     "Please wait while Eve is being installed.",
+                                     "Show \u0026details",
+                                     "Extract: eve-installerProgress.bmp... 100%",
+                                     "Eve",
+                                     "科研工作台",
+                                     "正在安装 Eve",
+                                     "正在写入应用文件，请保持窗口开启。",
+                                     "完成后可立即打开 Eve，已有科研数据不会受到影响。",
+                                     "取消"
+                                 ],
+                     "buttons":  [
+                                     {
+                                         "id":  3,
+                                         "text":  "\u003c \u0026Back",
+                                         "visible":  false,
+                                         "enabled":  false
+                                     },
+                                     {
+                                         "id":  1,
+                                         "text":  "\u0026Next \u003e",
+                                         "visible":  false,
+                                         "enabled":  false
+                                     },
+                                     {
+                                         "id":  2,
+                                         "text":  "Cancel",
+                                         "visible":  false,
+                                         "enabled":  false
+                                     },
+                                     {
+                                         "id":  1027,
+                                         "text":  "Show \u0026details",
+                                         "visible":  false,
+                                         "enabled":  true
+                                     }
+                                 ],
+                     "allControls":  [
+                                         {
+                                             "id":  3,
+                                             "class":  "Button",
+                                             "text":  "\u003c \u0026Back",
+                                             "visible":  false,
+                                             "enabled":  false
+                                         },
+                                         {
+                                             "id":  1,
+                                             "class":  "Button",
+                                             "text":  "\u0026Next \u003e",
+                                             "visible":  false,
+                                             "enabled":  false
+                                         },
+                                         {
+                                             "id":  2,
+                                             "class":  "Button",
+                                             "text":  "Cancel",
+                                             "visible":  false,
+                                             "enabled":  false
+                                         },
+                                         {
+                                             "id":  1018,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1044,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1035,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1036,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1045,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1256,
+                                             "class":  "Static",
+                                             "text":  "Eve 1.5.0 ",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1028,
+                                             "class":  "Static",
+                                             "text":  "Eve 1.5.0",
+                                             "visible":  false,
+                                             "enabled":  false
+                                         },
+                                         {
+                                             "id":  1034,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1037,
+                                             "class":  "Static",
+                                             "text":  "Installing",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1038,
+                                             "class":  "Static",
+                                             "text":  "Please wait while Eve is being installed.",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1039,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "#32770",
+                                             "text":  "",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1027,
+                                             "class":  "Button",
+                                             "text":  "Show \u0026details",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1004,
+                                             "class":  "msctls_progress32",
+                                             "text":  "",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1006,
+                                             "class":  "Static",
+                                             "text":  "Extract: eve-installerProgress.bmp... 100%",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  1016,
+                                             "class":  "SysListView32",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "SysHeader32",
+                                             "text":  "",
+                                             "visible":  false,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "Eve",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "科研工作台",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "正在安装 Eve",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "正在写入应用文件，请保持窗口开启。",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "完成后可立即打开 Eve，已有科研数据不会受到影响。",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  0,
+                                             "class":  "Static",
+                                             "text":  "取消",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         },
+                                         {
+                                             "id":  2,
+                                             "class":  "Static",
+                                             "text":  "",
+                                             "visible":  true,
+                                             "enabled":  true
+                                         }
+                                     ],
+                     "backgroundImage":  "1476737758",
+                     "pageWidth":  620,
+                     "pageHeight":  450
+                 },
+    "finish":  {
+                   "text":  [
+                                "Eve",
+                                "科研工作台",
+                                "−",
+                                "×",
+                                "安装完成",
+                                "Eve 已准备就绪，可以开始新的科研工作。",
+                                "安装位置",
+                                "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                "Eve 1.5.0",
+                                "完成",
+                                "打开 Eve"
+                            ],
+                   "allText":  [
+                                   "\u003c \u0026Back",
+                                   "\u0026Close",
+                                   "Cancel",
+                                   "Eve 1.5.0 ",
+                                   "Eve 1.5.0",
+                                   "Installation Complete",
+                                   "Setup was completed successfully.",
+                                   "Eve",
+                                   "科研工作台",
+                                   "−",
+                                   "×",
+                                   "安装完成",
+                                   "Eve 已准备就绪，可以开始新的科研工作。",
+                                   "安装位置",
+                                   "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                   "Eve 1.5.0",
+                                   "完成",
+                                   "打开 Eve"
+                               ],
+                   "buttons":  [
+                                   {
+                                       "id":  3,
+                                       "text":  "\u003c \u0026Back",
+                                       "visible":  false,
+                                       "enabled":  false
+                                   },
+                                   {
+                                       "id":  1,
+                                       "text":  "\u0026Close",
+                                       "visible":  false,
+                                       "enabled":  true
+                                   },
+                                   {
+                                       "id":  2,
+                                       "text":  "Cancel",
+                                       "visible":  false,
+                                       "enabled":  false
+                                   }
+                               ],
+                   "allControls":  [
+                                       {
+                                           "id":  3,
+                                           "class":  "Button",
+                                           "text":  "\u003c \u0026Back",
+                                           "visible":  false,
+                                           "enabled":  false
+                                       },
+                                       {
+                                           "id":  1,
+                                           "class":  "Button",
+                                           "text":  "\u0026Close",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  2,
+                                           "class":  "Button",
+                                           "text":  "Cancel",
+                                           "visible":  false,
+                                           "enabled":  false
+                                       },
+                                       {
+                                           "id":  1018,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1044,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1035,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1036,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1045,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1256,
+                                           "class":  "Static",
+                                           "text":  "Eve 1.5.0 ",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1028,
+                                           "class":  "Static",
+                                           "text":  "Eve 1.5.0",
+                                           "visible":  false,
+                                           "enabled":  false
+                                       },
+                                       {
+                                           "id":  1034,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1037,
+                                           "class":  "Static",
+                                           "text":  "Installation Complete",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1038,
+                                           "class":  "Static",
+                                           "text":  "Setup was completed successfully.",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1039,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  false,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "#32770",
+                                           "text":  "",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "Eve",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "科研工作台",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1200,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1201,
+                                           "class":  "Static",
+                                           "text":  "−",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1202,
+                                           "class":  "Static",
+                                           "text":  "×",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "安装完成",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "Eve 已准备就绪，可以开始新的科研工作。",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "安装位置",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "Eve 1.5.0",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  0,
+                                           "class":  "Static",
+                                           "text":  "完成",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1203,
+                                           "class":  "Static",
+                                           "text":  "",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       },
+                                       {
+                                           "id":  1204,
+                                           "class":  "Static",
+                                           "text":  "打开 Eve",
+                                           "visible":  true,
+                                           "enabled":  true
+                                       }
+                                   ],
+                   "backgroundImage":  "3389339364",
+                   "pageWidth":  620,
+                   "pageHeight":  450
+               },
+    "finishTimeoutSeconds":  90,
+    "missingFinishText":  [
+
+                          ],
+    "checks":  {
+                   "welcomeRendered":  true,
+                   "welcomeBackgroundLoaded":  true,
+                   "customInstallClickAdvanced":  true,
+                   "progressRendered":  true,
+                   "progressBackgroundLoaded":  true,
+                   "noVisibleNativeButton":  true,
+                   "finishRendered":  true,
+                   "finishBackgroundLoaded":  true,
+                   "finishExited":  true,
+                   "installedAppPresent":  true,
+                   "uninstallerPresent":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "passed":  true,
+    "installDir":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+    "screenshots":  {
+                        "welcome":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\installer-1.5.0\\installer-welcome.png",
+                        "progress":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\installer-1.5.0\\installer-progress.png",
+                        "finish":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\installer-1.5.0\\installer-finish.png"
+                    },
+    "note":  "The probe chose Finish without launching Eve so the uninstaller can run immediately."
+}

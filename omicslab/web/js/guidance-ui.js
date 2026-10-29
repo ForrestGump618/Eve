@@ -1,6 +1,6 @@
-import {api,errorMessage} from './api.js?v=1.4.0';
-import {esc,escAttr} from './util.js?v=1.4.0';
-import {openModal,promptDialog,toastError,toastInfo} from './ui.js?v=1.4.0';
+import {api,errorMessage} from './api.js?v=1.5.0';
+import {esc,escAttr} from './util.js?v=1.5.0';
+import {openModal,promptDialog,toastError,toastInfo} from './ui.js?v=1.5.0';
 
 /** One task-bound candidate queue. Only explicit send reaches the model boundary. */
 export function mountGuidance({root,context,clearInput,startTask}){

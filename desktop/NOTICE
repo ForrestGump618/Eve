@@ -1,4 +1,4 @@
-Eve desktop 1.0.0
+Eve desktop 1.5.0
 The Electron/TypeScript application is MIT licensed. The Python implementation
 retains its original Apache-2.0 license and module/API identifiers for compatibility.
 The shared skill library contains upstream reference instructions and resources.
@@ -6,6 +6,12 @@ Pinned source commits, per-skill licenses and copyright notices are retained in
 skill-library/index.json and its content-addressed library.pack. Read a selected
 LICENSE resource through skill_read_resource. Import and omission decisions are
 recorded in skill-library/import-report.json. No upstream scripts run on installation.
+
+The shared scientific catalog includes K-Dense-AI/scientific-agent-skills at
+commit 5f2bc0341354fd5590aef76a533ada1e1e5b4e62 (MIT). Upstream license files,
+source paths and resource digests are retained per skill. Entries marked by the
+upstream project as non-redistributable, including deepspot-m and rowan, are not
+included. Their absence is intentional and is recorded in the import report.
 
 The research workflow adapts the stage/evidence mechanisms of ResearAI/DeepScientist
 (b36624417f0c6b8238ec02db37b94d6db2faa5b0, Apache-2.0) to Eve's existing RunService.

@@ -2,7 +2,7 @@
 
 技能（Skill）是 SuWen 的「按需操作手册」。默认只把技能目录（`name + description + when_to_use`）注入模型上下文；当模型判断需要时，才用 `skill_view` 读取完整正文与附带脚本。因此技能可以写得很详细，而不会挤占日常对话的上下文。
 
-> **状态说明**：`omicslab/skills/` 当前共 **23 个内置技能**，本页全部收录。每个技能对应 `omicslab/skills/<name>/SKILL.md`；用途描述已与技能的 frontmatter（`name` / `description` / `when_to_use`）核对，若后续正文调整，请以各 `SKILL.md` 为最终事实来源。
+> **状态说明**：`omicslab/skills/` 当前共 **32 个本机技能**，另有桌面扩展技能和 390 项共享技能库。本页保留核心科研方法目录；湿实验与 K-Dense 的完整来源、加载方式和执行边界见 [湿实验技能](WET-LAB-SKILLS.md)。每个技能对应 `omicslab/skills/<name>/SKILL.md`，正文为最终事实来源。
 
 ## 1. 技能总览
 
@@ -51,6 +51,18 @@
 | `evidence-critic` | `statistical-rigor`、`causal-inference` |
 | `research-strategist` | `rsi-discovery-loop`、`hypothesis-generation` |
 | `remote-compute-engineer` | `remote-compute-ssh`、`function-registry` |
+
+## 1.1 共享技能库与湿实验
+
+桌面发行包的 `desktop/skill-library/` 是共享技能目录，来源固定并保留许可证与资源摘要。当前索引包含 390 项技能，其中 K-Dense-AI/scientific-agent-skills 为 175 项；正文按需读取，不会整库注入上下文。
+
+| 本机技能 | 用途 | 主要依赖 |
+| --- | --- | --- |
+| `wet-lab-experiment-design` | 把假设转成含独立单位、终点、对照、随机化、盲法、样本量、QC 和停止规则的实验设计卡 | `experimental-design`、`statistical-rigor` |
+| `classic-cell-and-molecular-assays` | 选择并检查细胞/分子 assay、SOP、对照、批次和数据交付包 | `wet-lab-experiment-design`、`flow-cytometry` |
+| `wet-lab-result-interpretation` | 对活力、qPCR、Western 和 ELISA 原始读数做确定性 QC、归一化与证据分级 | 前两项、`statistical-rigor` |
+
+实验设计、结果解释和真实执行必须分开：技能可以给出方案、计算和缺口，不会替代伦理/生物安全审批、仪器操作或独立重复。
 
 ## 2. 技能详情
 
@@ -257,4 +269,4 @@ pytest tests/test_skills.py -q
 
 ---
 
-本文件对应 Suwen 2.0.0。
+本文件对应 Eve 1.5.0；旧版 2.x 文档中的历史工具名仍可在归档中查到。

@@ -1,0 +1,140 @@
+{
+    "at":  "2026-10-29T21:36:52.8200762Z",
+    "uninstaller":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve\\Uninstall Eve.exe",
+    "windowProcessId":  23316,
+    "confirm":  {
+                    "text":  [
+                                 "Eve",
+                                 "科研工作台",
+                                 "−",
+                                 "×",
+                                 "卸载 Eve",
+                                 "只移除应用程序，不删除你的科研资料。",
+                                 "会保留",
+                                 "科研项目与数据 · 技能与记忆 · 设置与偏好",
+                                 "当前安装位置",
+                                 "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                                 "Eve 1.5.0",
+                                 "取消",
+                                 "卸载"
+                             ],
+                    "buttons":  [
+                                    {
+                                        "id":  3,
+                                        "text":  "",
+                                        "visible":  false,
+                                        "enabled":  false
+                                    },
+                                    {
+                                        "id":  1,
+                                        "text":  "\u0026Next \u003e",
+                                        "visible":  false,
+                                        "enabled":  true
+                                    },
+                                    {
+                                        "id":  2,
+                                        "text":  "Cancel",
+                                        "visible":  false,
+                                        "enabled":  true
+                                    }
+                                ],
+                    "backgroundImage":  "1694839959",
+                    "pageWidth":  620,
+                    "pageHeight":  450
+                },
+    "progress":  {
+                     "text":  [
+                                  "Eve",
+                                  "科研工作台",
+                                  "−",
+                                  "×",
+                                  "卸载完成",
+                                  "Eve 已从当前账户移除。",
+                                  "科研项目、技能、记忆和设置均已保留。",
+                                  "Eve 1.5.0",
+                                  "完成"
+                              ],
+                     "buttons":  [
+                                     {
+                                         "id":  3,
+                                         "text":  "\u003c \u0026Back",
+                                         "visible":  false,
+                                         "enabled":  false
+                                     },
+                                     {
+                                         "id":  1,
+                                         "text":  "\u0026Next \u003e",
+                                         "visible":  false,
+                                         "enabled":  true
+                                     },
+                                     {
+                                         "id":  2,
+                                         "text":  "Cancel",
+                                         "visible":  false,
+                                         "enabled":  true
+                                     }
+                                 ],
+                     "backgroundImage":  "2449805697",
+                     "pageWidth":  620,
+                     "pageHeight":  450
+                 },
+    "finish":  {
+                   "text":  [
+                                "Eve",
+                                "科研工作台",
+                                "−",
+                                "×",
+                                "卸载完成",
+                                "Eve 已从当前账户移除。",
+                                "科研项目、技能、记忆和设置均已保留。",
+                                "Eve 1.5.0",
+                                "完成"
+                            ],
+                   "buttons":  [
+                                   {
+                                       "id":  3,
+                                       "text":  "\u003c \u0026Back",
+                                       "visible":  false,
+                                       "enabled":  false
+                                   },
+                                   {
+                                       "id":  1,
+                                       "text":  "\u0026Next \u003e",
+                                       "visible":  false,
+                                       "enabled":  true
+                                   },
+                                   {
+                                       "id":  2,
+                                       "text":  "Cancel",
+                                       "visible":  false,
+                                       "enabled":  true
+                                   }
+                               ],
+                   "backgroundImage":  "2449805697",
+                   "pageWidth":  620,
+                   "pageHeight":  450
+               },
+    "missingFinishText":  [
+
+                          ],
+    "progressObserved":  false,
+    "screenshots":  {
+                        "confirm":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\installer-1.5.0\\uninstaller-confirm.png",
+                        "finish":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\installer-1.5.0\\uninstaller-finish.png"
+                    },
+    "checks":  {
+                   "confirmRendered":  true,
+                   "confirmBackgroundLoaded":  true,
+                   "customUninstallClickAdvanced":  true,
+                   "progressTransitionRan":  true,
+                   "finishRendered":  true,
+                   "finishBackgroundLoaded":  true,
+                   "noVisibleNativeButton":  true,
+                   "finishExited":  true,
+                   "applicationFilesRemoved":  true
+               },
+    "failedChecks":  [
+
+                     ],
+    "passed":  true
+}

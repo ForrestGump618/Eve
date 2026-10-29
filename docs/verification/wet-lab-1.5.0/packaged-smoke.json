@@ -1,0 +1,57 @@
+{
+  "modelProtocol": "local HTTP fixture only; no external model account",
+  "renderer": "single hosted workbench",
+  "checks": [
+    "normal launch opens only the hosted Eve workbench",
+    "first-run prompt is contained in the hosted renderer",
+    "hosted settings save provider, model and encrypted credential",
+    "hosted settings test the real configured HTTP protocol",
+    "hosted chat streamed through the unified daemon harness",
+    "forced UI exit leaves the detached daemon running",
+    "durable timer completed once after the renderer exited",
+    "reopen attaches to the same daemon and the single hosted renderer",
+    "dashboard route renders after relaunch",
+    "Python research worker ran a sandboxed stdlib script"
+  ],
+  "shell": {
+    "title": "研究总览 · Eve",
+    "routes": 16,
+    "routeNames": [
+      "dashboard",
+      "evolution",
+      "dashboard",
+      "literature",
+      "workbench",
+      "tasks2",
+      "context",
+      "research",
+      "knowledge",
+      "workflow",
+      "artifacts",
+      "extensions",
+      "discovery",
+      "ssh",
+      "settings",
+      "diagnostics"
+    ],
+    "legacyPreloadBridge": "undefined",
+    "desktopBridge": true,
+    "legacyHealth": false,
+    "legacyTimeline": false,
+    "bodyRoute": "dashboard"
+  },
+  "daemonPid": 52672,
+  "workbenchPort": 2841,
+  "liveMcp": "skipped: EVE_SMOKE_LIVE is unset",
+  "runtimeVersions": {
+    "node": "24.22.0",
+    "electron": "45.0.0",
+    "sqlite": "3.53.4"
+  },
+  "packaged": true,
+  "fixtureRequests": 2,
+  "result": "passed",
+  "cleanupTimeouts": [
+    "Electron close"
+  ]
+}

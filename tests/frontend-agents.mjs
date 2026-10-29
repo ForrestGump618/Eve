@@ -35,7 +35,7 @@ const fixture = `<!doctype html><html lang="zh-CN" data-theme="light"><head><met
 <main id="view"></main>
 <script type="module">
   window.runAgents = async () => {
-    const {mountAgentsPanel} = await import('/js/agents-panel.js?v=1.4.0');
+    const {mountAgentsPanel} = await import('/js/agents-panel.js?v=1.5.0');
     window.opened = [];
     window.panel = await mountAgentsPanel(document.querySelector('#app-sidebar'), {
       getContext: () => ({conversationId: 'captain-session', scope: 'ws_main'}),
@@ -43,7 +43,7 @@ const fixture = `<!doctype html><html lang="zh-CN" data-theme="light"><head><met
     });
   };
   window.renderBlock = async (text) => {
-    const {renderMarkdown} = await import('/js/markdown.js?v=1.4.0');
+    const {renderMarkdown} = await import('/js/markdown.js?v=1.5.0');
     document.querySelector('#view').innerHTML = renderMarkdown(text);
   };
 </script></body></html>`;

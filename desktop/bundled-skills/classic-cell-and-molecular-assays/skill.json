@@ -1,0 +1,8 @@
+{
+  "name": "classic-cell-and-molecular-assays",
+  "description": "经典细胞与分子实验 湿实验 细胞培养 细胞活力 CCK-8 MTT 凋亡 克隆形成 迁移 侵袭 qPCR Western blot ELISA 流式 免疫荧光 免疫组化 转染 CRISPR 类器官 动物实验",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "Apache-2.0",
+  "permissions": []
+}

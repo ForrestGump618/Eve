@@ -36,9 +36,3 @@ export function blocksRuntimeUpgrade(snapshot: {
   return snapshot.tasks.some(task => !dormant.has(task.status)
     || task.steps?.some(step => step.status === 'running'));
 }
-
-/** Legacy console switches are supported only in explicitly isolated test
- * profiles. Normal and installed launches always open the formal workbench. */
-export function diagnosticConsole(args: readonly string[], testHome?: string): boolean {
-  return Boolean(testHome && args.includes('--native'));
-}

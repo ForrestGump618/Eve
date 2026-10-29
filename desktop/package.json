@@ -1,6 +1,6 @@
 {
   "name": "eve-desktop",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "description": "Eve research workspace with durable local and SSH task execution",
   "main": "dist/main.js",
@@ -8,10 +8,11 @@
   "author": "Eve contributors",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && node scripts/copy-assets.mjs",
+    "build": "node scripts/clean-dist.mjs && tsc && node scripts/copy-assets.mjs",
+    "generate:installer": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-installer-assets.ps1",
     "start": "electron .",
     "test": "npm run build && node --test dist/test/*.test.js",
-    "dist:win": "npm run build && electron-builder --win nsis --x64",
+    "dist:win": "npm run generate:installer && npm run build && electron-builder --win nsis --x64",
     "pack": "npm run build && electron-builder --dir",
     "sbom": "node -e \"import('node:fs').then(({mkdirSync})=>mkdirSync('release',{recursive:true}))\" && npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > release/sbom.cdx.json",
     "smoke": "node scripts/electron-smoke.mjs",
@@ -30,8 +31,6 @@
     "@xterm/xterm": "6.0.0",
     "electron": "45.0.0",
     "electron-builder": "26.18.0",
-    "katex": "^0.16.21",
-    "mermaid": "^11.12.0",
     "playwright-core": "1.64.1",
     "typescript": "7.0.2"
   },
@@ -40,14 +39,14 @@
     "productName": "Eve",
     "asar": false,
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "installer"
     },
     "artifactName": "Eve-Setup-${version}-win-${arch}.${ext}",
     "files": [
       "dist/main.js",
       "dist/build-info.json",
       "dist/src/**/*",
-      "dist/ui/**/*",
       "dist/bundled-skills/**/*",
       "package.json",
       "LICENSE",
@@ -101,10 +100,19 @@
     "nsis": {
       "oneClick": false,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
+      "allowToChangeInstallationDirectory": false,
       "deleteAppDataOnUninstall": false,
       "shortcutName": "Eve",
-      "uninstallDisplayName": "Eve"
+      "uninstallDisplayName": "Eve",
+      "include": "installer.nsh",
+      "installerIcon": "../assets/eve.ico",
+      "uninstallerIcon": "../assets/eve.ico",
+      "language": "2052",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "multiLanguageInstaller": false,
+      "displayLanguageSelector": false
     }
   }
 }

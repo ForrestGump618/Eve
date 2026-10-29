@@ -1,0 +1,13 @@
+{
+  "name": "wet-lab-result-interpretation",
+  "description": "湿实验结果解读 result interpretation 细胞活力 qPCR ddct Western blot ELISA 标准曲线 质量控制 QC 生物学重复 技术重复 归一化 效应量",
+  "version": "1.0.0",
+  "entry": "SKILL.md",
+  "license": "Apache-2.0",
+  "permissions": [],
+  "run": {
+    "language": "python",
+    "script": "run.py",
+    "timeoutMs": 30000
+  }
+}

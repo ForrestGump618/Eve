@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { blocksRuntimeUpgrade, compatibleRuntime, diagnosticConsole, runtimeIdentity } from '../src/runtime-identity.js';
+import { blocksRuntimeUpgrade, compatibleRuntime, runtimeIdentity } from '../src/runtime-identity.js';
 
 test('same-version daemons are reused only for the same identified build and installation', () => {
   const root = mkdtempSync(join(tmpdir(), 'eve-build-identity-'));
@@ -21,12 +21,6 @@ test('missing or malformed build manifests cannot authorize stale daemon reuse',
   assert.equal(compatibleRuntime(missing, missing), false);
   writeFileSync(join(root, 'build-info.json'), '{"buildId":"not-a-digest"}');
   assert.equal(runtimeIdentity('1.0.0', root).buildId, null);
-});
-
-test('legacy console arguments cannot replace the normal product home', () => {
-  assert.equal(diagnosticConsole(['--native']), false);
-  assert.equal(diagnosticConsole(['--native'], '/isolated-test-profile'), true);
-  assert.equal(diagnosticConsole([], '/isolated-test-profile'), false);
 });
 
 test('upgrade preserves dormant tasks but cannot interrupt runnable or in-flight work', () => {

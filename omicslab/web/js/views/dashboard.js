@@ -1,11 +1,11 @@
 // Research overview. All figures come from the platform dashboard projection;
 // controls only change the local presentation and never start a second runner.
-import {api, errorMessage} from '../api.js?v=1.4.0';
-import {icon} from '../icons.js?v=1.4.0';
-import {esc, escAttr, fmtDuration, fmtNum, getPref, relTime, setPref, truncate} from '../util.js?v=1.4.0';
-import {getState, navigate, setState} from '../store.js?v=1.4.0';
-import {emit} from '../bus.js?v=1.4.0';
-import {spinnerHtml} from '../ui.js?v=1.4.0';
+import {api, errorMessage} from '../api.js?v=1.5.0';
+import {icon} from '../icons.js?v=1.5.0';
+import {esc, escAttr, fmtDuration, fmtNum, getPref, relTime, setPref, truncate} from '../util.js?v=1.5.0';
+import {getState, navigate, setState} from '../store.js?v=1.5.0';
+import {emit} from '../bus.js?v=1.5.0';
+import {spinnerHtml} from '../ui.js?v=1.5.0';
 
 const RUN_LABELS = {
   queued: '排队中',

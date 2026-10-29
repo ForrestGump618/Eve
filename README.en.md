@@ -1,10 +1,12 @@
-# Eve 1.1.0
+# Eve 1.5.0
 
 A Windows research agent with a light integrated workbench, durable tasks, local and SSH execution, tool traces, permissions, steering, MCP and progressively loaded skills.
 
 Eve retains the existing TypeScript Harness and Python backends. The research workspace adapts 外部项目 stage and evidence mechanisms to that same loop. Seven stages expose comparator contracts, actual artifact hashes, metric deltas, findings and human-reviewed closure. Recording evidence does not establish scientific validity.
 
-The shared library includes 373 indexed skills alongside the built-in workflows and runtime tools. It uses metadata-only discovery, per-resource gzip loading and digest verification, and a bounded 4 MB decoded cache. Catalog pages display at most 32 skills. Upstream scripts are never executed on installation. Missing dependencies, external API accounts and restricted/unlicensed upstream entries are not claimed installed or verified.
+The shared library includes 390 indexed skills alongside the built-in workflows and runtime tools, including 175 pinned K-Dense-AI/scientific-agent-skills entries. It uses metadata-only discovery, per-resource gzip loading and digest verification, and a bounded 4 MB decoded cache. Catalog pages display at most 32 skills. Upstream scripts are never executed on installation. Missing dependencies, external API accounts and restricted/unlicensed upstream entries are not claimed installed or verified.
+
+Wet-lab workflows cover experiment design, classic cell and molecular assays, and deterministic result interpretation for viability, qPCR ΔΔCt, Western blot normalization, and ELISA standard curves. The skills produce design cards, QC gaps, descriptive calculations and validation handoffs; they do not replace ethics, biosafety, SOP training or real experimentation. See [wet-lab skill boundaries](docs/WET-LAB-SKILLS.md).
 
 ## Run and build
 

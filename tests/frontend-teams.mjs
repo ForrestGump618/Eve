@@ -109,9 +109,9 @@ await test('Teams view in real Edge', async t => {
   async function mount() {
     await page.goto(base + '/__teams-test');
     await page.evaluate(async () => {
-      window.store = await import('/js/store.js?v=1.4.0');
-      window.bus = await import('/js/bus.js?v=1.4.0');
-      window.teams = await import('/js/views/teams.js?v=1.4.0');
+      window.store = await import('/js/store.js?v=1.5.0');
+      window.bus = await import('/js/bus.js?v=1.5.0');
+      window.teams = await import('/js/views/teams.js?v=1.5.0');
       store.setState({workspaceId: 'ws_main', activeConversationId: 'captain-session'});
       window.view = await teams.mount(document.querySelector('#view'));
     });
@@ -266,7 +266,7 @@ await test('Teams view in real Edge', async t => {
       await cleanMount();
       await page.evaluate(() => { window.selectedSession = null; bus.on('chat:select', id => { selectedSession = id; }); localStorage.setItem('unrelated-preference', 'preserved'); });
       await page.locator('.team-captain [data-session]').click();
-      assert.deepEqual(await page.evaluate(async () => ({session: store.getState().activeConversationId, persisted: (await import('/js/util.js?v=1.4.0')).getPref('activeConversationId'), selected: selectedSession, hash: location.hash})),
+      assert.deepEqual(await page.evaluate(async () => ({session: store.getState().activeConversationId, persisted: (await import('/js/util.js?v=1.5.0')).getPref('activeConversationId'), selected: selectedSession, hash: location.hash})),
         {session: 'captain-session', persisted: 'captain-session', selected: 'captain-session', hash: '#/workbench'});
     });
 

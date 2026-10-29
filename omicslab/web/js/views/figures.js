@@ -1,8 +1,8 @@
 // Figures view: thumbnail gallery of generated plots with lightbox / download / delete.
 
-import { icon } from '../icons.js?v=1.4.0';
-import { esc, fmtBytes, relTime, fmtTime, baseName } from '../util.js?v=1.4.0';
-import { api, errorMessage } from '../api.js?v=1.4.0';
+import { icon } from '../icons.js?v=1.5.0';
+import { esc, fmtBytes, relTime, fmtTime, baseName } from '../util.js?v=1.5.0';
+import { api, errorMessage } from '../api.js?v=1.5.0';
 import {
   toastSuccess,
   toastError,
@@ -10,9 +10,9 @@ import {
   openLightbox,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.4.0';
-import { setState } from '../store.js?v=1.4.0';
-import {annotateFigure} from '../figure-annotator.js?v=1.4.0';
+} from '../ui.js?v=1.5.0';
+import { setState } from '../store.js?v=1.5.0';
+import {annotateFigure} from '../figure-annotator.js?v=1.5.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();

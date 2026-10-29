@@ -287,8 +287,9 @@ html,body{overflow:hidden}.app-body{grid-column:2;grid-row:1}.workspace-sidebar{
 .chat-locator-panel{width:min(560px,calc(100% - 24px));max-height:min(420px,58vh);display:flex;flex-direction:column;border:1px solid var(--border);border-radius:13px;background:color-mix(in srgb,var(--bg) 97%,transparent);box-shadow:0 16px 50px #0000001c;overflow:hidden;backdrop-filter:blur(18px);animation:locator-in 150ms cubic-bezier(.2,.75,.2,1)}
 .chat-locator-search{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--border-soft);color:var(--text-3)}
 .chat-locator-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:13px var(--font-sans);outline:0;padding:4px}
+.chat-locator-search:focus-within{box-shadow:inset 0 0 0 2px var(--accent)}
 .chat-locator-search kbd{font:10px var(--font-mono);border:1px solid var(--border);border-radius:4px;padding:2px 5px;color:var(--text-4);background:var(--panel-2)}
-.chat-locator-results{overflow:auto;padding:5px;scrollbar-gutter:stable}
+.chat-locator-results{overflow:auto;padding:5px;scrollbar-gutter:stable;overscroll-behavior:contain}
 .chat-locator-item{display:flex;align-items:flex-start;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:var(--text-2);font:12px var(--font-sans);text-align:left;cursor:pointer}
 .chat-locator-item:hover,.chat-locator-item.is-active{background:var(--panel-2);color:var(--text)}
 .chat-locator-role{flex:none;min-width:28px;color:var(--text-4);font-size:10px;padding-top:2px}
@@ -346,12 +347,13 @@ html,body{overflow:hidden}.app-body{grid-column:2;grid-row:1}.workspace-sidebar{
 /* Eve controls: native selects remain in the DOM for automation and form APIs;
    the visible menu is rendered as an anchored, platform-neutral surface. */
 .eve-select-host{position:relative;min-width:0}.eve-native-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;inset:auto!important;z-index:-1}.eve-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:32px;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text-2);font:inherit;font-size:12px;text-align:left;cursor:pointer;transition:border-color 140ms ease,background 140ms ease,box-shadow 140ms ease}.eve-select-trigger:hover,.eve-select-trigger.is-open{border-color:var(--border-strong);background:var(--panel-2);color:var(--text)}.eve-select-trigger:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px}.eve-select-trigger:disabled{opacity:.48;cursor:not-allowed}.eve-select-trigger svg{flex:none;color:var(--text-3);transition:transform 150ms ease}.eve-select-trigger.is-open svg{transform:rotate(180deg)}.eve-select-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.eve-select-menu{position:fixed;z-index:10010;max-height:min(360px,55vh);overflow:auto;padding:5px;border:1px solid var(--border);border-radius:11px;background:color-mix(in srgb,var(--panel) 96%,transparent);box-shadow:0 16px 45px #00000020;backdrop-filter:blur(18px)}.eve-select-menu[hidden]{display:none}.eve-select-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:8px 9px;border:0;border-radius:7px;background:transparent;color:var(--text-2);font:inherit;font-size:12px;text-align:left;cursor:pointer}.eve-select-option:hover,.eve-select-option.is-keyboard{background:var(--panel-2);color:var(--text)}.eve-select-option.is-selected{color:var(--text);font-weight:600}.eve-select-option svg{flex:none;color:var(--accent)}
+.eve-select-menu{overscroll-behavior:contain;scrollbar-gutter:stable}
 .agent-select-wrap.eve-select-host>.eve-select-trigger{border:0;background:transparent;padding:6px 16px 6px 0;min-height:28px;max-width:170px}.permission-control.eve-select-host{gap:6px}.permission-control.eve-select-host>.eve-select-trigger{border:0;background:transparent;padding:0 17px 0 0;min-height:27px}.permission-control.eve-select-host>svg:last-of-type{display:none}#project-workspace.eve-native-select+.eve-select-trigger{border:0;background:transparent;padding:5px 7px;margin:0 10px 6px;color:var(--text-2);font-size:12px}.task-selection-form .eve-select-trigger{min-height:38px;padding:9px 10px}.settings-body .eve-select-trigger{min-height:38px}
 .eve-model-popover{position:fixed;z-index:10020;width:min(460px,calc(100vw - 24px));min-height:260px;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);border-radius:14px;background:color-mix(in srgb,var(--panel) 97%,transparent);box-shadow:0 20px 70px #00000025;backdrop-filter:blur(20px);animation:locator-in 150ms cubic-bezier(.2,.75,.2,1)}
 .eve-model-search{margin:10px;padding:9px 11px;border:1px solid var(--border-soft);border-radius:8px;background:var(--bg-soft);color:var(--text);font:12px var(--font-sans);outline:0}
-.eve-model-search:focus{border-color:var(--border-strong)}
+.eve-model-search:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .eve-model-body{display:grid;grid-template-columns:42% 58%;min-height:210px;border-top:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft)}
-.eve-model-providers,.eve-model-models{padding:7px;overflow:auto}
+.eve-model-providers,.eve-model-models{padding:7px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .eve-model-providers{border-right:1px solid var(--border-soft);background:color-mix(in srgb,var(--panel-2) 35%,transparent)}
 .eve-model-provider,.eve-model-option{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:9px;border:0;border-radius:8px;background:transparent;color:var(--text-2);font:12px var(--font-sans);text-align:left;cursor:pointer}
 .eve-model-provider:hover,.eve-model-provider.is-active,.eve-model-option:hover{background:var(--panel-2);color:var(--text)}
@@ -404,7 +406,7 @@ html,body{overflow:hidden}.app-body{grid-column:2;grid-row:1}.workspace-sidebar{
   display:grid;gap:var(--space-6);width:min(100%,var(--content-wide));height:100%;margin:0 auto;
   padding:clamp(var(--space-4),3vw,var(--space-8));overflow-y:auto;scrollbar-gutter:stable;
   scroll-padding-block:var(--space-5);overscroll-behavior:contain;
-  background:radial-gradient(ellipse at 92% 0,var(--accent-soft),transparent 42%),var(--bg)
+  background:linear-gradient(180deg,var(--bg-soft),var(--bg) 22rem),var(--bg)
 }
 .dashboard-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-5);padding-block:var(--space-3) var(--space-1)}
 .dashboard-head h1{margin:var(--space-1) 0 var(--space-2);font-size:clamp(1.7rem,3.2vw,2.65rem);line-height:1.05;letter-spacing:-.045em;font-weight:650}
@@ -596,3 +598,15 @@ html,body{overflow:hidden}.app-body{grid-column:2;grid-row:1}.workspace-sidebar{
 @media(max-width:1050px){.sw-dream-hero{grid-template-columns:1fr}}
 @media(max-width:640px){.sw-dream-candidate-head,.sw-dream-section>header{align-items:flex-start;flex-direction:column}.sw-dream-run{grid-template-columns:auto 1fr}.sw-dream-run small{grid-column:2}}
 @media(prefers-reduced-motion:reduce){.sw-dream-candidate{transition:none}.sw-dream-candidate:hover{transform:none}}
+
+@media (prefers-reduced-transparency:reduce){
+  .chat-locator-panel,.eve-select-menu,.eve-model-popover{backdrop-filter:none;background:var(--panel)}
+}
+
+@media (prefers-contrast:more){
+  .chat-locator-panel,.eve-select-menu,.eve-model-popover{border-color:var(--text-3)}
+}
+
+@media (hover:none){
+  .dashboard-metric:hover,.dashboard-project:hover,.dashboard-plan:hover,.dashboard-conversation:hover,.dashboard-run:not(:disabled):hover,.dashboard-insight:hover,.eve-provider-card:hover{transform:none}
+}

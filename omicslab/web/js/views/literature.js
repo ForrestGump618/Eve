@@ -1,9 +1,9 @@
 // Literature radar: search, user-fed PDFs, private research feed and review queue.
-import {request, errorMessage} from '../api.js?v=1.4.0';
-import {icon} from '../icons.js?v=1.4.0';
-import {esc, escAttr, fmtNum, relTime, truncate} from '../util.js?v=1.4.0';
-import {navigate, getState} from '../store.js?v=1.4.0';
-import {confirmDialog, promptDialog, spinnerHtml} from '../ui.js?v=1.4.0';
+import {request, errorMessage} from '../api.js?v=1.5.0';
+import {icon} from '../icons.js?v=1.5.0';
+import {esc, escAttr, fmtNum, relTime, truncate} from '../util.js?v=1.5.0';
+import {navigate, getState} from '../store.js?v=1.5.0';
+import {confirmDialog, promptDialog, spinnerHtml} from '../ui.js?v=1.5.0';
 
 const SOURCES = [
   ['europe_pmc', 'Europe PMC'],

@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)：`主版本.次版本.修订号`。
 
+## [1.5.0] — 2026-10-30
+
+- 固定接入 K-Dense-AI/scientific-agent-skills 提交 `5f2bc0341354fd5590aef76a533ada1e1e5b4e62`：共享技能库现为 390 项、11 个来源，其中 K-Dense 175 项；`deepspot-m`、`rowan` 因上游再分发限制不收录。
+- 新增 `wet-lab-experiment-design`、`classic-cell-and-molecular-assays`、`wet-lab-result-interpretation`，覆盖独立生物学单位、对照、随机化、盲法、样本量、QC、细胞/分子 assay、原始读数与证据分级。
+- 新增确定性湿实验脚本，支持细胞活力、qPCR ΔΔCt、Western blot 归一化和 ELISA 标准曲线；缺失值不填补、标准曲线不外推、技术重复不冒充生物学重复。
+- 湿实验技能接入科学工作台 `experiment` 流程、技能依赖闭包、检索同义词和 Agent 提示词；新增 sample size、实验记录、实验室自动化、细胞图像和方法验证的中英文检索入口。
+- 桌面界面补齐动态版本号、按钮并发忙碌状态保护、Toast 与确认弹窗退出动画、焦点恢复、悬停能力检测、按压反馈、聊天空白行压缩和减少动画支持；Web 工作台移除残留紫色渐变，统一单一强调色和中性灰表面。
+- Windows 安装与卸载器改为与主程序一致的 620×450 自绘六页界面：统一顶栏、品牌标识、中性灰表面、`#3157D5` 主操作、圆角卡片和中文排版，隐藏标准 MUI 页面与 Back/Next/Cancel 原生按钮；保留逐用户安装、路径校验、安装后启动和数据保留卸载。
+- 新增湿实验、K-Dense 来源和技能副本漂移测试；完整截图、测试、安装包与未验证边界见 [1.5.0 报告](docs/verification/wet-lab-1.5.0/README.md) 和 [湿实验技能说明](docs/WET-LAB-SKILLS.md)。
+
 ## [1.4.0] — 2026-10-29
 
 - 新增「文献雷达」：后台日循环扫描 Europe PMC、OpenAlex、bioRxiv 与 arXiv，支持研究/综述分类、先验工作接地的新颖性评分、跨学科桥接权重、用户 PDF 投喂、朋友圈评论与待审反思。

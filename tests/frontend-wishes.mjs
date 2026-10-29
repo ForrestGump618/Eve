@@ -7,7 +7,7 @@ import path from 'node:path';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/wish-research-1.2.0/', import.meta.url));
+const output = fileURLToPath(new URL('../docs/verification/wet-lab-1.5.0/', import.meta.url));
 const calls = [];
 const appearance = {theme: 'light', font: 'system', font_size: 14, accent: '#404040', density: 'comfortable', radius: 12, mode: 'research', home: 'workbench', agent_name: 'Eve', avatar: '', shortcuts: {palette: 'k'}};
 const wish = {
@@ -122,9 +122,9 @@ try {
   const desktopStarted = performance.now();
   await page.goto(base + '/__wish-test');
   const desktopMountMs = await page.evaluate(async () => {
-    const {setState} = await import('/js/store.js?v=1.4.0');
+    const {setState} = await import('/js/store.js?v=1.5.0');
     setState({route: 'research', workspaceId: 'ws_main', workspace: {name: 'Research'}});
-    const {mount} = await import('/js/views/platform.js');
+    const {mount} = await import('/js/views/platform.js?v=1.5.0');
     const started = performance.now();
     window.platformView = await mount(document.querySelector('#view'));
     return performance.now() - started;
@@ -155,9 +155,9 @@ try {
   const mobileStarted = performance.now();
   await page.goto(base + '/__wish-test');
   const mobileMountMs = await page.evaluate(async () => {
-    const {setState} = await import('/js/store.js?v=1.4.0');
+    const {setState} = await import('/js/store.js?v=1.5.0');
     setState({route: 'research', workspaceId: 'ws_main', workspace: {name: 'Research'}});
-    const {mount} = await import('/js/views/platform.js');
+    const {mount} = await import('/js/views/platform.js?v=1.5.0');
     const started = performance.now();
     window.platformView = await mount(document.querySelector('#view'));
     return performance.now() - started;

@@ -2,17 +2,17 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
-[![Release](https://img.shields.io/badge/release-1.4.0-202020)](https://github.com/ForrestGump618/suwen/releases/tag/eve-v1.4.0)
+[![Release](https://img.shields.io/badge/release-1.5.0-202020)](https://github.com/ForrestGump618/suwen/releases/tag/eve-v1.5.0)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
 [![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
-> 本轮交付 Eve 1.4.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/literature-1.4.0/README.md)。
+> 本轮交付 Eve 1.5.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/wet-lab-1.5.0/README.md)。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
-| 论文、数据、代码、复现、核验 | 引物、载体、对照、验证 | RNA、ATAC、蛋白、空间 | 本地、SSH、PowerShell | 勾画、批注、局部修改 |
+| 论文、数据、代码、复现、核验 | 引物、载体、湿实验、读数解读 | RNA、ATAC、蛋白、空间 | 本地、SSH、PowerShell | 勾画、批注、局部修改 |
 
 <p align="center">
   <a href="#深度调研"><img alt="深度调研" src="https://img.shields.io/badge/深度调研-论文复现-202020" /></a>
@@ -29,6 +29,7 @@ Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数�
 | 从一句愿望开始一个科研项目 | [许愿式科研](#许愿式科研) |
 | 读懂并复现一篇论文 | [深度调研](#深度调研) |
 | 设计 PCR、qPCR 或克隆方案 | [实验设计](#实验设计) |
+| 设计细胞/分子湿实验或解读原始读数 | [实验设计](#实验设计) / [湿实验技能](docs/WET-LAB-SKILLS.md) |
 | 分析 RNA、ATAC、蛋白或空间数据 | [多组学数据处理](#多组学数据处理) |
 | 修改已经生成的图表 | [图表批注](#7-图表批注) |
 | 把研究方案或模块关系整理成交互页面 | [交互图解](#交互图解) |
@@ -52,7 +53,7 @@ flowchart LR
 <details>
 <summary>30 秒上手清单</summary>
 
-- [ ] 下载并安装 Eve 1.4.0
+- [ ] 下载并安装 Eve 1.5.0
 - [ ] 在“设置 → 模型连接”保存一个可用模型
 - [ ] 选择本地目录或 SSH 工作区
 - [ ] 在输入框发送一个只读任务
@@ -151,13 +152,18 @@ flowchart LR
 - 检查 Tm、GC、产物位置、阅读框、连接位点、特异性和潜在冲突。
 - 输出对照、质控、测序引物、订购清单和验证步骤。
 - 缺少参考序列或特异性证据时暂停设计，不用基因符号猜序列。
+- 设计细胞活力、凋亡、克隆形成、迁移/侵袭、qPCR、Western、ELISA、流式、IF/IHC、类器官或动物实验。
+- 固定独立生物学单位、主要终点、随机化、盲法、样本量、批次和 QC，再分析原始读数。
+- 结果解释先做样本映射与技术 QC；缺少原始值、对照或独立重复时只列缺口，不宣称显著、因果或机制。
 
 <details>
 <summary>查看实验设计交付物</summary>
 
-`候选引物` · `Tm / GC / 产物坐标` · `载体特征表` · `对照设计` · `订购与验证清单`
+`候选引物` · `Tm / GC / 产物坐标` · `载体特征表` · `实验设计卡` · `原始读数 QC` · `结果证据分级` · `订购与验证清单`
 
 </details>
+
+共享技能库包含 K-Dense 的 175 项科学技能，并新增实验设计、经典细胞/分子检测和结果解读三项本机技能。技能按需加载，外部数据库和 Python 依赖仍需在执行主机上可用。安装来源、执行契约和证据边界见 [湿实验技能与结果解读](docs/WET-LAB-SKILLS.md)。
 
 ### 多组学数据处理
 - 盘点 RNA、ATAC、蛋白组、空间组学和临床文件。
@@ -184,7 +190,7 @@ flowchart LR
 
 ### 科学工具
 
-预装 40 项科学技能，包含 65 个可执行脚本。可按问题选用变异解释、组织表达、蛋白结构、化合物活性和文献检索工具。技能按需加载，运行结果保存在当前本地或 SSH 工作区。
+共享技能库收录 390 项技能，其中 175 项来自 K-Dense-AI/scientific-agent-skills（固定提交）；另有 40 项科学包装和 65 个可执行脚本。可按问题选用变异解释、组织表达、蛋白结构、化合物活性、文献检索、实验设计和湿实验读数解释。技能按需加载，运行结果保存在当前本地或 SSH 工作区。
 
 <details>
 <summary>查看工具范围与使用方式</summary>
@@ -231,7 +237,7 @@ Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其�
 
 | 项目 | 当前值 |
 | --- | --- |
-| 版本 | `1.4.0` |
+| 版本 | `1.5.0` |
 | 平台 | Windows x64 |
 | 当前交付 | 源码更新 + 本机构建的无签名安装包 |
 | 默认界面 | 浅色工作台 |

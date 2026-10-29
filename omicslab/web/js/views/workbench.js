@@ -12,9 +12,9 @@
  * working through the same REST APIs as the standalone pages.
  */
 
-import { api, errorMessage } from '../api.js?v=1.4.0';
-import { icon } from '../icons.js?v=1.4.0';
-import { esc, escAttr, relTime, fmtClock, fmtDuration, truncate, getPref, setPref } from '../util.js?v=1.4.0';
+import { api, errorMessage } from '../api.js?v=1.5.0';
+import { icon } from '../icons.js?v=1.5.0';
+import { esc, escAttr, relTime, fmtClock, fmtDuration, truncate, getPref, setPref } from '../util.js?v=1.5.0';
 import {
   toastError,
   toastInfo,
@@ -25,10 +25,10 @@ import {
   spinnerHtml,
   emptyStateHtml,
   confirmDialog,
-} from '../ui.js?v=1.4.0';
-import { getState, setState, navigate, setWorkspace } from '../store.js?v=1.4.0';
-import { on, emit } from '../bus.js?v=1.4.0';
-import { openRunDetail } from '../runview.js?v=1.4.0';
+} from '../ui.js?v=1.5.0';
+import { getState, setState, navigate, setWorkspace } from '../store.js?v=1.5.0';
+import { on, emit } from '../bus.js?v=1.5.0';
+import { openRunDetail } from '../runview.js?v=1.5.0';
 
 const RIGHT_MIN = 240;
 const RIGHT_MAX = 640;
@@ -702,7 +702,7 @@ export async function mount(root, ctx = {}) {
     if (!workspace) { el.bottomBody.textContent = '请先选择工作区'; return; }
     const epoch = local.terminalEpoch;
     try {
-      const service=await import('../terminal-panel.js?v=1.4.0');
+      const service=await import('../terminal-panel.js?v=1.5.0');
       if(epoch!==local.terminalEpoch||local.destroyed)return;
       const session=await service.acquireTerminalSession(workspace);
       if(epoch!==local.terminalEpoch||local.destroyed)return;
@@ -1157,7 +1157,7 @@ export async function mount(root, ctx = {}) {
 
   // Mount the standard chat view in the centre so every chat feature keeps working.
   try {
-    const chatModule = await import('./chat.js?v=1.4.0');
+    const chatModule = await import('./chat.js?v=1.5.0');
     local.chat = await chatModule.mount(el.center, ctx);
     el.center.classList.add('is-chat-mounted');
   } catch (err) {

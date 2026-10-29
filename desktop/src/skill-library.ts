@@ -27,6 +27,19 @@ const expand:Record<string,string> = {
   '时序图':'archify sequence diagram', '一页说明':'archify explainer', '单页说明':'archify explainer',
   '测序':'ngs sequencing fastq', '仪器':'instrument allotrope', '批次':'batch integration scvi',
   '变异':'variant clinvar gnomad', '引物':'primer pcr', '系统发育':'phylogeny evolutionary',
+  '湿实验':'wet lab wetlab experiment', '实验设计':'experimental design experiment design',
+  '实验方案':'experimental design protocol', '细胞培养':'cell culture', '细胞活力':'cell viability',
+  '活力':'viability', '凋亡':'apoptosis annexin', '克隆形成':'clonogenic colony formation',
+  '迁移':'migration transwell', '侵袭':'invasion transwell', '转染':'transfection',
+  '类器官':'organoid', '动物实验':'animal experiment arrive',
+  '分子实验':'molecular assay', '蛋白检测':'protein assay', '免疫印迹':'western blot',
+  '免疫荧光':'immunofluorescence', '免疫组化':'immunohistochemistry', '流式':'flow cytometry',
+  '结果解读':'result interpretation wet-lab result', '读数':'readout',
+  '技术重复':'technical replicate', '生物学重复':'biological replicate',
+  '批内':'intra batch', '批间':'inter batch', '样本量':'statistical power sample size',
+  '统计功效':'statistical power', '实验记录':'protocolsio protocol eln',
+  '实验室自动化':'pylabrobot liquid handling automation', '细胞图像':'cellprofiler image analysis',
+  '方法验证':'analytical method validation', '流式分析':'flowkit flowio cytometry',
 };
 /** Product-level synonyms steer the shared library without requiring a
  * second semantic index. These are ranked as exact capability intents. */
@@ -35,7 +48,33 @@ const preferredByName:Record<string,string[]> = {
   ocr:['mineru','liteparse'],
   document:['mineru','liteparse','markitdown'],
   architecture:['archify'],workflow:['archify'],explainer:['archify'],
+  'wet lab':['wet-lab-experiment-design','classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  wetlab:['wet-lab-experiment-design','classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  'result interpretation':['wet-lab-result-interpretation'],
+  'sample size':['statistical-power'], 'statistical power':['statistical-power'],
+  protocol:['protocolsio-integration'], 'liquid handling':['pylabrobot'],
+  'cell imaging':['cellprofiler'], 'method validation':['analytical-method-validation'],
+  '湿实验':['wet-lab-experiment-design','classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  '实验设计':['wet-lab-experiment-design','experimental-design'],
+  '实验方案':['wet-lab-experiment-design','experimental-design'],
+  '细胞培养':['classic-cell-and-molecular-assays'],
+  '细胞活力':['classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  '结果解读':['wet-lab-result-interpretation'],
+  '读数':['wet-lab-result-interpretation'],
+  'qpcr':['classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  'western blot':['classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  'elisa':['classic-cell-and-molecular-assays','wet-lab-result-interpretation'],
+  '样本量':['statistical-power'],
+  '统计功效':['statistical-power'],
+  '实验记录':['protocolsio-integration'],
+  '实验室自动化':['pylabrobot'],
+  '细胞图像':['cellprofiler'],
+  '方法验证':['analytical-method-validation'],
 };
+/** Resolve exact capability intents before the shared-library ranking runs. */
+export function preferredSkillNames(query:string):string[] {
+  return [...(preferredByName[query.trim().toLowerCase()]??[])];
+}
 function tokens(text:string):string[] {
   const translated=Object.entries(expand).filter(([key])=>text.includes(key)).map(([,value])=>value).join(' ');
   return [...new Set((text+' '+translated).toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean))];

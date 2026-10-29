@@ -24,7 +24,7 @@ try{
   const page=await browser.newPage();
   await page.goto(`http://127.0.0.1:${server.address().port}/`);
   const result=await page.evaluate(async()=>{
-    const {TerminalOutputBuffer,terminalPolicy}=await import('/js/terminal-policy.js');
+    const {TerminalOutputBuffer,terminalPolicy}=await import('/js/terminal-policy.js?v=1.5.0');
     const count=4096,text='Eve measured terminal output '.repeat(8)+'\r\n';
     async function measure(batched){
       const terminal=new Terminal({cols:100,rows:30,scrollback:100});

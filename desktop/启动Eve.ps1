@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([switch]$NativeConsole)
+param()
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'node_modules\electron'))) {
@@ -8,5 +8,5 @@ if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'node_modules\electron
 }
 & npm.cmd run build
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-if ($NativeConsole) { & npm.cmd start -- --native } else { & npm.cmd start }
+& npm.cmd start
 exit $LASTEXITCODE

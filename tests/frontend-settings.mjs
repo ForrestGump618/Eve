@@ -9,7 +9,7 @@ import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
 const root = fileURLToPath(new URL('../', import.meta.url));
-const output = path.join(root, 'docs/verification/platform-upgrade');
+const output = path.join(root, 'docs/verification/wet-lab-1.5.0');
 const models = {
   mode: 'balanced', strategy: 'quality', roles: {}, fallbacks: [], context_window: 32000,
   verification: 'standard', sage_verification: false, orchestration: true,
@@ -21,7 +21,7 @@ permissions.tools = {run_shell: 'ask'};
 const calls = [];
 const appearance = {theme: 'light', font: 'system', font_size: 14, accent: '#404040', density: 'comfortable', radius: 12, mode: 'research', home: 'workbench', agent_name: 'Eve', avatar: '', shortcuts: {palette: 'k'}};
 const bootstrap = {settings: {appearance: {value: appearance}}};
-const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/components.css"><link rel="stylesheet" href="/css/views.css"><link rel="stylesheet" href="/css/platform.css"></head><body><main id="view"></main><script type="module">window.loadSettings = async (route='settings') => { const {setState} = await import('/js/store.js'); setState({route,workspaceId:'ws_main',workspace:{name:'Research'}}); const {mount} = await import('/js/views/platform.js'); window.unmount = await mount(document.querySelector('#view')); };</script></body></html>`;
+const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/components.css"><link rel="stylesheet" href="/css/views.css"><link rel="stylesheet" href="/css/platform.css"></head><body><main id="view"></main><script type="module">window.loadSettings = async (route='settings') => { const {setState} = await import('/js/store.js?v=1.5.0'); setState({route,workspaceId:'ws_main',workspace:{name:'Research'}}); const {mount} = await import('/js/views/platform.js?v=1.5.0'); window.unmount = await mount(document.querySelector('#view')); };</script></body></html>`;
 
 const server = createServer(async (req, res) => {
   try {
@@ -59,7 +59,7 @@ test('model parameters and permission form save real structured values', {timeou
   await page.evaluate(() => window.loadSettings());
   await page.waitForSelector('[data-action="save-models"]');
   await page.evaluate(async () => {
-    const {applyAppearance} = await import('/js/suwen.js');
+    const {applyAppearance} = await import('/js/suwen.js?v=1.5.0');
     const data = await (await fetch('/api/platform/bootstrap')).json();
     applyAppearance(data.settings.appearance.value);
   });

@@ -18,6 +18,7 @@ if(pkg.build?.productName==='Eve'){
     '1.2.0':'docs/verification/wish-research-1.2.0/installer.json',
     '1.3.0':'docs/verification/eve-1.3.0/installer.json',
     '1.4.0':'docs/verification/literature-1.4.0/installer.json',
+    '1.5.0':'docs/verification/wet-lab-1.5.0/installer.json',
   };
   const record=records[pkg.version];
   if(!record)throw Error(`No installer manifest mapping for Eve ${pkg.version}`);

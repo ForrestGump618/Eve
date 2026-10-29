@@ -21,6 +21,8 @@
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     background var(--speed) ease,
     border-color var(--speed) ease,
@@ -35,7 +37,7 @@
 }
 
 .btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.995);
+  transform: translateY(1px) scale(var(--press-scale));
 }
 
 .btn:disabled {
@@ -45,20 +47,15 @@
 
 .btn-primary {
   border-color: transparent;
-  color: #0d0f16;
-  background: linear-gradient(100deg, var(--accent), var(--accent-strong) 65%, var(--accent-2));
-  box-shadow: 0 6px 18px -8px rgba(139, 92, 246, 0.75);
-}
-
-[data-theme="light"] .btn-primary {
-  color: #fff;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--accent) 56%, transparent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(100deg, var(--accent), var(--accent-strong) 55%, var(--accent-2));
+  background: var(--accent-strong);
   border-color: transparent;
-  filter: brightness(1.07) saturate(1.05);
-  box-shadow: 0 8px 24px -8px rgba(139, 92, 246, 0.85);
+  box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--accent) 62%, transparent);
 }
 
 .btn-ghost {
@@ -122,6 +119,10 @@
   color: var(--text);
   background: var(--panel-2);
   border-color: var(--border-soft);
+}
+
+.icon-btn:active:not(:disabled) {
+  transform: scale(var(--press-scale));
 }
 
 .icon-btn.is-active {
@@ -729,7 +730,7 @@ select.input {
 .toast-root {
   position: fixed;
   right: 18px;
-  bottom: 18px;
+  bottom: calc(18px + var(--safe-bottom));
   z-index: 400;
   display: flex;
   flex-direction: column-reverse;
@@ -961,6 +962,8 @@ select.input {
 .modal-body {
   padding: 16px;
   overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   min-height: 0;
   flex: 1;
 }
@@ -1104,6 +1107,10 @@ select.input {
   outline: none;
 }
 
+.palette-input-wrap:focus-within {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
 .palette-input::placeholder {
   color: var(--text-4);
 }
@@ -1119,6 +1126,8 @@ select.input {
 
 .palette-results {
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding: 6px;
   min-height: 0;
 }
@@ -1235,10 +1244,8 @@ select.input {
   height: 66px;
   margin-bottom: 4px;
   border-radius: 20px;
-  color: var(--accent);
-  background:
-    radial-gradient(circle at 30% 20%, var(--accent-soft-2), transparent 70%),
-    var(--panel-2);
+  color: var(--text-3);
+  background: var(--panel-2);
   border: 1px solid var(--border-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -2197,4 +2204,30 @@ kbd {
   border-radius: 999px;
   background: var(--amber-soft);
   color: var(--amber);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .toast,
+  .palette,
+  .lightbox-bar {
+    background: var(--panel);
+    backdrop-filter: none;
+  }
+
+  .modal-backdrop,
+  .modal-overlay,
+  .lightbox-backdrop,
+  .palette-backdrop {
+    backdrop-filter: none;
+    background: color-mix(in srgb, var(--bg-deep) 86%, transparent);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .modal,
+  .toast,
+  .palette,
+  .lightbox-bar {
+    border-color: var(--text-3);
+  }
 }

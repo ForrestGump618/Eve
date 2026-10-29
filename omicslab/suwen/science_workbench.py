@@ -35,11 +35,14 @@ WORKFLOWS = [
     {"id": "instrument", "label": "仪器数据", "description": "转换仪器输出，保留原始测量和派生量的关系。",
      "skills": ["science-bio-instrument-data-to-allotrope"],
      "deliverables": ["识别仪器和格式", "标准数据与字段映射", "校验结果和原始文件哈希"]},
-    {"id": "experiment", "label": "课题与实验", "description": "评估问题价值，设计对照和可验证的实验路径。",
-     "skills": ["science-bio-scientific-problem-selection", "experimental-design", "archify",
+    {"id": "experiment", "label": "课题与实验", "description": "设计对照完整的湿实验，读取原始结果，先做 QC 再解释。",
+     "skills": ["science-bio-scientific-problem-selection", "experimental-design",
+                "wet-lab-experiment-design", "classic-cell-and-molecular-assays",
+                "wet-lab-result-interpretation", "flow-cytometry", "archify",
                 "literature-review", "science-primer-reference-check",
                 "science-construct-validation"],
-     "deliverables": ["假设、主要终点和对照", "资源与失败路径", "方案、验证门槛和人工复核"]},
+     "deliverables": ["独立单位、主要终点和对照", "技术/生物学重复与 QC 门槛",
+                      "原始读数、归一化和统计方案", "结果证据分级、验证实验和人工复核"]},
 ]
 
 

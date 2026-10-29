@@ -5,5 +5,5 @@ capabilities of existing omics agent workbenches, but all code, prompts,
 skills and assets in this project are written from scratch.
 """
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 __app_name__ = "素问 SuWen"

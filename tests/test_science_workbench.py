@@ -127,6 +127,14 @@ def test_every_workbench_skill_exists_in_the_packaged_library():
         (root / "desktop" / "skill-library" / "index.json").read_text(encoding="utf-8")
     )
     available = {skill["name"] for skill in index["skills"]}
+    available |= {
+        json.loads(path.read_text(encoding="utf-8"))["name"]
+        for path in (root / "desktop" / "bundled-skills").glob("*/skill.json")
+    }
+    available |= {
+        path.name for path in (root / "omicslab" / "skills").iterdir()
+        if path.is_dir() and (path / "SKILL.md").is_file()
+    }
     referenced = {name for flow in WORKFLOWS for name in flow["skills"]}
     assert referenced <= available, sorted(referenced - available)
 

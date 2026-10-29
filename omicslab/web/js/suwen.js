@@ -1,8 +1,8 @@
 /** Shared appearance and workspace-local layout preferences. Legacy keys remain readable. */
-import { api } from './api.js?v=1.4.0';
-import { getPref, setPref } from './util.js?v=1.4.0';
-import { getState, navigate } from './store.js?v=1.4.0';
-import { applyTheme, openModal } from './ui.js?v=1.4.0';
+import { api } from './api.js?v=1.5.0';
+import { getPref, setPref } from './util.js?v=1.5.0';
+import { getState, navigate } from './store.js?v=1.5.0';
+import { applyTheme, openModal } from './ui.js?v=1.5.0';
 
 export function applyAppearance(settings){
  if(!settings)return;
@@ -27,8 +27,9 @@ export async function initPlatform(){
  try{
   const scope=getState().workspaceId||'ws_main';
   const data=await api.request(`/api/platform/bootstrap?scope=${encodeURIComponent(scope)}`);
-  applyAppearance(data.settings.appearance.value);
-  if(!data.settings.appearance.value.onboarded&&!getPref('onboardingDismissed',false)){
+  const appearance=data.settings.appearance.value;
+  applyAppearance(appearance);
+  if(!appearance.onboarded&&!getPref('onboardingDismissed',false)){
    const onboarding=openModal({
     title:'连接模型',
     size:'sm',
@@ -37,7 +38,14 @@ export async function initPlatform(){
     actions:[
      {label:'连接模型',kind:'primary',onClick:()=>navigate('settings')},
     ],
-    onClose:()=>setPref('onboardingDismissed',onboarding.body.querySelector('[data-onboarding-optout]')?.checked===true),
+    onClose:()=>{
+      const dismissed=onboarding.body.querySelector('[data-onboarding-optout]')?.checked===true;
+      setPref('onboardingDismissed',dismissed);
+      if(dismissed)void api.request(`/api/platform/config/appearance?scope=${encodeURIComponent(scope)}`,{
+       method:'PUT',
+       body:{value:{...appearance,onboarded:true}},
+      }).catch(err=>console.warn('[Eve] 无法保存首次引导偏好',err.message));
+    },
    });
    onboarding.el.querySelector('.modal')?.classList.add('sw-onboarding-modal');
   }

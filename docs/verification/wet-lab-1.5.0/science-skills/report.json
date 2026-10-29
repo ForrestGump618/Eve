@@ -1,0 +1,1193 @@
+{
+  "kind": "real local Jupyter kernel and upstream scripts; no model acceptance",
+  "live": false,
+  "checks": [
+    {
+      "name": "science-alphafold-database-fetch-and-analyze",
+      "passed": true,
+      "durationMs": 95,
+      "result": {
+        "skillId": "builtin:science-alphafold-database-fetch-and-analyze:a16c4defe16c",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "a16c4defe16ce1c2afb60a9f9d0543f8b05643ebece011738f8138d9ab9dc81c",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphafold_database_fetch_and_analyze",
+        "resourceDigest": "e5c2b89abd0ceaf50df58f4f7584125f72f38e584528ee4380fcf949e2d59fe4",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-alphafold-database-fetch-and-analyze\\1.3.1+4de6786171f1-e5c2b89abd0c",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/analyze_pae.py",
+          "scripts/analyze_plddt.py",
+          "scripts/fetch_structure.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-alphagenome-atlas-website-links",
+      "passed": true,
+      "durationMs": 70,
+      "result": {
+        "skillId": "builtin:science-alphagenome-atlas-website-links:61b050f62470",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "61b050f6247001a9bdd1b6e7372779af834a6125eec23bbded81bdffc5debdde",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphagenome_atlas_website_links",
+        "resourceDigest": "16c008a95ab59540f23f406195a9ea25862874168c5c70aefb260c6b456f2bbe",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-alphagenome-atlas-website-links\\1.3.1+4de6786171f1-16c008a95ab5",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/alphagenome_atlas_links.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-alphagenome-single-variant-analysis",
+      "passed": true,
+      "durationMs": 150,
+      "result": {
+        "skillId": "builtin:science-alphagenome-single-variant-analysis:bd663b06a6b0",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "bd663b06a6b0188342244d7f19259ed993f7bbe33cf6062dcac5d244322b05ee",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphagenome_single_variant_analysis",
+        "resourceDigest": "5ef2b06b7113eabcb18a066e8ddcdca068f2b7fa1bdb49644f1aae8f8ca469ba",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-alphagenome-single-variant-analysis\\1.3.1+4de6786171f1-5ef2b06b7113",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/analyze_ism.py",
+          "scripts/generate_ontology_mapping.py",
+          "scripts/interpret_splicing.py",
+          "scripts/lookup_gene_info.py",
+          "scripts/resolve_ontology_terms.py",
+          "scripts/visualize_genome_tracks.py",
+          "scripts/visualize_variant_effects.py"
+        ],
+        "verifiedFiles": 29,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [
+            "ALPHAGENOME_API_KEY"
+          ],
+          "optionalCredentials": [],
+          "credentialPresence": {
+            "ALPHAGENOME_API_KEY": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-alphagenome-variant-impact-score",
+      "passed": true,
+      "durationMs": 84,
+      "result": {
+        "skillId": "builtin:science-alphagenome-variant-impact-score:047e0b38f3eb",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "047e0b38f3ebbd56cf966c3263b86992d6101cbf4da501e113c19455468473fb",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphagenome_variant_impact_score",
+        "resourceDigest": "d5fb6832c8b4e66e60b876a9ef8812a92080de8ee6dc8f46749f84fc659fae77",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-alphagenome-variant-impact-score\\1.3.1+4de6786171f1-d5fb6832c8b4",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/alphagenome_atlas_avi.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [
+            "ALPHAGENOME_API_KEY"
+          ],
+          "optionalCredentials": [],
+          "credentialPresence": {
+            "ALPHAGENOME_API_KEY": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-chembl-database",
+      "passed": true,
+      "durationMs": 75,
+      "result": {
+        "skillId": "builtin:science-chembl-database:67d375e3a869",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "67d375e3a869fd61312bbb6b8fd7a99a588a12254ffed2dce2f10653ed17e9db",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/chembl_database",
+        "resourceDigest": "ab08769f241534396237a7e9c8f725768b92e940ab121c0cd36c3a6a3212b880",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-chembl-database\\1.3.1+4de6786171f1-ab08769f2415",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/chembl_api.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-clinical-trials-database",
+      "passed": true,
+      "durationMs": 71,
+      "result": {
+        "skillId": "builtin:science-clinical-trials-database:d7c3390f01dd",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "d7c3390f01dd9c1f755ed27a89946c7fbd068f64945230e45cffa7b3321f46fa",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/clinical_trials_database",
+        "resourceDigest": "fd85c0a820752b1d41e6622f636d01e134ea58c2561967b7d3b92060af586e38",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-clinical-trials-database\\1.3.1+4de6786171f1-fd85c0a82075",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/clinical_trials_api.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-clinvar-database",
+      "passed": true,
+      "durationMs": 117,
+      "result": {
+        "skillId": "builtin:science-clinvar-database:2e3e3e5c79b6",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "2e3e3e5c79b67b344fcfca657f180482d00949d8a63b4d6ec47035f1edb7c1aa",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/clinvar_database",
+        "resourceDigest": "71622ea225cb79068c83cdb9afc4cba6afa9bd4d282a16ad4c1c283d5f69470f",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-clinvar-database\\1.3.1+4de6786171f1-71622ea225cb",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/clinvar_api.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY"
+          ],
+          "credentialPresence": {
+            "NCBI_API_KEY": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-credentials",
+      "passed": true,
+      "durationMs": 60,
+      "result": {
+        "skillId": "builtin:science-credentials:82f252acbf13",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "82f252acbf135c37d04a14c20856f159fce7142e45cda5d318e1504426578bcc",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/credentials",
+        "resourceDigest": "718cd7f0718a224ed8376c01a45bf29065b1cc080b8176f85f1fd17d72052995",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-credentials\\1.3.1+4de6786171f1-718cd7f0718a",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [],
+        "verifiedFiles": 4,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-dbsnp-database",
+      "passed": true,
+      "durationMs": 113,
+      "result": {
+        "skillId": "builtin:science-dbsnp-database:261817ea3ca4",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "261817ea3ca4ff6396b49902c8004a44b6d0a7fdc7620d1212ecfe3ede21e80e",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/dbsnp_database",
+        "resourceDigest": "f06254ff6bf438c023e54a72c3c31e683455f79a2defd94f0d55d662be83f1bf",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-dbsnp-database\\1.3.1+4de6786171f1-f06254ff6bf4",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/dbsnp_cli.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY"
+          ],
+          "credentialPresence": {
+            "NCBI_API_KEY": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-embl-ebi-ols",
+      "passed": true,
+      "durationMs": 135,
+      "result": {
+        "skillId": "builtin:science-embl-ebi-ols:fd6b63b2d509",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "fd6b63b2d509502069f03b7891242b30f996ac97fc530e0b0a7b4a004f8f3720",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/embl_ebi_ols",
+        "resourceDigest": "d292d410afde7c22ca27adeeb3b048ebb96b7a9691866d7526518963c5bdb76a",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-embl-ebi-ols\\1.3.1+4de6786171f1-d292d410afde",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/get_individual.py",
+          "scripts/get_ontology.py",
+          "scripts/get_property.py",
+          "scripts/get_stats.py",
+          "scripts/get_term.py",
+          "scripts/ols_utils.py",
+          "scripts/search_ols.py",
+          "scripts/suggest_ols.py"
+        ],
+        "verifiedFiles": 14,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-encode-ccres-database",
+      "passed": true,
+      "durationMs": 89,
+      "result": {
+        "skillId": "builtin:science-encode-ccres-database:756f1c152088",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "756f1c1520886edcb106f912512653d588de73b9c6e374da03abbcc20c81b00a",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/encode_ccres_database",
+        "resourceDigest": "03d6b3d47fe5d9a899952b0db3a260bfcc63ee32e54d2e9aa3bfd0841a3e2a31",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-encode-ccres-database\\1.3.1+4de6786171f1-03d6b3d47fe5",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/encode_portal_api.py",
+          "scripts/screen_api.py"
+        ],
+        "verifiedFiles": 9,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-ensembl-database",
+      "passed": true,
+      "durationMs": 80,
+      "result": {
+        "skillId": "builtin:science-ensembl-database:aff4c6f7c862",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "aff4c6f7c86268afaacd8a56a88771f536f263602b895cb360603bb7bbf0487f",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/ensembl_database",
+        "resourceDigest": "a3d48dfc647b586b5ee58ec5af5352ed67afe55f32e0746d8f7d68b2f2a128c9",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-ensembl-database\\1.3.1+4de6786171f1-a3d48dfc647b",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/ensembl_api.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-foldseek-structural-search",
+      "passed": true,
+      "durationMs": 86,
+      "result": {
+        "skillId": "builtin:science-foldseek-structural-search:3aff6e5f4725",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "3aff6e5f47256cfcb156efb8a07e60a8bd9510a9a3510cc0990c69798c031731",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/foldseek_structural_search",
+        "resourceDigest": "9acce73f3c2e3b0704bae25d2cba7691cab384ea05d6f15dbb36ef1704a2e0a7",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-foldseek-structural-search\\1.3.1+4de6786171f1-9acce73f3c2e",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/search.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-gnomad-database",
+      "passed": true,
+      "durationMs": 138,
+      "result": {
+        "skillId": "builtin:science-gnomad-database:f2082c83ddca",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "f2082c83ddca825e0c336097c6b59a9237d99a33887577cd90fc574f1d3bc18b",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/gnomad_database",
+        "resourceDigest": "8b4a08da2a12cd67eff56db2ed59a2e52524ff0f31cfaa7069cac5ed33b931b4",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-gnomad-database\\1.3.1+4de6786171f1-8b4a08da2a12",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/get_gene_constraint.py",
+          "scripts/get_variant_frequency.py",
+          "scripts/search_variants.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-gtex-database",
+      "passed": true,
+      "durationMs": 71,
+      "result": {
+        "skillId": "builtin:science-gtex-database:bbd4c8ac358d",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "bbd4c8ac358dbcbec4ec2e6bd16642ba935afb37c662c1d48912e542c61348b0",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/gtex_database",
+        "resourceDigest": "27396afb138040845226bfeaea9f5092a32c5dd960bd6e3d9f1bb66abcd4e9f7",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-gtex-database\\1.3.1+4de6786171f1-27396afb1380",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/gtex_cli.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-human-protein-atlas-database",
+      "passed": true,
+      "durationMs": 67,
+      "result": {
+        "skillId": "builtin:science-human-protein-atlas-database:35f990cd2348",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "35f990cd2348bd2b3b7e798d5bf821c1caf112045cb826daae325a44535a3612",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/human_protein_atlas_database",
+        "resourceDigest": "5ebbb9dc887945b8152f0ad37a9707eacdf59c0035afc8f25499be23d4a3be45",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-human-protein-atlas-database\\1.3.1+4de6786171f1-5ebbb9dc8879",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/hpa_cli.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-interpro-database",
+      "passed": true,
+      "durationMs": 85,
+      "result": {
+        "skillId": "builtin:science-interpro-database:ab24b2241057",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "ab24b22410571bf5720e02c7ac5b18cf6ad92d250a6b29606f10a5483002e133",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/interpro_database",
+        "resourceDigest": "49256e909689935464ba4e09c1d8f4e8683d6a5837a90a009b51f68f5325e598",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-interpro-database\\1.3.1+4de6786171f1-49256e909689",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/interpro_client.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-jaspar-database",
+      "passed": true,
+      "durationMs": 150,
+      "result": {
+        "skillId": "builtin:science-jaspar-database:5cbe866bfd4c",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "5cbe866bfd4c9b399c5e978a4835cfe1247982f94d9a746281c6a1821f97af06",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/jaspar_database",
+        "resourceDigest": "d5255fb1974ebedfbf96a1cf3248e219d3a3d4c3742673ef6ff4ee4f838cac0a",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-jaspar-database\\1.3.1+4de6786171f1-d5255fb1974e",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/jaspar_api.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-literature-search-arxiv",
+      "passed": true,
+      "durationMs": 103,
+      "result": {
+        "skillId": "builtin:science-literature-search-arxiv:b71daf2b4f84",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "b71daf2b4f847b5ca31d74c10b2e565aaeec90ed9f8c727465f89cae03fcbd49",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_arxiv",
+        "resourceDigest": "a71368848a4e54a1ee5ef34e852d152297390e33545e263cb309cecda4be0633",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-literature-search-arxiv\\1.3.1+4de6786171f1-a71368848a4e",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/download_paper.py",
+          "scripts/download_paper_source.py",
+          "scripts/search_arxiv.py"
+        ],
+        "verifiedFiles": 9,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-literature-search-biorxiv",
+      "passed": true,
+      "durationMs": 141,
+      "result": {
+        "skillId": "builtin:science-literature-search-biorxiv:94c617dd4660",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "94c617dd466062bfb838c8d3aed6aa4726ee6191b999bb472184bdeb86bb1ede",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_biorxiv",
+        "resourceDigest": "1b7358953da6dc5d94026075d91dae2b9423c39e0fc0657bd955d7e2086b5617",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-literature-search-biorxiv\\1.3.1+4de6786171f1-1b7358953da6",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/search_by_dates.py",
+          "scripts/search_by_doi.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-literature-search-europepmc",
+      "passed": true,
+      "durationMs": 74,
+      "result": {
+        "skillId": "builtin:science-literature-search-europepmc:4582fcc3fa36",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "4582fcc3fa3665798615bdc1d95a8b82e22576273eda74d46ca74a5524658cc3",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_europepmc",
+        "resourceDigest": "fe5923284827718d07b3e068f660be80affe29ab49beb0fb231af00ad6a70a54",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-literature-search-europepmc\\1.3.1+4de6786171f1-fe5923284827",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/europepmc_api.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-literature-search-openalex",
+      "passed": true,
+      "durationMs": 148,
+      "result": {
+        "skillId": "builtin:science-literature-search-openalex:61ae8d259829",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "61ae8d25982973cf2b753ab44e438efcef22df01fc25bc88fb6926c19014246d",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_openalex",
+        "resourceDigest": "df5c54fb92f5c184407d381f5350153666ce88bf540a8fa0cc81e815377f2da6",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-literature-search-openalex\\1.3.1+4de6786171f1-df5c54fb92f5",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/openalex_cli.py"
+        ],
+        "verifiedFiles": 15,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "OPENALEX_API_KEY"
+          ],
+          "credentialPresence": {
+            "OPENALEX_API_KEY": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-ncbi-sequence-fetch",
+      "passed": true,
+      "durationMs": 89,
+      "result": {
+        "skillId": "builtin:science-ncbi-sequence-fetch:9cda15b57873",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "9cda15b57873e8671f9ae778ed33b543c50f45bdde0feb84bdf0f9884be3e456",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/ncbi_sequence_fetch",
+        "resourceDigest": "b357ebd5fdbfb4a4809d2267b1566c9d277d803041712c7997b18b7108fece64",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-ncbi-sequence-fetch\\1.3.1+4de6786171f1-b357ebd5fdbf",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/ncbi_fetch.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY",
+            "USER_EMAIL"
+          ],
+          "credentialPresence": {
+            "NCBI_API_KEY": false,
+            "USER_EMAIL": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-openfda-database",
+      "passed": true,
+      "durationMs": 78,
+      "result": {
+        "skillId": "builtin:science-openfda-database:f31e483d8713",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "f31e483d871395e8d80457b96e36c6ceb887ab81e6a1c82e8f72c9a828959216",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/openfda_database",
+        "resourceDigest": "2097fdf35ea71c7e8cc1e5f5779a00d0f1a762a2417d1f75451cc40394d865f5",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-openfda-database\\1.3.1+4de6786171f1-2097fdf35ea7",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/openfda_query.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "FDA_API_KEY"
+          ],
+          "credentialPresence": {
+            "FDA_API_KEY": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-opentargets-database",
+      "passed": true,
+      "durationMs": 149,
+      "result": {
+        "skillId": "builtin:science-opentargets-database:06f42275cb2a",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "06f42275cb2a6b6e81939a30dc42b5e897aff805432e43e2501a9deba09579fa",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/opentargets_database",
+        "resourceDigest": "70514e3e38a00175c3878cdda5638cc222f853b608ff6932d98419f7eddfa32d",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-opentargets-database\\1.3.1+4de6786171f1-70514e3e38a0",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/query_opentargets.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-pdb-database",
+      "passed": true,
+      "durationMs": 89,
+      "result": {
+        "skillId": "builtin:science-pdb-database:f17ca40aa072",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "f17ca40aa07270e220bce7560435eef3c998d857eb790e12377b29537a451f5a",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pdb_database",
+        "resourceDigest": "e229caeeb61f1d81461b5a957a25609eccc70fd90384da7d1de0cdd9864753b5",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-pdb-database\\1.3.1+4de6786171f1-e229caeeb61f",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/download_coordinate_files.py",
+          "scripts/fetch_pdb_metadata.py",
+          "scripts/fetch_schema.py",
+          "scripts/search_pdb.py"
+        ],
+        "verifiedFiles": 9,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-predictingthepast",
+      "passed": true,
+      "durationMs": 245,
+      "result": {
+        "skillId": "builtin:science-predictingthepast:07520c497a85",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "07520c497a85afb1523483a5b495599abe1fe688d598b681d833bd4d916b735b",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/predictingthepast",
+        "resourceDigest": "5a6741ecb7bdaf3aa757a2575fb732514fd8a390a800fe1e3117931ccb472d60",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-predictingthepast\\1.3.1+4de6786171f1-5a6741ecb7bd",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/preprocess.py",
+          "scripts/run_inference.py",
+          "scripts/visualize_results.py"
+        ],
+        "verifiedFiles": 13,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-protein-sequence-msa",
+      "passed": true,
+      "durationMs": 99,
+      "result": {
+        "skillId": "builtin:science-protein-sequence-msa:899c45684b07",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "899c45684b07e252d534c7ec287896436f5b0b4483c0e9dd8fb52a3773d01ba2",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/protein_sequence_msa",
+        "resourceDigest": "a6275a08f410e10815875b1a6db7740b3f40ee38a2bd70d0da875fa9acaf0c9e",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-protein-sequence-msa\\1.3.1+4de6786171f1-a6275a08f410",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/msa_align.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [
+            "USER_EMAIL"
+          ],
+          "optionalCredentials": [],
+          "credentialPresence": {
+            "USER_EMAIL": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-protein-sequence-similarity-search",
+      "passed": true,
+      "durationMs": 100,
+      "result": {
+        "skillId": "builtin:science-protein-sequence-similarity-search:489005b99c42",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "489005b99c42614042e2ff56db551d989a1ffd65124c3af4748f78ce032df83e",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/protein_sequence_similarity_search",
+        "resourceDigest": "54d85d9e704fa135d2d913e1f767e21f795f76e063b29d18a880a13ac72a6bc4",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-protein-sequence-similarity-search\\1.3.1+4de6786171f1-54d85d9e704f",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/mmseqs2_search.py",
+          "scripts/uniprot_blast.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "USER_EMAIL"
+          ],
+          "credentialPresence": {
+            "USER_EMAIL": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-pubchem-database",
+      "passed": true,
+      "durationMs": 119,
+      "result": {
+        "skillId": "builtin:science-pubchem-database:dfb7876a2da5",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "dfb7876a2da5bea3d7e426e29a3e31876f7da2152415269fbfb3ef63dd248cc3",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pubchem_database",
+        "resourceDigest": "b263b92fc7c85ea0beb4ff0db7c68def0eb28671048bc7f118e3cfae8af07bac",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-pubchem-database\\1.3.1+4de6786171f1-b263b92fc7c8",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/pubchem_api.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-pubmed-database",
+      "passed": true,
+      "durationMs": 128,
+      "result": {
+        "skillId": "builtin:science-pubmed-database:f1f4a89fb2b7",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "f1f4a89fb2b7be808db1352405a09858f049d5b5c2c12aec44cffcdac844d4e8",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pubmed_database",
+        "resourceDigest": "90159b52f1beed1c6b1d2e21933c238e4af8ee29a04c0d68572c0514e3f00e01",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-pubmed-database\\1.3.1+4de6786171f1-90159b52f1be",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/pubmed_api.py"
+        ],
+        "verifiedFiles": 14,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY",
+            "USER_EMAIL"
+          ],
+          "credentialPresence": {
+            "NCBI_API_KEY": false,
+            "USER_EMAIL": false
+          }
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-pymol",
+      "passed": true,
+      "durationMs": 74,
+      "result": {
+        "skillId": "builtin:science-pymol:72bf6ae780d2",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "72bf6ae780d21e4789eb3b536f1da40c707d7ac59188022a8bec8e94c00e6275",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pymol",
+        "resourceDigest": "ed238fbd8d382050a36e95fce6d59af01e2db0bd5bc1fc8e979b073f3b551476",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-pymol\\1.3.1+4de6786171f1-ed238fbd8d38",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-quickgo-database",
+      "passed": true,
+      "durationMs": 148,
+      "result": {
+        "skillId": "builtin:science-quickgo-database:a835ba855337",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "a835ba85533779524b19205fa14ff05d786143f6a92e6b47c5817d8436463936",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/quickgo_database",
+        "resourceDigest": "c615d4ca5006740316c59fa9a530a541eb0d054162657bfa95ca5daa511dd3df",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-quickgo-database\\1.3.1+4de6786171f1-c615d4ca5006",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/quickgo_tool.py"
+        ],
+        "verifiedFiles": 10,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-reactome-database",
+      "passed": true,
+      "durationMs": 79,
+      "result": {
+        "skillId": "builtin:science-reactome-database:bccfb05ac68a",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "bccfb05ac68a5c52bd3c9dbecdfc059d532dd927b29c6ef61c9c617a8d083e7c",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/reactome_database",
+        "resourceDigest": "156f16d875f448693617475377c366da76f1ac945bad63a5ed9d969abdc1db8b",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-reactome-database\\1.3.1+4de6786171f1-156f16d875f4",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/reactome_analysis.py"
+        ],
+        "verifiedFiles": 7,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-string-database",
+      "passed": true,
+      "durationMs": 78,
+      "result": {
+        "skillId": "builtin:science-string-database:6de0f5994327",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "6de0f5994327052e6ab59f232698e4275fff552ec712fba435f9951f3e473ecf",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/string_database",
+        "resourceDigest": "ffd24d79dfccd71c25d7a250f1ac91f18f751df1b9e1e14bcf2d6ae552fdbfe5",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-string-database\\1.3.1+4de6786171f1-ffd24d79dfcc",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/string_cli.py"
+        ],
+        "verifiedFiles": 10,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-ucsc-conservation-and-tfbs",
+      "passed": true,
+      "durationMs": 114,
+      "result": {
+        "skillId": "builtin:science-ucsc-conservation-and-tfbs:c416b214ae56",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "c416b214ae567b293f1eb9b643f9352f69211e317a5a735681e97559c5f0561e",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/ucsc_conservation_and_tfbs",
+        "resourceDigest": "a647f34cbf704877e7f57a1a87ace7ccdf93d640da7855a12ac1b79678c7c0d1",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-ucsc-conservation-and-tfbs\\1.3.1+4de6786171f1-a647f34cbf70",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/get_conservation.py",
+          "scripts/get_tfbs.py",
+          "scripts/list_tracks.py"
+        ],
+        "verifiedFiles": 8,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-unibind-database",
+      "passed": true,
+      "durationMs": 104,
+      "result": {
+        "skillId": "builtin:science-unibind-database:779f16722e93",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "779f16722e93f49346683210ca7197b6317e091d20385d2cc55b1ac3b90acd09",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/unibind_database",
+        "resourceDigest": "d6fa8b83948c676e063ee2b7fc96cfef8ee5e2b40d26035cdec9a48e08792c4c",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-unibind-database\\1.3.1+4de6786171f1-d6fa8b83948c",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/unibind_api.py"
+        ],
+        "verifiedFiles": 6,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-uniprot-database",
+      "passed": true,
+      "durationMs": 156,
+      "result": {
+        "skillId": "builtin:science-uniprot-database:c430156a6826",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "c430156a6826cc43c24ce4974d3038d2a93c6fe54a5f640521caea92ae818f11",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/uniprot_database",
+        "resourceDigest": "0da3bad1298c95e81ef30a70f5d303d60dbf77bbf8491b04112d63f140348020",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-uniprot-database\\1.3.1+4de6786171f1-0da3bad1298c",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [
+          "scripts/uniprot_tools.py"
+        ],
+        "verifiedFiles": 9,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-uv",
+      "passed": true,
+      "durationMs": 100,
+      "result": {
+        "skillId": "builtin:science-uv:d01562f2dcc1",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "d01562f2dcc104b3291a08bfb3a9e9883044330847285824a05f04000df0665b",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/uv",
+        "resourceDigest": "559443c8bdbfa375c3160363bcb4efe44ea4ac3930e5afed12a7f779b881bb94",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-uv\\1.3.1+4de6786171f1-559443c8bdbf",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [],
+        "verifiedFiles": 4,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    },
+    {
+      "name": "science-workflow-skill-creator",
+      "passed": true,
+      "durationMs": 71,
+      "result": {
+        "skillId": "builtin:science-workflow-skill-creator:4833b12e3bbe",
+        "version": "1.3.1+4de6786171f1",
+        "sha256": "4833b12e3bbe5298783a7ff5132951b494e661eecb034eb6f01973a8cccfaa18",
+        "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/workflow_skill_creator",
+        "resourceDigest": "a898ea137d2cd02e8f4c59ec2ff11bc246cc586025cf9cb2320b6b4b4638af72",
+        "status": "prepared",
+        "executed": false,
+        "directory": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills\\.eve\\skills\\science-workflow-skill-creator\\1.3.1+4de6786171f1-a898ea137d2c",
+        "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills",
+        "scripts": [],
+        "verifiedFiles": 5,
+        "runtime": {
+          "uvAvailable": true,
+          "installHint": null,
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "credentialPresence": {}
+        },
+        "externalRequirements": []
+      }
+    }
+  ],
+  "failures": [],
+  "workspace": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\docs\\verification\\wet-lab-1.5.0\\science-skills"
+}

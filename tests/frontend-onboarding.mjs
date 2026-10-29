@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/onboarding-refresh/', import.meta.url));
+const output = fileURLToPath(new URL('../docs/verification/wet-lab-1.5.0/', import.meta.url));
 const appearance = {
   theme: 'light',
   font: 'system',
@@ -22,6 +22,8 @@ const appearance = {
   avatar: '',
   shortcuts: {palette: 'k'},
 };
+let savedAppearance = {...appearance};
+let appearanceWrites = 0;
 
 const fixture = `<!doctype html><html lang="zh-CN" data-theme="light"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -29,7 +31,7 @@ ${['base', 'components', 'views', 'studio', 'platform'].map(name => `<link rel="
 <style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:var(--bg)}#fixture{color:var(--text-2);font:13px var(--font-sans)}</style>
 </head><body><main id="fixture">Eve workbench</main><script type="module">
 window.openOnboarding = async () => {
-  const {initPlatform} = await import('/js/suwen.js');
+  const {initPlatform} = await import('/js/suwen.js?v=1.5.0');
   await initPlatform();
 };
 </script></body></html>`;
@@ -44,7 +46,22 @@ const server = createServer(async (req, res) => {
     }
     if (url.pathname === '/api/platform/bootstrap') {
       res.writeHead(200, {'content-type': 'application/json;charset=utf-8'});
-      res.end(JSON.stringify({settings: {appearance: {value: appearance}}, workspaces: []}));
+      res.end(JSON.stringify({settings: {appearance: {value: savedAppearance}}, workspaces: []}));
+      return;
+    }
+    if (url.pathname === '/api/platform/config/appearance' && req.method === 'PUT') {
+      let body = '';
+      for await (const chunk of req) body += chunk;
+      const payload = JSON.parse(body || '{}');
+      if (!payload?.value || typeof payload.value !== 'object') {
+        res.writeHead(400, {'content-type': 'application/json;charset=utf-8'});
+        res.end(JSON.stringify({error: {message: 'appearance value required'}}));
+        return;
+      }
+      savedAppearance = {...savedAppearance, ...payload.value};
+      appearanceWrites += 1;
+      res.writeHead(200, {'content-type': 'application/json;charset=utf-8'});
+      res.end(JSON.stringify({value: savedAppearance, revision: appearanceWrites}));
       return;
     }
     if (url.pathname === '/favicon.ico') {
@@ -215,6 +232,11 @@ try {
   await dialog.locator('.modal-foot .btn-primary').click();
   await page.waitForFunction(() => location.hash === '#/settings' && !document.querySelector('.modal-backdrop'));
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('omicslab.onboardingDismissed'))), true);
+  for (let attempt = 0; attempt < 50 && appearanceWrites < 1; attempt += 1) {
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
+  assert.equal(appearanceWrites, 1);
+  assert.equal(savedAppearance.onboarded, true);
   await page.evaluate(() => window.openOnboarding());
   await page.waitForTimeout(180);
   assert.equal(await page.locator('.modal-backdrop').count(), 0);
@@ -230,11 +252,14 @@ try {
       'dark mode contrast and solid accent',
       'opt-out unchecked keeps next prompt',
       'opt-out checked suppresses next prompt',
+      'server appearance stores cross-launch dismissal',
     ],
     viewports: ['1440x900', '390x844'],
     desktop,
     mobile,
     dark,
+    appearanceWrites,
+    savedAppearance,
     errors,
   }, null, 2));
   console.log(`Onboarding UI checks passed; screenshots: ${output}`);

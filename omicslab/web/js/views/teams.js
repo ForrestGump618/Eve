@@ -1,10 +1,10 @@
-import {api, errorMessage} from '../api.js?v=1.4.0';
-import {esc, escAttr, setPref} from '../util.js?v=1.4.0';
-import {getState, navigate, setState} from '../store.js?v=1.4.0';
-import {on, emit} from '../bus.js?v=1.4.0';
-import {openModal, toastError, confirmDialog, promptDialog} from '../ui.js?v=1.4.0';
-import {openRunDetail} from '../runview.js?v=1.4.0';
-import {teamConfig, teamLabels, deliveryLabels, teamActions, ensureTeamStyles} from '../team-config.js?v=1.4.0';
+import {api, errorMessage} from '../api.js?v=1.5.0';
+import {esc, escAttr, setPref} from '../util.js?v=1.5.0';
+import {getState, navigate, setState} from '../store.js?v=1.5.0';
+import {on, emit} from '../bus.js?v=1.5.0';
+import {openModal, toastError, confirmDialog, promptDialog} from '../ui.js?v=1.5.0';
+import {openRunDetail} from '../runview.js?v=1.5.0';
+import {teamConfig, teamLabels, deliveryLabels, teamActions, ensureTeamStyles} from '../team-config.js?v=1.5.0';
 
 const actionLabels = {approve: '批准并运行', pause: '暂停', resume: '恢复', cancel: '取消任务', archive: '归档'};
 const statusLabel = status => teamLabels[status] || status || '任务缺失';

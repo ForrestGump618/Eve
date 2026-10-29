@@ -35,11 +35,11 @@ test('all built-in workbench workflows seed into the native registry and load wi
   const root=resolve('dist/bundled-skills');
   const first=await installBundledSkills(registry,root) as any;
   await installBundledSkills(registry,root);
-  assert.equal(first.count,37);assert.equal(registry.list().length,37);
-  for(const name of ['biomedical-discovery','primer-design','public-biomedical-data','remote-compute-ssh','statistical-rigor']){
+  assert.equal(first.count,40);assert.equal(registry.list().length,40);
+  for(const name of ['biomedical-discovery','primer-design','public-biomedical-data','remote-compute-ssh','statistical-rigor','wet-lab-experiment-design','classic-cell-and-molecular-assays','wet-lab-result-interpretation']){
    const skill=registry.list().find(s=>s.name===name)!;assert.ok(skill);
    assert.match((registry.load(skill.id) as any).instructions,/Eve 运行适配/);
-   assert.equal(skill.executable,false);
+   assert.equal(skill.executable,name==='wet-lab-result-interpretation');
   }
  }finally{store.close();}
 });
@@ -49,7 +49,7 @@ test('bundled skills seed idempotently and generated skills actually execute',as
  try{
   const registry=new SkillRegistry({home,store,worker});
   const bundled=resolve('bundled-skills');await installBundledSkills(registry,bundled);await installBundledSkills(registry,bundled);
-  assert.equal(registry.list().length,8);
+  assert.equal(registry.list().length,11);
   const creator=registry.list().find(x=>x.name==='skill-creator')!;
   assert.match((registry.readResource(creator.id,'references/openai_yaml.md') as any).content,/interface/);
   assert.throws(()=>registry.readResource(creator.id,'../SKILL.md'),/Unknown/);

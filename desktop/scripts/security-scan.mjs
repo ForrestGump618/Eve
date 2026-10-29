@@ -29,6 +29,8 @@ const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 
 const TEXT_EXT = /\.(?:ts|cts|mts|js|mjs|cjs|jsx|json|jsonl|yml|yaml|md|txt|py|ps1|sh|bat|cmd|html|css|toml|in|cff|cfg|ini|xml|svg)$/i;
 const SKIP_PATH = /^(?:node_modules|dist|release|\.git)\//;
+const GENERATED_EVIDENCE =
+  /^docs\/verification\/(?:[^/]+\/)?(?:security-scan\.json|sbom\.cdx\.json|packaged-smoke\.json|page-transitions\.json|uninstaller-page-transitions\.json|.*-browser-results\.json)$/i;
 
 const RULES = [
   { name: 'openai-style-key', severity: 'high', re: /\bsk-[A-Za-z0-9_-]{20,}\b/g },
@@ -54,7 +56,7 @@ function listTrackedFiles() {
 }
 
 function isTextCandidate(rel) {
-  if (SKIP_PATH.test(rel)) return false;
+  if (SKIP_PATH.test(rel) || GENERATED_EVIDENCE.test(rel)) return false;
   if (!TEXT_EXT.test(rel)) return false;
   try {
     const abs = join(root, rel);

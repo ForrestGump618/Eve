@@ -10,7 +10,7 @@ import { safeError } from '../security.js';
 import { parseMcpResult } from '../mcp-result.js';
 import { validateArguments } from '../harness/tool-registry.js';
 import type { McpServerView, RecordRow, RecordStore, SkillView, WorkerClient } from '../shared/contract.js';
-import {SkillLibrary} from '../skill-library.js';
+import {SkillLibrary,preferredSkillNames} from '../skill-library.js';
 import {gzipSync} from 'node:zlib';
 
 /** Minimal injectable fetch surface; tests pass a deterministic fake and never touch the public network. */
@@ -907,10 +907,13 @@ export class SkillRegistry {
   /** Progressive discovery: descriptions only, never all SKILL.md bodies. */
   search(query: string): Json {
     const words = query.toLowerCase().split(/[^\p{L}\p{N}_-]+/u).filter(Boolean);
+    const preferred = new Set(preferredSkillNames(query));
+    const preferredBoost = (name: string): number => preferred.has(name) ? 20 : 0;
     const installed=this.installedViews().filter(skill=>skill.enabled).map(skill=>{
       const text=`${skill.name} ${skill.description}`.toLowerCase();
       return {id:skill.id,name:skill.name,version:skill.version,description:skill.description,
-        score:(skill.name.toLowerCase()===query.trim().toLowerCase()?20:0)+words.reduce((n,w)=>n+(text.includes(w)?1:0),0)};
+        score:(skill.name.toLowerCase()===query.trim().toLowerCase()?20:0)+
+          words.reduce((n,w)=>n+(text.includes(w)?1:0),0)+preferredBoost(skill.name)};
     });
     const states=this.bundledStates();
     const bundled=this.library?.search(query,32).filter(result=>{
@@ -921,7 +924,8 @@ export class SkillRegistry {
       return data?.enabled!==false;
     }).map(result=>{
       const skill=this.library!.get(result.id);
-      return {id:skill.id,name:skill.name,version:skill.version,description:skill.description,score:result.score};
+      return {id:skill.id,name:skill.name,version:skill.version,description:skill.description,
+        score:result.score+preferredBoost(skill.name)};
     })??[];
     const ranked=[...installed,...bundled].filter(result=>result.score>0).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
     const requested=query.trim().toLowerCase();
