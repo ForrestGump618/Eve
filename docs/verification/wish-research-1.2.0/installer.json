@@ -1,0 +1,11 @@
+{
+  "file": "Eve-Setup-1.2.0-win-x64.exe",
+  "version": "1.2.0",
+  "sha256": "4e634f84805a7e45576c5ae0473886958ab29f2f1cc57a7b73a5fe4880e1ae05",
+  "bytes": 144305025,
+  "blockmap": {
+    "file": "Eve-Setup-1.2.0-win-x64.exe.blockmap",
+    "sha256": "dd1e33ef2ae2e6ded74d3000fda8aa39ab06abf0b166f2959a89244e887a31dc",
+    "bytes": 151493
+  }
+}

@@ -1,11 +1,11 @@
-import {api,errorMessage} from './api.js?v=2.1.1';
-import {getState,setWorkspace,navigate} from './store.js?v=2.1.1';
-import {on} from './bus.js?v=2.1.1';
-import {esc,escAttr} from './util.js?v=2.1.1';
-import {icon} from './icons.js?v=2.1.1';
-import {openModal,toastError,toastInfo} from './ui.js?v=2.1.1';
-import {openWorkspaceEditor,openWorkspaceSearch,openWorkspaceGit} from './workspace-editor.js?v=1.0.0';
-import {openHtmlArtifact} from './artifact-viewer.js?v=1.0.0';
+import {api,errorMessage} from './api.js?v=1.2.0';
+import {getState,setWorkspace,navigate} from './store.js?v=1.2.0';
+import {on} from './bus.js?v=1.2.0';
+import {esc,escAttr} from './util.js?v=1.2.0';
+import {icon} from './icons.js?v=1.2.0';
+import {openModal,toastError,toastInfo} from './ui.js?v=1.2.0';
+import {openWorkspaceEditor,openWorkspaceSearch,openWorkspaceGit} from './workspace-editor.js?v=1.2.0';
+import {openHtmlArtifact} from './artifact-viewer.js?v=1.2.0';
 
 /** Lazy, bounded file tree. No polling, recursive preload or cross-workspace cache. */
 export async function mountProjectFiles(root,{busy,changed}){

@@ -1,15 +1,15 @@
 // Chat view: conversation list, message stream, markdown rendering, SSE consumption,
 // tool cards, approval prompts, figures, retry/stop and the composer.
 
-import { renderMarkdown } from '../markdown.js?v=2.1.1';
-import {openHtmlArtifact} from '../artifact-viewer.js?v=1.0.0';
-import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=2.1.1';
-import {mountProjectFiles} from '../project-files.js?v=2.1.1';
-import {mountGuidance} from '../guidance-ui.js?v=2.1.1';
-import {mountFileChanges} from '../file-changes.js?v=1.0.0';
-import {chooseComposerSkills} from '../composer-skills.js?v=1.0.0';
-import {mountAgentsPanel} from '../agents-panel.js?v=1.0.0';
-import { icon, brandMark } from '../icons.js?v=2.1.1';
+import { renderMarkdown } from '../markdown.js?v=1.2.0';
+import {openHtmlArtifact} from '../artifact-viewer.js?v=1.2.0';
+import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.2.0';
+import {mountProjectFiles} from '../project-files.js?v=1.2.0';
+import {mountGuidance} from '../guidance-ui.js?v=1.2.0';
+import {mountFileChanges} from '../file-changes.js?v=1.2.0';
+import {chooseComposerSkills} from '../composer-skills.js?v=1.2.0';
+import {mountAgentsPanel} from '../agents-panel.js?v=1.2.0';
+import { icon, brandMark } from '../icons.js?v=1.2.0';
 import {
   esc,
   escAttr,
@@ -23,9 +23,9 @@ import {
   removePref,
   uid,
   truncate,
-} from '../util.js?v=2.1.1';
-import { api, errorMessage } from '../api.js?v=2.1.1';
-import { streamChat, streamTrace } from '../sse.js?v=2.1.1';
+} from '../util.js?v=1.2.0';
+import { api, errorMessage } from '../api.js?v=1.2.0';
+import { streamChat, streamTrace } from '../sse.js?v=1.2.0';
 import {
   toast,
   toastSuccess,
@@ -39,10 +39,10 @@ import {
   emptyStateHtml,
   openLightbox,
   spinnerHtml,
-} from '../ui.js?v=2.1.1';
-import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=2.1.1';
-import { on, emit } from '../bus.js?v=2.1.1';
-import { openRunDetail, openRunList } from '../runview.js?v=2.1.1';
+} from '../ui.js?v=1.2.0';
+import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.2.0';
+import { on, emit } from '../bus.js?v=1.2.0';
+import { openRunDetail, openRunList } from '../runview.js?v=1.2.0';
 
 const SIDEBAR_MIN = 210;
 const SIDEBAR_MAX = 420;

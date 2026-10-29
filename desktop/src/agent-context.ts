@@ -38,7 +38,7 @@ export function registerContextTools(registry:ToolRegistry,messages:TurnMessage[
     if(!m.content.startsWith(marker))return;
     try{const value=JSON.parse(m.content.slice(marker.length));if(typeof value.id==='string'&&Array.isArray(value.sources))return value;}catch{}
   };
-  registry.register({name:'acp_status',kind:'tool',description:'Inspect archived context blocks and eligible historical message ranges. User/system messages and unobserved tool calls cannot be compressed. Use compress only after writing an evidence-preserving summary.',
+  registry.register({name:'acp_status',kind:'tool',readOnly:true,description:'Inspect archived context blocks and eligible historical message ranges. User/system messages and unobserved tool calls cannot be compressed. Use compress only after writing an evidence-preserving summary.',
     parameters:{type:'object',properties:{},additionalProperties:false},execute:async()=>({
       messageCount:messages.length,candidates:candidates(),
       blocks:messages.flatMap(m=>{const b=block(m);return b?[{id:b.id,summary:b.summary.slice(0,200),sourceCount:b.sources.length}]:[];}),
@@ -59,7 +59,7 @@ export function registerContextTools(registry:ToolRegistry,messages:TurnMessage[
       event('context.compressed',{id,sourceCount:sources.length,beforeCharacters:before,afterCharacters:content.length});
       return {id,sourceCount:sources.length,savedCharacters:before-content.length,originalsRetained:true};
     }});
-  registry.register({name:'decompress',kind:'tool',description:'Restore a compressed block by id from the verified original request journal. Does not execute any original tool or change workspace files.',
+  registry.register({name:'decompress',kind:'tool',readOnly:true,description:'Restore a compressed block by id from the verified original request journal. Does not execute any original tool or change workspace files.',
     parameters:{type:'object',properties:{id:{type:'string',maxLength:80}},required:['id'],additionalProperties:false},execute:async(args,signal)=>{
       const index=messages.findIndex(m=>block(m)?.id===args.id);if(index<0)throw new ValidationError('Unknown archived context block');
       const memory=block(messages[index]!)!,originals:TurnMessage[]=[];
@@ -68,10 +68,10 @@ export function registerContextTools(registry:ToolRegistry,messages:TurnMessage[
       event('context.decompressed',{id:memory.id,messageCount:originals.length});
       return {id:memory.id,restoredMessages:originals.length,toolsReplayed:false};
     }});
-  registry.register({name:'search_context',kind:'tool',description:'Search original context, including messages removed by summaries. Returns verified source references and excerpts; no tools are repeated.',
+  registry.register({name:'search_context',kind:'tool',readOnly:true,description:'Search original context, including messages removed by summaries. Returns verified source references and excerpts; no tools are repeated.',
     parameters:{type:'object',properties:{query:{type:'string',minLength:1,maxLength:500}},required:['query'],additionalProperties:false},
     execute:async(args,signal)=>{signal.throwIfAborted();return journal.search(String(args.query));}});
-  registry.register({name:'read_context',kind:'tool',description:'Read a verified source returned by search_context; returns original message content in pages without replaying tools.',
+  registry.register({name:'read_context',kind:'tool',readOnly:true,description:'Read a verified source returned by search_context; returns original message content in pages without replaying tools.',
     parameters:{type:'object',properties:{source:{type:'object',properties:{requestSequence:{type:'integer',minimum:1},messageIndex:{type:'integer',minimum:0},sha256:{type:'string',pattern:'^[a-f0-9]{64}$'}},required:['requestSequence','messageIndex','sha256'],additionalProperties:false},startChar:{type:'integer',minimum:0}},required:['source'],additionalProperties:false},
     execute:async(args,signal)=>{signal.throwIfAborted();const m=await journal.source(args.source as unknown as SourceRef),start=Number(args.startChar??0),end=Math.min(m.content.length,start+16000);return {role:m.role,content:m.content.slice(start,end),nextStartChar:end<m.content.length?end:null};}});
   return async(tools:unknown[],metadata:{turn:number;reservedTokens:number})=>{

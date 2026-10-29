@@ -1,10 +1,10 @@
-import {api,errorMessage} from '../api.js?v=2.1.1';
-import {esc,escAttr} from '../util.js?v=2.1.1';
-import {getState} from '../store.js?v=2.1.1';
-import {on} from '../bus.js?v=2.1.1';
-import {openModal,toastError,toastSuccess} from '../ui.js?v=2.1.1';
-import {contextRequestsHtml,contextActivityHtml,contextOverviewHtml} from '../context-components.js?v=1.0.0';
-import {openRunDetail} from '../runview.js?v=2.1.1';
+import {api,errorMessage} from '../api.js?v=1.2.0';
+import {esc,escAttr} from '../util.js?v=1.2.0';
+import {getState} from '../store.js?v=1.2.0';
+import {on} from '../bus.js?v=1.2.0';
+import {openModal,toastError,toastSuccess} from '../ui.js?v=1.2.0';
+import {contextRequestsHtml,contextActivityHtml,contextOverviewHtml} from '../context-components.js?v=1.2.0';
+import {openRunDetail} from '../runview.js?v=1.2.0';
 
 export async function mount(root){
  const abort=new AbortController();let disposed=false,epoch=0,data=null,sourceRefs=[],overview=null,overviewEpoch=0,overviewMode=false;

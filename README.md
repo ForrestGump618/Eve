@@ -2,13 +2,13 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
-[![Release](https://img.shields.io/badge/release-1.1.0-202020)](https://github.com/ForrestGump618/suwen/releases)
+[![Release](https://img.shields.io/badge/release-1.2.0-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
 [![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
-> 本轮交付 Eve 1.1.0 源码与 Windows x64 安装包。功能验收与安装包校验值见 [本轮报告](docs/verification/platform-upgrade/README.md)。
+> 本轮交付 Eve 1.2.0 源码与 Windows x64 安装包。功能验收与安装包校验值见 [本轮报告](docs/verification/wish-research-1.2.0/README.md)。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
@@ -26,6 +26,7 @@ Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数�
 
 | 我想做什么 | 从哪里开始 |
 | --- | --- |
+| 从一句愿望开始一个科研项目 | [许愿式科研](#许愿式科研) |
 | 读懂并复现一篇论文 | [深度调研](#深度调研) |
 | 设计 PCR、qPCR 或克隆方案 | [实验设计](#实验设计) |
 | 分析 RNA、ATAC、蛋白或空间数据 | [多组学数据处理](#多组学数据处理) |
@@ -51,7 +52,7 @@ flowchart LR
 <details>
 <summary>30 秒上手清单</summary>
 
-- [ ] 下载并安装 Eve 1.1.0
+- [ ] 下载并安装 Eve 1.2.0
 - [ ] 在“设置 → 模型连接”保存一个可用模型
 - [ ] 选择本地目录或 SSH 工作区
 - [ ] 在输入框发送一个只读任务
@@ -60,6 +61,16 @@ flowchart LR
 </details>
 
 ## 能做什么
+
+### 许愿式科研
+
+在聊天中直接说出研究目标，或进入「科研与证据 → 许愿式科研」。Eve 会先建立持久项目，再按证据依赖推进资源侦察、证据矩阵、可证伪假设、预注册、分析、实验设计和图表。模型只在真实产物落盘后登记节点，最终结题由用户复核。
+
+![许愿式科研](docs/verification/wish-research-1.2.0/wish-research-desktop.png)
+
+每个愿望拥有独立的 `research-wishes/<wish_id>/` 工作区。数据、分析代码、实验设计、图表、报告和溯源记录分别归档；跨愿望路径或跨阶段产物会被拒绝。连续推进运行在现有 `RunService` 中，失败或暂停后可从未完成节点恢复。
+
+完整状态机、工具与边界见 [许愿式科研](docs/WISH-RESEARCH.md)。
 
 ### 科学工作台
 
@@ -202,7 +213,7 @@ Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其�
 
 | 项目 | 当前值 |
 | --- | --- |
-| 版本 | `1.1.0` |
+| 版本 | `1.2.0` |
 | 平台 | Windows x64 |
 | 当前交付 | 源码更新 + 本机构建的无签名安装包 |
 | 默认界面 | 浅色工作台 |

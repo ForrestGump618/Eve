@@ -113,6 +113,95 @@ async def quest_launch(request:Request,id:str,scope:str='ws_main'):
     except ValueError as exc:raise HTTPException(422,str(exc)) from exc
 
 
+@router.get('/wishes')
+async def wish_list(request:Request,scope:str='ws_main'):
+    return {'items':platform(request).wishes.list(scope)}
+
+
+@router.get('/wishes/{id}')
+async def wish_get(request:Request,id:str,scope:str='ws_main'):
+    return guarded(lambda:platform(request).wishes.get(scope,id))
+
+
+@router.post('/wishes')
+async def wish_start(request:Request,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    try:return await p.wishes.start(scope,data)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.put('/wishes/{id}')
+async def wish_update(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    try:return await p.wishes.update(scope,id,data)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/wishes/{id}/record')
+async def wish_record(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    try:return await p.wishes.record(scope,id,data)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/wishes/{id}/block')
+async def wish_block(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    try:return await p.wishes.block(scope,id,data)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/wishes/{id}/review')
+async def wish_review(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    if data.get('confirmed') is not True:
+        raise HTTPException(400,'需要用户明确确认')
+    try:return await p.wishes.review(scope,id,data)
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/wishes/{id}/launch')
+async def wish_launch(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);data=await body(request)
+    try:
+        async with p.wishes.lock(scope,id):
+            # Validate before creating a conversation. A recorded, running or
+            # blocked stage must not leave an orphan conversation behind.
+            wish,stage_id=p.wishes.launch_target(scope,id,data.get('stage'))
+            prompt=p.wishes.prompt(scope,id,stage_id,advance=data.get('advance') is not False)
+            stage_label=next(s['label'] for s in wish['stages'] if s['id']==stage_id)
+            conversation=p.state.store.create(agent=p.state.default_agent_info()['agent_id'],
+                title=f"Eve · {wish['title'][:52]} · {stage_label}")
+            from .chat import _workspace_binding
+            _workspace_binding(p.state,conversation,scope)
+            try:
+                result=await p.state.runs.submit(session_id=conversation.id,message=prompt,workspace_id=scope,
+                    conversation=conversation,permission_mode='ask')
+            except Exception as exc:
+                # Validation happens before creation, but the durable engine can
+                # still reject a submission. Do not leave an empty conversation
+                # in the sidebar when no run was created.
+                try:
+                    p.state.store.delete(conversation.id)
+                except Exception:
+                    pass
+                raise HTTPException(503,'任务提交失败，请检查模型、工作区与运行引擎状态') from exc
+            run=result.get('run') or {}
+            # launch_target reconciled a stale failed run to "failed". Use the
+            # same projection here; checking the raw record would mistake that
+            # old run for the new one and leave the submitted conversation
+            # orphaned.
+            fresh=p.wishes._reconcile(p.store.get('research_wish',id,scope))
+            stage=next(s for s in fresh['stages'] if s['id']==stage_id)
+            if stage['status'] in {'recorded','running'}:
+                raise ValueError('节点状态已变化，未启动重复执行')
+            stage.update(status='running',run_id=run.get('run_id'),session_id=conversation.id)
+            p.store.put('research_wish',id,fresh,scope,expected=fresh['revision'])
+            p.store.audit('research_wish.launch',{'id':id,'stage':stage_id,'run':run.get('run_id')},scope)
+            return {'wish_id':id,'run':run,'session_id':conversation.id,'stage':stage_id}
+    except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
 def platform(request):
     service=getattr(request.app.state.omicslab,'platform',None)
     if service is None:raise HTTPException(503,'平台服务未就绪')

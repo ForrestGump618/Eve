@@ -4,20 +4,44 @@
  * worker bridge. Capability-specific handlers live in `./capabilities.ts`.
  */
 import { spawnSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { createHash, randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, resolve, sep } from 'node:path';
 import { ValidationError, type Artifact, type Json } from '../harness/types.js';
 import type { Store } from '../harness/store.js';
 import { atomicJson } from '../security.js';
 import type { ModelRuntime } from '../model-runtime.js';
 import type { ImportService } from '../import-service.js';
-import { appendConversationMessage, normalizeConversation, type ConversationMessage } from '../conversations.js';
+import { appendConversationMessage, normalizeConversation, rewriteConversationMessage, type ConversationMessage } from '../conversations.js';
 import type { WorkerHealth } from '../shared/contract.js';
+import { WorkspaceFiles } from '../workspace-files.js';
 
 const MAX_ARTIFACT_TEXT = 200_000;
 const MAX_ARTIFACT_BINARY = 4_000_000;
 const PREFERENCE_KEYS = new Set(['language', 'theme', 'autoCompact', 'compactWarn', 'compactHard', 'autoApproveLowRisk', 'showEvidence', 'sendOnEnter', 'defaultMode', 'defaultProjectId', 'confirmHighRisk', 'keepLogs', 'maxTokens', 'budgetCalls', 'budgetCost', 'compactionWarn', 'compactionForce', 'concurrency']);
+const PROJECT_WORKSPACE_DIRECTORIES = Object.freeze([
+  'data', 'experiments', 'analysis', 'figures', 'reports', 'evidence', 'provenance',
+]);
+
+function projectWorkspacePath(home: string, projectId: string): string {
+  const safeId = projectId.replace(/[^A-Za-z0-9._-]/g, '-').slice(0, 80);
+  const suffix = createHash('sha256').update(projectId).digest('hex').slice(0, 12);
+  return join(home, 'projects', `${safeId || 'project'}-${suffix}`);
+}
+
+function provisionProjectWorkspace(home: string, projectId: string, data: Record<string, Json>): Record<string, Json> {
+  const projectsRoot = resolve(join(home, 'projects'));
+  const stored = typeof data.workspaceRoot === 'string' ? resolve(data.workspaceRoot) : null;
+  const insideProjects = stored && (stored === projectsRoot || stored.startsWith(`${projectsRoot}${sep}`));
+  const root = insideProjects ? stored : projectWorkspacePath(home, projectId);
+  mkdirSync(root, { recursive: true });
+  for (const directory of PROJECT_WORKSPACE_DIRECTORIES) mkdirSync(join(root, directory), { recursive: true });
+  return {
+    ...data,
+    workspaceRoot: root,
+    workspaceDirectories: [...PROJECT_WORKSPACE_DIRECTORIES],
+  };
+}
 
 /** Validate one preference value and return it normalized; rejects values the runtime cannot honor. */
 function preferenceValue(key: string, value: Json): Json {
@@ -97,24 +121,44 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
 
   const listView = (kind: string, options: { projectId?: string | null; limit?: number; offset?: number; order?: 'asc' | 'desc' } = {}): Json[] =>
     store.listRecords(kind, { ...options, limit: Math.min(options.limit ?? 200, 500) }).map(record => ({ id: record.id, version: record.version, projectId: record.projectId, createdAt: record.createdAt, updatedAt: record.updatedAt, ...recordData(record) }));
+  const projectContext = (id: string): { record: ReturnType<Store['getRecord']> & { kind: string }; data: Record<string, Json>; root: string } => {
+    const record = recordOrThrow(store, id, 'project');
+    const current = recordData(record);
+    const data = provisionProjectWorkspace(home, record.id, current);
+    if (current.workspaceRoot !== data.workspaceRoot || JSON.stringify(current.workspaceDirectories) !== JSON.stringify(data.workspaceDirectories)) {
+      const updated = store.putRecord('project', data as unknown as Json, {
+        id: record.id,
+        expectedVersion: record.version,
+        provenance: { kind: 'project.workspace.provision', at: Date.now() },
+      });
+      return { record: updated, data: recordData(updated), root: String(data.workspaceRoot) };
+    }
+    return { record: record as typeof record & { kind: string }, data, root: String(data.workspaceRoot) };
+  };
+  const projectFiles = (root: string): WorkspaceFiles => new WorkspaceFiles([root], []);
 
   const handlers: Record<string, Handler> = {
-    'project.list': () => listView('project', { limit: 500 }),
+    'project.list': () => store.listRecords('project', { limit: 500 }).map(record => {
+      const data = provisionProjectWorkspace(home, record.id, recordData(record));
+      return { id: record.id, version: record.version, projectId: record.projectId, createdAt: record.createdAt, updatedAt: record.updatedAt, ...data };
+    }),
     'project.get': params => {
-      const record = recordOrThrow(store, str(params, 'id'), 'project');
-      return { id: record.id, version: record.version, createdAt: record.createdAt, updatedAt: record.updatedAt, ...recordData(record), conversations: store.countRecords('conversation', { projectId: record.id }) };
+      const context = projectContext(str(params, 'id'));
+      return { id: context.record.id, version: context.record.version, createdAt: context.record.createdAt, updatedAt: context.record.updatedAt, ...context.data, conversations: store.countRecords('conversation', { projectId: context.record.id }) };
     },
     'project.create': params => {
       const name = str(params, 'name', 1, 200).trim();
       if (!name) throw new ValidationError('name must not be blank');
       const notes = optStr(params, 'notes', 20_000) ?? '';
-      const record = store.putRecord('project', { name, notes, archived: false, createdAt: Date.now() } as unknown as Json);
+      const id = `project-${randomUUID()}`;
+      const data = provisionProjectWorkspace(home, id, { name, notes, archived: false, createdAt: Date.now() });
+      const record = store.putRecord('project', data as unknown as Json, { id, projectId: id });
       return { id: record.id, version: record.version, project: { id: record.id, version: record.version, projectId: null, createdAt: record.createdAt, updatedAt: record.updatedAt, ...recordData(record) } };
     },
     'project.update': params => {
       const id = str(params, 'id');
       const current = recordOrThrow(store, id, 'project');
-      const data = recordData(current);
+      const data = provisionProjectWorkspace(home, id, recordData(current));
       const next: Record<string, Json> = { ...data };
       const name = optStr(params, 'name', 200);
       if (name !== undefined) { if (!name.trim()) throw new ValidationError('name must not be blank'); next.name = name; }
@@ -135,7 +179,45 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
         detached += 1;
       }
       store.deleteRecord(project.id);
-      return { deleted: id, detachedConversations: detached };
+      const workspaceRoot = typeof recordData(project).workspaceRoot === 'string'
+        ? String(recordData(project).workspaceRoot)
+        : projectWorkspacePath(home, id);
+      return { deleted: id, detachedConversations: detached, workspaceRetained: workspaceRoot };
+    },
+    'project.workspace.list': async params => {
+      const context = projectContext(str(params, 'id'));
+      const path = optStr(params, 'path', 1_000) ?? '.';
+      const offset = optNum(params, 'offset') ?? 0;
+      if (!Number.isSafeInteger(offset) || offset < 0) throw new ValidationError('offset must be a nonnegative integer');
+      return {
+        projectId: context.record.id,
+        root: context.root,
+        directories: PROJECT_WORKSPACE_DIRECTORIES,
+        ...(await projectFiles(context.root).list(path, offset) as Record<string, Json>),
+      } as unknown as Json;
+    },
+    'project.workspace.read': async params => {
+      const context = projectContext(str(params, 'id'));
+      const path = str(params, 'path', 1, 1_000);
+      const start = optNum(params, 'startLine') ?? 1;
+      const limit = optNum(params, 'limit') ?? 400;
+      if (!Number.isSafeInteger(start) || start < 1) throw new ValidationError('startLine must be a positive integer');
+      if (!Number.isSafeInteger(limit) || limit < 1 || limit > 2_000) throw new ValidationError('limit must be between 1 and 2000');
+      return { projectId: context.record.id, ...(await projectFiles(context.root).read(path, start, limit) as Record<string, Json>) } as unknown as Json;
+    },
+    'project.workspace.search': async params => {
+      const context = projectContext(str(params, 'id'));
+      const query = str(params, 'query', 1, 500);
+      const path = optStr(params, 'path', 1_000) ?? '.';
+      return { projectId: context.record.id, ...(await projectFiles(context.root).search(query, path) as Record<string, Json>) } as unknown as Json;
+    },
+    'project.workspace.write': async params => {
+      const context = projectContext(str(params, 'id'));
+      const path = str(params, 'path', 1, 1_000);
+      const content = str(params, 'content', 1, 200_000);
+      const expectedSha256 = optStr(params, 'expectedSha256', 64);
+      if (expectedSha256 !== undefined && !/^[a-f0-9]{64}$/.test(expectedSha256)) throw new ValidationError('expectedSha256 is invalid');
+      return { projectId: context.record.id, ...(await projectFiles(context.root).write(path, content, expectedSha256) as Record<string, Json>) } as unknown as Json;
     },
 
     'conversation.list': params => {
@@ -153,12 +235,12 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
       const title = (optStr(params, 'title', 300) ?? '').trim() || '新会话';
       const mode = (optStr(params, 'mode', 32) ?? 'chat').trim() || 'chat';
       const record = store.putRecord('conversation', { projectId: projectId ?? null, title, mode, messages: [], updatedAt: Date.now() } as unknown as Json, { projectId: projectId ?? null });
-      return { id: record.id, version: record.version, title, mode, projectId: projectId ?? null, messages: [], updatedAt: record.updatedAt };
+      return { id: record.id, version: record.version, title, mode, projectId: projectId ?? null, messages: [], activeBranchId: null, updatedAt: record.updatedAt };
     },
     'conversation.get': params => {
       const record = recordOrThrow(store, str(params, 'id'), 'conversation');
       const view = normalizeConversation(record.data);
-      return { id: record.id, version: record.version, projectId: view.projectId, title: view.title, mode: view.mode, messages: view.messages as unknown as Json, updatedAt: view.updatedAt, legacy: view.legacy ?? null };
+      return { id: record.id, version: record.version, projectId: view.projectId, title: view.title, mode: view.mode, messages: view.messages as unknown as Json, activeBranchId: view.activeBranchId ?? null, updatedAt: view.updatedAt, legacy: view.legacy ?? null };
     },
     'conversation.append': params => {
       const id = str(params, 'id');
@@ -174,7 +256,11 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
           text: typeof raw.text === 'string' ? raw.text : '',
           at: typeof raw.at === 'number' ? raw.at : Date.now(),
           ...(typeof raw.taskId === 'string' ? { taskId: raw.taskId } : {}),
-          ...(typeof raw.mode === 'string' ? { mode: raw.mode } : {})
+          ...(typeof raw.mode === 'string' ? { mode: raw.mode } : {}),
+          ...(typeof raw.revisionOf === 'string' ? { revisionOf: raw.revisionOf } : {}),
+          ...(typeof raw.supersededBy === 'string' ? { supersededBy: raw.supersededBy } : {}),
+          ...(typeof raw.branchId === 'string' ? { branchId: raw.branchId } : {}),
+          ...(typeof raw.replacesTaskId === 'string' ? { replacesTaskId: raw.replacesTaskId } : {})
         } as ConversationMessage;
       });
       let record = recordOrThrow(store, id, 'conversation');
@@ -200,6 +286,7 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
       const title = optStr(params, 'title', 300);
       const mode = optStr(params, 'mode', 32);
       const data: Record<string, Json> = { projectId: view.projectId, title: title ?? view.title, mode: mode ?? view.mode, messages: view.messages as unknown as Json, updatedAt: Date.now() };
+      if (view.activeBranchId) data.activeBranchId = view.activeBranchId;
       if (view.legacy !== undefined) data.legacy = view.legacy;
       if (params.projectId !== undefined) {
         if (params.projectId === null) data.projectId = null;
@@ -207,6 +294,43 @@ export function createCoreHandlers(deps: CoreRpcDeps): Record<string, Handler> {
       }
       const record = store.putRecord('conversation', data as unknown as Json, { id, expectedVersion: current.version });
       return { id: record.id, version: record.version, updatedAt: record.updatedAt, title: data.title, mode: data.mode, projectId: data.projectId };
+    },
+    'conversation.rewrite': params => {
+      const id = str(params, 'id');
+      const messageId = str(params, 'messageId', 1, 100);
+      const text = str(params, 'text', 1, 100_000);
+      const mode = optStr(params, 'mode', 32);
+      const current = recordOrThrow(store, id, 'conversation');
+      const view = normalizeConversation(current.data);
+      const original = view.messages.find(message => message.id === messageId);
+      if (!original || original.role !== 'user') throw new ValidationError('Only an existing user message can be rewritten');
+      const taskUsesConversation = (task: ReturnType<Store['listTasks']>[number]): boolean =>
+        store.getSteps(task.id).some(step => String((step.input as Record<string, Json> | undefined)?.conversationId ?? '') === id);
+      const activeStatuses = new Set(['queued', 'running', 'waiting_external', 'waiting_approval', 'retry_scheduled']);
+      const activeTasks = store.listTasks().filter(task => activeStatuses.has(task.status) && taskUsesConversation(task));
+      const pausedTaskIds: string[] = [];
+      for (const task of activeTasks) {
+        // Pause before truncating the transcript. If a task cannot be paused we
+        // abort the rewrite rather than allow stale work to append to the branch.
+        store.pauseTask(task.id, task.version);
+        pausedTaskIds.push(task.id);
+      }
+      const rewritten = rewriteConversationMessage(store, id, messageId, text, {
+        ...(mode === undefined ? {} : { mode }),
+        ...(original.taskId ? { replacesTaskId: original.taskId } : {}),
+        pausedTaskIds,
+      });
+      return {
+        id,
+        version: rewritten.record.version,
+        messages: rewritten.messages as unknown as Json,
+        branchId: rewritten.branchId,
+        auditId: rewritten.auditId,
+        originalIndex: rewritten.originalIndex,
+        previousTaskId: original.taskId ?? null,
+        pausedTaskIds,
+        message: rewritten.messages[rewritten.originalIndex] as unknown as Json,
+      } as unknown as Json;
     },
     'conversation.delete': params => {
       if (params.confirm !== true) throw new ValidationError('conversation.delete requires confirm: true');

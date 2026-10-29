@@ -1,6 +1,6 @@
-import {api} from './api.js?v=2.1.1';
-import {esc,escAttr} from './util.js?v=2.1.1';
-import {openModal,toastError} from './ui.js?v=2.1.1';
+import {api} from './api.js?v=1.2.0';
+import {esc,escAttr} from './util.js?v=1.2.0';
+import {openModal,toastError} from './ui.js?v=1.2.0';
 
 export async function chooseComposerSkills(input){
  const data=await api.skills.list(),skills=(data.skills||data).filter(s=>s.enabled!==false);

@@ -31,6 +31,8 @@ from omicslab.workspace.service import WorkspaceService
 class FilesBackend:
     def __init__(self,settings,workspace):self.settings=settings;self.workspace=workspace;self.kind='local'
     async def read_text(self,path,max_bytes=200000):return files.read_text(self.settings,path,max_bytes,root=self.workspace.root)
+    async def write_text(self,path,content):return files.write_text(self.settings,path,content,root=self.workspace.root)
+    async def make_dir(self,path):return files.make_dir(self.settings,path,root=self.workspace.root)
     async def read_bytes(self,path):
         target=files.resolve_path(self.settings,path,root=self.workspace.root)
         return target.read_bytes(),target.name,files.guess_mime(target)

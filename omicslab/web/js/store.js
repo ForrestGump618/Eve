@@ -1,8 +1,8 @@
 // Shell-level application state shared by the router, top bar and views.
 // Views never import app.js; they read/write this store and emit events via bus.js.
 
-import { emit } from './bus.js?v=2.1.1';
-import { getPref, setPref } from './util.js?v=2.1.1';
+import { emit } from './bus.js?v=1.2.0';
+import { getPref, setPref } from './util.js?v=1.2.0';
 
 export const ROUTES = [
   {id:'evolution',label:'自我改进',icon:'discovery',subtitle:'Proteus 实验、回归与版本'},

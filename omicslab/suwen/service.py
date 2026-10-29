@@ -46,6 +46,8 @@ class Platform:
         self.experiments=Experiments(self)
         from .research import ResearchQuests
         self.research=ResearchQuests(self)
+        from .wishes import ResearchWishes
+        self.wishes=ResearchWishes(self)
         self.sandbox.register()
         for server in self.store.list('mcp'):
             discovered=self.store.get('mcp_status',server['id'])

@@ -1,7 +1,7 @@
-import {icon} from './icons.js?v=2.1.1';
-import {on} from './bus.js?v=2.1.1';
-import {errorMessage} from './api.js?v=2.1.1';
-import {artifactConfig, ensureArtifactStyles} from './artifact-config.js';
+import {icon} from './icons.js?v=1.2.0';
+import {on} from './bus.js?v=1.2.0';
+import {errorMessage} from './api.js?v=1.2.0';
+import {artifactConfig, ensureArtifactStyles} from './artifact-config.js?v=1.2.0';
 
 let sidebar = null;
 let nextTabId = 0;

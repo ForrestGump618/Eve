@@ -59,6 +59,10 @@ export interface EvalCaseResult {
   success: boolean;
   evidenceScore?: number;
   toolFailure?: boolean;
+  failureType?: string;
+  failureMessage?: string;
+  evidenceGaps?: string[];
+  citations?: string[];
   cost?: number;
   latencyMs?: number;
   reproducible?: boolean;
@@ -73,6 +77,24 @@ export interface EvalRunnerArgs {
   signal?: AbortSignal;
 }
 export type EvalRunner = (args: EvalRunnerArgs) => EvalCaseResult | Promise<EvalCaseResult>;
+
+export interface RsiProposal {
+  change: Json;
+  diagnosis: Json;
+  confidence?: number;
+}
+
+export interface RsiProposerContext {
+  kind: RsiKind;
+  baselineConfig: Json;
+  baselineMetrics: StrategyMetrics;
+  observations: string[];
+  failures: Json;
+  signal?: AbortSignal;
+}
+
+/** An auxiliary model may diagnose failures and propose bounded declarative patches only. */
+export type RsiProposer = (context: RsiProposerContext) => RsiProposal | RsiProposal[] | Promise<RsiProposal | RsiProposal[]>;
 
 export interface RegressionThresholds {
   maxSuccessDrop: number;
@@ -263,7 +285,21 @@ function choosePatch(kind: RsiKind, baseline: Record<string, Json>, rand: () => 
   }
 }
 
-interface Candidate { id: string; change: Json; metrics: StrategyMetrics; passed: boolean; regressions: string[]; score: number }
+export interface RsiCandidate {
+  id: string;
+  change: Json;
+  metrics: Json;
+  passed: boolean;
+  regressions: string[];
+  source: 'deterministic' | 'auxiliary';
+  scoreDelta: number;
+  diagnosis?: Json;
+}
+
+type Candidate = Omit<RsiCandidate, 'metrics'> & {
+  metrics: StrategyMetrics;
+  score: number;
+};
 
 export interface RsiAuditRow {
   id: string;
@@ -289,6 +325,8 @@ export interface RsiEngineOptions {
   maxCandidates?: number;
   maxCases?: number;
   baseline?: Partial<Record<RsiKind, Json>>;
+  proposer?: RsiProposer;
+  strictImprovement?: boolean;
 }
 
 interface RunData {
@@ -498,7 +536,7 @@ export class RsiEngine {
 
   // ---- evaluation ---------------------------------------------------------
 
-  private async evaluate(run: RunData, cases: EvalCase[], candidateRef: { id: string; change: Json; config: Json }, signal?: AbortSignal): Promise<StrategyMetrics> {
+  private async evaluate(run: RunData, cases: EvalCase[], candidateRef: { id: string; change: Json; config: Json }, signal?: AbortSignal): Promise<{ metrics: StrategyMetrics; results: EvalCaseResult[] }> {
     const runner = this.options.runner;
     if (!runner) throw new ValidationError('rsi evaluation requires an injected runner');
     const results: EvalCaseResult[] = [];
@@ -507,7 +545,7 @@ export class RsiEngine {
       const raw = await runner({ candidateId: candidateRef.id, change: candidateRef.change, baselineConfig: candidateRef.config, evalCase, ...(signal ? { signal } : {}) });
       results.push(this.sanitizeResult(evalCase.id, raw));
     }
-    return aggregateMetrics(results);
+    return { metrics: aggregateMetrics(results), results };
   }
 
   private sanitizeResult(caseId: string, raw: EvalCaseResult): EvalCaseResult {
@@ -516,6 +554,10 @@ export class RsiEngine {
     const result: EvalCaseResult = { caseId, success: raw.success };
     if (typeof raw.evidenceScore === 'number') result.evidenceScore = raw.evidenceScore;
     if (typeof raw.toolFailure === 'boolean') result.toolFailure = raw.toolFailure;
+    if (typeof raw.failureType === 'string' && raw.failureType.length <= 100) result.failureType = raw.failureType;
+    if (typeof raw.failureMessage === 'string' && raw.failureMessage.length <= 2_000) result.failureMessage = raw.failureMessage;
+    if (Array.isArray(raw.evidenceGaps)) result.evidenceGaps = raw.evidenceGaps.filter((value): value is string => typeof value === 'string').slice(0, 20).map(value => value.slice(0, 500));
+    if (Array.isArray(raw.citations)) result.citations = raw.citations.filter((value): value is string => typeof value === 'string' && /^https?:\/\//.test(value)).slice(0, 50).map(value => value.slice(0, 2_000));
     if (typeof raw.cost === 'number' && Number.isFinite(raw.cost)) result.cost = Math.max(0, raw.cost);
     if (typeof raw.latencyMs === 'number' && Number.isFinite(raw.latencyMs)) result.latencyMs = Math.max(0, raw.latencyMs);
     if (typeof raw.reproducible === 'boolean') result.reproducible = raw.reproducible;
@@ -568,36 +610,49 @@ export class RsiEngine {
     });
     data = recordData(runRow) as unknown as RunData;
     data = this.appendPhase(data, 'observe', `observed active ${kindValue} strategy v${baselineStrategy.version} over ${cases.length} eval cases`);
-    const baselineMetrics = await this.evaluate(data, cases, { id: `baseline-${baselineRow.id}`, change: {}, config: baselineConfig }, signal);
+    const baselineEvaluation = await this.evaluate(data, cases, { id: `baseline-${baselineRow.id}`, change: {}, config: baselineConfig }, signal);
+    const baselineMetrics = baselineEvaluation.metrics;
+    const failures = this.failureSummary(baselineEvaluation.results);
     data = this.appendPhase(data, 'observe-baseline', `baseline metrics: taskSuccess=${baselineMetrics.taskSuccess} evidenceAccuracy=${baselineMetrics.evidenceAccuracy}`, {
       baseline: { strategyId: baselineRow.id, metrics: baselineMetrics as unknown as Json },
     });
 
     // Diagnose: turn baseline metrics into named observations.
     const observations = this.diagnose(baselineMetrics);
-    data = this.appendPhase(data, 'diagnose', observations.join('; '), { diagnosis: { observations, at: this.clock() } });
+    data = this.appendPhase(data, 'diagnose', observations.join('; '), { diagnosis: { observations, failures, at: this.clock() } });
 
-    // Propose: deterministic seeded candidates from the fixed baseline schema.
-    const candidates = this.propose(kindValue, baselineConfig, seedInput, cycle);
+    // Propose: an optional auxiliary model diagnoses the same failures and emits
+    // a bounded declarative patch. Deterministic candidates remain a fallback.
+    const candidates = await this.propose(kindValue, baselineConfig, seedInput, cycle, {
+      baselineMetrics, observations, failures, ...(signal ? { signal } : {}),
+    });
     data = this.appendPhase(data, 'propose', `proposed ${candidates.length} candidates (seed ${seedInput})`, { candidates: candidates as unknown as Json });
 
     // Benchmark (Sandbox Test + Benchmark): every candidate over the same eval set.
     runRow = this.transition(data, 'benchmarking', 'benchmarking', `evaluating ${candidates.length} candidates x ${cases.length} cases`);
     data = recordData(runRow) as unknown as RunData;
     const benchmarked: Candidate[] = [];
+    const baselineScore = candidateScore(baselineMetrics);
+    const strictImprovement = value.strictImprovement === true || this.options.strictImprovement === true;
     for (const candidate of candidates) {
       if (signal?.aborted) throw new Error('rsi run aborted');
-      const metrics = await this.evaluate(data, cases, { id: candidate.id, change: candidate.change, config: mergeStrategyConfig(baselineConfig, candidate.change) }, signal);
+      const evaluation = await this.evaluate(data, cases, { id: candidate.id, change: candidate.change, config: mergeStrategyConfig(baselineConfig, candidate.change) }, signal);
+      const metrics = evaluation.metrics;
       const regressions = detectRegressions(metrics, baselineMetrics, this.thresholds);
+      const score = candidateScore(metrics);
+      const scoreDelta = Math.round((score - baselineScore) * 1e6) / 1e6;
       benchmarked.push({
         id: candidate.id,
         change: candidate.change,
         metrics,
-        passed: regressions.length === 0,
+        passed: regressions.length === 0 && (!strictImprovement || scoreDelta > 0),
         regressions,
-        score: candidateScore(metrics),
+        score,
+        scoreDelta,
+        source: candidate.source,
+        ...(candidate.diagnosis === undefined ? {} : { diagnosis: candidate.diagnosis }),
       });
-      this.writeAudit(data.id, data.cycle, 'sandbox-test', 'benchmarking', 'benchmarking', `${candidate.id} ${regressions.length ? `regressed: ${regressions.join(',')}` : 'passed'}`);
+      this.writeAudit(data.id, data.cycle, 'sandbox-test', 'benchmarking', 'benchmarking', `${candidate.id} ${regressions.length ? `regressed: ${regressions.join(',')}` : strictImprovement && scoreDelta <= 0 ? `no positive delta (${scoreDelta})` : `passed (delta ${scoreDelta})`}`);
     }
     data = this.appendPhase({ ...data, candidates: benchmarked }, 'benchmark', `benchmarked ${benchmarked.length} candidates`, { candidates: benchmarked as unknown as Json });
 
@@ -605,7 +660,7 @@ export class RsiEngine {
     const chosen = passed[0];
     if (!chosen) {
       // Regression => rollback: keep the active baseline untouched.
-      const failedRow = this.transition(data, 'rolled_back', 'regression-rollback', 'every candidate regressed; baseline retained', { chosenCandidateId: null });
+      const failedRow = this.transition(data, 'rolled_back', 'regression-rollback', strictImprovement ? 'no candidate produced a positive paired score delta without regression; baseline retained' : 'every candidate regressed; baseline retained', { chosenCandidateId: null });
       return this.toRunView(failedRow);
     }
     data = { ...data, chosenCandidateId: chosen.id, candidates: benchmarked };
@@ -623,6 +678,33 @@ export class RsiEngine {
     return (cycles.length ? Math.max(...cycles) : 0) + 1;
   }
 
+  /** Summarize failed cases once, rather than asking a proposer to infer from raw metrics alone. */
+  private failureSummary(results: EvalCaseResult[]): Json {
+    const failed = results.filter(result => !result.success);
+    const byType: Record<string, number> = {};
+    const evidenceGaps: string[] = [];
+    for (const result of failed) {
+      const type = result.failureType?.slice(0, 100) || 'unspecified';
+      byType[type] = (byType[type] ?? 0) + 1;
+      for (const gap of result.evidenceGaps ?? []) {
+        if (!evidenceGaps.includes(gap)) evidenceGaps.push(gap.slice(0, 500));
+      }
+    }
+    return {
+      failedCases: failed.length,
+      totalCases: results.length,
+      byType: byType as unknown as Json,
+      evidenceGaps: evidenceGaps.slice(0, 20) as Json,
+      examples: failed.slice(0, 8).map(result => ({
+        caseId: result.caseId,
+        type: result.failureType ?? 'unspecified',
+        message: result.failureMessage?.slice(0, 300) ?? null,
+        toolFailure: result.toolFailure === true,
+        citations: (result.citations ?? []).slice(0, 5),
+      })) as unknown as Json,
+    };
+  }
+
   private diagnose(metrics: StrategyMetrics): string[] {
     const observations: string[] = [];
     if (metrics.taskSuccess < 0.8) observations.push(`taskSuccess ${metrics.taskSuccess} below 0.80 target`);
@@ -634,12 +716,44 @@ export class RsiEngine {
     return observations;
   }
 
-  private propose(kind: RsiKind, baselineConfig: Json, seed: string, cycle: number): Array<{ id: string; change: Json }> {
+  private async propose(
+    kind: RsiKind,
+    baselineConfig: Json,
+    seed: string,
+    cycle: number,
+    context: Omit<RsiProposerContext, 'kind' | 'baselineConfig'>,
+  ): Promise<Array<{ id: string; change: Json; source: 'deterministic' | 'auxiliary'; diagnosis?: Json }>> {
     const rand = mulberry32(hashSeed(`${seed}|${kind}|${cycle}`));
     const count = Math.max(1, Math.min(this.options.maxCandidates ?? 6, MAX_CANDIDATES));
-    const candidates: Array<{ id: string; change: Json }> = [];
+    const candidates: Array<{ id: string; change: Json; source: 'deterministic' | 'auxiliary'; diagnosis?: Json }> = [];
     const seen = new Set<string>();
-    for (let index = 0; index < count; index += 1) {
+    const proposer = this.options.proposer;
+    if (proposer) {
+      try {
+        const proposalOrList = await proposer({ kind, baselineConfig, ...context });
+        const proposals = (Array.isArray(proposalOrList) ? proposalOrList : [proposalOrList]).slice(0, count);
+        for (const [index, proposal] of proposals.entries()) {
+          if (!proposal || typeof proposal !== 'object' || !isRecord(proposal.change)) continue;
+          const change = proposal.change as Json;
+          const effective = mergeStrategyConfig(baselineConfig, change);
+          assertStrategyConfigSafe(kind, effective);
+          const signature = JSON.stringify(change);
+          if (seen.has(signature)) continue;
+          seen.add(signature);
+          candidates.push({
+            id: `cand-${cycle}-${index + 1}-aux-${createHash('sha256').update(signature).digest('hex').slice(0, 8)}`,
+            change,
+            source: 'auxiliary',
+            diagnosis: proposal.diagnosis ?? {},
+          });
+        }
+      } catch {
+        // An auxiliary diagnosis is optional. It must never erase the fixed
+        // deterministic fallback or promote an invalid configuration.
+      }
+    }
+    const deterministicCount = Math.max(0, count - candidates.length);
+    for (let index = 0; index < deterministicCount; index += 1) {
       let patch = choosePatch(kind, baselineConfig as Record<string, Json>, rand, index);
       let signature = JSON.stringify(patch);
       let attempts = 0;
@@ -651,7 +765,11 @@ export class RsiEngine {
       seen.add(signature);
       const effective = mergeStrategyConfig(baselineConfig, patch);
       assertStrategyConfigSafe(kind, effective);
-      candidates.push({ id: `cand-${cycle}-${index + 1}-${createHash('sha256').update(signature).digest('hex').slice(0, 8)}`, change: patch });
+      candidates.push({
+        id: `cand-${cycle}-${index + 1}-${createHash('sha256').update(signature).digest('hex').slice(0, 8)}`,
+        change: patch,
+        source: 'deterministic',
+      });
     }
     return candidates;
   }

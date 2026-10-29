@@ -1,21 +1,22 @@
 /** Eve platform: every control talks to a real, scoped service. */
-import { api, errorMessage } from '../api.js?v=2.1.1';
-import { getState, navigate } from '../store.js?v=2.1.1';
-import { esc, escAttr, getPref, setPref } from '../util.js?v=2.1.1';
-import { icon } from '../icons.js?v=2.1.1';
-import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=2.1.1';
-import { applyAppearance } from '../suwen.js?v=2.1.1';
-import { renderChannels } from './channel-setup.js?v=2.1.1';
-import {mountResearchWorkspace} from './research-workspace.js?v=1.0.0';
-import {mountScienceWorkbench} from './science-workbench.js?v=1.0.0';
-import {mountProviderModels} from '../provider-models.js?v=1.0.0';
+import { api, errorMessage } from '../api.js?v=1.2.0';
+import { getState, navigate } from '../store.js?v=1.2.0';
+import { esc, escAttr, getPref, setPref } from '../util.js?v=1.2.0';
+import { icon } from '../icons.js?v=1.2.0';
+import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.2.0';
+import { applyAppearance } from '../suwen.js?v=1.2.0';
+import { renderChannels } from './channel-setup.js?v=1.2.0';
+import {mountResearchWorkspace} from './research-workspace.js?v=1.2.0';
+import {mountWishResearch} from './wish-research.js?v=1.2.0';
+import {mountScienceWorkbench} from './science-workbench.js?v=1.2.0';
+import {mountProviderModels} from '../provider-models.js?v=1.2.0';
 
 const GROUPS={
  settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']],
  extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']],
  tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']],
  knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']],
- research:[['science','科学工作台','skills'],['quests','科研课题','layers'],['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']],
+ research:[['wishes','许愿式科研','wand'],['science','科学工作台','skills'],['quests','科研课题','layers'],['research','证据与验证','shield'],['experiments','实验比较','layers'],['biomni','生物工具','skills'],['review','视觉检查记录','eye']],
  workflow:[['workflow','工作流编排','layers']],artifacts:[['artifact','产物与版本','files']],diagnostics:[['diagnostics','系统诊断','cpu']],
 };
 const TITLES={settings:['设置','默认简单，需要时再深入。'],extensions:['能力中心','连接工具、专业技能与消息入口。'],tasks2:['任务中心','工作持续运行，过程随时可查。'],knowledge:['知识与记忆','只检索当前工作区，保留原始来源。'],research:['科研与证据','结论必须有来源，验证必须可复查。'],workflow:['工作流','把重复工作变成可检查的步骤。'],artifacts:['产物中心','文件、来源和历史版本在一起。'],diagnostics:['系统诊断','真实状态、用量和错误，随时可见。']};
@@ -54,6 +55,7 @@ export async function mount(root){
    else if(['appearance','permissions','budget','vision','memory'].includes(section))await settings(section);
    else if(section==='advanced')await advanced();
    else if(section==='channel')channelView=await renderChannels(content,{request,scope,reload:load});
+   else if(section==='wishes')channelView=await mountWishResearch(content,{request});
    else if(section==='science')channelView=await mountScienceWorkbench(content,{request});
    else if(section==='quests')channelView=await mountResearchWorkspace(content,{request});
    else if(section==='tasks')await tasks();

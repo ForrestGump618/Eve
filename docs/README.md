@@ -2,13 +2,15 @@
 
 素问 Suwen 是面向日常工作与科研的本地 AI Agent 工作室：在本机或 SSH 工作区里运行持久的 Agent 任务，用技能扩展分析方法，并对科研结论执行证据门控。本目录是它的公开文档入口。
 
-> 当前版本 **1.1.0**（Python 发行包名仍为 `omicslab`）。项目根目录的 [README](../README.md) 给出定位、启动方式和能力边界；本页负责把文档按读者和主题组织起来。
+> 当前版本 **1.2.0**（Python 发行包名仍为 `omicslab`）。项目根目录的 [README](../README.md) 给出定位、启动方式和能力边界；本页负责把文档按读者和主题组织起来。
 
 消息渠道：[微信扫码与引导设置](CHANNELS.md)。
 
 运行时修复：[自动回合治理与流式输出](TURN-GOVERNANCE.md)。
 
 新增版本：[2.1 升级说明与 Sage-A1.5 适配](UPGRADE-2.1.md)。
+
+科研工作流：[许愿式科研](WISH-RESEARCH.md)。
 
 ## 从这里开始
 
@@ -28,6 +30,7 @@
 - [安装指南](INSTALL.md) → [运行说明](SUWEN-V2-GUIDE.md) → [常见问题](FAQ.md)
 - 能力与限制：[V2 实现与缺口清单](SUWEN-V2-CHECKLIST.md)、[与商业方案的对照](COMPARISON.md)
 - 科研使用：[科研证据设计](BIOMEDICAL-EVIDENCE.md)、[内置技能库](SKILLS.md)
+- 从一句愿望开始：[许愿式科研](WISH-RESEARCH.md)
 
 ### 研究者
 
@@ -71,6 +74,7 @@
 | [SUWEN-V2-REQUIREMENTS.md](SUWEN-V2-REQUIREMENTS.md) | V2 原始需求基线，用于对照验收范围 | 当前 |
 | [VALIDATION-V2.md](VALIDATION-V2.md) | 2.0.0 自动回归与实测记录 | 当前 |
 | [BIOMEDICAL-EVIDENCE.md](BIOMEDICAL-EVIDENCE.md) | Biomni 思路与科研证据门控设计 | 当前 |
+| [WISH-RESEARCH.md](WISH-RESEARCH.md) | 一句话愿望到持久科研项目、证据门禁与工作区 | 当前 |
 | [REFERENCES-V2.md](REFERENCES-V2.md) | 参考项目清单、借鉴点与许可证边界 | 当前 |
 | [COMPARISON.md](COMPARISON.md) | 与商业组学工作台的功能对照及边界声明（内容整理于 1.3.0 时期） | 当前 |
 | [UPGRADE-1.3.md](UPGRADE-1.3.md) | 1.3.0 SSH 工作区升级说明与验证范围 | 当前 |

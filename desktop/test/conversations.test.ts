@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store } from '../src/harness/store.js';
 import type { Json } from '../src/harness/types.js';
-import { appendConversationMessage, normalizeConversation } from '../src/conversations.js';
+import { appendConversationMessage, normalizeConversation, rewriteConversationMessage } from '../src/conversations.js';
 
 function fixture(t: { after: (fn: () => void) => void }): Store {
   const dir = mkdtempSync(join(tmpdir(), 'suwen-conversation-'));
@@ -66,4 +66,39 @@ test('unknown conversation and invalid messages are rejected', t => {
   const id = conversation(store);
   assert.throws(() => appendConversationMessage(store, id, { id: 'a', role: 'tool' as never, text: 'hi', at: 1 }), /role is invalid/);
   assert.throws(() => appendConversationMessage(store, id, { id: 'a', role: 'user', text: '', at: 1 }), /non-empty/);
+});
+
+test('rewriting a user turn creates an auditable branch and preserves the old suffix', t => {
+  const store = fixture(t);
+  const id = conversation(store);
+  appendConversationMessage(store, id, { id: 'u1', role: 'user', text: 'Question', at: 10, taskId: 'task-1' });
+  appendConversationMessage(store, id, { id: 'a1', role: 'assistant', text: 'Old answer', at: 11, taskId: 'task-1' });
+  appendConversationMessage(store, id, { id: 'u2', role: 'user', text: 'Follow up', at: 12, taskId: 'task-2' });
+
+  const rewritten = rewriteConversationMessage(store, id, 'u1', 'Corrected question', {
+    now: 20, branchId: 'branch-fixed', replacesTaskId: 'task-1', pausedTaskIds: ['task-1', 'task-2'],
+  });
+  assert.equal(rewritten.originalIndex, 0);
+  assert.equal(rewritten.branchId, 'branch-fixed');
+  assert.equal(rewritten.messages.length, 1);
+  assert.equal(rewritten.messages[0]!.text, 'Corrected question');
+  assert.equal(rewritten.messages[0]!.revisionOf, 'u1');
+  assert.equal(rewritten.messages[0]!.replacesTaskId, 'task-1');
+  const view = normalizeConversation(store.getRecord(id)!.data);
+  assert.equal(view.activeBranchId, 'branch-fixed');
+  assert.equal(view.messages.length, 1);
+  const audit = store.getRecord(rewritten.auditId)!;
+  assert.equal(audit.kind, 'conversationBranch');
+  const payload = audit.data as Record<string, Json>;
+  assert.deepEqual(payload.pausedTaskIds, ['task-1', 'task-2']);
+  assert.equal((payload.messages as Json[]).length, 3);
+  assert.equal((payload.messages as Array<Record<string, Json>>)[1]!.role, 'assistant');
+});
+
+test('only user turns can be rewritten and missing turns are rejected', t => {
+  const store = fixture(t);
+  const id = conversation(store);
+  appendConversationMessage(store, id, { id: 'a1', role: 'assistant', text: 'Answer', at: 1 });
+  assert.throws(() => rewriteConversationMessage(store, id, 'a1', 'Changed'), /Only user messages/);
+  assert.throws(() => rewriteConversationMessage(store, id, 'missing', 'Changed'), /not found/);
 });

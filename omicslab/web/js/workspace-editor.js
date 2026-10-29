@@ -1,8 +1,8 @@
-import {api,errorMessage} from './api.js?v=2.1.1';
-import {esc,escAttr} from './util.js?v=2.1.1';
-import {openModal,toastError,toastSuccess} from './ui.js?v=2.1.1';
-import {getState} from './store.js?v=2.1.1';
-import {emit} from './bus.js?v=2.1.1';
+import {api,errorMessage} from './api.js?v=1.2.0';
+import {esc,escAttr} from './util.js?v=1.2.0';
+import {openModal,toastError,toastSuccess} from './ui.js?v=1.2.0';
+import {getState} from './store.js?v=1.2.0';
+import {emit} from './bus.js?v=1.2.0';
 
 // Small dirty buffers survive dialog dismissal/route changes; never evict edits.
 const drafts=new Map();

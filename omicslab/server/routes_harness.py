@@ -272,6 +272,29 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
                 return await service.record(scope, str(args.get("id") or ""), args, run_id=run_id)
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from exc
+        if operation in {"wish_status", "wish_start", "wish_update", "wish_record", "wish_block"}:
+            service = state.platform.wishes
+            scope = handle.workspace.workspace_id
+            if operation == "wish_status":
+                try:
+                    wish_id = str(args.get("id") or "")
+                    return service.get(scope, wish_id) if wish_id else {"items": service.agent_list(scope)}
+                except ValueError as exc:
+                    raise HTTPException(422, str(exc)) from exc
+            await authorize(state, handle, operation, args)
+            try:
+                if operation == "wish_start":
+                    return await service.start(scope, args)
+                wish_id = str(args.get("id") or "")
+                if not wish_id:
+                    raise ValueError("缺少科研愿望 id")
+                if operation == "wish_update":
+                    return await service.update(scope, wish_id, args)
+                if operation == "wish_record":
+                    return await service.record(scope, wish_id, args, run_id=run_id)
+                return await service.block(scope, wish_id, args)
+            except (ValueError, RuntimeError) as exc:
+                raise HTTPException(422, str(exc)[:3000]) from exc
         if operation in {"write_file", "run_shell", "run_skill", "prepare_science_skill", "run_science_skill", "prepare_archify", "run_archify"}:
             approval_args = args
             if operation in {"prepare_science_skill", "run_science_skill", "prepare_archify", "run_archify"}:

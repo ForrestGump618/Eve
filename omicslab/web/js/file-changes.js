@@ -1,9 +1,9 @@
-import {api,errorMessage} from './api.js?v=2.1.1';
-import {esc,escAttr} from './util.js?v=2.1.1';
-import {openModal,confirmDialog,toastError,toastSuccess} from './ui.js?v=2.1.1';
-import {getState} from './store.js?v=2.1.1';
-import {openWorkspaceEditor} from './workspace-editor.js?v=2.1.1';
-import {emit} from './bus.js?v=2.1.1';
+import {api,errorMessage} from './api.js?v=1.2.0';
+import {esc,escAttr} from './util.js?v=1.2.0';
+import {openModal,confirmDialog,toastError,toastSuccess} from './ui.js?v=1.2.0';
+import {getState} from './store.js?v=1.2.0';
+import {openWorkspaceEditor} from './workspace-editor.js?v=1.2.0';
+import {emit} from './bus.js?v=1.2.0';
 
 export function mountFileChanges(root,context){
  const host=document.createElement('details');host.className='eve-file-changes';host.hidden=true;

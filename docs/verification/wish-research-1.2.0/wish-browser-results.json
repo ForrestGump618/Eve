@@ -1,0 +1,45 @@
+{
+  "browser": "156.0.4314.50",
+  "checks": [
+    "desktop render",
+    "stage dependencies",
+    "no raw JSON",
+    "launch payload",
+    "conversation selection",
+    "mobile overflow"
+  ],
+  "timings": {
+    "desktopMountMs": 6.7,
+    "desktopVisibleMs": 179.93,
+    "mobileMountMs": 3.8,
+    "mobileVisibleMs": 71.76,
+    "note": "Local loopback fixture and in-process API response; this does not include model or scientific workload latency."
+  },
+  "browserMetrics": {
+    "domNodes": 239,
+    "resourceEntries": 22,
+    "resourceEncodedBytes": 445077
+  },
+  "calls": [
+    {
+      "path": "/api/platform/wishes",
+      "method": "GET",
+      "scope": "ws_main"
+    },
+    {
+      "path": "/api/platform/wishes/wish-demo/launch",
+      "method": "POST",
+      "scope": "ws_main",
+      "body": {
+        "stage": "scouting",
+        "advance": true
+      }
+    },
+    {
+      "path": "/api/platform/wishes",
+      "method": "GET",
+      "scope": "ws_main"
+    }
+  ],
+  "errors": []
+}

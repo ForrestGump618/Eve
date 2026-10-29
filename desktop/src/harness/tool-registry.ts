@@ -5,12 +5,20 @@ import type { FormatsPlugin } from 'ajv-formats';
 const addFormats:FormatsPlugin=createRequire(import.meta.url)('ajv-formats');
 import type { Json } from './types.js';
 import { ValidationError } from './types.js';
+import {
+  ToolArgumentError,
+  UnknownToolError,
+  normalizeToolArguments,
+  suggestFieldName,
+  suggestToolNames,
+} from './tool-diagnostics.js';
 
 export interface ToolDefinition {
   name: string;
   description: string;
   parameters: Record<string, Json>;
   kind: 'tool' | 'mcp' | 'skill';
+  readOnly?: boolean;
   timeoutMs?: number;
   execute(args: Record<string, Json>, signal: AbortSignal): Promise<Json>;
 }
@@ -31,7 +39,36 @@ export function validateArguments(value: unknown, schema: unknown, path = '$'): 
     catch{throw new ValidationError(`${path}: unsupported or invalid JSON Schema`);}
     validators.set(key,validate);while(validators.size>128)validators.delete(validators.keys().next().value!);
   }
-  if(!validate(value)){const e=validate.errors?.[0];throw new ValidationError(`${path}${e?.instancePath??''}: ${e?.keyword??'schema'} validation failed`);}
+  if(!validate(value)){
+    const error=validate.errors?.[0];
+    const schemaRecord=schema as Record<string, Json>;
+    const properties=schemaRecord.properties&&typeof schemaRecord.properties==='object'&&!Array.isArray(schemaRecord.properties)
+      ?schemaRecord.properties as Record<string,Json>:{};
+    const required=Array.isArray(schemaRecord.required)?schemaRecord.required.filter(item=>typeof item==='string'):[];
+    const keyword=String(error?.keyword??'schema');
+    const field=keyword==='required'
+      ?String((error?.params as {missingProperty?:unknown}|undefined)?.missingProperty??'')
+      :keyword==='additionalProperties'
+        ?String((error?.params as {additionalProperty?:unknown}|undefined)?.additionalProperty??'')
+        :String(error?.instancePath??'').split('/').filter(Boolean).at(-1)??'';
+    const allowed=Object.keys(properties);
+    const suggestions=field&&allowed.length?suggestFieldName(field,allowed):required.slice(0,5);
+    const detail=keyword==='required'
+      ?`required field ${JSON.stringify(field)} is missing`
+      :keyword==='additionalProperties'
+        ?`field ${JSON.stringify(field)} is not allowed`
+        :keyword==='type'
+          ?`field ${field?JSON.stringify(field):'value'} has the wrong type`
+          :`${keyword} validation failed${field?` at ${field}`:''}`;
+    throw new ToolArgumentError(`${path}${error?.instancePath??''}: ${detail}${suggestions.length?`. Did you mean ${suggestions.join(', ')}?`:''}`,{
+      ...(field?{field}:{}),
+      keyword,
+      ...(keyword==='type'&&properties[field]&&typeof properties[field]==='object'&&!Array.isArray(properties[field])&&typeof (properties[field] as Record<string,Json>).type==='string'
+        ?{expected:String((properties[field] as Record<string,Json>).type)}:{}),
+      received:value===null?'null':Array.isArray(value)?'array':typeof value,
+      suggestions,
+    });
+  }
 }
 
 export class ToolRegistry {
@@ -43,15 +80,25 @@ export class ToolRegistry {
   definitions(): Array<{name:string; description:string; parameters:Record<string,Json>}> {
     return [...this.tools.values()].map(({name,description,parameters}) => ({name,description,parameters}));
   }
+  names(): string[] {
+    return [...this.tools.keys()];
+  }
+  readOnly(name: string): boolean {
+    return this.tools.get(name)?.readOnly === true;
+  }
+  definition(name: string): ToolDefinition | undefined {
+    return this.tools.get(name);
+  }
   async execute(name: string, args: Record<string, Json>, signal: AbortSignal): Promise<Json> {
     signal.throwIfAborted();
     const tool = this.tools.get(name);
-    if (!tool) throw new ValidationError(`Unknown tool: ${name}`);
-    validateArguments(args,tool.parameters);
+    if (!tool) throw new UnknownToolError(name, suggestToolNames(name, this.names()));
+    const normalized=normalizeToolArguments(args,tool.parameters);
+    validateArguments(normalized.args,tool.parameters);
     const deadline = AbortSignal.any([signal,AbortSignal.timeout(tool.timeoutMs ?? 20000)]);
     let listener: (() => void) | undefined;
     try {
-      return await Promise.race([tool.execute(args,deadline), new Promise<never>((_,reject) => {
+      return await Promise.race([tool.execute(normalized.args,deadline), new Promise<never>((_,reject) => {
         listener = () => reject(new Error(signal.aborted ? 'Tool cancelled' : 'Tool timed out'));
         deadline.addEventListener('abort',listener,{once:true}); if (deadline.aborted) listener();
       })]);

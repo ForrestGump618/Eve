@@ -6,12 +6,12 @@
  * chat live bubble, the session run list and child task cards.
  */
 
-import { api, errorMessage } from './api.js?v=2.1.1';
-import { icon } from './icons.js?v=2.1.1';
-import { esc, escAttr, cleanValue, fmtClock, fmtDuration, truncate, setPref } from './util.js?v=2.1.1';
-import { openModal, spinnerHtml, toastError, toastSuccess, toastWarn, confirmDialog } from './ui.js?v=2.1.1';
-import {navigate,setState} from './store.js?v=2.1.1';
-import {emit} from './bus.js?v=2.1.1';
+import { api, errorMessage } from './api.js?v=1.2.0';
+import { icon } from './icons.js?v=1.2.0';
+import { esc, escAttr, cleanValue, fmtClock, fmtDuration, truncate, setPref } from './util.js?v=1.2.0';
+import { openModal, spinnerHtml, toastError, toastSuccess, toastWarn, confirmDialog } from './ui.js?v=1.2.0';
+import {navigate,setState} from './store.js?v=1.2.0';
+import {emit} from './bus.js?v=1.2.0';
 
 const RUN_LABELS = {
   queued: '排队中',

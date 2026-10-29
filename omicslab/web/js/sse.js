@@ -3,8 +3,8 @@
 // Wire format (CONTRACTS.md): each event is one `data: <json>\n\n` line whose JSON is
 // an envelope {type, data, ts}.
 
-import { ApiError } from './api.js?v=2.1.1';
-import { sleep } from './util.js?v=2.1.1';
+import { ApiError } from './api.js?v=1.2.0';
+import { sleep } from './util.js?v=1.2.0';
 
 /** Parse one raw SSE block (text between blank lines) into a normalised envelope. */
 export function parseEventBlock(block) {
