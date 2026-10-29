@@ -1,17 +1,20 @@
 import { safeError } from './security.js';
 import type { Json } from './harness/types.js';
-export interface ModelConfig { provider:'openai'|'anthropic'; baseUrl:string; model:string; apiKey:string; contextWindow:number; maxOutput:number }
+export type InputModality='text'|'image';
+export interface ModelConfig { provider:'openai'|'anthropic'; baseUrl:string; model:string; apiKey:string; contextWindow:number; maxOutput:number; temperature:number|null; modalities:InputModality[] }
 export function validateModelConfig(value:unknown):ModelConfig {
- const c=value as ModelConfig;const fields=new Set(['provider','baseUrl','model','apiKey','contextWindow','maxOutput']);
+ const c=value as ModelConfig;const fields=new Set(['provider','baseUrl','model','apiKey','contextWindow','maxOutput','temperature','modalities']);
  if(!c||Array.isArray(c)||typeof c!=='object'||Object.keys(c).some(k=>!fields.has(k))||!['openai','anthropic'].includes(c.provider)||typeof c.apiKey!=='string'||c.apiKey.length>4096||/[\u0000-\u001f\u007f]/.test(c.apiKey)||typeof c.model!=='string'||!c.model.trim()||c.model.length>160||/[\u0000-\u001f\u007f]/.test(c.model)||typeof c.baseUrl!=='string')throw new Error('模型配置无效');
  const url=new URL(c.baseUrl);if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['127.0.0.1','localhost','[::1]'].includes(url.hostname)))throw new Error('模型地址需要 HTTPS 或本地回环 HTTP');
  if(url.username||url.password||url.search||url.hash)throw new Error('模型地址不能包含凭据或查询参数');
  if(!Number.isSafeInteger(c.contextWindow)||c.contextWindow<4096||c.contextWindow>2_000_000||!Number.isSafeInteger(c.maxOutput)||c.maxOutput<128||c.maxOutput>32768||c.maxOutput>=c.contextWindow/2)throw new Error('上下文与输出预算无效');
- return {...c,baseUrl:c.baseUrl.replace(/\/$/,'')};
+ if(c.temperature!==undefined&&c.temperature!==null&&(typeof c.temperature!=='number'||!Number.isFinite(c.temperature)||c.temperature<0||c.temperature>2))throw new Error('温度需要 0—2 的数值，或留空使用模型默认值');
+ if(c.modalities!==undefined&&(!Array.isArray(c.modalities)||!c.modalities.length||new Set(c.modalities).size!==c.modalities.length||c.modalities.some(m=>m!=='text'&&m!=='image')))throw new Error('输入模态仅支持文本和图片');
+ return {...c,baseUrl:c.baseUrl.replace(/\/$/,''),temperature:c.temperature??null,modalities:[...(c.modalities??['text'])]};
 }
 export interface FunctionSpec { name:string; description:string; parameters:Record<string,Json> }
 export interface ToolCall { id:string; name:string; arguments:string }
-export interface TurnMessage { role:'system'|'user'|'assistant'|'tool'; content:string; tool_calls?: Array<{id:string;type:'function';function:{name:string;arguments:string}}>; tool_call_id?:string; reasoning_content?:string }
+export interface TurnMessage { role:'system'|'user'|'assistant'|'tool'; content:string; images?:Array<{url:string;mime:'image/png'|'image/jpeg'|'image/webp'|'image/gif'}>; tool_calls?: Array<{id:string;type:'function';function:{name:string;arguments:string}}>; tool_call_id?:string; reasoning_content?:string }
 export interface ModelTurn { text:string; tokens:number; toolCalls:ToolCall[]; reasoningContent?:string }
 export class ModelTruncatedError extends Error {
  constructor(readonly partialText:string,readonly tokens:number,readonly hasToolCalls:boolean){super('模型输出达到长度上限（截断），尚未完成');this.name='ModelTruncatedError';}
@@ -25,16 +28,28 @@ function anthropicMessages(messages:TurnMessage[]):any[] {
  for(const m of messages.filter(m=>m.role!=='system')){
   let role=m.role==='assistant'?'assistant':'user';let content:any[];
   if(m.role==='tool')content=[{type:'tool_result',tool_use_id:m.tool_call_id,content:m.content}];
-  else {content=m.content?[{type:'text',text:m.content}]:[];for(const t of m.tool_calls??[]){let input:unknown;try{input=JSON.parse(t.function.arguments);}catch{throw new Error('模型工具参数不是有效 JSON');}content.push({type:'tool_use',id:t.id,name:t.function.name,input});}}
+  else {content=m.content?[{type:'text',text:m.content}]:[];for(const image of m.images??[])content.push({type:'image',source:{type:'url',url:image.url}});for(const t of m.tool_calls??[]){let input:unknown;try{input=JSON.parse(t.function.arguments);}catch{throw new Error('模型工具参数不是有效 JSON');}content.push({type:'tool_use',id:t.id,name:t.function.name,input});}}
   if(result.at(-1)?.role===role)result.at(-1).content.push(...content);else result.push({role,content});
  }
  return result;
 }
 async function streamReply(c:ModelConfig,messages:TurnMessage[],signal:AbortSignal,onText:(text:string)=>void,tools:FunctionSpec[]):Promise<ModelTurn> {
  const anthropic=c.provider==='anthropic';
+ const multimodal=messages.some(m=>m.images?.length);
+ if(multimodal){
+  if(!c.modalities.includes('image'))throw new Error('当前模型仅配置为文本输入，请先启用图片模态');
+  for(const m of messages)for(const image of m.images??[]){
+   if(m.role!=='user'||!/^https:\/\/|^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(image.url)||!/^image\/(?:png|jpeg|webp|gif)$/.test(image.mime))throw new Error('图片输入需要受支持的 HTTPS 或 Base64 图片地址');
+  }
+ }
  const system=messages.filter(m=>m.role==='system').map(m=>m.content).join('\n');
- const nativeMessages=anthropic&&(tools.length||messages.some(m=>m.role==='tool'||m.tool_calls?.length))?anthropicMessages(messages):messages.filter(m=>m.role!=='system');
- const body=anthropic?{model:c.model,max_tokens:c.maxOutput,system,messages:nativeMessages,stream:true,...(tools.length?{tools:tools.map(t=>({name:t.name,description:t.description,input_schema:t.parameters}))}:{})}:{model:c.model,max_tokens:c.maxOutput,messages,stream:true,stream_options:{include_usage:true},...(tools.length?{tools:tools.map(t=>({type:'function',function:t})),tool_choice:'auto'}:{})};
+ const nativeMessages=anthropic
+  ?(tools.length||multimodal||messages.some(m=>m.role==='tool'||m.tool_calls?.length)?anthropicMessages(messages):messages.filter(m=>m.role!=='system'))
+  :messages.map(m=>m.role==='user'&&m.images?.length
+   ?{role:m.role,content:[...(m.content?[{type:'text',text:m.content}]:[]),...(m.images??[]).map(image=>({type:'image_url',image_url:{url:image.url}}))]}
+   :m);
+ const sampling=c.temperature===null?{}:{temperature:c.temperature};
+ const body=anthropic?{model:c.model,max_tokens:c.maxOutput,system,messages:nativeMessages,stream:true,...sampling,...(tools.length?{tools:tools.map(t=>({name:t.name,description:t.description,input_schema:t.parameters}))}:{})}:{model:c.model,max_tokens:c.maxOutput,messages:nativeMessages,stream:true,stream_options:{include_usage:true},...sampling,...(tools.length?{tools:tools.map(t=>({type:'function',function:t})),tool_choice:'auto'}:{})};
  const headers:Record<string,string>=anthropic?{'Content-Type':'application/json','x-api-key':c.apiKey,'anthropic-version':'2023-06-01'}:{'Content-Type':'application/json','Authorization':`Bearer ${c.apiKey}`};
  const response=await fetch(c.baseUrl+(anthropic?'/messages':'/chat/completions'),{method:'POST',headers,body:JSON.stringify(body),signal,redirect:'error'});
  if(!response.ok){
@@ -91,7 +106,7 @@ export async function modelTurn(c:ModelConfig,messages:TurnMessage[],signal:Abor
   if(error instanceof ModelApiError||error instanceof ModelTruncatedError)throw error;
   // Never persist arbitrary transport/SDK exceptions, which can echo enterprise credentials.
   const message=error instanceof Error?error.message:'';
-  const safe=/^(?:模型|单个流事件)/.test(message)&&!message.includes(c.apiKey||'\u0000');
+  const safe=/^(?:模型|单个流事件|当前模型|图片输入)/.test(message)&&!message.includes(c.apiKey||'\u0000');
   throw new Error(safe?message:(signal.aborted?'模型请求已取消；外部计费结果需要核查':'模型连接失败；请检查供应商、网络和配置。请求可能已计费。'));
  }
 }

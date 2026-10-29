@@ -7,6 +7,9 @@
 const $ = id => document.getElementById(id);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const call = (method, params = {}) => window.suwen.call(method, params);
+const UI = window.EveUiConfig;
+const chatPresentation = window.EveChatPresentation;
+document.documentElement.style.setProperty('--session-row-height', `${UI.lists.sessionRowPx}px`);
 
 function el(tag, props, ...children) {
   const node = document.createElement(tag);
@@ -64,7 +67,7 @@ function safeJson(value, fallback = '') {
     return fallback;
   }
 }
-function limitText(value, max = 20000) {
+function limitText(value, max = UI.preview.textChars) {
   const text = typeof value === 'string' ? value : safeJson(value);
   return text.length > max ? `${text.slice(0, max)}\n… (${text.length} chars total)` : text;
 }
@@ -122,7 +125,7 @@ function showError(error) {
   box.textContent = message;
   box.hidden = false;
   clearTimeout(errorTimer);
-  errorTimer = setTimeout(() => { box.hidden = true; }, 15000);
+  errorTimer = setTimeout(() => { box.hidden = true; }, UI.timing.errorMs);
   return message;
 }
 let toastTimer = 0;
@@ -132,7 +135,7 @@ function toast(key, values = {}) {
   box.textContent = key.startsWith('!') ? key.slice(1) : t(key, values);
   box.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { box.hidden = true; }, 5000);
+  toastTimer = setTimeout(() => { box.hidden = true; }, UI.timing.toastMs);
 }
 function confirmDialog(message, okKey = 'confirmOk') {
   const dialog = $('confirm-dialog');
@@ -160,17 +163,20 @@ function confirmDialog(message, okKey = 'confirmOk') {
 /* Renders records with a stable 48px row height and only mounts the visible slice.
    Used for the session list so long histories stay responsive (requirement: >50). */
 function virtualize(host, items, rowHeight, renderRow) {
+  const previousTop = host.scrollTop;
   clear(host);
   host.classList.add('virtual');
   const top = el('div', { class: 'vspacer' });
   const middle = el('div', { class: 'vrows' });
   const bottom = el('div', { class: 'vspacer' });
   host.append(top, middle, bottom);
+  top.style.height = `${items.length * rowHeight}px`;
+  host.scrollTop = previousTop;
   let frame = 0;
   const paint = () => {
-    const view = Math.max(host.clientHeight, 240);
-    const first = Math.max(0, Math.floor(host.scrollTop / rowHeight) - 3);
-    const count = Math.ceil(view / rowHeight) + 7;
+    const view = Math.max(host.clientHeight, UI.lists.minViewportPx);
+    const count = Math.ceil(view / rowHeight) + UI.lists.overscanRows;
+    const first = Math.min(Math.max(0, items.length - count), Math.max(0, Math.floor(host.scrollTop / rowHeight) - UI.lists.overscanBefore));
     const slice = items.slice(first, first + count);
     top.style.height = `${first * rowHeight}px`;
     middle.replaceChildren(...slice.map((item, index) => renderRow(item, first + index)));
@@ -183,8 +189,12 @@ function virtualize(host, items, rowHeight, renderRow) {
   paint();
 }
 const copy={
+ conversationList:['会话','Chats'],
+ sessionSearch:['搜索会话标题','Search conversation titles'],sessionSearchEmpty:['没有匹配的会话标题。','No matching conversation titles.'],
+ messageLocator:['你的消息','Your messages'],messageLocatorSearch:['搜索你的消息','Search your messages'],locatorPrevious:['上一页','Previous page'],locatorNext:['下一页','Next page'],locatorEmpty:['没有匹配的消息。','No matching messages.'],locatorResults:['{count} 条消息 · 第 {page} / {pages} 页','{count} messages · Page {page} of {pages}'],
+ earlierMessages:['查看更早消息（{count}）','Earlier messages ({count})'],newerMessages:['查看更新消息','Newer messages'],showCode:['展开代码','Show code'],
  navigation:['主导航','Main navigation'],chat:['对话','Chat'],projects:['科研项目','Research projects'],tasks:['任务执行','Task execution'],tools:['工具 / 技能','Tools / Skills'],settings:['设置 / 诊断','Settings / Diagnostics'],
- newChat:['＋ 新建对话','＋ New chat'],recent:['最近会话 / 任务','Recent chats / tasks'],connecting:['连接后台…','Connecting to background…'],version:['1.0.0','1.0.0'],switchLanguage:['切换界面语言','Change interface language'],showTrace:['执行记录 ↗','Execution trace ↗'],trace:['执行记录','Execution trace'],close:['关闭','Close'],
+ newChat:['＋ 新建对话','＋ New chat'],recent:['最近会话 / 任务','Recent chats / tasks'],connecting:['连接后台…','Connecting to background…'],version:['1.1.0','1.1.0'],switchLanguage:['切换界面语言','Change interface language'],showTrace:['执行记录 ↗','Execution trace ↗'],trace:['执行记录','Execution trace'],close:['关闭','Close'],
  eyebrow:['SUWEN 科研工作空间','SUWEN RESEARCH WORKSPACE'],welcomeTitle:['从一个问题开始。','Start with a question.'],welcomeBody:['梳理思路、检索证据，或提交一个可恢复的任务。','Explore ideas, retrieve evidence, or submit a recoverable task.'],explore:['探索科研问题 ↗','Explore a research question ↗'],demoWelcome:['运行后台恢复演示 ↗','Run the recovery demo ↗'],researchExample:['研究 TP53 在肿瘤中的作用，并区分已知证据与待验证假设。','Investigate the role of TP53 in cancer. Separate established evidence from hypotheses requiring validation.'],
  executionMode:['执行模式','Execution mode'],modeAuto:['自动路由','Automatic routing'],modeChat:['Chat · 对话','Chat · Conversation'],modeResearch:['Research · 科研检索','Research · Literature search'],modeDebate:['Debate · 提案与批判','Debate · Proposal and critique'],promptPlaceholder:['输入问题，Shift + Enter 换行','Ask a question. Shift + Enter for a new line.'],promptLabel:['问题或任务','Question or task'],send:['发送 ↑','Send ↑'],sending:['提交中…','Submitting…'],composerNote:['模型需自行配置。任务持久化到本机；睡眠或断电期间等待恢复。','Configure your own model. Tasks are saved locally and wait for recovery during sleep or power loss.'],
  projectsHelp:['项目笔记保存为持久任务记录，可关联到后续科研检索。','Project notes are saved as durable task records for later research.'],projectName:['项目名称','Project name'],projectNotes:['目标、约束与证据来源','Goals, constraints, and evidence sources'],saveProject:['保存项目笔记','Save project notes'],noProjects:['还没有项目笔记。','No project notes yet.'],demo30:['30 秒后台演示','30-second background demo'],tasksHelp:['关闭窗口后由独立后台进程继续。审批等待、暂停和恢复状态如实显示。','A separate background process continues after the window closes. Approval, pause, and recovery states reflect actual execution.'],
@@ -248,6 +258,10 @@ Object.assign(copy,{
 /* Additional interface strings added by the vNext UI (zh, en). Existing keys from the
    preview UI are kept above; these cover the five-page workspace. */
 Object.assign(copy, {
+  temperature: ['温度', 'Temperature'],
+  modalities: ['输入模态', 'Input modalities'],
+  textModality: ['文本', 'Text'],
+  imageModality: ['图片（需要模型支持）', 'Images (model support required)'],
   older: ['显示更早消息', 'Show older messages'],
   attempt: ['第 {current} / {maxAttempts} 次尝试', 'attempt {current} / {maxAttempts}'],
   pause: ['暂停', 'Pause'],
@@ -774,7 +788,7 @@ function conversationTitleFromTasks(conversationId) {
   const list = conversationTaskList(conversationId);
   const first = list[list.length - 1];
   if (!first) return t('newSession');
-  return String(first.name || '').slice(0, 80) || t('newSession');
+  return String(first.name || '').slice(0, UI.chat.titleChars) || t('newSession');
 }
 function taskConversationId(task) {
   return task && Array.isArray(task.steps) ? task.steps.find(step => step && step.input && step.input.conversationId)?.input?.conversationId ?? null : null;
@@ -967,9 +981,9 @@ function deriveConversationList() {
 }
 function visibleConversations() {
   const filter = $('session-project')?.value || '';
+  const query = ($('session-search')?.value || '').trim().toLocaleLowerCase();
   const source = S.conversations && S.conversations.length ? S.conversations : deriveConversationList();
-  if (!filter) return source;
-  return source.filter(conversation => conversation.projectId === filter);
+  return source.filter(conversation => (!filter || conversation.projectId === filter) && (!query || conversation.title.toLocaleLowerCase().includes(query)));
 }
 function sessionRow(conversation) {
   const button = el('button', {
@@ -978,8 +992,10 @@ function sessionRow(conversation) {
     title: conversation.title,
     on: {
       click: () => {
+        setSessionsOpen(false);
         showPage('chat');
         void openConversation(conversation.id);
+        $('prompt')?.focus();
       },
     },
   });
@@ -992,15 +1008,16 @@ function sessionRow(conversation) {
 function renderSessions() {
   const host = $('sessions');
   if (!host) return;
+  renderSessionFilterOptions();
   const list = visibleConversations();
   if (!list.length) {
     host.classList.remove('virtual');
     host.onscroll = null;
-    host.replaceChildren(el('p', { class: 'muted small', text: S.conversationsError ? t('sessionLoadFailed') : t('sessionEmpty') }));
+    host.replaceChildren(el('p', { class: 'muted small', text: S.conversationsError ? t('sessionLoadFailed') : $('session-search')?.value.trim() ? t('sessionSearchEmpty') : t('sessionEmpty') }));
     return;
   }
-  if (list.length > 50) {
-    virtualize(host, list, 48, conversation => el('div', { class: 'session-cell' }, sessionRow(conversation)));
+  if (list.length > UI.lists.virtualThreshold) {
+    virtualize(host, list, UI.lists.sessionRowPx, conversation => el('div', { class: 'session-cell' }, sessionRow(conversation)));
   } else {
     host.classList.remove('virtual');
     host.onscroll = null;
@@ -1083,6 +1100,7 @@ async function openConversation(id) {
   renderChatNotice();
 }
 function newConversation() {
+  setSessionsOpen(false);
   S.conversationSelectionTouched=true;
   S.conversationEpoch=(S.conversationEpoch||0)+1;
   S.conversationId = null;
@@ -1101,14 +1119,14 @@ function newConversation() {
 async function ensureConversation(title, mode) {
   if (S.conversationId) return S.conversationId;
   try {
-    const result = await call('conversation.create', { title: String(title).slice(0, 80), mode });
+    const result = await call('conversation.create', { title: String(title).slice(0, UI.chat.titleChars), mode });
     const conversation = conversationOf(result) || normalizeConversation(result?.record ?? result);
     const id = conversation?.id ?? dataOf(result?.record ?? result).id;
     if (!id) return null;
     S.conversationId = id;
     moveDraft('__new__', id);
     S.conversation = conversation || null;
-    S.conversations.unshift(conversation || { id, title: String(title).slice(0, 80), projectId: null, mode, messages: [], updatedAt: Date.now(), derived: false });
+    S.conversations.unshift(conversation || { id, title: String(title).slice(0, UI.chat.titleChars), projectId: null, mode, messages: [], updatedAt: Date.now(), derived: false });
     renderSessions();
     return id;
   } catch (error) {
@@ -1159,7 +1177,7 @@ Object.assign(copy, {
 });
 function pick(zh, en) { return locale === 'en' ? en : zh; }
 function nearBottom(node) {
-  return node.scrollHeight - node.scrollTop - node.clientHeight < 120;
+  return node.scrollHeight - node.scrollTop - node.clientHeight < UI.chat.nearBottomPx;
 }
 /* Composer draft: kept per conversation in memory, never cleared by an unrelated render.
    Streaming, theme changes and navigation do not touch the textarea content. */
@@ -1201,7 +1219,8 @@ function updateJumpLatest() {
   const button = $('jump-latest');
   if (!button) return;
   const active = chatTaskList().some(task => !FINAL_STATUS.has(statusFor(task)));
-  button.hidden = !(active && !followScroll());
+  const browsingHistory = S.chatWindow?.key === (S.conversationId || 'new') && S.chatWindow.end !== null;
+  button.hidden = !(browsingHistory || (active && !followScroll()));
 }
 function chatSignature() {
   const messageSignature = (S.conversation?.messages || []).map(message => `${message.id || ''}:${(message.text || '').length}`).join('.');
@@ -1218,7 +1237,7 @@ function scheduleChatRender() {
   S.chatRenderTimer = setTimeout(() => {
     S.chatRenderTimer = 0;
     renderChat();
-  }, 120);
+  }, UI.timing.chatRenderMs);
 }
 /* Shared options for markdown.render/enhance and the progressive streaming path. Labels are
    localized here so ui/markdown.js stays language neutral. */
@@ -1236,7 +1255,11 @@ function markdownRenderOptions(extra = {}) {
 }
 function messageBubble(role, text, options = {}) {
   const article = el('article', { class: `message ${role}${options.streaming ? ' streaming' : ''}` });
-  article.append(el('div', { class: 'label', text: role === 'user' ? t('messageUser') : t('messageAssistant') }));
+  article.append(el(role === 'user' ? 'h3' : 'div', { class: 'label', text: role === 'user' ? t('messageUser') : t('messageAssistant') }));
+  if (options.locatorId !== undefined) {
+    article.dataset.locatorId = String(options.locatorId);
+    article.tabIndex = -1;
+  }
   let body = text;
   if (!body && options.streaming) body = t('replyPending');
   const bodyNode = el('div', { class: `body${options.markdown ? ' markdown' : ''}` });
@@ -1248,9 +1271,11 @@ function messageBubble(role, text, options = {}) {
       /* Inert math/diagram placeholders are upgraded asynchronously by markdown.js
          (vendor scripts load lazily, one render per event-loop turn). */
       if (typeof markdown.enhance === 'function') markdown.enhance(bodyNode, markdownOptions);
-    } catch { bodyNode.textContent = body; }
+    } catch { chatPresentation.setPlainText(bodyNode, body, t('showCode')); }
+    chatPresentation.foldCode(bodyNode, t('showCode'));
   } else {
-    bodyNode.textContent = body || '';
+    if (role === 'assistant') chatPresentation.setPlainText(bodyNode, body || '', t('showCode'));
+    else bodyNode.textContent = body || '';
   }
   article.append(bodyNode);
   if (options.meta) article.append(el('div', { class: 'meta', text: options.meta }));
@@ -1279,14 +1304,14 @@ function toolActivity(task) {
   if (!steps.length) return null;
   const details = el('details', { class: 'tool-activity' });
   details.append(el('summary', { text: t('toolActivity', { count: steps.length }) }));
-  for (const step of steps.slice(-8)) {
+  for (const step of steps.slice(-UI.chat.activitySteps)) {
     /* Display-only projection: step kind/status/id. Model or tool parameters are never copied
        into the chat transcript (they stay in the evidence panel). */
     const line = `${statusName(step.status)} · ${step.kind || 'step'} · ${step.id || ''}`.replace(/\s+·\s*$/, '');
     details.append(el('div', { class: 'tool-row', text: line }));
   }
   const traces=(task.events||[]).filter(event=>/^(tool\.|agent\.(?:verif|failed))/.test(event.type));
-  for(const event of traces.slice(-24)){
+  for(const event of traces.slice(-UI.chat.activityEvents)){
     const data=event.data||{};
     const label=event.type==='tool.started'?'执行中':event.type==='tool.completed'?'已返回':event.type==='tool.failed'?'失败':event.type==='agent.verified'?'验证完成':event.type==='agent.failed'?'验证或执行失败':'验证中';
     details.append(el('div',{class:'tool-row',text:`${label} · ${data.name||''}${data.durationMs!==undefined?` · ${data.durationMs} ms`:''}${data.error?` · ${data.error}`:''}`}));
@@ -1317,6 +1342,45 @@ function renderStreamingBubble(task, actions) {
 function deriveTasksForChat() {
   return conversationTaskList(S.conversationId);
 }
+let messageLocator = null;
+function updateMessageLocator(messages, derivedTasks) {
+  const host = $('message-locator');
+  if (!host) return;
+  if (!messageLocator) messageLocator = window.EveMessageLocator.create({
+    host,
+    pageSize: UI.lists.locatorPageSize,
+    previewChars: UI.chat.previewChars,
+    onSelect: locateUserMessage,
+  });
+  const source = messages.length ? messages : derivedTasks.map(task => ({ role: 'user', text: firstPrompt(task) }));
+  let ordinal = 0;
+  const entries = source.flatMap((message, index) => message.role === 'user' ? [{ index, ordinal: ++ordinal, text: message.text || '' }] : []);
+  messageLocator.update(entries, S.conversationId || 'new', {
+    title: count => `${t('messageLocator')} (${count})`,
+    search: t('messageLocatorSearch'), previous: t('locatorPrevious'), next: t('locatorNext'),
+    results: (count, page, pages) => t('locatorResults', { count, page, pages }), empty: t('locatorEmpty'),
+  });
+  $('chat')?.classList.toggle('has-message-locator', entries.length > 0);
+}
+function locateUserMessage(entry) {
+  const messages = (S.conversation?.messages || []).filter(message => typeof message.text === 'string' && message.text.trim());
+  const total = messages.length || deriveTasksForChat().length;
+  const size = messages.length ? UI.chat.messageWindow : UI.chat.taskWindow;
+  const end = Math.min(total, Math.max(size, entry.index + Math.ceil(size / 2)));
+  S.chatWindow = { key: S.conversationId || 'new', end: end === total ? null : end };
+  S.stream.userIntent = 'up';
+  S.stream.scrollPinned = false;
+  S.chatSignature = '';
+  renderChat();
+  const target = $('timeline')?.querySelector(`[data-locator-id="${entry.index}"]`);
+  if (target) {
+    target.focus({ preventScroll: true });
+    const timeline = $('timeline');
+    const inset = Number.parseFloat(getComputedStyle(timeline).paddingTop) || 0;
+    restoreTimelineScroll(timeline.scrollTop + target.getBoundingClientRect().top - timeline.getBoundingClientRect().top - inset);
+  }
+  updateJumpLatest();
+}
 function renderChat() {
   const timeline = $('timeline');
   if (!timeline) return;
@@ -1329,15 +1393,19 @@ function renderChat() {
   const previousFollow = followScroll();
   const previousTop = timeline.scrollTop;
   const allMessages = (Array.isArray(S.conversation?.messages) ? S.conversation.messages : []).filter(message=>typeof message.text==='string'&&message.text.trim());
+  const derivedTasks = deriveTasksForChat();
+  updateMessageLocator(allMessages, derivedTasks);
   const windowKey=S.conversationId||'new';
   if(S.chatWindow?.key!==windowKey)S.chatWindow={key:windowKey,end:null};
-  const end=S.chatWindow.end===null?allMessages.length:Math.min(S.chatWindow.end,allMessages.length);
-  const start=Math.max(0,end-80);
+  const total = allMessages.length || derivedTasks.length;
+  const size = allMessages.length ? UI.chat.messageWindow : UI.chat.taskWindow;
+  const step = allMessages.length ? UI.chat.messageStep : UI.chat.taskStep;
+  const end=S.chatWindow.end===null?total:Math.min(S.chatWindow.end,total);
+  const start=Math.max(0,end-size);
   const conversationMessages=allMessages.slice(start,end);
-  const derivedTasks = deriveTasksForChat();
   const activeTask = derivedTasks.filter(task => !FINAL_STATUS.has(statusFor(task))).slice(-1)[0] || null;
   const nodes = [];
-  if(start>0)nodes.push(textButton(locale==='en'?`Earlier messages (${start})`:`查看更早消息（${start}）`,()=>{S.chatWindow.end=Math.max(80,end-60);S.chatSignature='';scheduleChatRender();}));
+  if(start>0)nodes.push(textButton(t('earlierMessages', { count: start }),()=>{S.chatWindow.end=Math.max(size,end-step);S.chatSignature='';scheduleChatRender();}, 'older'));
   if (!conversationMessages.length && !derivedTasks.length) {
     if (S.welcomeNode) nodes.push(S.welcomeNode);
     timeline.replaceChildren(...nodes);
@@ -1345,7 +1413,7 @@ function renderChat() {
     return;
   }
   if (conversationMessages.length) {
-    for (const message of conversationMessages) {
+    for (const [index, message] of conversationMessages.entries()) {
       const role = message.role === 'user' ? 'user' : 'assistant';
       const task = message.taskId ? taskById(message.taskId) : null;
       const status = task ? statusFor(task) : '';
@@ -1359,6 +1427,7 @@ function renderChat() {
         markdown: role === 'assistant' && !live,
         actions,
         task: role === 'assistant' && !live ? null : task,
+        locatorId: role === 'user' ? start + index : undefined,
       });
       if(role==='assistant'&&task){const activity=toolActivity(task);if(activity)bubble.append(activity);}
       nodes.push(bubble);
@@ -1366,17 +1435,16 @@ function renderChat() {
     if (activeTask && end===allMessages.length) {
       if (!nodes.some(node => node.classList?.contains('streaming'))) nodes.push(renderStreamingBubble(activeTask, taskActionButtons(activeTask)));
     }
-    if(end<allMessages.length)nodes.push(textButton(locale==='en'?'Newer messages':'查看更新消息',()=>{S.chatWindow.end=end+60>=allMessages.length?null:end+60;S.chatSignature='';scheduleChatRender();}));
     // A failed/cancelled run has no persisted assistant answer. Keep its actual
     // failure visible beside the user turn rather than leaving a blank timeline.
-    for(const task of derivedTasks.filter(task=>FINAL_STATUS.has(statusFor(task))&&!allMessages.some(m=>m.role==='assistant'&&m.taskId===task.id))){
+    for(const task of (end === total ? derivedTasks.filter(task=>FINAL_STATUS.has(statusFor(task))&&!allMessages.some(m=>m.role==='assistant'&&m.taskId===task.id)).slice(-UI.chat.taskWindow) : [])){
       const bubble=messageBubble('assistant',taskText(task)||statusName(statusFor(task)),{meta:statusName(statusFor(task)),actions:taskActionButtons(task)});
       const activity=toolActivity(task);if(activity)bubble.append(activity);nodes.push(bubble);
     }
   } else {
-    for (const task of derivedTasks) {
+    for (const [index, task] of derivedTasks.slice(start, end).entries()) {
       const prompt = firstPrompt(task);
-      nodes.push(messageBubble('user', prompt, { meta: fmtClock(task.createdAt) }));
+      nodes.push(messageBubble('user', prompt, { meta: fmtClock(task.createdAt), locatorId: start + index }));
       const status = statusFor(task);
       const final = FINAL_STATUS.has(status);
       const text = final ? taskText(task) : streamTextFor(task);
@@ -1391,6 +1459,7 @@ function renderChat() {
       }));
     }
   }
+  if(end<total)nodes.push(textButton(t('newerMessages'),()=>{S.chatWindow.end=end+step>=total?null:end+step;S.chatSignature='';scheduleChatRender();}, 'older'));
   timeline.replaceChildren(...nodes);
   // Structural events may be the last event before a provider pauses. Render
   // already received text now instead of waiting for another token or poll.
@@ -1750,7 +1819,7 @@ function renderExecTab(host, task) {
     for (const event of events) {
       const line = el('div', { class: 'event' });
       line.append(el('span', { class: 'muted small', text: `${event.sequence ?? '—'} · ${fmtClock(event.at)} · ${event.type ?? event.kind ?? '—'}` }));
-      if (event.data !== undefined) line.append(el('pre', { class: 'small', text: limitText(event.data, 4000) }));
+      if (event.data !== undefined) line.append(el('pre', { class: 'small', text: limitText(event.data, UI.preview.eventChars) }));
       list.append(line);
     }
     details.append(list);
@@ -1777,7 +1846,7 @@ function renderArtifacts(host, task) {
       clear(output);
       const text = typeof result?.text === 'string' ? result.text : '';
       if (text) {
-        output.append(el('pre', { class: 'artifact-text', text: limitText(text, 200000) }));
+        output.append(el('pre', { class: 'artifact-text', text: limitText(text, UI.preview.artifactChars) }));
       } else {
         const metaLines = [
           `${t('artifactPath')}: ${result?.path ?? artifact.path ?? '—'}`,
@@ -1853,7 +1922,7 @@ function renderContextTab(host, task) {
       const retention = entry.retention ?? entry.data?.retention ?? null;
       row.append(el('div', { class: 'record-title', text: t('contextVersionLine', { version, before: before ?? '—', after: after ?? '—' }) }));
       if (retention !== null) row.append(el('div', { class: 'small muted', text: t('contextRetentionShort', { percent: Math.round(Number(retention) * 100) }) }));
-      if (summary) row.append(el('pre', { class: 'small', text: limitText(summary, 8000) }));
+      if (summary) row.append(el('pre', { class: 'small', text: limitText(summary, UI.preview.summaryChars) }));
       else row.append(el('div', { class: 'small muted', text: t('unavailable') }));
       const restoreButton = textButton(t('contextRestore'), () => run(restoreButton, async () => {
         if (!(await confirmDialog(t('contextRestoreConfirm', { version })))) return;
@@ -2296,7 +2365,7 @@ function projectRow(tab, row) {
   if (tab === 'experiments') {
     box.append(el('div', { class: 'record-title', text: String(field(data, ['design']) ?? holder.id) }));
     box.append(el('div', { class: 'small muted', text: [t('experimentResult'), field(data, ['status']), field(data, ['simulated']) === true ? t('experimentSimulated') : ''].filter(Boolean).join(' · ') }));
-    if (field(data, ['protocol'])) box.append(el('pre', { class: 'small', text: limitText(field(data, ['protocol']), 8000) }));
+    if (field(data, ['protocol'])) box.append(el('pre', { class: 'small', text: limitText(field(data, ['protocol']), UI.preview.summaryChars) }));
     if (field(data, ['status']) === 'proposed') {
       const actions = el('div', { class: 'actions' });
       actions.append(textButton(t('experimentApprove'), () => run(actions, async () => {
@@ -2521,6 +2590,10 @@ Object.assign(copy, {
   workerHealthTitle: ['工作进程状态', 'Worker status'],
   dirsTitle: ['数据目录', 'Data directories'],
   settingsSavedNote: ['设置仅在显式保存后生效。', 'Settings take effect only after an explicit save.'],
+  temperature: ['温度', 'Temperature'],
+  modalities: ['输入模态', 'Input modalities'],
+  textModality: ['文本', 'Text'],
+  imageModality: ['图片（需要模型支持）', 'Images (model support required)'],
   noWorkerDescribe: ['工作进程未报告能力。', 'The worker reported no capabilities.'],
 });
 function toolOutput(value) {
@@ -3207,7 +3280,7 @@ function startPolling() {
   /* Push events are the primary transport (window.suwen.onEvent). Snapshot polling is the
      slow reconciliation fallback only; it must stay slow (>= 2000 ms) so it can never race
      or duplicate the push stream. */
-  S.pollTimer = setInterval(() => { void poll(); }, 2500);
+  S.pollTimer = setInterval(() => { void poll(); }, UI.timing.pollMs);
   void poll();
 }
 /* ---------- settings: model configuration, defaults, doctor, worker, dirs, bridges ---------- */
@@ -3243,6 +3316,8 @@ function fillSettingsForm() {
   setValue('model', model.model || '');
   setValue('contextWindow', model.contextWindow ?? '');
   setValue('maxOutput', model.maxOutput ?? '');
+  setValue('temperature', model.temperature ?? '');
+  if ($('modality-image')) $('modality-image').checked = Boolean(model.modalities?.includes('image'));
   const key = $('apiKey');
   if (key) {
     key.value = '';
@@ -3385,6 +3460,8 @@ async function saveSettingsForm(event) {
     model,
     contextWindow: numberOrUndefined($('contextWindow')?.value),
     maxOutput: numberOrUndefined($('maxOutput')?.value),
+    temperature: numberOrUndefined($('temperature')?.value) ?? null,
+    modalities: $('modality-image')?.checked ? ['text', 'image'] : ['text'],
   };
   if (apiKey) params.apiKey = apiKey;
   const submit = $('settings-form')?.querySelector('button[type="submit"]');
@@ -3394,7 +3471,7 @@ async function saveSettingsForm(event) {
       const fresh = await call('settings', {});
       if (fresh && typeof fresh === 'object') S.modelSettings = fresh;
     } catch {
-      S.modelSettings = { ...(S.modelSettings || {}), provider, baseUrl, model, contextWindow: params.contextWindow, maxOutput: params.maxOutput, hasKey: Boolean(apiKey) || Boolean(S.modelSettings?.hasKey) };
+      S.modelSettings = { ...(S.modelSettings || {}), provider, baseUrl, model, contextWindow: params.contextWindow, maxOutput: params.maxOutput, temperature: params.temperature, modalities: params.modalities, hasKey: Boolean(apiKey) || Boolean(S.modelSettings?.hasKey) };
     }
     fillSettingsForm();
     renderSettingsPage();
@@ -3607,7 +3684,7 @@ function monotonicNow() {
 /* Any scroll we cause ourselves is tagged so the scroll listener cannot mistake content
    clamping (innerHTML replacement / appended text) for a user scroll-up intent. */
 function markProgrammaticScroll() {
-  S.stream.programmaticUntil = monotonicNow() + 400;
+  S.stream.programmaticUntil = monotonicNow() + UI.timing.programmaticScrollMs;
 }
 function scrollTimelineToBottom() {
   const timeline = $('timeline');
@@ -3674,7 +3751,7 @@ function registerStreamNode(task, node) {
    row, code fence, math delimiter or word never renders as half-finished structure. Rebuilds are
    throttled to ~110 ms; between rebuilds only the tail text node is updated in place, which keeps
    the DOM stable (no flicker, no scroll jump, composer untouched). */
-const STREAM_MARKDOWN_INTERVAL = 110;
+const STREAM_MARKDOWN_INTERVAL = UI.timing.streamMarkdownMs;
 function applyStreamTextPatches() {
   const timeline = $('timeline');
   if (!timeline) return;
@@ -3695,7 +3772,7 @@ function applyStreamTextPatches() {
       try { plan = markdown.planProgressive(text, ref.plan); } catch { plan = null; }
     }
     if (!plan) {
-      ref.body.textContent = text;
+      chatPresentation.setPlainText(ref.body, text, t('showCode'));
       ref.body.classList.remove('markdown', 'progressive');
       ref.plan = null;
       ref.stableChars = -1;
@@ -3703,7 +3780,7 @@ function applyStreamTextPatches() {
     }
     if (plan.stableChars === 0) {
       /* No closed block yet: one plain text node is both cheapest and safest. */
-      if (ref.body.textContent !== plan.tail) ref.body.textContent = plan.tail;
+      chatPresentation.setPlainText(ref.body, plan.tail, t('showCode'));
       ref.body.classList.remove('markdown', 'progressive');
       ref.plan = plan;
       ref.stableChars = 0;
@@ -3715,6 +3792,9 @@ function applyStreamTextPatches() {
       try {
         const options = markdownRenderOptions({ allowDiagrams: false });
         ref.body.replaceChildren(markdown.renderProgressivePlan(document, plan, options));
+        chatPresentation.foldCode(ref.body, t('showCode'));
+        const tail = ref.body.querySelector('.md-stream-tail');
+        if (tail) chatPresentation.setPlainText(tail, plan.tail, t('showCode'));
         ref.body.classList.add('markdown', 'progressive');
         /* Complete inline math inside closed blocks may upgrade now; Mermaid waits for the
            completed message so a diagram is never re-rendered on every closed block. */
@@ -3722,7 +3802,7 @@ function applyStreamTextPatches() {
         ref.stableChars = plan.stableChars;
         ref.renderedAt = now;
       } catch {
-        ref.body.textContent = text;
+        chatPresentation.setPlainText(ref.body, text, t('showCode'));
         ref.body.classList.remove('markdown', 'progressive');
         ref.plan = null;
         ref.stableChars = -1;
@@ -3737,7 +3817,7 @@ function applyStreamTextPatches() {
         tailNode.className = 'md-stream-tail';
         ref.body.appendChild(tailNode);
       }
-      if (tailNode && tailNode.textContent !== plan.tail) tailNode.textContent = plan.tail;
+      if (tailNode) chatPresentation.setPlainText(tailNode, plan.tail, t('showCode'));
       if (plan.stableChars !== ref.stableChars && !ref.renderTimer) {
         /* A closed block arrived inside the throttle window: flush it after the interval. */
         ref.renderTimer = setTimeout(() => {
@@ -3908,7 +3988,7 @@ function reconcileStreamSnapshot() {
 }
 
 Object.assign(copy, {
-  version: ['1.0.0', '1.0.0'],
+  version: ['1.1.0', '1.1.0'],
   themeLabel: ['界面主题', 'Interface theme'],
   themeSystem: ['跟随系统', 'Follow system'],
   themeLight: ['浅色', 'Light'],
@@ -4028,9 +4108,15 @@ function subscribeWorkbench() {
   });
 }
 /* ---------- boot ---------- */
+function setSessionsOpen(open) {
+  document.body.classList.toggle('sessions-open', open);
+  $('toggle-sessions')?.setAttribute('aria-expanded', String(open));
+  if (open) $('session-search')?.focus();
+}
 function bindEvents() {
   for (const button of $$('.rail [data-page]')) {
     button.addEventListener('click', () => {
+      setSessionsOpen(false);
       showPage(button.dataset.page);
       if (button.dataset.page === 'settings') void loadSettingsPage();
     });
@@ -4039,6 +4125,13 @@ function bindEvents() {
   on('wb-install', 'click', () => { void installWorkbench(); });
   on('wb-open', 'click', () => { void openWorkbenchWindow(); });
   on('new-chat', 'click', () => newConversation());
+  on('toggle-sessions', 'click', () => setSessionsOpen(!document.body.classList.contains('sessions-open')));
+  on('conversation-sidebar', 'keydown', event => {
+    if (event.key === 'Escape') { setSessionsOpen(false); $('toggle-sessions').focus(); }
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!$('conversation-sidebar')?.contains(event.target) && !$('toggle-sessions')?.contains(event.target)) setSessionsOpen(false);
+  });
   on('language', 'click', () => {
     locale = locale === 'en' ? 'zh' : 'en';
     try { localStorage.setItem('suwen.locale', locale); } catch { /* storage may be unavailable */ }
@@ -4060,6 +4153,9 @@ function bindEvents() {
     if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void sendMessage(); }
   });
   on('jump-latest', 'click', () => {
+    if (S.chatWindow) S.chatWindow.end = null;
+    S.chatSignature = '';
+    renderChat();
     S.stream.scrollPinned = true;
     S.stream.userIntent = 'down';
     scrollTimelineToBottom();
@@ -4070,6 +4166,7 @@ function bindEvents() {
   }
   on('mode', 'change', event => setMode(event.currentTarget.value));
   on('session-project', 'change', event => { S.sessionProject = event.currentTarget.value; renderSessions(); });
+  on('session-search', 'input', () => { $('sessions').scrollTop = 0; renderSessions(); });
   on('project-form', 'submit', event => { void saveProjectForm(event); });
   on('project-cancel', 'click', () => resetProjectForm());
   on('import-inspect', 'click', event => { void inspectLegacyData(event.currentTarget); });

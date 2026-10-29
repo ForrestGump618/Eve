@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "omicslab"
-version = "1.0.0"
+version = "1.1.0"
 description = "Eve - local-first AI agent workspace with persistent tasks, skills, remote workspaces and scientific evidence gates."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -61,6 +61,7 @@ dependencies = [
 
 [project.optional-dependencies]
 science = ["uv==0.13.6"]
+rsi = ["proteus-evolve @ https://github.com/proteus-evolve/Proteus/archive/69f766e73460f67d96a3ce965a5c3f9adaab2f85.zip", "pytest>=8.0", "pytest-asyncio>=0.23"]
 bio = [
   "numpy>=1.26",
   "pandas>=2.1",
@@ -68,7 +69,7 @@ bio = [
   "scanpy>=1.10",
   "anndata>=0.10",
 ]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "uv==0.13.6"]
 
 [project.scripts]
 suwen = "omicslab.cli:main"

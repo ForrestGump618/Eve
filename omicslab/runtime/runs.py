@@ -54,7 +54,7 @@ def run_snapshot(row: dict[str, Any], *, children: list[dict[str, Any]] | None =
         "status": status,
         "agent_id": row.get("agent_id"),
         "workspace": row.get("workspace") or {},
-        "permission_mode": (row.get("meta") or {}).get("permission_mode", "ask"),
+        "permission_mode": (row.get("meta") or {}).get("permission_mode", "full"),
         "provider": (row.get("meta") or {}).get("provider"),
         "model": (row.get("meta") or {}).get("model"),
         "created_at": row.get("created_at"),
@@ -68,6 +68,9 @@ def run_snapshot(row: dict[str, Any], *, children: list[dict[str, Any]] | None =
         "result_text": row.get("result_text") or "",
         "evidence_gate": (row.get("meta") or {}).get("evidence_gate"),
         "client_request_id": row.get("client_request_id"),
+        "collaboration_mode": (row.get("meta") or {}).get("collaboration_mode"),
+        "team_id": (row.get("meta") or {}).get("team_id"),
+        "meta": {key: (row.get("meta") or {}).get(key) for key in ("team_id", "collaboration_mode")},
         "children": children or [],
         "approvals": approvals or [],
         "actions": {"cancel": status in ACTIVE_STATUSES,
@@ -152,6 +155,10 @@ class RunService:
     def loop(self) -> Any:
         return self._loop_provider()
 
+    def _team_platform(self) -> Any:
+        return (getattr(self.loop, "platform", None)
+                or getattr(getattr(self.loop, "registry", None), "platform", None))
+
     def _session_lock(self, session_id: str) -> asyncio.Lock:
         lock = self._session_locks.get(session_id)
         if lock is None:
@@ -214,14 +221,20 @@ class RunService:
         model: str | None = None,
         attachments: list[dict[str, Any]] | None = None,
         conversation: Conversation | None = None,
-        permission_mode: str = "ask",
+        permission_mode: str = "full",
         resume_task_id: str | None = None,
+        collaboration_mode: str | None = None,
+        internal_task_id: str | None = None,
     ) -> dict[str, Any]:
         from ..agent.permissions import validate_mode
         validate_mode(permission_mode)
+        if collaboration_mode not in {None, "team", "direct"}:
+            raise ValueError("collaboration_mode must be team or direct")
         if client_request_id:
             existing = self.events.find_by_client_request(client_request_id)
             if existing:
+                if existing["session_id"] != session_id or (workspace_id and (existing.get("meta") or {}).get("workspace_id") != workspace_id):
+                    raise ValueError("client_request_id belongs to another session or workspace")
                 return {"run": run_snapshot(existing), "idempotent": True}
         if not str(message or "").strip():
             raise ValueError("message 不能为空")
@@ -259,7 +272,8 @@ class RunService:
                 "agent_id": agent_id or conversation.agent,
                 "workspace": workspace_public,
                 "created_at": utc_now(),
-                "meta": {"workspace_id": ws.workspace_id if ws is not None else None, "permission_mode": permission_mode, "resume_task_id": resume_task_id, "provider": provider, "model": model},
+                "meta": {"workspace_id": ws.workspace_id if ws is not None else None, "permission_mode": permission_mode, "resume_task_id": resume_task_id, "provider": provider, "model": model,
+                         "user_message": message, "collaboration_mode": collaboration_mode, "internal_task_id": internal_task_id},
             }
         )
         cancel_event = asyncio.Event()
@@ -274,6 +288,24 @@ class RunService:
         handle.workspace = ws
         self._handles[handle.run_id] = handle
         self._session_runs[session_id] = handle.run_id
+        platform = self._team_platform()
+        if platform is not None and ws is not None:
+            from ..suwen.teams import ensure_agent_team, forward_user_message
+            try:
+                if internal_task_id:
+                    internal = platform.store.get("task", internal_task_id, ws.workspace_id)
+                    if internal and internal.get("team_summary_id"):
+                        run = self.events.update_run(handle.run_id, meta={**run["meta"], "team_id": internal["team_summary_id"]})
+                if not conversation.meta.get("team_member") and not parent_run_id and not resume_task_id and not internal_task_id:
+                    if ensure_agent_team(platform, ws.workspace_id, run):
+                        run = self.events.get_run(handle.run_id)
+                    forward_user_message(platform, ws.workspace_id, session_id, message,
+                                         "run:" + handle.run_id, source_run_id=handle.run_id)
+            except Exception as exc:
+                self.events.update_run(handle.run_id, status="failed", finish_reason="error",
+                                       error={"code": "team_plan_error", "message": str(exc)}, ended_at=utc_now())
+                self._cleanup_handle(handle)
+                raise
         await self._emit(
             handle,
             "run_status",
@@ -344,6 +376,30 @@ class RunService:
                 kwargs["workspace"] = getattr(handle.workspace, "root", None)
             if backend is not None:
                 kwargs["backend"] = backend
+            platform = self._team_platform()
+            if platform is not None and handle.workspace is not None:
+                from ..suwen.teams import captain_context, team_snapshot
+                message += captain_context(platform, handle.workspace.workspace_id, handle.session_id, handle=handle)
+                current_run = self.events.get_run(handle.run_id)
+                team_id = (current_run.get("meta") or {}).get("team_id")
+                if not team_id and not handle.conversation.meta.get("team_member"):
+                    team_id = next((item["id"] for item in platform.store.list("team", handle.workspace.workspace_id)
+                                    if item.get("captain_session") == handle.session_id and not item.get("archived")), None)
+                    if team_id:
+                        current_run = self.events.update_run(handle.run_id, meta={**(current_run.get("meta") or {}), "team_id": team_id})
+                if team_id:
+                    team = platform.store.get("team", team_id, handle.workspace.workspace_id)
+                    if team:
+                        status = team_snapshot(platform, handle.workspace.workspace_id, team)["status"]
+                        # Members receive their assigned brief, not the captain's
+                        # authority or the entire roster and mailbox.
+                        if handle.conversation.meta.get("team_member"):
+                            message += f"\nBound member task in team {team_id}. Read only your own goal and mailbox; do not create nested teams."
+                        else:
+                            message += f"\nNative team {team_id}: status={status}. "
+                        message += ("Draft awaiting human approval; inspect team_status before dispatch."
+                                    if team.get("draft") and not team.get("archived") else
+                                    "Inspect team_status/team_mailbox and aggregate actual results and unresolved failures.")
             result = await self.loop.run(handle.conversation, message, **kwargs)
             if result.get("evidence_gate"):
                 record = self.events.get_run(handle.run_id)
@@ -463,6 +519,17 @@ class RunService:
         elif event_type in {"approval_resolved", "tool_result", "text", "reasoning", "tool_call"}:
             if handle.status == "waiting_approval":
                 handle.status = "running"
+        elif event_type == "guidance_status" and data.get("status") == "included":
+            platform = self._team_platform()
+            message_id = data.get("message_id")
+            message = next((m for m in reversed(handle.conversation.messages)
+                            if m.role == "user" and m.meta.get("guidance_id") == message_id), None)
+            if (platform is not None and handle.workspace is not None and message is not None
+                    and not handle.conversation.meta.get("team_member")
+                    and message.content not in getattr(handle, "team_guidance_contents", set())):
+                from ..suwen.teams import forward_user_message
+                forward_user_message(platform, handle.workspace.workspace_id, handle.session_id,
+                                     message.content, "guidance:" + str(message_id), source_run_id=handle.run_id)
         await self._emit(handle, event_type, data, ts=ts)
 
     def _persist_approval(self, handle: RunHandle, data: dict[str, Any]) -> None:
@@ -705,6 +772,11 @@ class RunService:
         message = ChatMessage(role="user", content=content, ts=utc_now())
         handle.conversation.messages.append(message)
         handle.steering.append(content)
+        platform = self._team_platform()
+        if platform is not None and handle.workspace is not None and not handle.conversation.meta.get("team_member"):
+            from ..suwen.teams import forward_user_message
+            forward_user_message(platform, handle.workspace.workspace_id, handle.session_id, content,
+                                 "message:" + message.id, source_run_id=run_id)
         try:
             self.store.save(handle.conversation)
         except Exception:  # pragma: no cover

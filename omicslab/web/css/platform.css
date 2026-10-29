@@ -310,3 +310,28 @@ html,body{overflow:hidden}.app-body{grid-column:2;grid-row:1}.workspace-sidebar{
 .eve-model-manage{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border:0;border-radius:6px;background:transparent;color:var(--text-2);font:11px var(--font-sans);cursor:pointer}
 .eve-model-manage:hover{background:var(--panel-2);color:var(--text)}
 .eve-provider-manager{display:grid;gap:12px}.eve-provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.eve-provider-card{display:grid;gap:10px;padding:15px;border:1px solid var(--border-soft);border-radius:12px;background:var(--bg-soft);transition:border-color 140ms ease,transform 140ms ease,background 140ms ease}.eve-provider-card:hover{transform:translateY(-1px);border-color:var(--border-strong)}.eve-provider-card.is-default{border-color:var(--text-3);background:var(--panel-2)}.eve-provider-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.eve-provider-card h3{margin:3px 0 0;font-size:14px}.eve-provider-card p{margin:0;min-height:32px;color:var(--text-3);font-size:11px;line-height:1.5}.eve-provider-family{font-size:10px;color:var(--text-4);letter-spacing:.05em;text-transform:uppercase}.eve-provider-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}.eve-provider-meta code{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text-2)}.eve-default-mark{padding:3px 6px;border-radius:5px;background:var(--accent-soft-2);color:var(--text);font-size:10px;white-space:nowrap}.eve-provider-editor{display:grid;gap:12px}.eve-provider-step{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border-radius:8px;background:var(--bg-soft)}.eve-provider-step-number{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--panel-2);color:var(--text);font-size:11px;font-weight:700}.eve-provider-step strong,.eve-provider-step small{display:block}.eve-provider-step strong{font-size:12px}.eve-provider-step small{margin-top:2px;color:var(--text-3);font-size:10px;line-height:1.45}.status-missing{color:var(--text-3);background:var(--panel-2)}
+
+/* Settings: structured model + permission editors (no raw JSON surfaces). */
+.sw-model-roles,.sw-fallback-row,.sw-cap-fields,.sw-permission-card,.sw-tool-permission{display:grid;gap:8px}
+.sw-model-role{display:grid;grid-template-columns:88px minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-soft)}
+.sw-model-role strong{font-size:12px;font-weight:600}
+.sw-cap-row{border:1px solid var(--border-soft);border-radius:10px;padding:10px;margin-bottom:10px;background:var(--bg-soft)}
+.sw-cap-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sw-cap-head strong{font-size:12.5px}
+.sw-cap-fields{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.sw-cap-fields label{display:flex;flex-direction:column;gap:4px;font-size:10.5px;color:var(--text-3)}
+.sw-cap-modalities{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:10.5px;color:var(--text-3)}
+.sw-cap-modalities .sw-check{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-2)}
+.sw-fallback-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:center}
+.sw-fallback-row .btn{height:32px}
+.sw-permission-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:10px 0}
+.sw-permission-card{display:grid;gap:5px;padding:10px;border:1px solid var(--border-soft);border-radius:10px;background:var(--bg-soft);font-size:12px}
+.permissions-bulk{grid-column:1/-1;display:flex;justify-content:flex-end}
+.permission-tools{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.sw-tool-permission{grid-template-columns:minmax(120px,1fr) 140px auto;align-items:center}
+.sw-tool-permission code{font:11px/1.5 'Cascadia Mono',Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:720px){
+ .sw-model-role,.sw-tool-permission{grid-template-columns:1fr}
+ .sw-model-role{grid-template-columns:1fr 1fr}
+ .sw-model-role strong{grid-column:1/-1}
+}

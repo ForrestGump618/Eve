@@ -5,10 +5,10 @@ import math
 from urllib.parse import urlsplit
 
 DEFAULTS = {
- 'models': {'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[], 'capabilities':{},'context_window':32000,'sage_verification':False,'orchestration':False},
+ 'models': {'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[], 'capabilities':{},'context_window':32000,'sage_verification':False,'orchestration':True,'verification':'standard'},
  'memory': {'enabled':True,'auto_capture':False,'embedding':'keyword','embedding_url':'','embedding_model':'','top_k':5,'retention_days':365},
  'appearance': {'theme':'light','font':'system','font_size':14,'accent':'#404040','density':'comfortable','radius':12,'mode':'research','home':'workbench','onboarded':False,'agent_name':'Eve助手','avatar':'','shortcuts':{'palette':'k'}},
- 'permissions': {'files':'ask','shell':'ask','network':'ask','browser':'deny','messages':'ask','mcp':'ask','memory':'allow','skills':'allow','agents':'allow','python':'ask','system':'allow','notebook':'ask','jobs':'ask','research':'allow','tools':{}},
+ 'permissions': {'files':'allow','shell':'allow','network':'allow','browser':'allow','messages':'allow','mcp':'allow','memory':'allow','skills':'allow','agents':'allow','python':'allow','system':'allow','notebook':'allow','jobs':'allow','research':'allow','tools':{}},
  'budget': {'concurrency':2,'prices':{}},
  'vision': {'enabled':False,'auto_review':False,'max_repairs':2,'model':'','api_base':'','credential_ref':''},
 }
@@ -40,7 +40,8 @@ class Configuration:
         value=dict(self.get(section,scope)['value'],**patch)
         enums={'mode': {'fast','balanced','deep'} if section=='models' else {'research','minimal','developer'},
                'theme':{'light','dark','system'},'strategy':{'quality','latency','cost','privacy'},'density':{'compact','comfortable'},
-               'embedding':{'keyword','api'},'font':{'system','sans','mono'}}
+               'embedding':{'keyword','api'},'font':{'system','sans','mono'},
+               'verification':{'off','standard','sage'}}
         for key,choices in enums.items():
             if key in value and value[key] not in choices:
                 raise ValueError(f'{key} 仅支持 {sorted(choices)}')
@@ -72,7 +73,14 @@ class Configuration:
                 if not isinstance(caps,dict):raise ValueError('每个模型的能力必须为对象')
                 if 'max_output' in caps and (type(caps['max_output']) is not int or not 32<=caps['max_output']<=200000):
                     raise ValueError('max_output 需要 32—200000 的整数')
-                if 'temperature' in caps and type(caps['temperature']) is not bool:raise ValueError('temperature 能力需要布尔值')
+                if 'temperature' in caps and not (type(caps['temperature']) is bool or (isinstance(caps['temperature'],(int,float)) and 0<=caps['temperature']<=2)):
+                    raise ValueError('temperature 需要布尔值开关或 0—2 的数值')
+                if 'context_window' in caps and (type(caps['context_window']) is not int or not 2048<=caps['context_window']<=2000000):
+                    raise ValueError('模型 context_window 需要 2048—2000000 的整数')
+                if 'modalities' in caps and (not isinstance(caps['modalities'],list) or any(m not in {'text','image','audio'} for m in caps['modalities']) or not caps['modalities']):
+                    raise ValueError('modalities 仅支持 text / image / audio 的非空数组')
+                if 'supported_parameters' in caps and (not isinstance(caps['supported_parameters'],list) or any(not isinstance(x,str) or not x.strip() for x in caps['supported_parameters'])):
+                    raise ValueError('supported_parameters 需要非空白文本数组')
                 if caps.get('token_parameter','max_tokens') not in {'max_tokens','max_completion_tokens'}:raise ValueError('Token 参数名无效')
         if section=='budget':
             for prices in value['prices'].values():

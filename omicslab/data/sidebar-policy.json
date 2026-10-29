@@ -1,0 +1,17 @@
+{
+  "command_timeout_s": 15,
+  "operation_timeout_s": 25,
+  "backend_timeout_s": 30,
+  "request_timeout_ms": 40000,
+  "output_bytes": 500000,
+  "diff_bytes": 100000,
+  "error_bytes": 2000,
+  "file_limit": 500,
+  "file_bytes": 2000000,
+  "index_bytes": 16000000,
+  "path_bytes": 4096,
+  "message_bytes": 8000,
+  "history_limit": 100,
+  "history_bytes": 100000,
+  "blocked_names": [".git", ".env", ".env.*", "*.pem", "*.key", "*.p12", "*.pfx", "id_rsa*", "id_ed25519*", "credentials*", "secrets*", ".ssh", ".aws"]
+}

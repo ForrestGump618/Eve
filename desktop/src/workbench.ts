@@ -32,6 +32,10 @@ export const WORKBENCH_REQUIREMENTS = [
   'paramiko==5.1.0',
   'qrcode==8.2',
   'keyring==25.7.0',
+  'uv==0.13.6',
+  'proteus-evolve @ https://github.com/proteus-evolve/Proteus/archive/69f766e73460f67d96a3ce965a5c3f9adaab2f85.zip',
+  'pytest==8.4.2',
+  'pytest-asyncio==1.2.0',
   ...(process.platform === 'win32' ? ['pywinpty==3.1.0'] : []),
 ] as const;
 
@@ -41,7 +45,7 @@ export const WORKBENCH_SCHEMA = 1;
 export const WORKBENCH_DOWNLOAD_MB = 130;
 const INSTALL_TIMEOUT_MS = 20 * 60_000;
 const PROBE_TIMEOUT_MS = 20_000;
-const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'keyring', ...(process.platform==='win32'?['winpty']:[])];
+const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'keyring', 'uv', 'proteus', 'pytest', 'pytest_asyncio', ...(process.platform==='win32'?['winpty']:[])];
 const SAFE_ENV_KEYS = [
   'SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA',
   'PROGRAMFILES', 'PROGRAMFILES(X86)', 'ARCHIFY_CHROME',

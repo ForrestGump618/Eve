@@ -6,6 +6,9 @@ import {getPref,setPref,relTime} from './util.js?v=2.1.1';
 import {on} from './bus.js?v=2.1.1';
 import {promptDialog,confirmDialog,toastError} from './ui.js?v=2.1.1';
 import {mountProjectFiles} from './project-files.js?v=2.1.1';
+import {artifactConfig} from './artifact-config.js';
+
+export const conversationFlag = (conversation, key) => Boolean(conversation[key] ?? conversation.meta?.[key]);
 
 export function workspaceSidebarHtml(){return `
  <div class="chat-brand">Eve<span class="brand-chevron">⌄</span></div>
@@ -13,17 +16,17 @@ export function workspaceSidebarHtml(){return `
  <div class="conv-search">${icon('search',{size:14})}<input type="search" id="conv-filter" placeholder="搜索会话" aria-label="搜索会话"/></div></div>
  <section class="project-files" aria-label="项目文件"><div class="sidebar-section-label"><span>项目文件</span><div class="project-tools"><button type="button" class="icon-btn" id="project-search" aria-label="检索项目文件">${icon('search',{size:13})}</button><button type="button" class="icon-btn" id="project-git" aria-label="Git 状态与历史">${icon('gitBranch',{size:13})}</button><button type="button" class="icon-btn" id="project-refresh" aria-label="刷新项目文件">${icon('refresh',{size:13})}</button></div></div><select id="project-workspace" aria-label="当前项目工作区"></select><div id="project-file-tree" class="project-file-tree"></div></section>
  ${conversationControlsHtml()}<div class="conv-list" id="conv-list"></div>
- <div class="chat-sidebar-foot"><a href="#/workbench">工作台</a><a href="#/research">科研</a><a href="#/extensions">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/context">上下文</a><a href="#/teams">协作</a><a href="#/settings">设置</a></div>
+ <div class="chat-sidebar-foot"><a href="#/workbench">工作台</a><a href="#/research">科研</a><a href="#/extensions">技能</a><a href="#/ssh">SSH</a><a href="#/tasks2">任务</a><a href="#/context">上下文</a><a href="#/teams">协作</a><a href="#/evolution">自我改进</a><a href="#/settings">设置</a></div>
  <div class="sidebar-actions sidebar-utilities"><button type="button" class="icon-btn" id="theme-toggle" aria-label="切换主题">${icon('sun',{size:16})}</button><button type="button" class="icon-btn" id="palette-open" aria-label="打开命令面板">${icon('command',{size:16})}</button></div>`;}
 
 export function conversationControlsHtml(){return `<div class="sidebar-section-label"><span>会话</span><span id="sidebar-conv-count"></span></div><div class="sidebar-conv-tools"><select id="conv-view" aria-label="会话视图"><option value="recent">最近</option><option value="archived">已归档</option><option value="all">全部</option></select><label title="只显示当前工作区"><input id="conv-workspace-only" type="checkbox"/>当前项目</label></div>`;}
 
-export function conversationListHtml(conversations,{query='',view='recent',workspaceOnly=false,activeId='',limit=100}={}){
+export function conversationListHtml(conversations,{query='',view='recent',workspaceOnly=false,activeId='',limit=artifactConfig.sidebar.pageSize}={}){
  const workspaceId=getState().workspaceId||'ws_main';
- const items=conversations.filter(c=>(view==='all'||Boolean(c.archived||c.meta?.archived)===(view==='archived'))&&(!workspaceOnly||(c.workspace_id||c.meta?.workspace_id||'ws_main')===workspaceId)&&(!query||String(c.title||'').toLowerCase().includes(query.toLowerCase()))).sort((a,b)=>Number(Boolean(b.pinned||b.meta?.pinned))-Number(Boolean(a.pinned||a.meta?.pinned))||Number(b.updated_at||0)-Number(a.updated_at||0));
+ const items=conversations.filter(c=>(view==='all'||conversationFlag(c,'archived')===(view==='archived'))&&(!workspaceOnly||(c.workspace_id||c.meta?.workspace_id||'ws_main')===workspaceId)&&(!query||String(c.title||'').toLowerCase().includes(query.toLowerCase()))).sort((a,b)=>Number(conversationFlag(b,'pinned'))-Number(conversationFlag(a,'pinned'))||Number(b.updated_at||0)-Number(a.updated_at||0));
  let group='';
  return (items.slice(0,limit).map(conv=>{
-  const pinned=Boolean(conv.pinned||conv.meta?.pinned),archived=Boolean(conv.archived||conv.meta?.archived);
+  const pinned=conversationFlag(conv,'pinned'),archived=conversationFlag(conv,'archived');
   const age=(Date.now()/1000-Number(conv.updated_at||0))/86400;
   const label=pinned?'置顶':age<1?'今天':age<7?'本周':'更早';
   const heading=label!==group?`<div class="conv-group">${label}</div>`:'';group=label;
@@ -34,7 +37,7 @@ export function conversationListHtml(conversations,{query='',view='recent',works
 /** Non-chat routes share the same sidebar and persisted conversation metadata. */
 export async function mountSidebarNavigation(root,open){
  const controller=new AbortController(),signal=controller.signal;
- let disposed=false,conversations=[],limit=100,lastHtml='';
+ let disposed=false,conversations=[],limit=artifactConfig.sidebar.pageSize,lastHtml='';
  const list=root.querySelector('#conv-list'),filter=root.querySelector('#conv-filter'),view=root.querySelector('#conv-view'),workspaceOnly=root.querySelector('#conv-workspace-only');
  view.value=getPref('conversationView','recent');workspaceOnly.checked=getPref('conversationWorkspaceOnly',false);
  function render(){if(!disposed){const html=conversationListHtml(conversations,{query:filter.value,view:view.value,workspaceOnly:workspaceOnly.checked,activeId:getState().activeConversationId,limit});if(html!==lastHtml){list.innerHTML=html;lastHtml=html;}}}
@@ -44,15 +47,16 @@ export async function mountSidebarNavigation(root,open){
  view.addEventListener('change',()=>{setPref('conversationView',view.value);render();},{signal});
  workspaceOnly.addEventListener('change',()=>{setPref('conversationWorkspaceOnly',workspaceOnly.checked);render();},{signal});
  list.addEventListener('click',async event=>{
-  if(event.target.closest('[data-conv-more]')){limit+=100;render();return;}
+  if(event.target.closest('[data-conv-more]')){limit+=artifactConfig.sidebar.pageSize;render();return;}
   const node=event.target.closest('[data-id]');if(!node)return;
   const conv=conversations.find(c=>c.id===node.dataset.id);if(!conv)return;
   const action=event.target.closest('.conv-archive,.conv-pin');
-  if(action){try{
+  if(action){action.disabled=true;try{
    const key=action.classList.contains('conv-pin')?'pinned':'archived';
-   const record=await api.conversations.update(conv.id,{[key]:!Boolean(conv[key])});
-   Object.assign(conv,record,{archived:Boolean(record.meta?.archived),pinned:Boolean(record.meta?.pinned)});setState({conversations:[...conversations]});render();
-  }catch(error){toastError(errorMessage(error));}return;}
+   const record=await api.conversations.update(conv.id,{[key]:!conversationFlag(conv,key)});
+   if(disposed)return;
+   Object.assign(conv,record,{archived:conversationFlag(record,'archived'),pinned:conversationFlag(record,'pinned')});setState({conversations:[...conversations]});render();
+  }catch(error){if(!disposed)toastError(errorMessage(error));}finally{action.disabled=false;}return;}
   if(event.target.closest('.conv-rename')){
    const title=await promptDialog({title:'重命名会话',label:'会话标题',value:conv.title||'',confirmText:'保存'});
    if(title?.trim())try{await api.conversations.update(conv.id,{title:title.trim()});conv.title=title.trim();setState({conversations:[...conversations]});render();}catch(error){toastError(errorMessage(error));}

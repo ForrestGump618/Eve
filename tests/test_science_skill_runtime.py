@@ -98,6 +98,33 @@ def test_real_uv_execution_is_offline_and_output_uses_workspace(tmp_path):
     assert json.loads((tmp_path / "science-result.json").read_text()) == {"value": 42}
 
 
+def test_silent_script_requires_fresh_verified_output_artifact(tmp_path):
+    script = ('# /// script\n# dependencies = []\n# ///\n'
+              'import pathlib,sys\npathlib.Path(sys.argv[2]).write_text(\'{"gene":"TNF"}\')\n')
+    result = execute_bundle(payload(tmp_path, bundle(script), run=True,
+                                    script='scripts/analyze.py', args=['--output', 'result.json']))
+    assert result['ok'] is True, result
+    assert result['artifactEvidence'][0]['sha256'] == hashlib.sha256(b'{"gene":"TNF"}').hexdigest()
+    assert json.loads(result['stdout'])['output'] == {'gene': 'TNF'}
+    silent = '# /// script\n# dependencies = []\n# ///\npass\n'
+    stale = execute_bundle(payload(tmp_path, bundle(silent), run=True,
+                                   script='scripts/analyze.py', args=['--output', 'result.json']))
+    assert stale['ok'] is False
+
+
+def test_artifact_output_cannot_escape_workspace(tmp_path):
+    with pytest.raises(ValueError, match='output'):
+        execute_bundle(payload(tmp_path, run=True, script='scripts/analyze.py', args=['--output', '../escape.json']))
+
+
+def test_silent_artifact_with_scientific_error_cannot_pass(tmp_path):
+    script = ('# /// script\n# dependencies = []\n# ///\n'
+              'import pathlib\npathlib.Path("failed.json").write_text(\'{"error":"query failed"}\')\n')
+    result = execute_bundle(payload(tmp_path, bundle(script), run=True,
+                                    script='scripts/analyze.py', args=['--output', 'failed.json']))
+    assert result['ok'] is False
+
+
 @pytest.mark.parametrize("script, expected", [
     ('raise SystemExit(7)', "exit"),
     ('print("x"*60000)', "truncated"),

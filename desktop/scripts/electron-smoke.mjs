@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { mkdirSync,writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
 import { resolve, dirname, join } from 'node:path';
@@ -15,13 +16,26 @@ const {_electron}=require('playwright-core');
 const {rpc}=await import(pathToFileURL(project+'/dist/src/rpc.js'));
 const {readConnection}=await import(pathToFileURL(project+'/dist/src/security.js'));
 const profile=workspace+'/work/electron-e2e-profile';mkdirSync(profile,{recursive:true});
+// app.close() bypasses the product's ask/background close UI, so this smoke
+// explicitly selects the quit path before launch.
+writeFileSync(profile+'/desktop-window.json',JSON.stringify({closeAction:'quit'}));
 const server=createServer(async(req,res)=>{let body='';for await(const chunk of req)body+=chunk.toString();assert.match(req.url,/chat\/completions$/);res.writeHead(200,{'Content-Type':'text/event-stream'});res.write('data: '+JSON.stringify({choices:[{delta:{content:'这是一条本地模拟服务的界面验收响应。\n\n'}}]})+'\n\n');setTimeout(()=>res.end('data: '+JSON.stringify({choices:[{delta:{content:'已验证流式显示、任务持久化与执行记录；这不是科研结论。'},finish_reason:'stop'}],usage:{prompt_tokens:100,completion_tokens:50}})+'\n\ndata: [DONE]\n\n'),300);});
 server.listen(0,'127.0.0.1');await once(server,'listening');
 const env={...process.env,SUWEN_TEST_HOME:profile};delete env.ELECTRON_RUN_AS_NODE;
 const packaged=process.env.SUWEN_SMOKE_PACKAGED==='1';
 const executablePath=packaged?project+'/release/win-unpacked/Eve.exe':project+'/node_modules/electron/dist/electron.exe';
 const launchArgs=packaged?['--native']:[project,'--native'];
-let app,connection;const closes=[];const log={modelProtocol:'local HTTP fixture only; no external model account',checks:[]};
+async function waitForProcessExit(handle,timeoutMs){
+ const deadline=Date.now()+timeoutMs;
+ while(handle.exitCode===null&&Date.now()<deadline)await new Promise(r=>setTimeout(r,100));
+ return handle.exitCode;
+}
+function forceStopElectron(handle){
+ if(!handle?.pid||handle.exitCode!==null)return;
+ if(process.platform==='win32')execFileSync('taskkill.exe',['/PID',String(handle.pid),'/F'],{stdio:'ignore'});
+ else handle.kill('SIGKILL');
+}
+let app,connection,appProcessHandle=null;const closes=[];const log={modelProtocol:'local HTTP fixture only; no external model account',checks:[]};
 try{
  app=await _electron.launch({executablePath,args:launchArgs,env,timeout:30000});
  const page=await app.firstWindow();page.on('pageerror',e=>console.log('PAGE_ERROR',e.message));await page.waitForSelector('#health');
@@ -32,7 +46,7 @@ try{
  await page.locator('#toggle-evidence').click();await page.screenshot({path:workspace+'/outputs/SuWen-preview.png',fullPage:true});
  await page.locator('[data-page="tasks"]').click();await page.locator('#task-demo').click();await page.waitForFunction(()=>document.getElementById('task-list').textContent.includes('等待计时'),{timeout:10000});
  connection=readConnection(profile+'/runtime');assert.ok(connection);const before=await rpc(connection,'snapshot');const demo=before.tasks.find(t=>t.name.startsWith('后台恢复演示'));assert.ok(demo);log.daemonPid=connection.pid;log.timerTask=demo.id;
- const processHandle=app.process();closes.push(app.close());app=null;await new Promise(r=>setTimeout(r,1000));assert.notEqual(processHandle.exitCode,null);assert.equal((await rpc(connection,'health')).pid,connection.pid);log.checks.push('closing actual Electron UI does not kill detached daemon');
+ const processHandle=app.process();appProcessHandle=processHandle;await Promise.race([app.evaluate(({app})=>app.exit(0)).catch(()=>{}),new Promise(r=>setTimeout(r,3000))]);app=null;let exitCode=await waitForProcessExit(processHandle,15000);if(exitCode===null){forceStopElectron(processHandle);exitCode=await waitForProcessExit(processHandle,5000);}assert.notEqual(exitCode,null,'Electron launcher did not exit after the forced UI stop');assert.equal((await rpc(connection,'health')).pid,connection.pid);log.checks.push('forced Electron UI exit does not kill detached daemon');appProcessHandle=null;
  const deadline=Date.now()+38000;let task;while(Date.now()<deadline){const s=await rpc(connection,'snapshot');task=s.tasks.find(t=>t.id===demo.id);if(task.status==='completed')break;await new Promise(r=>setTimeout(r,500));}assert.equal(task.status,'completed');assert.equal(task.steps.find(s=>s.id==='start').attempts,1);log.checks.push('30-second persisted timer completed after UI exit; committed start step executed once');
  app=await _electron.launch({executablePath,args:launchArgs,env,timeout:30000});const reopened=await app.firstWindow();await reopened.waitForFunction(()=>document.getElementById('health').textContent.includes('后台运行'),{timeout:15000});assert.equal(readConnection(profile+'/runtime').pid,connection.pid);log.checks.push('reopen attaches to same daemon and restores task history');
  await reopened.locator('[data-page="tools"]').click();await reopened.screenshot({path:workspace+'/outputs/SuWen-tools.png',fullPage:true});
@@ -57,8 +71,8 @@ try{
    const unauthorized=await fetch(`http://127.0.0.1:${health.legacy.port}/api/health`);assert.equal(unauthorized.status,401);
    // The hosted legacy web UI must be the real SPA, not an empty shell.
    await legacyPage.waitForFunction(()=>document.querySelectorAll('nav [data-route], .nav-item, #nav button, #nav a').length>=8,{timeout:30000}).catch(()=>null);
-   const legacyShell=await legacyPage.evaluate(()=>({title:document.title,brand:(document.body.textContent||'').includes('素问'),nav:document.querySelectorAll('nav [data-route], .nav-item, #nav button, #nav a').length,routes:[...document.querySelectorAll('[data-route]')].map(e=>e.getAttribute('data-route'))}));
-   assert.match(legacyShell.title,/素问/);assert.equal(legacyShell.brand,true);assert.ok(legacyShell.nav>=8,`legacy nav items: ${legacyShell.nav}`);
+   const legacyShell=await legacyPage.evaluate(()=>({title:document.title,brand:/Eve|素问/.test(document.body.textContent||''),nav:document.querySelectorAll('nav [data-route], .nav-item, #nav button, #nav a').length,routes:[...document.querySelectorAll('[data-route]')].map(e=>e.getAttribute('data-route'))}));
+   assert.match(legacyShell.title,/Eve|素问/);assert.equal(legacyShell.brand,true);assert.ok(legacyShell.nav>=8,`legacy nav items: ${legacyShell.nav}`);
    await legacyPage.screenshot({path:join(workspace,'work','legacy-workbench.png')}).catch(()=>null);
    log.legacyWorkbench={hosted:true,title:legacyShell.title,navItems:legacyShell.nav,routes:legacyShell.routes.slice(0,20),screenshot:'work/legacy-workbench.png'};
    log.checks.push('packaged optional Python workbench opens isolated authenticated window; unauthorized HTTP rejected');
@@ -72,6 +86,7 @@ try{
  log.runtimeVersions=(await rpc(connection,'health')).runtimeVersions;log.packaged=packaged;log.result='passed';
 }catch(err){log.result='failed';log.error=err.message;console.log(err.stack);process.exitCode=1;}
 finally{
+ if(appProcessHandle){try{forceStopElectron(appProcessHandle);}catch{}}
  if(connection){try{await rpc(connection,'shutdown');}catch{}}
  if(app)closes.push(app.close());await Promise.allSettled(closes);server.close();server.closeAllConnections();
  writeFileSync(workspace+'/work/electron-e2e-result.json',JSON.stringify(log,null,2));console.log(JSON.stringify(log,null,2));

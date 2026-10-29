@@ -218,23 +218,17 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
         if handle.backend is None:
             raise HTTPException(503, "执行后端不可用；禁止回退本地执行")
         if operation.startswith("team_"):
-            from ..suwen.teams import create_team, member_team, team_snapshot, team_mailbox, send_message, assign_member
+            from ..suwen.teams import create_bound_team, member_team, team_snapshot, team_mailbox, send_message, assign_member, team_has_active_tasks
             p, scope = state.platform, handle.workspace.workspace_id
             try:
+                internal_id = (state.events.get_run(handle.run_id).get("meta") or {}).get("internal_task_id")
+                internal = p.store.get("task", internal_id, scope) if internal_id else None
+                if internal and internal.get("team_summary_id") and (
+                        operation in {"team_create", "team_assign"} or (operation == "team_message" and args.get("wake"))):
+                    raise ValueError("队长汇总任务不能创建团队、重新分配或唤醒成员")
                 if operation == "team_create":
-                    if state.store.get(handle.session_id).meta.get("team_member"):
-                        raise ValueError("团队成员不能创建下一级团队")
-                    existing = [t for t in p.store.list("team", scope)
-                                if t.get("captain_session") == handle.session_id and t.get("draft") and not t.get("archived")]
-                    if existing:
-                        return team_snapshot(p, scope, existing[0])
                     await authorize(state, handle, operation, args)
-                    # A member cannot silently exceed the parent's authority.
-                    modes = {"ask": 0, "review": 1, "full": 2}
-                    for m in args.get("members", []):
-                        if modes.get(m.get("permission_mode", "ask"), 99) > modes[handle.permission_mode]:
-                            raise ValueError("成员权限不能高于队长任务权限")
-                    return create_team(p, scope, {**args, "draft": True, "captain_session": handle.session_id})
+                    return create_bound_team(p, scope, state.events.get_run(handle.run_id), args)
                 if operation == "team_status" and not args.get("id"):
                     eligible = []
                     for row in p.store.list("team", scope):
@@ -258,8 +252,7 @@ async def harness_tool(request: Request, run_id: str) -> dict[str, Any]:
                 if operation == "team_assign":
                     return await assign_member(p, scope, team["id"], args.get("member_id"), args.get("goal"))
                 if operation == "team_archive":
-                    snap = team_snapshot(p, scope, team)
-                    if not team.get("draft") and any(m["task"]["status"] not in {"succeeded", "failed", "cancelled", "needs_review"} for m in snap["members"]):
+                    if team_has_active_tasks(p, scope, team):
                         raise ValueError("活动团队不可归档")
                     return p.store.put("team", team["id"], {**team, "archived": True}, scope)
                 raise ValueError("未知团队操作")

@@ -20,7 +20,7 @@ export function workspaceFailure(data:Record<string,Json>):string {
   return 'Workspace operation failed';
 }
 export function permissionMode(value:Json|undefined):PermissionMode {
-  if(value===undefined)return 'ask';
+  if(value===undefined)return 'full';
   if(value!=='ask'&&value!=='review'&&value!=='full')throw new ValidationError('Invalid task permission mode');
   return value;
 }

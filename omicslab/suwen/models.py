@@ -78,10 +78,22 @@ class ModelGateway:
         target=self.resolve_target(dict(role_model,provider=provider,model=model) if use_role else {'provider':provider,'model':model})
         caps=config['capabilities'].get(target.model,{})
         maximum={'fast':1024,'balanced':4096,'deep':8192}[config['mode']]
-        cfg=ProviderConfig(temperature=None if caps.get('temperature') is not True else (.1 if role=='code' else .3),
+        temperature=None
+        temp_cap=caps.get('temperature')
+        if temp_cap is True:
+            temperature=.1 if role=='code' else .3
+        elif type(temp_cap) in {int,float}:
+            temperature=float(temp_cap)
+        model_window=int(caps.get('context_window') or 0)
+        ctx_window=int(config['context_window'])
+        if model_window>=2048:
+            ctx_window=min(ctx_window,model_window)
+        cfg=ProviderConfig(temperature=temperature,
             max_tokens=min(maximum,int(caps.get('max_output',maximum))),timeout_s=float(settings.request_timeout_s),
-            extra={'supported_parameters':caps.get('supported_parameters',[]),'token_parameter':caps.get('token_parameter','max_tokens')})
-        return RoutedProvider(self,target,scope,agent.id,config),cfg,target
+            extra={'supported_parameters':caps.get('supported_parameters',[]),'token_parameter':caps.get('token_parameter','max_tokens'),
+                   'modalities':caps.get('modalities',[]),'model_context_window':ctx_window})
+        routed_config=dict(config);routed_config['context_window']=ctx_window
+        return RoutedProvider(self,target,scope,agent.id,routed_config),cfg,target
 
     def resolve_target(self,item):
         return self.platform.settings.resolve_llm(item.get('provider'),item.get('model'),
@@ -145,7 +157,9 @@ class RoutedProvider:
             try:
                 require_private_endpoint(self.config['strategy'],target.api_base,target.provider)
                 extra=dict(cfg.extra)
-                if self.config.get('sage_verification') and 'sage-a1.5' in target.model.lower():
+                verification=self.config.get('verification','standard')
+                if self.config.get('sage_verification'):verification='sage'
+                if verification=='sage' and 'sage-a1.5' in target.model.lower():
                     extra['chat_template_kwargs']={'verification':True}
                 else:extra.pop('chat_template_kwargs',None)
                 async with aclosing(make_provider(target).stream_chat(messages,tools,replace(cfg,extra=extra))) as stream:

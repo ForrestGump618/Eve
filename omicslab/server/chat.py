@@ -164,6 +164,7 @@ async def chat(request: Request) -> StreamingResponse:
             model=str(body.get("model") or "").strip() or None,
             attachments=[a for a in attachments if isinstance(a, dict)],
             conversation=conversation,
+            **({"collaboration_mode": body["collaboration_mode"]} if "collaboration_mode" in body else {}),
         )
     except RunConflict:
         active = state.events.active_run_for_session(conversation.id) or {}
@@ -507,6 +508,7 @@ async def create_session_run(request: Request, session_id: str) -> dict[str, Any
             model=model,
             attachments=[a for a in attachments if isinstance(a, dict)] if isinstance(attachments, list) else [],
             conversation=conversation,
+            **({"collaboration_mode": body["collaboration_mode"]} if "collaboration_mode" in body else {}),
         )
     except RunConflict as exc:
         raise HTTPException(

@@ -156,11 +156,11 @@ export function aggregateMetrics(results: EvalCaseResult[]): StrategyMetrics {
   const scores = results.map(result => result.humanScore).filter((value): value is number => typeof value === 'number');
   const metrics: StrategyMetrics = {
     taskSuccess: round(mean(result => (result.success ? 1 : 0))),
-    evidenceAccuracy: round(mean(result => clamp01(result.evidenceScore ?? (result.success ? 1 : 0)))),
+    evidenceAccuracy: round(mean(result => clamp01(result.evidenceScore ?? 0))),
     toolFailureRate: round(mean(result => (result.toolFailure ? 1 : 0))),
     cost: round(mean(result => Math.max(0, result.cost ?? 0))),
     latency: round(mean(result => Math.max(0, result.latencyMs ?? 0))),
-    reproducibility: round(mean(result => (result.reproducible === false ? 0 : 1))),
+    reproducibility: round(mean(result => (result.reproducible === true ? 1 : 0))),
     cases: results.length,
   };
   if (scores.length) metrics.humanScore = round(scores.reduce((total, value) => total + clamp01(value), 0) / scores.length);

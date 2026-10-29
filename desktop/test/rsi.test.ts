@@ -13,6 +13,12 @@ import type { RsiRunView } from '../src/shared/contract.js';
 const FIXED_NOW = 1_700_000_000_000;
 const clock = (): number => FIXED_NOW;
 
+test('unmeasured evidence and reproducibility cannot become successful metrics', () => {
+  const metrics = aggregateMetrics([{ caseId: 'unverified', success: true }]);
+  assert.equal(metrics.evidenceAccuracy, 0);
+  assert.equal(metrics.reproducibility, 0);
+});
+
 interface RsiHarness {
   store: Store;
   engine: RsiEngine;

@@ -1,0 +1,80 @@
+{
+  "baseline": "3f630ec973a895a1f08fd7e4cb8ec91f49cc158b",
+  "environment": {
+    "browser": "156.0.4314.50",
+    "viewport": "1440x900",
+    "theme": "light",
+    "text": "Short question",
+    "meta": "12:00:00",
+    "comparison": "same geometry, actual git baseline/current source renderer and CSS; no boot or RPC"
+  },
+  "userBubble": {
+    "before": {
+      "text": "Short question",
+      "height": 91.390625,
+      "width": 240,
+      "paddingBlock": "13px",
+      "gap": "6px",
+      "font": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+      "bodyFontSize": "14px",
+      "bodyLineHeight": "22.4px"
+    },
+    "after": {
+      "text": "Short question",
+      "height": 82.390625,
+      "width": 120.703125,
+      "paddingBlock": "10px",
+      "gap": "4px",
+      "font": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+      "bodyFontSize": "14px",
+      "bodyLineHeight": "22.4px"
+    },
+    "heightDelta": -9,
+    "heightReductionPercent": 9.85
+  },
+  "assetBytes": {
+    "before": 373440,
+    "after": 390944,
+    "delta": 17504,
+    "convention": "All desktop/ui source assets, normalized to LF for a like-for-like Git comparison; excludes tests and generated vendor assets",
+    "onDiskAfter": 397081,
+    "changedFiles": [
+      {
+        "path": "desktop/ui/app.js",
+        "before": 222909,
+        "after": 229509,
+        "delta": 6600
+      },
+      {
+        "path": "desktop/ui/index.html",
+        "before": 25339,
+        "after": 27032,
+        "delta": 1693
+      },
+      {
+        "path": "desktop/ui/style.css",
+        "before": 22396,
+        "after": 25223,
+        "delta": 2827
+      },
+      {
+        "path": "desktop/ui/chat-presentation.js",
+        "before": 0,
+        "after": 2362,
+        "delta": 2362
+      },
+      {
+        "path": "desktop/ui/message-locator.js",
+        "before": 0,
+        "after": 3101,
+        "delta": 3101
+      },
+      {
+        "path": "desktop/ui/ui-config.js",
+        "before": 0,
+        "after": 921,
+        "delta": 921
+      }
+    ]
+  }
+}

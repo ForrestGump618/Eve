@@ -4,6 +4,7 @@ from __future__ import annotations
 import inspect
 import json
 from .skill_resources import prepare_resources
+from .science_policy import OUTPUT_POLICY
 
 
 def execute_bundle(payload: dict) -> dict:
@@ -21,6 +22,7 @@ def execute_bundle(payload: dict) -> dict:
     import time
 
     started = time.monotonic()
+    output_policy = payload.get('outputPolicy') or OUTPUT_POLICY
     bundle = payload["bundle"]
     name, version = bundle["name"], bundle["version"]
     runtime = bundle["runtime"]
@@ -98,6 +100,23 @@ def execute_bundle(payload: dict) -> dict:
     else:
         command += ["--no-project", "--script"]
     command += [str(target / script), *args]
+    output_paths = []
+    for index, argument in enumerate(args):
+        value = None
+        if argument in output_policy['output_flags']:
+            if index + 1 >= len(args):
+                raise ValueError('Scientific output flag requires a path')
+            value = args[index + 1]
+        elif any(argument.startswith(flag + '=') for flag in output_policy['output_flags']):
+            value = argument.split('=', 1)[1]
+        if value:
+            path = (workspace / value).resolve()
+            if (not path.is_relative_to(workspace) or path == workspace or path.is_relative_to(workspace / '.eve')
+                    or path.is_symlink()):
+                raise ValueError('Scientific output path must stay inside the workspace')
+            before = path.stat() if path.is_file() else None
+            stamp = (before.st_mtime_ns, before.st_ctime_ns, before.st_size) if before else None
+            output_paths.append((path, stamp))
     # Output paths remain relative to the selected workspace; resources are immutable.
     env["UV_NO_PROGRESS"] = "1"
     timed_out = False
@@ -131,6 +150,30 @@ def execute_bundle(payload: dict) -> dict:
             if env.get(key):
                 text = text.replace(env[key], "[REDACTED]")
         return text
+    artifact_evidence = []
+    if proc.returncode == 0 and not timed_out and not clipped and not stdout.strip():
+        for path, before in output_paths:
+            # Stale pre-existing files cannot turn a silent no-op into success.
+            if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(workspace):
+                continue
+            stat = path.stat()
+            stamp = (stat.st_mtime_ns, stat.st_ctime_ns, stat.st_size)
+            if stamp == before or not 0 < stat.st_size <= output_policy['artifact_bytes']:
+                continue
+            data = path.read_bytes()
+            artifact_evidence.append({'path': path.relative_to(workspace).as_posix(),
+                                      'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data), 'fresh': True})
+            observed = {'artifactEvidence': artifact_evidence}
+            try:
+                observed['output'] = json.loads(data.decode('utf-8'))
+            except (ValueError, UnicodeDecodeError):
+                pass
+            encoded = json.dumps(observed).encode('utf-8')
+            if len(encoded) <= output_policy['stdout_bytes']:
+                stdout = encoded
+            else:
+                stdout = json.dumps({'artifactEvidence': artifact_evidence}).encode('utf-8')
+            break
     ok = proc.returncode == 0 and not timed_out and not clipped and bool(stdout.strip())
     structured = None
     if not clipped:
@@ -142,16 +185,22 @@ def execute_bundle(payload: dict) -> dict:
             structured.get("ok") is False or structured.get("error")
             or structured.get("status") in {"failed", "error", "blocked"}):
         ok = False
+    artifact_output = structured.get('output') if isinstance(structured, dict) else None
+    if isinstance(artifact_output, dict) and (
+            artifact_output.get('ok') is False or artifact_output.get('error')
+            or artifact_output.get('status') in {'failed', 'error', 'blocked'}):
+        ok = False
     return {**result, "status": "executed" if ok else "failed", "executed": True, "ok": ok,
             "error": "No scientific output was returned; artifact verification is required" if not stdout.strip() and proc.returncode == 0 else None,
             "exitCode": proc.returncode, "timedOut": timed_out, "truncated": clipped,
             "stdout": redact(stdout), "stderr": redact(stderr),
+            "artifactEvidence": artifact_evidence,
             "durationMs": round((time.monotonic() - started) * 1000),
             "dependencyNetworkAllowed": allow_install}
 
 
 def runtime_source(bundle: dict, workspace: str, *, input_data: dict | None = None, run: bool = False) -> str:
-    payload = {"bundle": bundle, "workspace": workspace, "input": input_data,
+    payload = {"bundle": bundle, "workspace": workspace, "input": input_data, "outputPolicy": OUTPUT_POLICY,
                "operation": "run" if run else "prepare"}
     return (inspect.getsource(prepare_resources) + "\n" + inspect.getsource(execute_bundle)
             + "\nprint(__import__('json').dumps(execute_bundle(__import__('json').loads("

@@ -1,0 +1,1083 @@
+{
+  "schemaVersion": 1,
+  "kind": "offline source/catalog audit",
+  "liveVerifiedThisAudit": false,
+  "indexSha256": "f9fc77936b4b7e8f3040ba27569c0ec1e6c5f7b286d67e9c89bc90b2d229159c",
+  "packSha256": "ea3f4b674af682c32ea06e2b4c308a57926b08226040030782df783b00851c2c",
+  "sources": [
+    {
+      "repository": "K-Dense-AI/scientific-agent-skills",
+      "commit": "5f2bc0341354fd5590aef76a533ada1e1e5b4e62",
+      "license": "MIT"
+    },
+    {
+      "repository": "obra/superpowers",
+      "commit": "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b",
+      "license": "MIT"
+    },
+    {
+      "repository": "ResearAI/DeepScientist",
+      "commit": "b36624417f0c6b8238ec02db37b94d6db2faa5b0",
+      "license": "Apache-2.0"
+    },
+    {
+      "repository": "ComposioHQ/awesome-codex-skills",
+      "commit": "0930e1373789d2eda449039f7ac154b33031de89",
+      "license": null
+    },
+    {
+      "repository": "FreedomIntelligence/OpenClaw-Medical-Skills",
+      "commit": "b1f9b6e3306f8d870e23b2023057bf730090036f",
+      "license": null
+    },
+    {
+      "repository": "opendatalab/MinerU",
+      "commit": "b7f3dd0c5f6e6d66a298239ffd02b328b873918e",
+      "license": "Apache-2.0"
+    },
+    {
+      "repository": "google-deepmind/science-skills",
+      "commit": "4de6786171f1479026da5d3a00f110703c8ba35e",
+      "version": "1.3.1",
+      "license": "Apache-2.0 AND CC-BY-4.0"
+    },
+    {
+      "repository": "tt-a1i/archify",
+      "commit": "208acba8d412335185b2056fedf54b3405df43fb",
+      "version": "3.2.0",
+      "license": "MIT"
+    },
+    {
+      "repository": "anthropics/knowledge-work-plugins",
+      "commit": "2574e29377c7173d0cecffef29a6ecbd7f8ccb5d",
+      "license": "Apache-2.0"
+    },
+    {
+      "repository": "NVIDIA-BioNeMo/bionemo-agent-toolkit",
+      "commit": "f9bb5bb3aacc881c89eb15e93fd119e91915eea8",
+      "license": "Apache-2.0 AND CC-BY-4.0 AND BSD-3-Clause"
+    }
+  ],
+  "verification": {
+    "pack": "sha256_matched",
+    "selectedResourceHashesChecked": 351,
+    "resourceBodyReads": 351,
+    "scriptsExecuted": 0
+  },
+  "runtimeEvidence": [
+    "omicslab/execution/science_skills.py",
+    "omicslab/execution/skill_resources.py",
+    "tests/test_science_skill_runtime.py",
+    "tests/test_science_workbench.py"
+  ],
+  "workflowEvidence": [
+    "desktop/src/agent-tools.ts",
+    "desktop/src/harness/agent-loop.ts",
+    "omicslab/suwen/research.py",
+    "tests/test_research_quests.py"
+  ],
+  "historicalEvidence": {
+    "path": "docs/verification/science-skills/results.json",
+    "scope": "Prior recorded preparation of 40 skills and five public queries; not rerun here and not verification of all requested domains."
+  },
+  "parentReportedLiveValidation": {
+    "source": "Parent/user report in this chat after main runtime fixes",
+    "passed": 45,
+    "total": 45,
+    "preparations": 40,
+    "liveQueries": 5,
+    "services": [
+      "Europe PMC",
+      "PubChem",
+      "ChEMBL",
+      "GTEx",
+      "UniProt"
+    ],
+    "rerunByThisAudit": false
+  },
+  "domains": [
+    {
+      "domain": "AlphaGenome",
+      "existing": [
+        {
+          "name": "science-alphagenome-single-variant-analysis",
+          "id": "builtin:science-alphagenome-single-variant-analysis:bd663b06a6b0",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphagenome_single_variant_analysis",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "bd663b06a6b0188342244d7f19259ed993f7bbe33cf6062dcac5d244322b05ee",
+          "resourceDigest": "5ef2b06b7113eabcb18a066e8ddcdca068f2b7fa1bdb49644f1aae8f8ca469ba",
+          "scripts": [
+            "scripts/analyze_ism.py",
+            "scripts/generate_ontology_mapping.py",
+            "scripts/interpret_splicing.py",
+            "scripts/lookup_gene_info.py",
+            "scripts/resolve_ontology_terms.py",
+            "scripts/visualize_genome_tracks.py",
+            "scripts/visualize_variant_effects.py"
+          ],
+          "scriptResources": [
+            "scripts/analyze_ism.py",
+            "scripts/generate_ontology_mapping.py",
+            "scripts/interpret_splicing.py",
+            "scripts/lookup_gene_info.py",
+            "scripts/resolve_ontology_terms.py",
+            "scripts/visualize_genome_tracks.py",
+            "scripts/visualize_variant_effects.py"
+          ],
+          "requiredCredentials": [
+            "ALPHAGENOME_API_KEY"
+          ],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-alphagenome-variant-impact-score",
+          "id": "builtin:science-alphagenome-variant-impact-score:047e0b38f3eb",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphagenome_variant_impact_score",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "047e0b38f3ebbd56cf966c3263b86992d6101cbf4da501e113c19455468473fb",
+          "resourceDigest": "d5fb6832c8b4e66e60b876a9ef8812a92080de8ee6dc8f46749f84fc659fae77",
+          "scripts": [
+            "scripts/alphagenome_atlas_avi.py"
+          ],
+          "scriptResources": [
+            "scripts/alphagenome_atlas_avi.py"
+          ],
+          "requiredCredentials": [
+            "ALPHAGENOME_API_KEY"
+          ],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-alphagenome-atlas-website-links",
+          "id": "builtin:science-alphagenome-atlas-website-links:61b050f62470",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphagenome_atlas_website_links",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "61b050f6247001a9bdd1b6e7372779af834a6125eec23bbded81bdffc5debdde",
+          "resourceDigest": "16c008a95ab59540f23f406195a9ea25862874168c5c70aefb260c6b456f2bbe",
+          "scripts": [
+            "scripts/alphagenome_atlas_links.py"
+          ],
+          "scriptResources": [
+            "scripts/alphagenome_atlas_links.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Prediction credentials/service execution unverified; atlas links alone are not model predictions.",
+      "supplement": "Use explicit assembly/alleles/tissue and API terms; verify prediction with valid credentials and preserve raw outputs."
+    },
+    {
+      "domain": "ClinVar",
+      "existing": [
+        {
+          "name": "science-clinvar-database",
+          "id": "builtin:science-clinvar-database:2e3e3e5c79b6",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/clinvar_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "2e3e3e5c79b67b344fcfca657f180482d00949d8a63b4d6ec47035f1edb7c1aa",
+          "resourceDigest": "71622ea225cb79068c83cdb9afc4cba6afa9bd4d282a16ad4c1c283d5f69470f",
+          "scripts": [
+            "scripts/clinvar_api.py"
+          ],
+          "scriptResources": [
+            "scripts/clinvar_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY"
+          ],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "gnomAD",
+      "existing": [
+        {
+          "name": "science-gnomad-database",
+          "id": "builtin:science-gnomad-database:f2082c83ddca",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/gnomad_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "f2082c83ddca825e0c336097c6b59a9237d99a33887577cd90fc574f1d3bc18b",
+          "resourceDigest": "8b4a08da2a12cd67eff56db2ed59a2e52524ff0f31cfaa7069cac5ed33b931b4",
+          "scripts": [
+            "scripts/get_gene_constraint.py",
+            "scripts/get_variant_frequency.py",
+            "scripts/search_variants.py"
+          ],
+          "scriptResources": [
+            "scripts/get_gene_constraint.py",
+            "scripts/get_variant_frequency.py",
+            "scripts/search_variants.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "GTEx",
+      "existing": [
+        {
+          "name": "science-gtex-database",
+          "id": "builtin:science-gtex-database:bbd4c8ac358d",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/gtex_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "bbd4c8ac358dbcbec4ec2e6bd16642ba935afb37c662c1d48912e542c61348b0",
+          "resourceDigest": "27396afb138040845226bfeaea9f5092a32c5dd960bd6e3d9f1bb66abcd4e9f7",
+          "scripts": [
+            "scripts/gtex_cli.py"
+          ],
+          "scriptResources": [
+            "scripts/gtex_cli.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Parent reports a bounded live upstream query passed; broader domain behavior and scientific correctness remain unverified. This audit did not rerun the query.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "Ensembl",
+      "existing": [
+        {
+          "name": "science-ensembl-database",
+          "id": "builtin:science-ensembl-database:aff4c6f7c862",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/ensembl_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "aff4c6f7c86268afaacd8a56a88771f536f263602b895cb360603bb7bbf0487f",
+          "resourceDigest": "a3d48dfc647b586b5ee58ec5af5352ed67afe55f32e0746d8f7d68b2f2a128c9",
+          "scripts": [
+            "scripts/ensembl_api.py"
+          ],
+          "scriptResources": [
+            "scripts/ensembl_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "AFDB",
+      "existing": [
+        {
+          "name": "science-alphafold-database-fetch-and-analyze",
+          "id": "builtin:science-alphafold-database-fetch-and-analyze:a16c4defe16c",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/alphafold_database_fetch_and_analyze",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "a16c4defe16ce1c2afb60a9f9d0543f8b05643ebece011738f8138d9ab9dc81c",
+          "resourceDigest": "e5c2b89abd0ceaf50df58f4f7584125f72f38e584528ee4380fcf949e2d59fe4",
+          "scripts": [
+            "scripts/analyze_pae.py",
+            "scripts/analyze_plddt.py",
+            "scripts/fetch_structure.py"
+          ],
+          "scriptResources": [
+            "scripts/analyze_pae.py",
+            "scripts/analyze_plddt.py",
+            "scripts/fetch_structure.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "UniProt",
+      "existing": [
+        {
+          "name": "science-uniprot-database",
+          "id": "builtin:science-uniprot-database:c430156a6826",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/uniprot_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "c430156a6826cc43c24ce4974d3038d2a93c6fe54a5f640521caea92ae818f11",
+          "resourceDigest": "0da3bad1298c95e81ef30a70f5d303d60dbf77bbf8491b04112d63f140348020",
+          "scripts": [
+            "scripts/uniprot_tools.py"
+          ],
+          "scriptResources": [
+            "scripts/uniprot_tools.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Parent reports a bounded live upstream query passed; broader domain behavior and scientific correctness remain unverified. This audit did not rerun the query.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "PDB",
+      "existing": [
+        {
+          "name": "science-pdb-database",
+          "id": "builtin:science-pdb-database:f17ca40aa072",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pdb_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "f17ca40aa07270e220bce7560435eef3c998d857eb790e12377b29537a451f5a",
+          "resourceDigest": "e229caeeb61f1d81461b5a957a25609eccc70fd90384da7d1de0cdd9864753b5",
+          "scripts": [
+            "scripts/download_coordinate_files.py",
+            "scripts/fetch_pdb_metadata.py",
+            "scripts/fetch_schema.py",
+            "scripts/search_pdb.py"
+          ],
+          "scriptResources": [
+            "scripts/download_coordinate_files.py",
+            "scripts/fetch_pdb_metadata.py",
+            "scripts/fetch_schema.py",
+            "scripts/search_pdb.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "Foldseek",
+      "existing": [
+        {
+          "name": "science-foldseek-structural-search",
+          "id": "builtin:science-foldseek-structural-search:3aff6e5f4725",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/foldseek_structural_search",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "3aff6e5f47256cfcb156efb8a07e60a8bd9510a9a3510cc0990c69798c031731",
+          "resourceDigest": "9acce73f3c2e3b0704bae25d2cba7691cab384ea05d6f15dbb36ef1704a2e0a7",
+          "scripts": [
+            "scripts/search.py"
+          ],
+          "scriptResources": [
+            "scripts/search.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Supply a real coordinate file; verify returned structural hits and search status, not a protein name alone."
+    },
+    {
+      "domain": "PyMOL",
+      "existing": [
+        {
+          "name": "science-pymol",
+          "id": "builtin:science-pymol:72bf6ae780d2",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pymol",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "72bf6ae780d21e4789eb3b536f1da40c707d7ac59188022a8bec8e94c00e6275",
+          "resourceDigest": "ed238fbd8d382050a36e95fce6d59af01e2db0bd5bc1fc8e979b073f3b551476",
+          "scripts": [],
+          "scriptResources": [],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Instructions only: no declared Python entry; PyMOL/OSMesa and actual rendering unverified.",
+      "supplement": "Review a workspace rendering script and validate atom count, PNG and PSE read-back on the bound host."
+    },
+    {
+      "domain": "ChEMBL",
+      "existing": [
+        {
+          "name": "science-chembl-database",
+          "id": "builtin:science-chembl-database:67d375e3a869",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/chembl_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "67d375e3a869fd61312bbb6b8fd7a99a588a12254ffed2dce2f10653ed17e9db",
+          "resourceDigest": "ab08769f241534396237a7e9c8f725768b92e940ab121c0cd36c3a6a3212b880",
+          "scripts": [
+            "scripts/chembl_api.py"
+          ],
+          "scriptResources": [
+            "scripts/chembl_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Parent reports a bounded live upstream query passed; broader domain behavior and scientific correctness remain unverified. This audit did not rerun the query.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "PubChem",
+      "existing": [
+        {
+          "name": "science-pubchem-database",
+          "id": "builtin:science-pubchem-database:dfb7876a2da5",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pubchem_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "dfb7876a2da5bea3d7e426e29a3e31876f7da2152415269fbfb3ef63dd248cc3",
+          "resourceDigest": "b263b92fc7c85ea0beb4ff0db7c68def0eb28671048bc7f118e3cfae8af07bac",
+          "scripts": [
+            "scripts/pubchem_api.py"
+          ],
+          "scriptResources": [
+            "scripts/pubchem_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Parent reports a bounded live upstream query passed; broader domain behavior and scientific correctness remain unverified. This audit did not rerun the query.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "Open Targets",
+      "existing": [
+        {
+          "name": "science-opentargets-database",
+          "id": "builtin:science-opentargets-database:06f42275cb2a",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/opentargets_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "06f42275cb2a6b6e81939a30dc42b5e897aff805432e43e2501a9deba09579fa",
+          "resourceDigest": "70514e3e38a00175c3878cdda5638cc222f853b608ff6932d98419f7eddfa32d",
+          "scripts": [
+            "scripts/query_opentargets.py"
+          ],
+          "scriptResources": [
+            "scripts/query_opentargets.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "PubMed",
+      "existing": [
+        {
+          "name": "science-pubmed-database",
+          "id": "builtin:science-pubmed-database:f1f4a89fb2b7",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pubmed_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "f1f4a89fb2b7be808db1352405a09858f049d5b5c2c12aec44cffcdac844d4e8",
+          "resourceDigest": "90159b52f1beed1c6b1d2e21933c238e4af8ee29a04c0d68572c0514e3f00e01",
+          "scripts": [
+            "scripts/pubmed_api.py"
+          ],
+          "scriptResources": [
+            "scripts/pubmed_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY",
+            "USER_EMAIL"
+          ],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "bioRxiv",
+      "existing": [
+        {
+          "name": "science-literature-search-biorxiv",
+          "id": "builtin:science-literature-search-biorxiv:94c617dd4660",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_biorxiv",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "94c617dd466062bfb838c8d3aed6aa4726ee6191b999bb472184bdeb86bb1ede",
+          "resourceDigest": "1b7358953da6dc5d94026075d91dae2b9423c39e0fc0657bd955d7e2086b5617",
+          "scripts": [
+            "scripts/search_by_dates.py",
+            "scripts/search_by_doi.py"
+          ],
+          "scriptResources": [
+            "scripts/search_by_dates.py",
+            "scripts/search_by_doi.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    },
+    {
+      "domain": "Europe PMC",
+      "existing": [
+        {
+          "name": "science-literature-search-europepmc",
+          "id": "builtin:science-literature-search-europepmc:4582fcc3fa36",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_europepmc",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "4582fcc3fa3665798615bdc1d95a8b82e22576273eda74d46ca74a5524658cc3",
+          "resourceDigest": "fe5923284827718d07b3e068f660be80affe29ab49beb0fb231af00ad6a70a54",
+          "scripts": [
+            "scripts/europepmc_api.py"
+          ],
+          "scriptResources": [
+            "scripts/europepmc_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Parent reports a bounded live upstream query passed; broader domain behavior and scientific correctness remain unverified. This audit did not rerun the query.",
+      "supplement": "Record that this imported search appends OPEN_ACCESS:y; it is not unrestricted PubMed coverage."
+    },
+    {
+      "domain": "OpenAlex",
+      "existing": [
+        {
+          "name": "science-literature-search-openalex",
+          "id": "builtin:science-literature-search-openalex:61ae8d259829",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_openalex",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "61ae8d25982973cf2b753ab44e438efcef22df01fc25bc88fb6926c19014246d",
+          "resourceDigest": "df5c54fb92f5c184407d381f5350153666ce88bf540a8fa0cc81e815377f2da6",
+          "scripts": [
+            "scripts/openalex_cli.py"
+          ],
+          "scriptResources": [
+            "scripts/openalex_cli.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "OPENALEX_API_KEY"
+          ],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ],
+      "missing": "Live API behavior and scientific correctness were not exercised.",
+      "supplement": "Validate a bounded reference query on the bound backend and read back its identifiers and output."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "literature_reproduction",
+      "existing": "Retrieval scripts, DOI registration checker resources, reproduction plan, ordered research stages, artifact hashes, metric contract, human finalization.",
+      "missing": "Plans and saved artifacts do not prove citation identity, claim support, full-text review, or a reproduced numerical result. Generic review scripts have no declared scientific runtime entry.",
+      "supplement": "Use this audit on paired execution observations and citations; fetch titled metadata. Preserve source, data/code versions, environment, comparison tolerances and human review separately.",
+      "catalog": [
+        {
+          "name": "science-literature-search-biorxiv",
+          "id": "builtin:science-literature-search-biorxiv:94c617dd4660",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_biorxiv",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "94c617dd466062bfb838c8d3aed6aa4726ee6191b999bb472184bdeb86bb1ede",
+          "resourceDigest": "1b7358953da6dc5d94026075d91dae2b9423c39e0fc0657bd955d7e2086b5617",
+          "scripts": [
+            "scripts/search_by_dates.py",
+            "scripts/search_by_doi.py"
+          ],
+          "scriptResources": [
+            "scripts/search_by_dates.py",
+            "scripts/search_by_doi.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-literature-search-europepmc",
+          "id": "builtin:science-literature-search-europepmc:4582fcc3fa36",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_europepmc",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "4582fcc3fa3665798615bdc1d95a8b82e22576273eda74d46ca74a5524658cc3",
+          "resourceDigest": "fe5923284827718d07b3e068f660be80affe29ab49beb0fb231af00ad6a70a54",
+          "scripts": [
+            "scripts/europepmc_api.py"
+          ],
+          "scriptResources": [
+            "scripts/europepmc_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-literature-search-openalex",
+          "id": "builtin:science-literature-search-openalex:61ae8d259829",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/literature_search_openalex",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "61ae8d25982973cf2b753ab44e438efcef22df01fc25bc88fb6926c19014246d",
+          "resourceDigest": "df5c54fb92f5c184407d381f5350153666ce88bf540a8fa0cc81e815377f2da6",
+          "scripts": [
+            "scripts/openalex_cli.py"
+          ],
+          "scriptResources": [
+            "scripts/openalex_cli.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "OPENALEX_API_KEY"
+          ],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-pubmed-database",
+          "id": "builtin:science-pubmed-database:f1f4a89fb2b7",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/pubmed_database",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "f1f4a89fb2b7be808db1352405a09858f049d5b5c2c12aec44cffcdac844d4e8",
+          "resourceDigest": "90159b52f1beed1c6b1d2e21933c238e4af8ee29a04c0d68572c0514e3f00e01",
+          "scripts": [
+            "scripts/pubmed_api.py"
+          ],
+          "scriptResources": [
+            "scripts/pubmed_api.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY",
+            "USER_EMAIL"
+          ],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "literature-review",
+          "id": "builtin:literature-review:16a9e85bcdcb",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/literature-review",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "16a9e85bcdcb9bb859e1646bf836e51b22900445ba2e367d8d75be05b5a5cba8",
+          "resourceDigest": "eab961ee949d4d68cfeb590d29c8a1880663618cf3da78b37d3e6bc749cf04e4",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/generate_pdf.py",
+            "scripts/generate_schematic.py",
+            "scripts/generate_schematic_ai.py",
+            "scripts/search_databases.py",
+            "scripts/verify_citations.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "citation-management",
+          "id": "builtin:citation-management:dc79fe1e8438",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/citation-management",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "dc79fe1e8438dcf598040615d5323360c6a7ed0b868fc3ffc82512c871a1e3ff",
+          "resourceDigest": "c114913944ab272b3a98241fe4e984327f73a9f31e657ba5024adc213fd59471",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/_common.py",
+            "scripts/doi_to_bibtex.py",
+            "scripts/extract_metadata.py",
+            "scripts/format_bibtex.py",
+            "scripts/search_google_scholar.py",
+            "scripts/search_openalex.py",
+            "scripts/search_pubmed.py",
+            "scripts/validate_citations.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ]
+    },
+    {
+      "id": "primers_cloning",
+      "existing": "Imported Primer3 resources and sequence retrieval, plus new optional standalone primer_check.py and validate_construct.py workspace CLIs with focused executed fixtures.",
+      "missing": "Local wrappers are available as lazy catalog entries science-primer-reference-check and science-construct-validation. Exact single-reference primer products do not establish assay specificity; vector reference/junction/CDS checks do not establish wet-lab assembly success.",
+      "supplement": "Implemented: real optional Primer3 design/Tm/hairpin/dimer calculations with explicit missing-dependency failure; both-strand exact amplicon coordinates and tails; tiled reference matching, circular junctions, strand/phase/CDS translation checks. Preserve source provenance and complete broader specificity/wet-lab validation separately.",
+      "catalog": [
+        {
+          "name": "primer-design",
+          "id": "builtin:primer-design:ea8bed0aa340",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/primer-design",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "ea8bed0aa340a5f6538c206bb3d9fe503da6759e68a944a2bce564fa115d25e4",
+          "resourceDigest": "6905f2a68d5037f071396e6c1db16ae1f0301259818de96de2013f6f0839875a",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/_common.py",
+            "scripts/_specificity.py",
+            "scripts/check_thermodynamics.py",
+            "scripts/design_primers.py",
+            "scripts/screen_specificity.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-ncbi-sequence-fetch",
+          "id": "builtin:science-ncbi-sequence-fetch:9cda15b57873",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/google-deepmind/science-skills/tree/4de6786171f1479026da5d3a00f110703c8ba35e/skills/ncbi_sequence_fetch",
+          "version": "1.3.1+4de6786171f1",
+          "instructionSha256": "9cda15b57873e8671f9ae778ed33b543c50f45bdde0feb84bdf0f9884be3e456",
+          "resourceDigest": "b357ebd5fdbfb4a4809d2267b1566c9d277d803041712c7997b18b7108fece64",
+          "scripts": [
+            "scripts/ncbi_fetch.py"
+          ],
+          "scriptResources": [
+            "scripts/ncbi_fetch.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [
+            "NCBI_API_KEY",
+            "USER_EMAIL"
+          ],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "experimental-design",
+          "id": "builtin:experimental-design:db2de0f3d29b",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/experimental-design",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "db2de0f3d29b7729776a91e923c9c83801298f5ad8e88fe44570045fbefcc248",
+          "resourceDigest": "6420d802dde1ec536aa7b8f3cbb2f64561933f916c65c894d132bc5294d8870c",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/doe_designs.py",
+            "scripts/randomization.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ]
+    },
+    {
+      "id": "omics_deterministic_scripts",
+      "existing": "Bounded deterministic FASTQ/count intake; Scanpy/PyDESeq2 script resources; declared Nextflow helper and scvi entries; QC library resources; artifact and metric contracts.",
+      "missing": "An imported script or seed is not a deterministic pipeline. Scanpy/PyDESeq2 lack declared scientific entries; single-cell QC entries are empty. No matched repeat-run dataset/environment/output comparison is established by this audit.",
+      "supplement": "Reuse existing science_workbench.inspect_scientific(kind='counts') for deterministic matrix QC; --run-fixtures executes repeat-run and invalid-matrix checks without duplicating QC logic. Full analysis still needs pinned inputs/environment/design and scientific output comparisons.",
+      "catalog": [
+        {
+          "name": "scanpy",
+          "id": "builtin:scanpy:4a59f87933a1",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/scanpy",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "4a59f87933a1e9ed49eac603719af1b0c606dd99050fe59ffa1c1bf807900cb8",
+          "resourceDigest": "5e3b3c31122ecfad514517073bdb960d1f01568e72a1bf01e67682ec000874af",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/_common.py",
+            "scripts/annotate.py",
+            "scripts/batch_correct.py",
+            "scripts/cluster.py",
+            "scripts/convert.py",
+            "scripts/find_markers.py",
+            "scripts/inspect_data.py",
+            "scripts/plot.py",
+            "scripts/preprocess.py",
+            "scripts/pseudobulk.py",
+            "scripts/qc_analysis.py",
+            "scripts/reduce_dimensions.py",
+            "scripts/run_pipeline.py",
+            "scripts/score_genes.py",
+            "scripts/subset.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "pydeseq2",
+          "id": "builtin:pydeseq2:f06a9f5ece54",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/pydeseq2",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "f06a9f5ece540c05bd8a8208bb3970d000b13cb1032abc9488cfbfe6106cd843",
+          "resourceDigest": "081beff5f7088d35fa40730c9fcf3665e5d44b71c0853c437c1858c61e78407f",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/run_deseq2_analysis.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "anndata",
+          "id": "builtin:anndata:a619c4088e1b",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/K-Dense-AI/scientific-agent-skills/tree/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/skills/anndata",
+          "version": "git-5f2bc0341354",
+          "instructionSha256": "a619c4088e1be6f6feaa5838c63ff8c4381fa21b4adee2a9276aa61464f3a034",
+          "resourceDigest": "aa68ca90ee3beca1e0629d0bf913c1eb1a01377ce55a8647f2e51ee4795cbcc9",
+          "scripts": [],
+          "scriptResources": [],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-bio-nextflow-development",
+          "id": "builtin:science-bio-nextflow-development:f30017df5d49",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/anthropics/knowledge-work-plugins/tree/2574e29377c7173d0cecffef29a6ecbd7f8ccb5d/bio-research/skills/nextflow-development",
+          "version": "git-2574e29377c7",
+          "instructionSha256": "f30017df5d499427a701ec6cedfc5c9948ca3bd04ee1a2b6a585a29cd93ad0d7",
+          "resourceDigest": "4a0097da39c17424a535e3d8eda5ed2e07127c2b782b12e8460c5ca5bdd85a96",
+          "scripts": [
+            "scripts/check_environment.py",
+            "scripts/detect_data_type.py",
+            "scripts/generate_samplesheet.py",
+            "scripts/manage_genomes.py",
+            "scripts/sra_geo_fetch.py"
+          ],
+          "scriptResources": [
+            "scripts/check_environment.py",
+            "scripts/detect_data_type.py",
+            "scripts/generate_samplesheet.py",
+            "scripts/manage_genomes.py",
+            "scripts/sra_geo_fetch.py",
+            "scripts/utils/__init__.py",
+            "scripts/utils/file_discovery.py",
+            "scripts/utils/ncbi_utils.py",
+            "scripts/utils/sample_inference.py",
+            "scripts/utils/validators.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-bio-single-cell-rna-qc",
+          "id": "builtin:science-bio-single-cell-rna-qc:49cb573916de",
+          "originLayer": "original_packed_catalog",
+          "status": "instructions_and_resources",
+          "source": "https://github.com/anthropics/knowledge-work-plugins/tree/2574e29377c7173d0cecffef29a6ecbd7f8ccb5d/bio-research/skills/single-cell-rna-qc",
+          "version": "git-2574e29377c7",
+          "instructionSha256": "49cb573916deec6fcf6cc2cb1b573469cbc8c34b84326597ce2db22d0202393f",
+          "resourceDigest": "85eecabfa6516e7e7c063519cd95f398e117cb0e8ac78889cd84e1571da8a7d0",
+          "scripts": [],
+          "scriptResources": [
+            "scripts/qc_analysis.py",
+            "scripts/qc_core.py",
+            "scripts/qc_plotting.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        },
+        {
+          "name": "science-bio-scvi-tools",
+          "id": "builtin:science-bio-scvi-tools:03a69b32b77d",
+          "originLayer": "original_packed_catalog",
+          "status": "declared_scripts",
+          "source": "https://github.com/anthropics/knowledge-work-plugins/tree/2574e29377c7173d0cecffef29a6ecbd7f8ccb5d/bio-research/skills/scvi-tools",
+          "version": "git-2574e29377c7",
+          "instructionSha256": "03a69b32b77db86afe5f87b75db2ae4c92b03b6e9e16e2c5e66cde2d4ad9c5bc",
+          "resourceDigest": "eb99a48e399541f643ba83272f1d0855aba58f232466a85825cf6c3677ca3d27",
+          "scripts": [
+            "scripts/cluster_embed.py",
+            "scripts/differential_expression.py",
+            "scripts/integrate_datasets.py",
+            "scripts/model_utils.py",
+            "scripts/prepare_data.py",
+            "scripts/train_model.py",
+            "scripts/transfer_labels.py",
+            "scripts/validate_adata.py"
+          ],
+          "scriptResources": [
+            "scripts/cluster_embed.py",
+            "scripts/differential_expression.py",
+            "scripts/integrate_datasets.py",
+            "scripts/model_utils.py",
+            "scripts/prepare_data.py",
+            "scripts/train_model.py",
+            "scripts/transfer_labels.py",
+            "scripts/validate_adata.py"
+          ],
+          "requiredCredentials": [],
+          "optionalCredentials": [],
+          "externalRequirements": [],
+          "liveVerifiedThisAudit": false
+        }
+      ]
+    }
+  ],
+  "supplementImplemented": [
+    "Paired call/result execution gate against catalog identity and resource digest.",
+    "Citation identifier membership in titled records from successful declared literature script output.",
+    "Offline CLI with failing exit status for invalid supplied evidence.",
+    "Optional standalone primer CLI with real Primer3 design/thermodynamics and bounded local exact products.",
+    "Standalone vector reference tiling, junction, circular-coordinate and CDS frame/protein checks.",
+    "Executed fixture option reuses existing matrix QC; does not implement a second matrix analyzer."
+  ],
+  "localSupplements": {
+    "originLayer": "new_optional_workspace_scripts",
+    "primer": "omicslab/skills/primer-design/scripts/primer_check.py",
+    "vector": "omicslab/skills/vector-design/scripts/validate_construct.py",
+    "matrixQC": "omicslab.execution.science_workbench.inspect_scientific",
+    "desktopPackaging": "Source execution verified by fixtures; the separate release report covers the compressed catalog and packaged runtime.",
+    "dispatch": "Lazy compressed resource entries dispatched by the bound scientific adapter."
+  },
+  "limitations": [
+    "Standalone audit only; no new live agent-loop or research-stage enforcement.",
+    "Trace authenticity is a caller trust boundary; forged observations are not detectable.",
+    "Identifier membership is not remote existence, DOI registration, title identity review, retraction screening or claim entailment.",
+    "Citation checks accept JSON stdout or the adapter's fresh declared-output read-back wrapper; bare file logs, XML and truncated records are not accepted.",
+    "No model acceptance, wet-lab validation, scientific reproduction or cross-platform execution claimed."
+  ],
+  "sourceBundleComparison": {
+    "baseline": "Tracked source HEAD",
+    "revision": "3f630ec973a895a1f08fd7e4cb8ec91f49cc158b",
+    "files": {
+      "index.json": {
+        "originalBytes": 1210386,
+        "currentBytes": 1213218,
+        "growthBytes": 2832,
+        "originalSha256": "0d9521f13916d1520b345c916b6b438cd022eff319bb6bbf39d515ba3a2d8d0e",
+        "currentSha256": "f9fc77936b4b7e8f3040ba27569c0ec1e6c5f7b286d67e9c89bc90b2d229159c",
+        "identicalToOriginalSource": false
+      },
+      "library.pack": {
+        "originalBytes": 12232630,
+        "currentBytes": 12245039,
+        "growthBytes": 12409,
+        "originalSha256": "a0b74d07dae32b63ea9887762f5a6dee876d2b2c0f08a8b33d4e4d0fab866079",
+        "currentSha256": "ea3f4b674af682c32ea06e2b4c308a57926b08226040030782df783b00851c2c",
+        "identicalToOriginalSource": false
+      }
+    },
+    "catalogSkills": 373,
+    "scienceSkills": 40,
+    "scienceDeclaredScripts": 65,
+    "mainBundleGrowthBytes": 15241,
+    "mainBundleUnchanged": false
+  },
+  "sourceHashes": {
+    "desktop/skill-library/science-import-report.json": "158c5494eba4f33cf438e9827a156f200e56c9488c056cbc7b710e39c1c1cdad",
+    "desktop/src/agent-tools.ts": "38c51f314fa4d6a145b69a303a48c7ae6ced50ee125a9b456050d4ec662f5bc9",
+    "desktop/src/harness/agent-loop.ts": "d4448dc22964d7d07997db807021741a7599fd4d4087ee65240b2a0ac650a865",
+    "desktop/src/skill-library.ts": "d12bbc2634573df7428b49acf9475efb5b9ace6f78e2f89d2c8afa1453cc373f",
+    "desktop/test/science-skills.test.ts": "27534bc067ca53bc068a530e83cef4532499979cbbfd1fcd228b5721294ee0d1",
+    "docs/verification/science-skills/results.json": "aa82ae0cbc0ab39ce9cae5b4ebfc5c99dabdc15117ebb2582a815c90804c0511",
+    "omicslab/execution/science_audit.py": "aca43cc4731473d53b7eedb57f64ebf4236cb70fab5e1e4a884168453932e541",
+    "omicslab/execution/science_skills.py": "e8afaa0cb8384e756e157c55fc752ec1b7fa7371cd29e3a01adc97ee445d5e84",
+    "omicslab/execution/science_workbench.py": "efb2e5461ce59928762840ac4fd4c283dc01223150a1eae8a474a4ead3887016",
+    "omicslab/execution/skill_resources.py": "2aadb6405f8d18e3c09960e3cb05d1bfcc31e8c6706c6abdc26dea3e94620cb9",
+    "omicslab/skills/primer-design/SKILL.md": "a93c6aba40348c8a2765196af5a31a5794995b0943b8c77089e65ea4380668ef",
+    "omicslab/skills/primer-design/scripts/primer_check.py": "bf4f7a788ede0e7300acc7694fbcfa02f03c378166f8b074eab7e4e254430703",
+    "omicslab/skills/vector-design/SKILL.md": "5b9834765ff4345e46857fed3cbc1532db0079a263873c9bfed7b0fb88e78d96",
+    "omicslab/skills/vector-design/scripts/validate_construct.py": "506c265d6ea3b6eb745d2745d6530c695b0cb7b0f8a121e49b16c2c3e5a73746",
+    "omicslab/suwen/research.py": "031094974b51cf7680333e711484645faca5068adf84e3c3e17c0358e0cf453e",
+    "scripts/audit_science_capabilities.py": "0e263d576cef64ecccd54bc581ee1df6725cb3accaa11905a8c3332021b4becf",
+    "tests/test_research_quests.py": "67693543600b1f6e96e26a9b49142f678b3851acc36240089dd8e86907f5ed1c",
+    "tests/test_science_capability_audit.py": "304fedde9f05d62a3418a6faef0b37f9bacc8db636e6f9c52d1d19a66b0951f1",
+    "tests/test_science_skill_runtime.py": "b9cd50bbb1b39105b0648abac0c34bd330787685406242112c6e3eed0b6248bc",
+    "tests/test_science_workbench.py": "b636ea3589797d57b8afe2202dc356c26e9341c5632fc50cc34e842c12ecd6d2"
+  }
+}

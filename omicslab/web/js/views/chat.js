@@ -3,11 +3,12 @@
 
 import { renderMarkdown } from '../markdown.js?v=2.1.1';
 import {openHtmlArtifact} from '../artifact-viewer.js?v=1.0.0';
-import {workspaceSidebarHtml,conversationListHtml} from '../workspace-sidebar.js?v=2.1.1';
+import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=2.1.1';
 import {mountProjectFiles} from '../project-files.js?v=2.1.1';
 import {mountGuidance} from '../guidance-ui.js?v=2.1.1';
 import {mountFileChanges} from '../file-changes.js?v=1.0.0';
 import {chooseComposerSkills} from '../composer-skills.js?v=1.0.0';
+import {mountAgentsPanel} from '../agents-panel.js?v=1.0.0';
 import { icon, brandMark } from '../icons.js?v=2.1.1';
 import {
   esc,
@@ -243,6 +244,18 @@ function childTaskHtml(task) {
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = chatLayout();
+  let agentsPanel=null;
+  const agentsCount=root.querySelector('#chat-agents-count');
+  root.querySelector('#chat-agents-open')?.addEventListener('click',()=>{
+    const section=(ctx.shellSidebar||root).querySelector('#sidebar-agents');
+    if(section){
+      if(section.hidden)section.hidden=false;
+      section.scrollIntoView({behavior:'smooth',block:'nearest'});
+      section.classList.add('agents-highlight');
+      setTimeout(()=>section.classList.remove('agents-highlight'),900);
+    }
+    agentsPanel?.refresh();
+  });
   const sidebarRoot=ctx.shellSidebar||root;
   if(ctx.shellSidebar){root.querySelector('.chat-sidebar')?.remove();root.querySelector('.chat-view').classList.add('has-shell-sidebar');}
   const sidebarController=new AbortController();
@@ -1871,7 +1884,9 @@ export async function mount(root, ctx = {}) {
   }
 
   async function createRunOrResume(message, attachments) {
-    const payload = { message, client_request_id: uid('req'), permission_mode: root.querySelector('#chat-permission-mode')?.value || 'ask' };
+    // Collaboration is a runtime decision the agent makes with team tools; the
+    // composer only keeps the default mode for backend compatibility.
+    const payload = { message, client_request_id: uid('req'), permission_mode: root.querySelector('#chat-permission-mode')?.value || 'ask', collaboration_mode: 'team' };
     if(local.taskSelection?.provider)payload.provider=local.taskSelection.provider;
     if(local.taskSelection?.model)payload.model=local.taskSelection.model;
     if (local.agentId) payload.agent = local.agentId;
@@ -1892,6 +1907,10 @@ export async function mount(root, ctx = {}) {
       return active;
     }
     let run = runPayload(runRecordFrom(data));
+    if(data.run?.meta?.team_id){
+      toastInfo('智能体已规划协作成员，可在侧边栏「子智能体」中查看并批准。',{action:{label:'查看子智能体',onClick:()=>root.querySelector('#chat-agents-open')?.click()}});
+      agentsPanel?.refresh();
+    }
     if (run && !run.traceId) {
       const fetched = await fetchRun(run.runId);
       if (fetched?.traceId) run = { ...run, traceId: fetched.traceId, status: fetched.status || run.status };
@@ -1911,6 +1930,7 @@ export async function mount(root, ctx = {}) {
     else delete payload.attachments;
     payload.client_request_id = uid('req');
     payload.permission_mode = root.querySelector('#chat-permission-mode')?.value || 'ask';
+    payload.collaboration_mode = 'team';
     const flow = createFlow('', '', 'preparing');
     local.run = flow;
     local.abort = flow.ctrl;
@@ -2462,8 +2482,8 @@ export async function mount(root, ctx = {}) {
       if(!conv)return;
       const key=metaButton.classList.contains('conv-pin')?'pinned':'archived';
       metaButton.disabled=true;
-      api.conversations.update(conv.id,{[key]:!Boolean(conv[key]||conv.meta?.[key])}).then(record=>{
-        Object.assign(conv,record,{archived:Boolean(record.meta?.archived),pinned:Boolean(record.meta?.pinned)});
+      api.conversations.update(conv.id,{[key]:!conversationFlag(conv,key)}).then(record=>{
+        Object.assign(conv,record,{archived:conversationFlag(record,'archived'),pinned:conversationFlag(record,'pinned')});
         setState({conversations:[...local.conversations]});renderConversationList();
         toastSuccess(key==='archived'?(conv.archived?'已归档':'已恢复'):(conv.pinned?'已置顶':'已取消置顶'));
       }).catch(error=>{metaButton.disabled=false;toastError(errorMessage(error));});return;
@@ -2681,6 +2701,14 @@ export async function mount(root, ctx = {}) {
   const permissionSelect = root.querySelector('#chat-permission-mode');
   let executionSelectionPending = Promise.resolve(true);
   const guidanceUI=mountGuidance({root,context:()=>({runId:local.run?.runId||local.guidanceRunId,epoch:observerEpoch,running:local.streaming}),clearInput:()=>{el.input.value='';autoGrow();},startTask:content=>void sendMessage({text:content})});
+  const offFigureApply=on('figure:annotation-apply',async detail=>{
+    if(!root.isConnected||!detail?.name)return;
+    detail.accept?.();
+    const regions=detail.regions||[];
+    const content=`局部修改图表 figures/${detail.name}。\n修改要求：${detail.note||'仅调整标注区域。'}\n归一化坐标区域：${JSON.stringify(regions)}\n先读取原图、原始数据和生成脚本，仅修改被标注的对象与相邻布局；保留未标注区域、数据、统计方法、尺寸与整体视觉样式。保存候选版本并核验差异；缺少可编辑源文件时先说明，不能整图重新生成代替局部修改。`;
+    if(local.streaming)await guidanceUI.send('send',content);
+    else await sendMessage({text:content});
+  });
   function refreshGuidance(){return guidanceUI.refresh();}
   function sendGuidance(action){return guidanceUI.send(action);}
   permissionSelect?.addEventListener('change',()=>{
@@ -2946,6 +2974,17 @@ export async function mount(root, ctx = {}) {
     const chip=root.querySelector('#chat-workspace');
     if(chip){chip.querySelector('span').textContent=workspace.name;chip.title=workspace.backend==='ssh'?`SSH · ${workspace.remote?.root||''}`:workspace.local_path;}
   }});
+  agentsPanel=await mountAgentsPanel(sidebarRoot,{
+    getContext:()=>({conversationId:local.activeId,scope:getState().workspaceId||'ws_main'}),
+    onSelectConversation:(conversationId)=>{
+      if(conversationId)emit('chat:select',conversationId);
+    },
+    onChanged:(total)=>{
+      if(!agentsCount)return;
+      agentsCount.hidden=!total;
+      agentsCount.textContent=total>99?'99+':String(total||'');
+    },
+  });
   if(root.isConnected){
     el.view.classList.add('is-mounted');
     el.view.dataset.ready='true';
@@ -2955,11 +2994,13 @@ export async function mount(root, ctx = {}) {
 
   return {
     destroy() {
+      offFigureApply();
       fileChanges.destroy();
       guidanceUI.dispose();
       detachActiveView();
       sidebarController.abort();
       disposeProjectFiles();
+      agentsPanel?.destroy();
       dragging = false;
       document.removeEventListener('mousemove', onSplitMove);
       document.removeEventListener('mouseup', onSplitUp);
@@ -3029,6 +3070,7 @@ function chatLayout() {
     '<input type="file" id="chat-file-input" multiple hidden />' +
     `<button type="button" class="btn btn-ghost btn-sm workspace-chip" id="chat-workspace" title="选择模型可访问的工作目录">${icon('folder',{size:14})}<span>工作目录</span></button>` +
     `<button type="button" class="btn btn-ghost btn-sm" id="chat-skills-open" title="查看已安装技能">${icon('skills',{size:14})}<span>技能</span></button>` +
+    `<button type="button" class="btn btn-ghost btn-sm" id="chat-agents-open" title="查看当前任务的子智能体与协作状态">${icon('layers',{size:14})}<span>子智能体</span><span class="agents-badge" id="chat-agents-count" hidden></span></button>` +
     `<label class="permission-control" title="本次任务的工具权限；不会改变运行中任务">${icon('shield',{size:14})}<select id="chat-permission-mode" class="permission-mode" aria-label="任务权限"><option value="ask">请求批准</option><option value="review">帮我审核</option><option value="full">完全权限</option></select>${icon('chevronDown',{size:12})}</label>` +
     '<span class="composer-hint" id="composer-hint">Enter 发送 · Shift+Enter 换行</span>' +
     '</div>' +

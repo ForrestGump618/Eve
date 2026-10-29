@@ -79,7 +79,7 @@ try {
   }
   check('api-health', health && health.ok === true, JSON.stringify(health).slice(0, 200));
   const index = await request('/');
-  check('spa-index', index.status === 200 && index.text.includes('素问') && index.text.includes('js/app.js'), `status=${index.status} bytes=${index.text.length}`);
+  check('spa-index', index.status === 200 && /<title>Eve[\s·]/.test(index.text) && index.text.includes('js/app.js'), `status=${index.status} bytes=${index.text.length}`);
   const appJs = await request('/js/app.js');
   const appJsSha = createHash('sha256').update(appJs.text).digest('hex');
   check('spa-app-js', appJs.status === 200 && appJs.text.includes('VIEW_LOADERS'), `bytes=${appJs.text.length} sha256=${appJsSha.slice(0, 16)}`);

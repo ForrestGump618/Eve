@@ -1,0 +1,118 @@
+/* Teams inherits the workspace palette and typography. All overrides stay local. */
+.team-view,.team-editor {
+  --team-ink: var(--text);
+  --team-muted: var(--text-2);
+  --team-surface: var(--bg);
+  --team-soft: var(--bg-soft);
+  --team-line: var(--border);
+  --team-focus: var(--text);
+  --team-radius: 12px;
+  --team-gap: 16px;
+  --team-error: var(--red);
+  color: var(--team-ink);
+  caret-color: var(--team-ink);
+  scrollbar-color: var(--border-strong) var(--team-soft);
+}
+.team-view {padding:28px clamp(16px,3vw,44px);font-size:13px;line-height:1.6}
+.team-view ::selection,.team-editor ::selection {color:var(--team-surface);background:var(--team-ink)}
+.team-view :is(button,select,textarea,summary,[tabindex]):focus-visible,.team-editor :is(button,input,select,textarea):focus-visible {outline:2px solid var(--team-focus);outline-offset:3px;box-shadow:none}
+.team-view .eve-page-header {align-items:flex-start;margin:0 auto 24px;max-width:1200px}
+.team-view .team-page-title {display:block}
+.team-view h1 {font-size:24px;line-height:1.3;letter-spacing:-.025em}
+.team-page-title p {margin:8px 0 0;color:var(--team-muted);font-size:13px}
+.team-view .team-toolbar {flex-wrap:wrap;gap:8px}
+.team-view .btn {min-height:36px;padding:7px 12px;font-size:12px;line-height:1.4;white-space:normal}
+.team-view .btn:disabled,.team-editor .btn:disabled {opacity:.5;cursor:not-allowed}
+.team-view .btn:hover:not(:disabled) {background:var(--panel-2)}
+.team-view .btn-primary:hover:not(:disabled) {background:var(--accent-strong);color:var(--bg)}
+.team-view [data-primary] {background:var(--text);color:var(--bg)}
+.team-view #team-list,.team-list-feedback {max-width:1200px;margin-inline:auto}
+.team-list-feedback:not(:empty) {display:flex;align-items:center;gap:12px;margin-bottom:16px;color:var(--team-error)}
+.team-card {border:1px solid var(--team-line);border-radius:var(--team-radius);margin-bottom:24px;background:var(--team-surface);min-width:0;overflow:hidden}
+.team-card-header {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 20px;border-bottom:1px solid var(--team-line)}
+.team-card-title,.team-card-actions,.team-row-actions {display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-width:0}
+.team-card-title h2 {margin:0;font-size:17px;font-weight:600;letter-spacing:-.02em;overflow-wrap:anywhere}
+.team-status {display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:1.5;color:var(--team-muted);white-space:nowrap}
+.team-status::before {content:"";width:6px;height:6px;background:var(--team-muted);border-radius:50%;flex:none}
+.team-status[data-status="running"]::before {background:var(--green)}
+.team-status[data-status="failed"],.team-status[data-status="missing"] {color:var(--team-error)}
+.team-status[data-status="paused"]::before,.team-status[data-status="waiting_approval"]::before {background:var(--amber)}
+.team-captain {display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--team-soft);padding:12px 20px}
+.team-captain>div {display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.team-captain strong {font-size:13px}
+.team-captain span,.team-note {color:var(--team-muted);font-size:12px;line-height:1.6}
+.team-roster-heading {display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:18px 20px 6px}
+.team-roster-heading h3 {margin:0;font-size:13px;font-weight:600}
+.team-roster-heading>span {font-size:12px;color:var(--team-muted);font-variant-numeric:tabular-nums}
+.team-roster {padding:0 20px 12px}
+.team-roster-row {display:grid;grid-template-columns:minmax(120px,.8fr) minmax(180px,2fr) minmax(140px,1fr);gap:var(--team-gap);padding:14px 0;border-bottom:1px solid var(--team-line);align-items:start}
+.team-roster-row:last-child {border-bottom:0}
+.team-member-identity h4 {margin:0 0 3px;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.team-member-identity .team-note {display:block;overflow-wrap:anywhere}
+.team-member-goal {min-width:0}
+.team-member-goal p {margin:0 0 5px;white-space:pre-wrap;overflow-wrap:anywhere;max-width:75ch;font-size:13px;line-height:1.65}
+.team-dependency {font-size:12px;color:var(--team-muted)}
+.team-member-controls {display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.team-row-actions {justify-content:flex-end;gap:6px}
+.team-row-actions .btn {padding:5px 8px;min-height:30px}
+.team-view .team-error {color:var(--team-error)}
+.team-result {margin-top:8px}
+.team-result summary {font-size:12px;cursor:pointer;min-height:32px;display:list-item;align-content:center}
+.team-result pre {white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto;background:var(--team-soft);padding:12px;font:12px/1.65 var(--font-mono)}
+.team-view .team-discussion {margin:0;border:0;border-top:1px solid var(--team-line);border-radius:0;background:var(--team-surface)}
+.team-view .team-discussion>summary {padding:14px 20px;min-height:48px;border-radius:0;font-size:14px;font-weight:600;color:var(--team-ink)}
+.team-view .team-discussion>summary:hover {background:var(--team-soft)}
+.team-view .team-discussion-body {padding:0 20px 16px}
+.team-discussion-toolbar {display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:8px}
+.team-message-count {font-size:12px;color:var(--team-muted);font-variant-numeric:tabular-nums}
+.team-view .team-mailbox {max-height:280px;min-height:80px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 12px;background:var(--team-soft);border-radius:8px}
+.team-view .team-mailbox article {padding:12px 0;border-bottom:1px solid var(--team-line);font-size:13px}
+.team-view .team-mailbox article:last-child {border-bottom:0}
+.team-message header {display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.team-message strong {font-size:13px;overflow-wrap:anywhere}
+.team-message-route {font-weight:400;margin-left:8px;color:var(--team-muted);font-size:12px}
+.team-message time {font-size:12px;color:var(--team-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.team-view .team-mailbox p {margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.7;max-width:75ch}
+.team-view .team-mailbox .team-empty-discussion {margin:20px 0;color:var(--team-muted)}
+.team-deliveries {display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--team-muted)}
+.team-discussion-feedback:not(:empty),.team-readonly {margin:12px 0;font-size:12px;color:var(--team-muted)}
+.team-discussion-feedback [role="alert"] {color:var(--team-error)}
+.team-view .team-discuss-form {display:block;margin:16px 0 0;padding:0;border:0}
+.team-discuss-form fieldset {min-width:0;margin:0;padding:0;border:0}
+.team-discuss-form legend {font-size:13px;font-weight:600;margin-bottom:10px;padding:0}
+.team-compose-options {display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px 24px;margin-bottom:12px}
+.team-discuss-form label {display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--team-muted)}
+.team-discuss-form select,.team-discuss-form textarea {border:1px solid var(--border-strong);border-radius:6px;background:var(--team-surface);color:var(--team-ink);font:13px/1.6 var(--font-sans);padding:8px 10px;max-width:100%;min-height:38px}
+.team-discuss-form select {min-width:200px}
+.team-discuss-form textarea {width:100%;resize:vertical;min-height:80px;max-height:320px}
+.team-discuss-form textarea::placeholder {color:var(--team-muted);opacity:1}
+.team-discuss-form .team-wake {flex-direction:row;align-items:center;gap:8px;min-height:38px}
+.team-wake input {width:16px;height:16px;accent-color:var(--team-ink);flex:none}
+.team-compose-footer {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:10px}
+.team-view .team-compose-footer button {justify-self:auto}
+.team-view .team-char-count {font-variant-numeric:tabular-nums}
+.team-view .team-delivery-note {margin:10px 0 0}
+.team-discuss-form fieldset:disabled {opacity:.6}
+.team-editor .team-edit-member {padding:16px 0}
+.team-editor .team-note {margin:10px 0}
+@media(max-width:760px) {
+  .team-view {padding:20px 16px}
+  .team-view .eve-page-header {gap:16px;flex-direction:column}
+  .team-roster-row {grid-template-columns:minmax(0,1fr);gap:8px}
+  .team-member-controls {flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .team-row-actions {justify-content:flex-start}
+  .team-card-header,.team-captain {padding:14px 16px}
+  .team-roster-heading {padding:16px 16px 6px;flex-wrap:wrap;gap:4px}
+  .team-roster {padding:0 16px 8px}
+  .team-view .team-discussion>summary {padding-inline:16px}
+  .team-view .team-discussion-body {padding-inline:16px}
+  .team-view .btn,.team-view select,.team-view summary {min-height:44px}
+  .team-compose-options {align-items:stretch;gap:8px}
+  .team-compose-options>label:first-child,.team-compose-options select {width:100%}
+  .team-discuss-form textarea {font-size:16px}
+  .team-compose-footer {align-items:stretch;flex-direction:column}
+  .team-compose-footer .btn {width:100%}
+}
+@media(prefers-reduced-motion:reduce) {
+  .team-view *,.team-editor * {animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}

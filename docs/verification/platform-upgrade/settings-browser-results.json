@@ -1,0 +1,41 @@
+{
+  "browser": "156.0.4314.50",
+  "savedModel": {
+    "verification": "sage",
+    "orchestration": true,
+    "strategy": "quality",
+    "roles": {},
+    "capabilities": {
+      "research-model": {
+        "temperature": 0.4,
+        "context_window": 64000,
+        "max_output": 8192,
+        "token_parameter": "max_tokens",
+        "modalities": [
+          "text",
+          "image"
+        ],
+        "supported_parameters": [
+          "temperature"
+        ]
+      }
+    },
+    "fallbacks": [],
+    "context_window": 32000,
+    "sage_verification": true
+  },
+  "savedPermissions": {
+    "tools": {
+      "run_shell": "deny"
+    },
+    "files": "allow",
+    "shell": "allow",
+    "network": "allow",
+    "agents": "allow"
+  },
+  "errors": [],
+  "viewport": [
+    "1440x1000",
+    "390x844"
+  ]
+}

@@ -116,7 +116,8 @@ function renderBlocks(lines) {
         body.push(lines[i]);
         i += 1;
       }
-      out.push(codeBlockHtml(body.join('\n'), lang));
+      const rawBody = body.join('\n');
+      out.push(lang === 'json' ? (jsonSummaryHtml(rawBody) || codeBlockHtml(rawBody, lang)) : codeBlockHtml(rawBody, lang));
       continue;
     }
 
@@ -237,6 +238,75 @@ function codeBlockHtml(code, lang) {
     `<button type="button" class="md-code-copy code-copy" title="复制代码" aria-label="复制代码">${icon('copy', { size: 13 })}<span>复制</span></button>` +
     '</div>' +
     `<pre class="md-pre"><code class="md-code-body${safeLang ? ` language-${esc(safeLang)}` : ''}">${esc(code)}</code></pre>` +
+    '</div>'
+  );
+}
+
+/** Compact, human-readable rendering for fenced JSON in assistant replies. */
+function jsonSummaryHtml(code) {
+  let value;
+  try {
+    value = JSON.parse(code);
+  } catch {
+    return null;
+  }
+  if (value === null || typeof value !== 'object') return null;
+  const valueText = (item) => {
+    if (item === null) return 'null';
+    if (typeof item === 'object') return JSON.stringify(item).slice(0, 120);
+    return String(item).slice(0, 120);
+  };
+  const rawHtml =
+    '<details class="json-summary-raw"><summary>查看原文</summary>' +
+    `<pre class="md-pre"><code class="md-code-body language-json">${esc(code)}</code></pre></details>`;
+  if (Array.isArray(value)) {
+    const total = value.length;
+    const preview = value.slice(0, 8);
+    if (preview.every((item) => item !== null && typeof item === 'object' && !Array.isArray(item))) {
+      const keys = [...new Set(preview.flatMap((item) => Object.keys(item)))].slice(0, 4);
+      const rows = preview
+        .map(
+          (item, index) =>
+            '<tr>' +
+            `<td class="json-summary-idx">${index + 1}</td>` +
+            keys.map((key) => `<td>${esc(valueText(item[key]))}</td>`).join('') +
+            '</tr>',
+        )
+        .join('');
+      return (
+        `<div class="json-summary" data-summary-json="true">` +
+        `<div class="json-summary-head"><span>结构化结果 · ${total} 条记录</span></div>` +
+        '<div class="json-summary-scroll"><table class="json-summary-table"><thead><tr>' +
+        '<th></th>' +
+        keys.map((key) => `<th>${esc(key)}</th>`).join('') +
+        '</tr></thead><tbody>' +
+        rows +
+        '</tbody></table></div>' +
+        rawHtml +
+        '</div>'
+      );
+    }
+    const chips = preview.map((item) => `<span class="json-summary-chip">${esc(valueText(item))}</span>`).join('');
+    return (
+      `<div class="json-summary" data-summary-json="true">` +
+      `<div class="json-summary-head"><span>结构化结果 · ${total} 条记录</span></div>` +
+      `<div class="json-summary-chips">${chips || '<span class="json-summary-chip">空数组</span>'}</div>` +
+      rawHtml +
+      '</div>'
+    );
+  }
+  const entries = Object.entries(value).slice(0, 8);
+  const rows = entries
+    .map(
+      ([key, item]) =>
+        `<div class="json-summary-kv"><span>${esc(key)}</span><strong>${esc(valueText(item))}</strong></div>`,
+    )
+    .join('');
+  return (
+    `<div class="json-summary" data-summary-json="true">` +
+    `<div class="json-summary-head"><span>结构化结果 · ${entries.length} 个字段</span></div>` +
+    `<div class="json-summary-kvs">${rows}</div>` +
+    rawHtml +
     '</div>'
   );
 }

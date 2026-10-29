@@ -5,8 +5,11 @@ import { emit } from './bus.js?v=2.1.1';
 import { getPref, setPref } from './util.js?v=2.1.1';
 
 export const ROUTES = [
+  {id:'evolution',label:'自我改进',icon:'discovery',subtitle:'Proteus 实验、回归与版本'},
   {id:'context',label:'上下文',icon:'memory',subtitle:'上下文组成、压缩与原文'},
-  {id:'teams',label:'团队协作',icon:'layers',subtitle:'成员、依赖与执行轨迹'},
+  // Team collaboration is agent-autonomous and surfaced in the chat sidebar
+  // (child agents), not as a standalone feature page.
+  {id:'teams',label:'团队协作',icon:'layers',subtitle:'成员、依赖与执行轨迹',hidden:true},
   { id: 'tasks2', label: '任务中心', icon: 'jobs', subtitle: '持续任务、自动化与多 Agent 讨论' },
   { id: 'research', label: '科研与证据', icon: 'shield', subtitle: '生物工具、来源与独立验证' },
   { id: 'knowledge', label: '知识与记忆', icon: 'memory', subtitle: '当前工作区的检索知识' },

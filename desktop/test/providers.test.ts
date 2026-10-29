@@ -42,6 +42,33 @@ test('OpenAI error observation survives malformed arguments without running the 
  assert.equal(result.text,'Corrected response');
 });
 
+test('temperature and enabled image modality reach the provider protocol', async t => {
+ let calls=0;
+ const baseUrl=await fixture(t,(_request,response,body)=>{
+  calls++;
+  assert.equal(body.temperature,0.7);
+  if(calls===1){
+   assert.equal(body.messages[0].content[1].type,'image_url');
+   assert.equal(body.messages[0].content[1].image_url.url,'https://example.com/image.png');
+  }else{
+   assert.deepEqual(body.messages[0],{role:'system',content:'Keep system text'});
+   assert.deepEqual(body.messages[1],{role:'user',content:'Text-only context'});
+   assert.equal(body.messages[2].content[1].type,'image_url');
+  }
+  response.writeHead(200,{'content-type':'text/event-stream'});
+  response.end('data: {"choices":[{"delta":{"content":"Image received"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+ });
+ const configured=validateModelConfig({...config(baseUrl),temperature:0.7,modalities:['text','image']});
+ await modelTurn(configured,[{role:'user',content:'Describe',images:[{url:'https://example.com/image.png',mime:'image/png'}]}],new AbortController().signal,()=>{});
+ await modelTurn(configured,[
+  {role:'system',content:'Keep system text'},
+  {role:'user',content:'Text-only context'},
+  {role:'user',content:'Describe',images:[{url:'https://example.com/image.png',mime:'image/png'}]}
+ ],new AbortController().signal,()=>{});
+ await assert.rejects(modelTurn(validateModelConfig({...config(baseUrl),modalities:['text']}),[{role:'user',content:'Describe',images:[{url:'https://example.com/image.png',mime:'image/png'}]}],new AbortController().signal,()=>{}),/文本输入/);
+ assert.throws(()=>validateModelConfig({...config(baseUrl),temperature:3}));
+});
+
 test('OpenAI-compatible protocol sends authenticated request and joins fragmented UTF-8 SSE text with usage', async t => {
   let seen = false;
   const baseUrl = await fixture(t, (request, response, body) => {

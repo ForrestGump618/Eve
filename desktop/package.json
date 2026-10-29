@@ -1,6 +1,6 @@
 {
   "name": "eve-desktop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Eve research workspace with durable local and SSH task execution",
   "main": "dist/main.js",
@@ -72,6 +72,10 @@
           "omicslab/skills/**/*",
           "omicslab/agents/**/*",
           "omicslab/data/**/*",
+          "tests/test_skills.py",
+          "tests/test_tools.py",
+          "tests/test_turn_governance.py",
+          "pyproject.toml",
           "LICENSE",
           "!**/__pycache__/**",
           "!**/*.pyc"

@@ -58,13 +58,72 @@ export async function openWorkspaceSearch(workspace){
 export async function openWorkspaceGit(workspace){
  if(!workspace?.workspace_id)throw new Error('请先选择工作区');
  const endpoint=`/api/workspaces/${encodeURIComponent(workspace.workspace_id)}/sidebar/git`;
- const modal=openModal({title:`${workspace.name||workspace.workspace_id} · Git`,size:'xl',html:'<div class="workspace-git">正在读取…</div>'});
- const data=await api.request(endpoint);if(!modal.el.isConnected)return;
- modal.body.innerHTML=`<div class="workspace-git"><h4>工作区状态</h4><pre>${esc(data.status||'工作区干净')}</pre><details><summary>分支</summary><pre>${esc(data.branches)}</pre></details><h4>提交图</h4><div>${data.graph.split('\n').map(line=>{
-  const commit=line.match(/(?:^|[\s*|\\/])([a-f0-9]{7,40})(?:\s|$)/)?.[1];
-  return commit?`<button class="workspace-git-row" data-git-commit="${commit}">${esc(line)}</button>`:`<pre>${esc(line)}</pre>`;
- }).join('')}</div><div data-git-detail></div><p class="eve-detail-note">只读历史，最近 ${data.history_limit} 条。分支查看不会切换目录或拉取远程。</p></div>`;
- modal.body.onclick=async event=>{const row=event.target.closest('[data-git-commit]');if(!row)return;row.disabled=true;
-  try{const details=await api.request(`${endpoint}?commit=${row.dataset.gitCommit}`);if(modal.el.isConnected)modal.body.querySelector('[data-git-detail]').innerHTML=`<pre class="context-original">${esc(details.detail)}</pre>`;}catch(error){toastError(errorMessage(error));}finally{row.disabled=false;}
+ const modal=openModal({title:`${workspace.name||workspace.workspace_id} · Git`,size:'xl',html:'<div class="workspace-git"><div class="eve-card-heading"><h4>工作区状态</h4><button class="btn btn-sm" data-git-refresh>刷新</button></div><p class="eve-detail-note" role="status" data-git-state>正在读取…</p><div data-git-files></div><form data-git-form hidden><h4>暂存差异</h4><p class="eve-detail-note" data-git-paths></p><pre class="context-original" data-git-diff></pre><label>提交说明<textarea class="input" name="message" rows="2" required aria-label="提交说明"></textarea></label><label class="eve-detail-note"><input type="checkbox" name="confirmed" required>我已检查以上完整暂存差异，确认提交这些文件</label><button class="btn btn-sm btn-primary" type="submit">提交已暂存更改</button><p class="eve-detail-note">仅提交已暂存内容，不会自动添加其他文件。提交不运行 Git hooks，也不签名。</p></form><details><summary>分支与提交历史</summary><div data-git-history></div></details><div data-git-detail></div></div>'});
+ let data=null,busy=false,message='';
+ const el=selector=>modal.body.querySelector(selector);
+ function state(text){el('[data-git-state]').textContent=text;}
+ function render(){
+  if(!modal.el.isConnected)return;
+  el('[data-git-files]').innerHTML=data.entries.map((entry,index)=>`<div class="eve-card-heading"><span><code>${esc(entry.index+entry.worktree)}</code> ${esc(entry.path)}${entry.blocked?' · 敏感路径，禁止操作':''}</span><span>${entry.worktree!==' '&&!entry.blocked?`<button class="btn btn-sm" data-git-stage="${index}">暂存</button>`:''}${entry.index!==' '&&entry.index!=='?'&&!entry.blocked?`<button class="btn btn-sm" data-git-unstage="${index}">取消暂存</button>`:''}</span></div>`).join('')||'<p class="eve-muted">工作区干净</p>';
+  el('[data-git-form]').hidden=false;
+  el('[data-git-paths]').textContent=data.staged_paths.length?`已暂存：${data.staged_paths.join('、')}`:'尚无暂存文件';
+  el('[data-git-diff]').textContent=data.reviewable?(data.staged_diff||'无暂存差异'):'暂存区包含敏感路径，无法预览或提交。请先在 Git 工具中处理。';
+  el('[name=message]').value=message;
+  el('[name=message]').maxLength=data.message_bytes;
+  el('[name=confirmed]').checked=false;
+ }
+ function controls(){
+  modal.body.querySelectorAll('button,input,textarea').forEach(node=>{node.disabled=busy;});
+  if(!busy){
+   modal.body.querySelectorAll('[data-git-stage],[data-git-unstage]').forEach(node=>{node.disabled=!data?.can_write;});
+   el('[type=submit]').disabled=!data?.can_write||!data?.reviewable||!data?.staged_paths.length;
+  }
+ }
+ async function history(){
+  try{
+   const result=await api.request(endpoint,{timeout:data.request_timeout_ms,quiet:true});
+   if(!modal.el.isConnected)return;
+   el('[data-git-history]').innerHTML=`<pre>${esc(result.branches)}</pre>${result.graph.split('\n').map(line=>{
+    const commit=line.match(/(?:^|[\s*|\\/])([a-f0-9]{7,40})(?:\s|$)/)?.[1];
+    return commit?`<button class="workspace-git-row" data-git-commit="${commit}">${esc(line)}</button>`:`<pre>${esc(line)}</pre>`;
+   }).join('')}<p class="eve-detail-note">最近 ${result.history_limit} 条；点击提交查看详情。</p>`;
+  }catch(error){if(modal.el.isConnected)el('[data-git-history]').textContent=data?.head?errorMessage(error):'尚无提交历史';}
+ }
+ async function refresh(){
+  if(busy)return;busy=true;controls();state('正在刷新…');
+  try{
+   message=el('[name=message]').value;
+   data=await api.request(`${endpoint}/review`);render();
+   state(data.can_write?'点击文件旁的按钮暂存或取消暂存；提交前检查差异。':'当前工作区只允许查看 Git。');
+   await history();
+  }catch(error){data=null;state(errorMessage(error));}
+  finally{busy=false;controls();}
+ }
+ async function mutate(action,path){
+  if(busy||!data)return;
+  const reviewed=data;message=el('[name=message]').value;
+  const confirmed=action!=='commit'||el('[name=confirmed]').checked;
+  if(!confirmed){state('请先检查暂存差异并勾选确认');return;}
+  busy=true;controls();state(action==='commit'?'正在提交并核验…':'正在更新暂存区…');
+  try{
+   const result=await api.request(`${endpoint}/${action}`,{method:'POST',timeout:reviewed.request_timeout_ms,body:{path,message,confirmed,digest:reviewed.digest,index_digest:reviewed.index_digest}});
+   if(!result.verified)throw new Error('Git 操作尚未通过读取核验，请刷新状态');
+   if(!modal.el.isConnected)return;
+   data=result;if(action==='commit')message='';render();
+   state(result.commit?`已提交并核验：${result.commit}；文件：${result.committed_paths.join('、')}`:`已核验暂存区：${result.staged_paths.join('、')||'空'}`);
+   if(result.commit){toastSuccess(`已提交 ${result.commit}`);await history();}
+  }catch(error){data=null;el('[name=confirmed]').checked=false;state(`${errorMessage(error)}；请刷新并重新检查差异后再操作。`);}
+  finally{busy=false;controls();}
+ }
+ modal.body.onclick=async event=>{
+  if(busy)return;
+  if(event.target.closest('[data-git-refresh]')){await refresh();return;}
+  const stage=event.target.closest('[data-git-stage]'),unstage=event.target.closest('[data-git-unstage]');
+  if(stage||unstage){const index=Number(stage?.dataset.gitStage??unstage.dataset.gitUnstage);await mutate(stage?'stage':'unstage',data.entries[index].path);return;}
+  const row=event.target.closest('[data-git-commit]');if(!row)return;
+  row.disabled=true;
+  try{const details=await api.request(`${endpoint}?commit=${row.dataset.gitCommit}`);if(modal.el.isConnected)el('[data-git-detail]').innerHTML=`<pre class="context-original">${esc(details.detail)}</pre>`;}catch(error){state(errorMessage(error));}finally{row.disabled=false;}
  };
+ el('[data-git-form]').onsubmit=event=>{event.preventDefault();void mutate('commit');};
+ await refresh();
 }

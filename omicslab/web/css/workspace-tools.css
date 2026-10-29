@@ -65,3 +65,46 @@ h1,h2,h3{font-weight:600;text-wrap:balance}.sw-page-head{padding-block:18px}.sw-
 .eve-empty{padding:70px 10px;text-align:center}.eve-empty h2{font-size:18px}.eve-empty p{font-size:12px;color:var(--text-3)}
 @media(max-width:1050px){.eve-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.eve-dashboard{padding:20px}.eve-page-header{align-items:flex-start;flex-direction:column}.eve-page-header select{max-width:220px}}
 @media(prefers-reduced-motion:no-preference){.eve-dashboard-card,.team-member{animation:eve-pane-in .18s ease-out}@keyframes eve-pane-in{from{opacity:.6;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}}
+
+/* Sidebar child agents (team collaboration as an agent runtime surface). */
+.sidebar-agents{padding:10px 12px 6px;border-top:1px solid var(--border-soft)}
+.sidebar-agents-body{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.sidebar-agents-note{font-size:11px;line-height:1.6;color:var(--text-3);margin:0}
+.sidebar-agents-team{border:1px solid var(--border-soft);border-radius:10px;padding:8px;background:var(--panel)}
+.sidebar-agents-team-head{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:11.5px;margin-bottom:6px}
+.sidebar-agents-team-head strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-agents-roster{display:flex;flex-direction:column;gap:6px}
+.sidebar-agent-row{display:flex;gap:7px;align-items:flex-start;padding:6px;border-radius:8px;background:var(--bg-soft)}
+.sidebar-agent-row:hover{background:var(--panel-2)}
+.agent-state{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--text-3)}
+.agent-state.is-running,.agent-state.is-queued{background:var(--accent)}
+.agent-state.is-succeeded{background:var(--ok,#2e9e5b)}
+.agent-state.is-failed,.agent-state.is-missing{background:var(--danger,#d92d20)}
+.sidebar-agent-main{min-width:0;flex:1}
+.sidebar-agent-name{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600}
+.sidebar-agent-name .team-status{font-size:9.5px}
+.sidebar-agent-main p{margin:2px 0 0;font-size:10.5px;line-height:1.45;color:var(--text-2);word-break:break-word}
+.sidebar-agent-meta{display:block;margin-top:2px;font-size:9.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-agent-actions{flex:none}
+.sidebar-agent-actions .btn{min-height:24px;font-size:10.5px;padding:2px 8px}
+.sidebar-agents-wait{font-size:9.5px;color:var(--text-3);white-space:nowrap}
+.sidebar-agents-count{font-size:9.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.agents-highlight{box-shadow:0 0 0 2px var(--accent-soft-2);border-radius:10px}
+.agents-badge{margin-left:3px;min-width:15px;height:15px;line-height:15px;padding:0 4px;border-radius:8px;background:var(--accent);color:var(--bg);font-size:9.5px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* JSON result summary in assistant bubbles: no raw JSON in the message flow. */
+.json-summary{border:1px solid var(--border);border-radius:10px;background:var(--bg-soft);margin:6px 0;overflow:hidden}
+.json-summary-head{display:flex;align-items:center;gap:6px;padding:7px 10px;font-size:11px;font-weight:600;border-bottom:1px solid var(--border-soft)}
+.json-summary-scroll{overflow:auto;max-height:220px}
+.json-summary-table{width:100%;border-collapse:collapse;font-size:10.5px}
+.json-summary-table th,.json-summary-table td{padding:4px 8px;border-bottom:1px solid var(--border-soft);text-align:left;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.json-summary-table th{color:var(--text-3);font-weight:600}
+.json-summary-idx{color:var(--text-3);font-variant-numeric:tabular-nums;width:26px}
+.json-summary-chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px}
+.json-summary-chip{font-size:10px;background:var(--panel);border:1px solid var(--border-soft);border-radius:20px;padding:2px 8px}
+.json-summary-kvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;padding:8px 10px}
+.json-summary-kv{font-size:10.5px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.json-summary-kv span{color:var(--text-3)}
+.json-summary-kv strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.json-summary-raw summary{font-size:9.5px;color:var(--text-3);padding:4px 10px;cursor:pointer}
+.json-summary-raw pre{margin:0;padding:8px 10px;overflow:auto;max-height:200px;font:10.5px/1.5 'Cascadia Mono',Consolas,monospace;color:var(--text-2);white-space:pre-wrap;word-break:break-word}

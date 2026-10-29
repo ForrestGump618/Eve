@@ -1,0 +1,18 @@
+{
+  "browser": "156.0.4314.50",
+  "packets": 4096,
+  "utf16Units": 958464,
+  "before": {
+    "writes": 4096,
+    "elapsedMs": 29.5,
+    "peakUnits": 0,
+    "tail": "ut Eve measured terminal output "
+  },
+  "after": {
+    "writes": 30,
+    "elapsedMs": 106.10000002384186,
+    "peakUnits": 131040,
+    "tail": "ut Eve measured terminal output "
+  },
+  "scope": "Loopback real xterm parser; fixed packet fixture, includes coalescing delay; not SSH/network throughput"
+}

@@ -11,25 +11,36 @@
   <div class="grow"></div>
   <button data-page="settings" data-i18n-title="settings" title="设置 / 诊断">⚙</button>
 </nav>
-<aside class="sidebar">
+<aside id="conversation-sidebar" class="sidebar">
   <div class="wordmark">Eve</div>
   <button id="new-chat" class="primary" data-i18n="newChat">＋ 新建对话</button>
   <div class="section-label" data-i18n="recent">最近会话 / 任务</div>
   <label class="sr-only" for="session-project" data-i18n="sessionsFilter">按项目筛选会话</label>
   <select id="session-project" class="session-project"><option value="" data-i18n="sessionProjectAll">全部项目</option></select>
+  <label class="sr-only" for="session-search" data-i18n="sessionSearch">搜索会话标题</label>
+  <input id="session-search" class="session-search" type="search" data-i18n-placeholder="sessionSearch" placeholder="搜索会话标题">
   <div id="sessions" class="sessions"></div>
   <div class="grow"></div>
   <div id="health" class="health" role="status" data-i18n="connecting">连接后台…</div>
-  <div class="version" data-i18n="version">1.0.0</div>
+  <div class="version" data-i18n="version">1.1.0</div>
 </aside>
 <main>
-<header><h1 id="page-title">对话</h1><div class="grow"></div><button id="language" class="quiet" data-i18n-title="switchLanguage">English</button><button id="toggle-evidence" class="quiet" data-i18n="showTrace">执行记录 ↗</button></header>
+<header><button id="toggle-sessions" class="quiet" type="button" aria-controls="conversation-sidebar" aria-expanded="false" data-i18n="conversationList">会话</button><h1 id="page-title">对话</h1><div class="grow"></div><button id="language" class="quiet" data-i18n-title="switchLanguage">English</button><button id="toggle-evidence" class="quiet" data-i18n="showTrace">执行记录 ↗</button></header>
 <div id="error" role="alert" hidden></div>
 <div id="stream-banner" class="stream-banner" role="status" hidden></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
 <section id="chat" class="page">
-  <div id="timeline" class="timeline"><div id="welcome" class="welcome"><div class="eyebrow" data-i18n="eyebrow">SUWEN 科研工作空间</div><h2 data-i18n="welcomeTitle">从一个问题开始。</h2><p data-i18n="welcomeBody">梳理思路、检索证据，或提交一个可恢复的任务。</p><div class="suggestions"><button id="research-example" data-example="researchExample" data-i18n="explore">探索科研问题 ↗</button><button id="demo" data-i18n="demoWelcome">运行后台恢复演示 ↗</button></div></div></div>
+  <details id="message-locator" class="message-locator" hidden>
+    <summary aria-controls="message-locator-panel" data-i18n="messageLocator">你的消息</summary>
+    <nav id="message-locator-panel" class="message-locator-panel" data-i18n-aria="messageLocator" aria-label="你的消息">
+      <input type="search" data-i18n-aria="messageLocatorSearch" aria-label="搜索你的消息">
+      <ol></ol>
+      <div role="status" class="small muted"></div>
+      <div class="locator-paging"><button type="button" data-locator-previous data-i18n="locatorPrevious">上一页</button><button type="button" data-locator-next data-i18n="locatorNext">下一页</button></div>
+    </nav>
+  </details>
+  <div id="timeline" class="timeline"><div id="welcome" class="welcome"><h2 data-i18n="welcomeTitle">从一个问题开始。</h2><p data-i18n="welcomeBody">梳理思路、检索证据，或提交一个可恢复的任务。</p><div class="suggestions"><button id="research-example" data-example="researchExample" data-i18n="explore">探索科研问题 ↗</button><button id="demo" data-i18n="demoWelcome">运行后台恢复演示 ↗</button></div></div></div>
   <div id="chat-notice" class="notice" role="status" hidden></div>
   <button id="jump-latest" class="jump-latest" type="button" data-i18n="jumpLatest" hidden>跳到最新 ↓</button>
   <form id="composer">
@@ -248,6 +259,7 @@
       <label><span data-i18n="modelName">模型名称</span><input id="model" required></label>
       <label><span data-i18n="apiKey">API Key</span><input id="apiKey" type="password" autocomplete="off" placeholder="留空保留已保存密钥"></label>
       <div class="row"><label><span data-i18n="contextWindow">上下文窗口</span><input id="contextWindow" type="number" min="4096" max="2000000" required></label><label><span data-i18n="maxOutput">最大输出</span><input id="maxOutput" type="number" min="128" max="32768" required></label></div>
+      <div class="row"><label><span data-i18n="temperature">温度</span><input id="temperature" type="number" min="0" max="2" step="0.1" placeholder="模型默认"></label><fieldset><legend data-i18n="modalities">输入模态</legend><label class="check"><input id="modality-text" type="checkbox" checked disabled><span data-i18n="textModality">文本</span></label><label class="check"><input id="modality-image" type="checkbox"><span data-i18n="imageModality">图片（需要模型支持）</span></label></fieldset></div>
       <p class="muted small" data-i18n="modelHelp">密钥由系统加密保存，不传回界面。不会自动切换供应商。已知模型采用 tokenizer；其余模型明确使用保守字节预算。</p>
       <button class="primary" data-i18n="saveUnlock">保存并解锁</button><span id="saved" role="status"></span>
     </form>
@@ -284,4 +296,4 @@
   <div id="evidence-content" class="muted" data-i18n="selectTask">选择任务查看事件与检查点。</div>
 </aside>
 <dialog id="confirm-dialog" class="dialog"><h3 id="confirm-title" data-i18n="confirmTitle">确认操作</h3><p id="confirm-text"></p><div class="actions"><button id="confirm-ok" class="danger" data-i18n="confirmOk">确认</button><button id="confirm-cancel" data-i18n="confirmCancel">取消</button></div></dialog>
-<script src="stream-core.js"></script><script src="markdown.js"></script><script src="app.js"></script></body></html>
+<script src="ui-config.js"></script><script src="message-locator.js"></script><script src="chat-presentation.js"></script><script src="stream-core.js"></script><script src="markdown.js"></script><script src="app.js"></script></body></html>

@@ -1,0 +1,14 @@
+{
+  "phase_timeout_s": 180,
+  "validation_timeout_s": 180,
+  "max_turns": 24,
+  "episodes": 2,
+  "seeds": 1,
+  "max_file_bytes": 1048576,
+  "max_tree_bytes": 33554432,
+  "max_context_bytes": 16000,
+  "max_source_files": 4096,
+  "validation_tests": ["test_skills.py", "test_tools.py", "test_turn_governance.py"],
+  "poll_interval_ms": 2000,
+  "list_limit": 50
+}

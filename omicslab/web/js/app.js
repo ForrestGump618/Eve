@@ -36,6 +36,7 @@ import {
 const HEALTH_INTERVAL_MS = 15000;
 
 const VIEW_LOADERS = {
+  evolution: () => import('./views/evolution.js?v=1.0.0'),
   context: () => import('./views/context-dashboard.js?v=1.0.0'),
   teams: () => import('./views/teams.js?v=1.0.0'),
   settings: () => import('./views/platform.js?v=2.1.1'),

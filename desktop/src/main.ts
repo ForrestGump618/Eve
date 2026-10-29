@@ -240,7 +240,7 @@ if(hasSingleInstanceLock)app.whenReady().then(async()=>{
   if(!liveWindow(win)||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==pathToFileURL(uiFile).href)throw new Error('Untrusted sender');
   if(typeof method!=='string'||JSON.stringify(params??{}).length>1_000_000)throw new Error('Invalid request');
   try{
-   if(method==='settings') {const c=readConfig();return {provider:c?.provider??'openai',baseUrl:c?.baseUrl??'https://api.openai.com/v1',model:c?.model??'gpt-4o-mini',contextWindow:c?.contextWindow??128000,maxOutput:c?.maxOutput??4096,hasKey:!!c?.apiKey,encrypted:safeStorage.isEncryptionAvailable(),launchAtLogin:app.getLoginItemSettings().openAtLogin,startupError,home};}
+   if(method==='settings') {const c=readConfig();return {provider:c?.provider??'openai',baseUrl:c?.baseUrl??'https://api.openai.com/v1',model:c?.model??'gpt-4o-mini',contextWindow:c?.contextWindow??128000,maxOutput:c?.maxOutput??4096,temperature:c?.temperature??null,modalities:c?.modalities??['text'],hasKey:!!c?.apiKey,encrypted:safeStorage.isEncryptionAvailable(),launchAtLogin:app.getLoginItemSettings().openAtLogin,startupError,home};}
    if(method==='configure') {
     const old=readConfig();if(!params.apiKey&&old?.apiKey)params={...params,apiKey:old.apiKey};const c=validateModelConfig(params);
     if(!safeStorage.isEncryptionAvailable())throw new Error('系统加密不可用，拒绝明文保存密钥');

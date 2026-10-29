@@ -4,7 +4,8 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Request
-from ..suwen.teams import create_team, team_snapshot, approve_team, send_message, team_mailbox, assign_member
+from ..suwen.teams import (create_team, team_snapshot, approve_team, send_message, team_mailbox, assign_member,
+                           team_task_ids, team_has_active_tasks, ensure_captain_summary)
 from .routes_platform import platform, body
 
 router = APIRouter(tags=["workspace-tools"])
@@ -103,10 +104,74 @@ async def context_action(request: Request, cid: str, action: str):
 
 
 @router.get("/api/teams")
-async def teams_list(request: Request, scope: str = "ws_main", archived: bool = False):
+async def teams_list(request: Request, scope: str = "ws_main", archived: bool = False, captain_session: str | None = None):
     p = platform(request)
     p.require_workspace(scope)
-    return {"items": [team_snapshot(p, scope, t) for t in p.store.list("team", scope) if bool(t.get("archived")) == archived]}
+    if captain_session:
+        _captain_scope(p, captain_session, scope)
+    return {"items": [team_snapshot(p, scope, t) for t in p.store.list("team", scope)
+                      if bool(t.get("archived")) == archived and (not captain_session or t.get("captain_session") == captain_session)]}
+
+
+def _captain_scope(p, cid, scope=None):
+    try:
+        conv = p.state.store.get(cid)
+    except KeyError as exc:
+        raise HTTPException(404, "会话不存在") from exc
+    bound = conv.meta.get("workspace_id") or "ws_main"
+    if conv.meta.get("team_member") or (scope and bound != scope):
+        raise HTTPException(403, "此会话不是当前工作区的队长")
+    p.require_workspace(bound)
+    return bound
+
+
+def _conversation_members(p, cid, scope):
+    items = []
+    for team in p.store.list("team", scope):
+        if team.get("captain_session") != cid or team.get("archived") or team.get("draft"):
+            continue
+        for member in team_snapshot(p, scope, team)["members"]:
+            task = member["task"] or {}
+            session = task.get("nodes", {}).get("work", {}).get("session_id")
+            items.append({"id": member["id"], "member_id": member["id"], "team_id": team["id"],
+                          "captain_session": cid, "scope": scope, "workspace_id": scope,
+                          "name": member.get("name") or member["id"], "goal": member["goal"],
+                          "task_id": member.get("task_id"), "conversation_id": session, "session_id": session,
+                          "status": task.get("status", "missing"), "provider": member.get("provider"),
+                          "model": member.get("model"), "permission_mode": member.get("permission_mode", "full")})
+    return items
+
+
+@router.get("/api/conversations/{cid}/members")
+async def conversation_members(request: Request, cid: str, scope: str | None = None):
+    p = platform(request)
+    scope = _captain_scope(p, cid, scope)
+    return {"captain_session": cid, "scope": scope, "items": _conversation_members(p, cid, scope)}
+
+
+@router.post("/api/conversations/{cid}/members/{member_id}/messages")
+async def conversation_member_message(request: Request, cid: str, member_id: str, scope: str | None = None):
+    p = platform(request)
+    scope = _captain_scope(p, cid, scope)
+    payload = await body(request)
+    matches = [m for m in _conversation_members(p, cid, scope) if m["member_id"] == member_id
+               and (not payload.get("team_id") or m["team_id"] == payload["team_id"])]
+    if not matches:
+        raise HTTPException(404, "此会话没有该成员")
+    if len(matches) != 1:
+        raise HTTPException(409, "请提供 team_id 区分同名成员")
+    member = matches[0]
+    key = payload.get("client_request_id")
+    if key is not None and (not isinstance(key, str) or not key.strip() or len(key) > 200):
+        raise HTTPException(422, "client_request_id 无效")
+    try:
+        message = await send_message(p, scope, member["team_id"], "user", member_id, payload.get("content"),
+                                     wake=True, source_key=f"member-chat:{cid}:{member_id}:{key}" if key else None)
+        current = next(m for m in _conversation_members(p, cid, scope)
+                       if m["team_id"] == member["team_id"] and m["member_id"] == member_id)
+        return {"message": message, "member": current, "conversation_id": current["conversation_id"], "team_id": current["team_id"]}
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
 
 
 @router.post("/api/teams")
@@ -142,24 +207,42 @@ async def teams_control(request: Request, id: str, action: str, scope: str = "ws
                 return {"items": team_mailbox(p, scope, id)}
             if action == "assign":
                 return await assign_member(p, scope, id, payload.get("member_id"), payload.get("goal"), confirmed=payload.get("confirmed") is True)
-            if not team.get("draft") and any(m["task"]["status"] not in {"succeeded", "failed", "cancelled", "needs_review"} for m in team_snapshot(p, scope, team)["members"]):
+            if team_has_active_tasks(p, scope, team):
                 raise ValueError("请先取消活动任务，再归档团队；归档保留所有执行记录")
             return p.store.put("team", id, {**team, "archived": True}, scope, expected=team["revision"])
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
     if action not in {"pause", "resume", "cancel"}:
         raise HTTPException(400, "未知团队操作")
+    if team.get("archived"):
+        raise HTTPException(409, "已归档团队不能更改执行状态")
+    with p.store.lock:
+        team = p.store.get("team", id, scope)
+        team = p.store.put("team", id, {**team, "control_status": None if action == "resume" else
+                                       "paused" if action == "pause" else "cancelled"}, scope, expected=team["revision"])
     errors = []
-    for member in team["members"]:
-        if not member.get("task_id"):
+    stopping = []
+    for task_id in team_task_ids(team):
+        task = p.store.get("task", task_id, scope)
+        if not task:
+            errors.append("团队任务不存在")
             continue
-        task = p.store.get("task", member["task_id"], scope)
         eligible = (task["status"] in {"paused", "interrupted", "failed", "budget_limited", "needs_review", "waiting_approval"}
                     if action == "resume" else task["status"] not in {"succeeded", "cancelled", "failed"})
         if not eligible:
             continue
         try:
+            worker = p.tasks.active.get(task_id)
+            handles = getattr(getattr(p.state, "runs", None), "_handles", {})
+            runs = [handle.task for node in task.get("nodes", {}).values()
+                    if (handle := handles.get(node.get("run_id"))) and handle.task]
             await p.tasks.control(task["id"], scope, action, payload.get("confirmed", False))
+            if action in {"pause", "cancel"}:
+                stopping.extend(([worker] if worker else []) + runs)
         except ValueError as exc:
             errors.append(str(exc))
+    if stopping:
+        await asyncio.gather(*stopping, return_exceptions=True)
+    if action == "resume":
+        ensure_captain_summary(p, scope, id)
     return {**team_snapshot(p, scope, p.store.get("team", id, scope)), "errors": errors}

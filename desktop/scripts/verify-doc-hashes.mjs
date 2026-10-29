@@ -12,7 +12,8 @@ const repoRoot = resolve(root, '..');
 const allowMissingRelease = process.argv.includes('--allow-missing-release');
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 if(pkg.build?.productName==='Eve'){
-  const manifest=JSON.parse(readFileSync(join(repoRoot,'docs/verification/eve-1.0/installer.json'),'utf8'));
+  const record=pkg.version==='1.0.0'?'docs/verification/eve-1.0/installer.json':'docs/verification/platform-upgrade/installer.json';
+  const manifest=JSON.parse(readFileSync(join(repoRoot,record),'utf8'));
   const expected=`Eve-Setup-${pkg.version}-win-x64.exe`;
   if(manifest.file!==expected||manifest.version!==pkg.version||!/^[a-f0-9]{64}$/.test(manifest.sha256)||!Number.isSafeInteger(manifest.bytes)||manifest.bytes<=0)throw Error('Invalid Eve installer manifest');
   const artifact=[join(root,'release',expected),join(root,'release/eve-v1.0.0',expected)].find(existsSync);

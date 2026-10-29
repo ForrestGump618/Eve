@@ -15,17 +15,12 @@ import asyncio
 import codecs
 import shlex
 import threading
-import time
 from typing import Any
 
 from fastapi import WebSocket, WebSocketDisconnect
 
 from ..config import Settings
-
-_READ_CHUNK = 4096
-_SSH_READ_CHUNK = 65536
-_QUEUE_MAX = 1024
-_SSH_POLL_INTERVAL = 0.02
+from .terminal_policy import POLICY, TerminalOutput
 
 
 def _query_int(websocket: WebSocket, name: str, default: int, low: int, high: int) -> int:
@@ -41,14 +36,15 @@ def _query_int(websocket: WebSocket, name: str, default: int, low: int, high: in
 
 async def _send_diagnostic(websocket: WebSocket, code: str, message: str) -> None:
     try:
-        await websocket.send_json({"type": "diagnostic", "code": code, "message": message})
+        await asyncio.wait_for(websocket.send_json(
+            {"type": "diagnostic", "code": code, "message": message}), POLICY.send_timeout)
     except Exception:  # pragma: no cover - client already gone
         pass
 
 
 async def _close_quietly(websocket: WebSocket) -> None:
     try:
-        await websocket.close()
+        await asyncio.wait_for(websocket.close(), POLICY.send_timeout)
     except Exception:
         pass
 
@@ -88,25 +84,16 @@ async def run_terminal(websocket: WebSocket, settings: Settings, workspaces: Any
 async def _run_local_terminal(websocket: WebSocket, settings: Settings) -> None:
     from .terminal_process import ShellProcess
     try:
-        cols = _query_int(websocket, "cols", 100, 20, 500)
-        rows = _query_int(websocket, "rows", 30, 5, 200)
+        cols = _query_int(websocket, "cols", POLICY.cols, POLICY.min_cols, POLICY.max_cols)
+        rows = _query_int(websocket, "rows", POLICY.rows, POLICY.min_rows, POLICY.max_rows)
         shell = await asyncio.to_thread(ShellProcess, str(settings.workspace), cols, rows)
     except Exception as exc:
         await _send_diagnostic(websocket, "terminal_start_failed", f"终端启动失败：{exc}")
         await websocket.send_json({"type": "exit", "code": -1})
         await _close_quietly(websocket)
         return
-    loop = asyncio.get_running_loop()
-    queue: asyncio.Queue[Any] = asyncio.Queue(maxsize=64)
     stop = threading.Event()
-
-    def push(item):
-        future = asyncio.run_coroutine_threadsafe(queue.put(item), loop)
-        try:
-            future.result(timeout=5)
-        except Exception:
-            future.cancel()
-            stop.set()
+    output = TerminalOutput(websocket, stop, POLICY)
 
     def reader():
         try:
@@ -114,34 +101,26 @@ async def _run_local_terminal(websocket: WebSocket, settings: Settings) -> None:
                 text = shell.read()
                 if not text:
                     break
-                push({"type": "output", "data": text})
+                if not output.push({"type": "output", "data": text}):
+                    break
         except EOFError:
             pass
         except Exception as exc:
             if not stop.is_set():
-                push({"type": "diagnostic", "code": "pty_read_failed", "message": str(exc)})
+                output.push({"type": "diagnostic", "code": "pty_read_failed", "message": str(exc)})
         finally:
             if not stop.is_set():
-                push({"type": "exit", "code": None})
+                output.push({"type": "exit", "code": None})
 
     thread = threading.Thread(target=reader, name="eve-pty", daemon=True)
-    thread.start()
-    await websocket.send_json({"type": "ready", "shell": shell.label, "pty": True,
-                               "cwd": str(settings.workspace), "pid": shell.pid})
-
-    async def output():
-        while True:
-            item = await queue.get()
-            await websocket.send_json(item)
-            if item["type"] == "exit":
-                return
-
     async def input_():
         while True:
             message = await websocket.receive_json()
-            if message.get("type") == "input":
+            if message.get("type") == "ack":
+                output.acknowledge(message)
+            elif message.get("type") == "input":
                 data = str(message.get("data") or "")
-                if len(data) > 65536:
+                if len(data) > POLICY.input_chars:
                     raise ValueError("终端输入超过 64KB")
                 await asyncio.to_thread(shell.write, data)
             elif message.get("type") == "resize":
@@ -151,8 +130,12 @@ async def _run_local_terminal(websocket: WebSocket, settings: Settings) -> None:
             elif message.get("type") in {"close", "exit"}:
                 return
 
-    tasks = {asyncio.create_task(output()), asyncio.create_task(input_())}
+    tasks = set()
     try:
+        await output.send({"type": "ready", "shell": shell.label, "pty": True,
+                           "cwd": str(settings.workspace), "pid": shell.pid, **output.ready_fields()})
+        thread.start()
+        tasks = {asyncio.create_task(output.pump()), asyncio.create_task(input_())}
         await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
     finally:
         stop.set()
@@ -162,7 +145,9 @@ async def _run_local_terminal(websocket: WebSocket, settings: Settings) -> None:
         try:
             await asyncio.to_thread(shell.close)
         finally:
-            await asyncio.to_thread(thread.join, 2)
+            if thread.ident is not None:
+                await asyncio.to_thread(thread.join, POLICY.thread_join_timeout)
+            output.clear()
             await _close_quietly(websocket)
 
 
@@ -179,7 +164,7 @@ def _resize_value(message: dict[str, Any]) -> tuple[int | None, int | None]:
         return None, None
     if cols <= 0 or rows <= 0:
         return None, None
-    return min(500, cols), min(200, rows)
+    return min(POLICY.max_cols, cols), min(POLICY.max_rows, rows)
 
 
 async def _run_ssh_terminal(
@@ -190,8 +175,8 @@ async def _run_ssh_terminal(
 ) -> None:
     from ..ssh.connections import get_connection_service
 
-    cols = _query_int(websocket, "cols", 100, 20, 500)
-    rows = _query_int(websocket, "rows", 30, 5, 200)
+    cols = _query_int(websocket, "cols", POLICY.cols, POLICY.min_cols, POLICY.max_cols)
+    rows = _query_int(websocket, "rows", POLICY.rows, POLICY.min_rows, POLICY.max_rows)
     service = get_connection_service(settings)
     try:
         channel = await asyncio.to_thread(
@@ -208,73 +193,42 @@ async def _run_ssh_terminal(
         await _close_quietly(websocket)
         return
 
-    await websocket.send_json({"type": "ready", "shell": "SSH", "pty": not bool(getattr(channel, "diagnostic", "")), "cwd": cwd})
-    loop = asyncio.get_running_loop()
-    queue: asyncio.Queue[Any] = asyncio.Queue(maxsize=_QUEUE_MAX)
     stop = threading.Event()
-
-    def _push(item: Any) -> None:
-        future = asyncio.run_coroutine_threadsafe(queue.put(item), loop)
-        try:
-            future.result(timeout=5)
-        except Exception:
-            future.cancel()
-            stop.set()
-
-    diagnostic = str(getattr(channel, "diagnostic", "") or "")
-    if diagnostic:
-        await _send_diagnostic(websocket, "pty_fallback", diagnostic)
-
-    if cwd:
-        try:
-            await asyncio.to_thread(channel.send, f"cd -- {shlex.quote(cwd)}\r")
-        except Exception as exc:  # pragma: no cover - channel may reject
-            await _send_diagnostic(websocket, "cwd_failed", f"切换远端目录失败：{exc}")
-
-    header = f"Eve SSH · 档案 {profile_id}\r\n"
-    if cwd:
-        header += f"远端工作目录：{cwd}\r\n"
-    header += "提示：Ctrl+C 可用；输入 exit 退出。\r\n"
-    await websocket.send_json({"type": "output", "data": header})
+    output = TerminalOutput(websocket, stop, POLICY)
 
     def _reader() -> None:
         decoder = codecs.getincrementaldecoder("utf-8")("replace")
         try:
+            header = f"Eve SSH · 档案 {profile_id}\r\n"
+            if cwd:
+                header += f"远端工作目录：{cwd}\r\n"
+            header += "提示：Ctrl+C 可用；输入 exit 退出。\r\n"
+            if not output.push({"type": "output", "data": header}):
+                return
             while not stop.is_set():
-                data = channel.recv(_SSH_READ_CHUNK)
+                data = channel.recv(POLICY.chunk_chars)
                 if data:
                     # paramiko 返回 bytes；JSON 帧必须是 str（中文按 UTF-8 解码）。
                     text = decoder.decode(data) if isinstance(data, bytes) else str(data)
-                    _push({"type": "output", "data": text})
+                    if not output.push({"type": "output", "data": text}):
+                        break
                     continue
                 if not channel.is_active():
                     transport = channel.client.get_transport() if getattr(channel, "client", None) else None
                     if transport is not None and not transport.is_active():
-                        _push({"type": "diagnostic", "code": "ssh_connection_lost",
+                        output.push({"type": "diagnostic", "code": "ssh_connection_lost",
                                "message": "SSH 连接中断；可重连新终端，旧命令不会自动重放。"})
                     break
-                time.sleep(_SSH_POLL_INTERVAL)
+                stop.wait(POLICY.ssh_poll_seconds)
+            tail = decoder.decode(b"", final=True)
+            if tail:
+                output.push({"type": "output", "data": tail})
         except Exception as exc:  # pragma: no cover - transport race
-            _push({"type": "diagnostic", "code": "channel_error", "message": f"远端终端中断：{exc}"})
+            output.push({"type": "diagnostic", "code": "channel_error", "message": f"远端终端中断：{exc}"})
         finally:
-            _push({"type": "exit", "code": None})
-            _push(None)
+            output.push({"type": "exit", "code": None})
 
     thread = threading.Thread(target=_reader, name="omicslab-ssh-terminal-reader", daemon=True)
-    thread.start()
-
-    async def pump_output() -> None:
-        while True:
-            item = await queue.get()
-            if item is None:
-                break
-            try:
-                await websocket.send_json(item)
-            except Exception:
-                break
-            if item.get("type") == "exit":
-                break
-
     async def pump_input() -> None:
         while True:
             try:
@@ -282,8 +236,13 @@ async def _run_ssh_terminal(
             except (WebSocketDisconnect, RuntimeError):
                 break
             mtype = message.get("type")
-            if mtype == "input":
+            if mtype == "ack":
+                output.acknowledge(message)
+            elif mtype == "input":
                 data = str(message.get("data") or "")
+                if len(data) > POLICY.input_chars:
+                    await _send_diagnostic(websocket, "terminal_input_too_large", "终端输入超过 64KB")
+                    break
                 try:
                     await asyncio.to_thread(channel.send, data)
                 except Exception as exc:  # pragma: no cover - channel gone
@@ -299,25 +258,35 @@ async def _run_ssh_terminal(
             elif mtype in ("close", "exit"):
                 break
 
-    out_task = asyncio.create_task(pump_output(), name="omicslab-ssh-terminal-out")
-    in_task = asyncio.create_task(pump_input(), name="omicslab-ssh-terminal-in")
+    tasks = set()
     try:
-        await asyncio.wait({out_task, in_task}, return_when=asyncio.FIRST_COMPLETED)
+        await output.send({"type": "ready", "shell": "SSH", "pty": not bool(getattr(channel, "diagnostic", "")),
+                           "cwd": cwd, **output.ready_fields()})
+        diagnostic = str(getattr(channel, "diagnostic", "") or "")
+        if diagnostic:
+            await _send_diagnostic(websocket, "pty_fallback", diagnostic)
+        if cwd:
+            try:
+                await asyncio.to_thread(channel.send, f"cd -- {shlex.quote(cwd)}\r")
+            except Exception as exc:  # pragma: no cover - channel may reject
+                await _send_diagnostic(websocket, "cwd_failed", f"切换远端目录失败：{exc}")
+        thread.start()
+        tasks = {asyncio.create_task(output.pump(), name="omicslab-ssh-terminal-out"),
+                 asyncio.create_task(pump_input(), name="omicslab-ssh-terminal-in")}
+        await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
     finally:
         stop.set()
-        for task in (out_task, in_task):
-            if not task.done():
-                task.cancel()
-                try:
-                    await task
-                except (asyncio.CancelledError, Exception):
-                    pass
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
         try:
             await asyncio.to_thread(channel.close)
         except Exception:  # pragma: no cover - defensive
             pass
         try:
-            await asyncio.to_thread(thread.join, 2)
+            if thread.ident is not None:
+                await asyncio.to_thread(thread.join, POLICY.thread_join_timeout)
         except Exception:  # pragma: no cover - defensive
             pass
+        output.clear()
         await _close_quietly(websocket)

@@ -2,13 +2,13 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
-[![Release](https://img.shields.io/badge/release-1.0.0-202020)](https://github.com/ForrestGump618/suwen/releases)
+[![Release](https://img.shields.io/badge/release-1.1.0-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
 [![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
-> 当前更新提供源码，暂不上传新的 EXE。已有桌面版用户应核对构建标识，避免启动旧安装包；源码运行方法见下文。
+> 本轮交付 Eve 1.1.0 源码与 Windows x64 安装包。功能验收与安装包校验值见 [本轮报告](docs/verification/platform-upgrade/README.md)。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ flowchart LR
 <details>
 <summary>30 秒上手清单</summary>
 
-- [ ] 下载并安装 Eve 1.0.0
+- [ ] 下载并安装 Eve 1.1.0
 - [ ] 在“设置 → 模型连接”保存一个可用模型
 - [ ] 选择本地目录或 SSH 工作区
 - [ ] 在输入框发送一个只读任务
@@ -65,7 +65,7 @@ flowchart LR
 
 在「科研与证据 → 科学工作台」选择研究流程。文献、遗传变异、靶点药物、结构序列、分子设计、测序、单细胞、蛋白代谢组、仪器数据和实验设计使用同一个任务执行框架，结果可在原对话中继续追问或修改。
 
-发行版的共享目录包含 371 项技能，覆盖科研、数据处理和通用工作区操作；用户安装的扩展包在本机合并检索。技能数量表示已收录的流程与资源，实际计算还取决于执行主机的依赖、数据和服务权限。
+发行版的共享目录包含 373 项技能，覆盖科研、数据处理和通用工作区操作；用户安装的扩展包在本机合并检索。技能数量表示已收录的流程与资源，实际计算还取决于执行主机的依赖、数据和服务权限。
 
 ![科学工作台](docs/screenshots/science-workbench.png)
 
@@ -144,6 +144,9 @@ flowchart LR
 </details>
 
 ### 工作区与协作
+
+默认以团队协作处理新任务：主智能体建立执行与复核成员方案，用户批准后并行或按依赖工作。用户消息通过持久信箱下发，成员可以互相讨论，结果回传队长；输入区可切换为单独执行。详见 [多智能体协作](docs/COLLABORATION.md)。
+
 - 本地目录和 SSH 远程目录使用同一套文件、搜索、编辑和终端能力。
 - 任务绑定工作区，连接失败不会偷偷切换到本地。
 - 支持 PowerShell、远程终端、后台任务、任务恢复和多个独立会话。
@@ -172,6 +175,18 @@ flowchart LR
 
 </details>
 
+### 自我改进（RSI）
+
+Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其边界：
+
+| 层级 | 入口 | 作用范围 | 晋升条件 |
+| --- | --- | --- | --- |
+| 科研发现闭环 | `rsi-discovery-loop` 技能、`discovery_*` 工具、`discovery-lead` 智能体 | 工作区中的假设、证据、策略账本 | 证据分级 + 人工复核 |
+| 桌面策略调参 | 「工具 → RSI 自我改进」 | 结构化策略配置（不修改源码） | `rsi.review` → 显式确认 → `rsi.promote`，可回滚 |
+| 源码副本进化 | 「自我改进」实验页（Proteus 适配） | 独立源码副本中的指令、技能、工具 | 回归门禁通过，产物不替换当前安装 |
+
+科研发现先建项目、预注册判据、真实代码执行、证据分级；桌面 RSI 每次运行受候选数、用例数和回归阈值约束；源码副本进化需要先确认方案，且只作用于隔离副本。智能体不得绕过确认，不得把 mock 或未验证实验说成已上线效果。详细说明见 [RSI 能力与边界](docs/RSI.md)。
+
 <details>
 <summary>核心交互</summary>
 
@@ -187,9 +202,9 @@ flowchart LR
 
 | 项目 | 当前值 |
 | --- | --- |
-| 版本 | `1.0.0` |
+| 版本 | `1.1.0` |
 | 平台 | Windows x64 |
-| 当前交付 | 源码更新；本次不上传 EXE |
+| 当前交付 | 源码更新 + 本机构建的无签名安装包 |
 | 默认界面 | 浅色工作台 |
 | 任务执行 | 本地目录或 SSH 工作区 |
 | 数据策略 | 结果、轨迹和证据保存在本机工作区 |

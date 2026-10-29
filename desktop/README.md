@@ -1,6 +1,6 @@
-# 素问 / SuWen Desktop 1.0.0
+# Eve Desktop 1.1.0
 
-素问桌面端是一个面向真实科研与开发任务的 Windows Agent 工作台。Electron 窗口负责交互，独立守护进程持久执行任务，Python 工作台继续承载既有科研页面和 Worker。
+Eve 桌面端是一个面向真实科研与开发任务的 Windows Agent 工作台。Electron 窗口负责交互，独立守护进程持久执行任务，Python 工作台继续承载既有科研页面和 Worker。
 
 ## 开发与验证
 
@@ -15,10 +15,10 @@ npm start
 构建未签名 Windows 安装包：
 
 ```powershell
-npm run dist:win -- --config.directories.output=release/product-100
+npm run dist:win -- --config.directories.output=release
 ```
 
-最终产物位于 `release/product-100/SuWen-Setup-1.0.0-win-x64.exe`。构建目录被 `.gitignore` 排除，发布资产上传到 GitHub Release。
+最终产物位于 `release/Eve-Setup-1.1.0-win-x64.exe`。构建目录被 `.gitignore` 排除，发布资产上传到 GitHub Release。
 
 ## 核心能力
 
@@ -33,7 +33,7 @@ npm run dist:win -- --config.directories.output=release/product-100
 
 ## 验收与边界
 
-最终测试为 560 项 Python 测试通过，249 项 TypeScript 测试中 248 项通过、1 项因 Windows 符号链接权限跳过；固定 22 项真实模型任务最终 22/22。正式页面、打包程序、托盘和实际 SSH 工作区均有自动化证据。
+最终回归为 831 项 Python 测试通过（1 项跳过）、303 项 TypeScript 测试中 302 项通过（1 项因 Windows 符号链接权限跳过），以及 40 项前端/终端/团队/产物集成测试通过。固定 22 项真实模型任务最终 22/22。正式页面、打包程序、托盘和实际 SSH 工作区均有自动化证据。
 
 安装包未签名，SmartScreen 可能提示。干净 Windows VM 安装、8/24/72 小时连续耐久、断电/休眠、跨系统重启恢复、实际 SSH 私钥/系统 SSH Agent、第二台物理主机与远程 stdio MCP 尚未真实验收。Python 子进程隔离不等于操作系统安全沙箱。
 
@@ -44,3 +44,5 @@ npm run dist:win -- --config.directories.output=release/product-100
 开发与测试使用独立的 `SUWEN_TEST_HOME`，不覆盖现有会话或用户配置。模型密钥由 Electron `safeStorage` 保护，SSH 凭据通过系统凭据库与引用传递，均不写入日志或源码。
 
 桌面原创代码使用 MIT；保留的 Python 工作台使用 Apache-2.0。第三方许可见 `NOTICE` 与 `third-party-licenses/`。
+
+本轮协作、RSI、科学技能和界面核验见 [1.1.0 报告](../docs/verification/platform-upgrade/README.md)。

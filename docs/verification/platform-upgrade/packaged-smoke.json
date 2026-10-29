@@ -1,0 +1,47 @@
+{
+  "modelProtocol": "local HTTP fixture only; no external model account",
+  "checks": [
+    "Electron main + detached runAsNode daemon + named pipe ready",
+    "renderer has no Node require; contextBridge present",
+    "safeStorage encrypted model configuration",
+    "chat fixture streamed and committed",
+    "forced Electron UI exit does not kill detached daemon",
+    "30-second persisted timer completed after UI exit; committed start step executed once",
+    "reopen attaches to same daemon and restores task history",
+    "packaged Python research-worker ran a sandboxed stdlib script (exit 0, mean 5)",
+    "packaged optional Python workbench opens isolated authenticated window; unauthorized HTTP rejected",
+    "packaged hosted legacy web SPA renders shell navigation"
+  ],
+  "daemonPid": 26304,
+  "timerTask": "67173786-ba44-40b9-8f83-60c5451c08a8",
+  "liveMcp": "skipped: SUWEN_SMOKE_LIVE is unset; live public-database evidence is exercised separately by scripts/e2e-rpc.mjs --live",
+  "legacyWorkbench": {
+    "hosted": true,
+    "title": "工作台 · Eve",
+    "navItems": 13,
+    "routes": [
+      "workbench",
+      "evolution",
+      "workbench",
+      "tasks2",
+      "context",
+      "research",
+      "knowledge",
+      "workflow",
+      "artifacts",
+      "extensions",
+      "discovery",
+      "ssh",
+      "settings",
+      "diagnostics"
+    ],
+    "screenshot": "work/legacy-workbench.png"
+  },
+  "runtimeVersions": {
+    "node": "24.22.0",
+    "electron": "45.0.0",
+    "sqlite": "3.53.4"
+  },
+  "packaged": true,
+  "result": "passed"
+}

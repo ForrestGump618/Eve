@@ -28,7 +28,7 @@ WORKFLOWS = [
      "skills": ["science-bio-instrument-data-to-allotrope"],
      "deliverables": ["识别仪器和格式", "标准数据与字段映射", "校验结果和原始文件哈希"]},
     {"id": "experiment", "label": "课题与实验", "description": "评估问题价值，设计对照和可验证的实验路径。",
-     "skills": ["science-bio-scientific-problem-selection", "archify", "science-lab-research-router-skill"],
+     "skills": ["science-bio-scientific-problem-selection", "archify", "science-lab-research-router-skill", "science-primer-reference-check", "science-construct-validation"],
      "deliverables": ["假设、主要终点和对照", "资源与失败路径", "方案、验证门槛和人工复核"]},
 ]
 

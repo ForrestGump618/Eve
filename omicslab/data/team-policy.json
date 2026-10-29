@@ -1,0 +1,13 @@
+{
+  "max_members": 8,
+  "max_goal_chars": 16000,
+  "max_message_chars": 5000,
+  "mailbox_limit": 100,
+  "mailbox_context_messages": 20,
+  "mailbox_context_chars": 20000,
+  "task_history_limit": 100,
+  "result_chars": 32000,
+  "dispatch_interval_s": 1,
+  "run_poll_interval_s": 0.25,
+  "automatic_enabled": false
+}
