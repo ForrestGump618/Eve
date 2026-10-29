@@ -1,0 +1,15 @@
+{
+  "bundle": "eve-public-data",
+  "name": "science-public-biomedical-data",
+  "version": "1.1.0",
+  "resources": 6,
+  "scripts": [
+    "scripts/collect.py",
+    "scripts/curate.py",
+    "scripts/evaluate.py",
+    "scripts/pipeline.py"
+  ],
+  "packSha256": "219547bf2817c2f987f7f39fdf77c31c0a8fb8329b88959e8846799f786d92a3",
+  "packBytes": 12384722,
+  "mainJavascriptBytesAdded": 0
+}

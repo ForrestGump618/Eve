@@ -1,8 +1,8 @@
 /** Shared appearance and workspace-local layout preferences. Legacy keys remain readable. */
-import { api } from './api.js?v=1.2.0';
-import { getPref, setPref } from './util.js?v=1.2.0';
-import { getState, navigate } from './store.js?v=1.2.0';
-import { applyTheme, openModal } from './ui.js?v=1.2.0';
+import { api } from './api.js?v=1.3.0';
+import { getPref, setPref } from './util.js?v=1.3.0';
+import { getState, navigate } from './store.js?v=1.3.0';
+import { applyTheme, openModal } from './ui.js?v=1.3.0';
 
 export function applyAppearance(settings){
  if(!settings)return;
@@ -11,13 +11,13 @@ export function applyAppearance(settings){
  const fonts={system:'Inter, "Segoe UI Variable", "PingFang SC", "Microsoft YaHei", sans-serif',sans:'Arial, "Microsoft YaHei", sans-serif',mono:'"Cascadia Code", Consolas, "Microsoft YaHei", monospace'};
  root.style.setProperty('--font-sans',fonts[settings.font]||fonts.system);
  root.style.setProperty('--ui-font-size',`${settings.font_size||14}px`);
- root.style.setProperty('--accent',settings.accent||'#47b8a1');
+ root.style.setProperty('--accent',settings.accent||'#3157D5');
  root.style.setProperty('--radius',`${settings.radius??12}px`);
  root.dataset.density=settings.density||'comfortable';root.dataset.mode=settings.mode||'research';
- setPref('homeRoute',settings.home||'workbench');
+ setPref('homeRoute',settings.home||'dashboard');
  setPref('paletteShortcut',settings.shortcuts?.palette||'k');
  setPref('agentAvatar',settings.avatar||'');
- setPref('agentName',settings.agent_name||'Eve助手');
+ setPref('agentName',settings.agent_name||'Eve');
  const name=document.querySelector('.brand-name');if(name)name.textContent='Eve';
 }
 
@@ -29,10 +29,17 @@ export async function initPlatform(){
   const data=await api.request(`/api/platform/bootstrap?scope=${encodeURIComponent(scope)}`);
   applyAppearance(data.settings.appearance.value);
   if(!data.settings.appearance.value.onboarded&&!getPref('onboardingDismissed',false)){
-   openModal({title:'开始使用 Eve',size:'md',html:'<div class="sw-onboarding"><p>连接模型，选择工作目录，即可开始任务。</p><ol><li>在设置中添加供应商与模型</li><li>选择本地文件夹或 SSH 远程目录</li><li>按需调整任务权限</li></ol></div>',actions:[
-    {label:'先看看',kind:'ghost',onClick:()=>{setPref('onboardingDismissed',true);}},
-    {label:'配置模型连接',kind:'primary',onClick:()=>{setPref('onboardingDismissed',true);navigate('connections');}},
-   ]});
+   const onboarding=openModal({
+    title:'开始使用 Eve',
+    size:'sm',
+    bodyClass:'sw-onboarding-body',
+    html:'<div class="sw-onboarding"><p class="sw-onboarding-purpose">连接模型后，Eve 才能读取项目并执行任务。</p><label class="sw-onboarding-optout"><input type="checkbox" data-onboarding-optout checked/><span>下次不再提示</span></label></div>',
+    actions:[
+     {label:'连接模型',kind:'primary',onClick:()=>navigate('settings')},
+    ],
+    onClose:()=>setPref('onboardingDismissed',onboarding.body.querySelector('[data-onboarding-optout]')?.checked===true),
+   });
+   onboarding.el.querySelector('.modal')?.classList.add('sw-onboarding-modal');
   }
  }catch(err){console.warn('[Eve] 平台设置不可用',err.message);}
 }

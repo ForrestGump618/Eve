@@ -1,0 +1,56 @@
+{
+  "browser": "156.0.4314.50",
+  "checks": [
+    "dashboard metrics, projects, runs and insights render",
+    "7/30 day range and metric switches update the interactive chart",
+    "chart points expose keyboard focus, labels and tooltips",
+    "wish progress and upcoming plans are summarized without raw JSON",
+    "dashboard route links preserve existing workflows",
+    "desktop and mobile contain no page-level overflow",
+    "mobile metric controls remain readable and the internal scroll reaches project plans",
+    "dreaming section opens from route parameters",
+    "reflection opt-in and manual run save real structured values",
+    "candidate acceptance requires explicit confirmation",
+    "no raw JSON or executable output is exposed"
+  ],
+  "calls": [
+    {
+      "kind": "settings",
+      "body": {
+        "enabled": true
+      }
+    },
+    {
+      "kind": "run",
+      "body": {
+        "focus": "all"
+      }
+    },
+    {
+      "kind": "accept",
+      "path": "/api/platform/dreaming/candidates/dream-2/accept",
+      "body": {
+        "confirmed": true,
+        "note": "用户从设置页确认采纳"
+      }
+    }
+  ],
+  "errors": [],
+  "measurements": {
+    "desktopMount": {
+      "durationMs": 128,
+      "domNodes": 262,
+      "resourceBytes": 108038
+    },
+    "chartSwitchMs": 100.7,
+    "mobileMount": {
+      "durationMs": 16.5,
+      "domNodes": 331,
+      "resourceBytes": 7214
+    }
+  },
+  "viewports": [
+    "1440x1000",
+    "390x844"
+  ]
+}

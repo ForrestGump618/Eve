@@ -1,15 +1,15 @@
 // Chat view: conversation list, message stream, markdown rendering, SSE consumption,
 // tool cards, approval prompts, figures, retry/stop and the composer.
 
-import { renderMarkdown } from '../markdown.js?v=1.2.0';
-import {openHtmlArtifact} from '../artifact-viewer.js?v=1.2.0';
-import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.2.0';
-import {mountProjectFiles} from '../project-files.js?v=1.2.0';
-import {mountGuidance} from '../guidance-ui.js?v=1.2.0';
-import {mountFileChanges} from '../file-changes.js?v=1.2.0';
-import {chooseComposerSkills} from '../composer-skills.js?v=1.2.0';
-import {mountAgentsPanel} from '../agents-panel.js?v=1.2.0';
-import { icon, brandMark } from '../icons.js?v=1.2.0';
+import { renderMarkdown } from '../markdown.js?v=1.3.0';
+import {openHtmlArtifact} from '../artifact-viewer.js?v=1.3.0';
+import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.3.0';
+import {mountProjectFiles} from '../project-files.js?v=1.3.0';
+import {mountGuidance} from '../guidance-ui.js?v=1.3.0';
+import {mountFileChanges} from '../file-changes.js?v=1.3.0';
+import {chooseComposerSkills} from '../composer-skills.js?v=1.3.0';
+import {mountAgentsPanel} from '../agents-panel.js?v=1.3.0';
+import { icon, brandMark } from '../icons.js?v=1.3.0';
 import {
   esc,
   escAttr,
@@ -23,9 +23,9 @@ import {
   removePref,
   uid,
   truncate,
-} from '../util.js?v=1.2.0';
-import { api, errorMessage } from '../api.js?v=1.2.0';
-import { streamChat, streamTrace } from '../sse.js?v=1.2.0';
+} from '../util.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
+import { streamChat, streamTrace } from '../sse.js?v=1.3.0';
 import {
   toast,
   toastSuccess,
@@ -39,10 +39,10 @@ import {
   emptyStateHtml,
   openLightbox,
   spinnerHtml,
-} from '../ui.js?v=1.2.0';
-import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.2.0';
-import { on, emit } from '../bus.js?v=1.2.0';
-import { openRunDetail, openRunList } from '../runview.js?v=1.2.0';
+} from '../ui.js?v=1.3.0';
+import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.3.0';
+import { on, emit } from '../bus.js?v=1.3.0';
+import { openRunDetail, openRunList } from '../runview.js?v=1.3.0';
 
 const SIDEBAR_MIN = 210;
 const SIDEBAR_MAX = 420;
@@ -51,7 +51,7 @@ const NEAR_BOTTOM_PX = 120;
 const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|bmp|tiff?|svg|avif)$/i;
 // One-time migration flag for pre-1.2 expert preferences (CONTRACTS-3 T07).
 const AGENT_MIGRATION_KEY = 'agentMigrationAsked';
-const leadAgentLabel = () => (getPref('agentName','Eve助手') || 'Eve助手') + ' · 自动';
+const leadAgentLabel = () => (getPref('agentName','Eve') || 'Eve') + ' · 自动';
 // Independent run + resumable trace subscription (CONTRACTS-3 §3 T03).
 const RUN_WATCHDOG_MS = 45000;
 const RUN_RECONNECTS = 3;
@@ -361,7 +361,7 @@ export async function mount(root, ctx = {}) {
         el.messages,
         '<div class="chat-empty">' +
           `<div class="chat-empty-mark">${brandMark(46, 'chat')}</div>` +
-          '<div class="chat-empty-title">今天做些什么？</div>' +
+          '<div class="chat-empty-title">输入任务或问题</div>' +
           (prompts.length
             ? `<div class="prompt-chips">${prompts
                 .map((p) => `<button type="button" class="prompt-chip">${esc(p)}</button>`)
@@ -1908,7 +1908,7 @@ export async function mount(root, ctx = {}) {
     }
     let run = runPayload(runRecordFrom(data));
     if(data.run?.meta?.team_id){
-      toastInfo('智能体已规划协作成员，可在侧边栏「子智能体」中查看并批准。',{action:{label:'查看子智能体',onClick:()=>root.querySelector('#chat-agents-open')?.click()}});
+      toastInfo('协作方案已生成，可在侧边栏「子智能体」中查看并批准。',{action:{label:'查看子智能体',onClick:()=>root.querySelector('#chat-agents-open')?.click()}});
       agentsPanel?.refresh();
     }
     if (run && !run.traceId) {
@@ -2828,7 +2828,7 @@ export async function mount(root, ctx = {}) {
     if (local.agentId) el.agentSelect.value = local.agentId;
     const defaultId = local.agentDefault?.id;
     el.agentSelect.title = defaultId ? `默认：${agentLabel(defaultId)}` : '选择智能体';
-    el.input.placeholder = '描述你的问题，或添加文件开始分析…';
+    el.input.placeholder = '输入任务或问题…';
     const workspace=getState().workspace;
     const chip=root.querySelector('#chat-workspace');
     if(chip&&workspace){chip.querySelector('span').textContent=workspace.name||'工作目录';chip.title=workspace.local_path||workspace.root||'选择工作目录';}
@@ -2853,9 +2853,9 @@ export async function mount(root, ctx = {}) {
       title: '默认智能体已更新',
       size: 'sm',
       html:
-        '<p class="confirm-text">检测到旧版本保存的专家偏好：<strong>' +
-        `${esc(agentLabel(stored))}</strong>。新版本默认使用「${esc(leadAgentLabel())}」，` +
-        '它会自动规划任务并按需调用专家。<br /><br />你可以保留原选择，或改用新的默认助手。此提示只显示一次。</p>',
+        '<p class="confirm-text">旧版本保存的专家偏好是 <strong>' +
+        `${esc(agentLabel(stored))}</strong>。当前默认使用「${esc(leadAgentLabel())}」。` +
+        '<br /><br />可以保留原选择，或切换到当前默认。</p>',
       actions: [
         {
           label: keep ? '保留原选择' : '保留原名称',
@@ -2874,7 +2874,7 @@ export async function mount(root, ctx = {}) {
           },
         },
         {
-          label: '改用 Eve 助手',
+          label: '使用 Eve',
           kind: 'primary',
           onClick: () => {
             applyEffectiveAgent(effectiveId);
@@ -2912,7 +2912,7 @@ export async function mount(root, ctx = {}) {
     const stored = local.agentId;
     if (stored && !knownAgentId(agents, stored)) {
       // Invalid / removed role: return to the effective default (never agents[0] unless necessary).
-      toastInfo('原默认专家已不可用，已切换到 Eve 助手');
+      toastInfo('原默认专家已不可用，已切换到 Eve');
       applyEffectiveAgent(effectiveId);
     } else if (!stored) {
       applyEffectiveAgent(effectiveId);

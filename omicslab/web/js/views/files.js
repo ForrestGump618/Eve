@@ -1,7 +1,7 @@
 // Files view: lazy workspace tree on the left, preview (text/image/CSV/binary) on the right,
 // plus upload / new file / new folder / delete.
 
-import { icon } from '../icons.js?v=1.2.0';
+import { icon } from '../icons.js?v=1.3.0';
 import {
   esc,
   fmtBytes,
@@ -13,8 +13,8 @@ import {
   setPref,
   parseDelimited,
   debounce,
-} from '../util.js?v=1.2.0';
-import { api, errorMessage } from '../api.js?v=1.2.0';
+} from '../util.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
 import {
   h,
   toast,
@@ -25,7 +25,7 @@ import {
   promptDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.2.0';
+} from '../ui.js?v=1.3.0';
 
 const TREE_MIN = 190;
 const TREE_MAX = 520;

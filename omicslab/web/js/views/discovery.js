@@ -1,8 +1,8 @@
 // Discovery (RSI) view: project list, live run timeline (7 steps), hypothesis
 // ledger, evidence, insights, strategy library and report preview.
 
-import { renderMarkdown } from '../markdown.js?v=1.2.0';
-import { icon } from '../icons.js?v=1.2.0';
+import { renderMarkdown } from '../markdown.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.3.0';
 import {
   esc,
   escAttr,
@@ -13,9 +13,9 @@ import {
   uid,
   copyText,
   downloadText,
-} from '../util.js?v=1.2.0';
-import { api, errorMessage } from '../api.js?v=1.2.0';
-import { streamSSE } from '../sse.js?v=1.2.0';
+} from '../util.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
+import { streamSSE } from '../sse.js?v=1.3.0';
 import {
   toastSuccess,
   toastError,
@@ -24,8 +24,8 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.2.0';
-import { getState } from '../store.js?v=1.2.0';
+} from '../ui.js?v=1.3.0';
+import { getState } from '../store.js?v=1.3.0';
 
 const STEP_ORDER = [
   'observe',
@@ -348,7 +348,7 @@ function layout() {
     '<header class="page-head">' +
     '<div class="page-heading">' +
     '<h1 class="page-title">发现</h1>' +
-    '<p class="page-subtitle">递归式科研（RSI）：让智能体提出假设、设计实验、记录证据，并沉淀可复用的研究策略。</p>' +
+    '<p class="page-subtitle">递归式科研（RSI）：提出假设、设计实验、记录证据，并沉淀可复用的研究策略。</p>' +
     '</div>' +
     '<div class="page-actions">' +
     '<span class="toolbar-meta" id="discovery-count"></span>' +
@@ -442,7 +442,7 @@ export async function mount(root, ctx = {}) {
         title: local.projects.length ? '没有匹配的项目' : '还没有发现项目',
         hint: local.projects.length
           ? '试试更换搜索词或状态过滤。'
-          : '新建一个项目，让智能体围绕研究目标自主提出假设、执行实验并沉淀策略。',
+          : '新建项目后，从研究目标开始组织假设、实验与证据。',
         actionLabel: local.projects.length ? '' : '新建项目',
         actionId: local.projects.length ? '' : 'discovery-empty-new',
       });
@@ -658,7 +658,7 @@ export async function mount(root, ctx = {}) {
           iconName: 'clockPlay',
           title: local.running ? '正在等待智能体事件…' : '还没有运行记录',
           hint: local.running
-            ? '智能体启动后，7 步流程与产出会实时显示在这里。'
+            ? '运行后，7 步流程与产出会显示在这里。'
             : '点击「运行」开始自主发现；时间线会按 观察 → 提出假设 → 优先排序 → 预注册 → 执行 → 评估 → 反思 展示每一步。',
         }) +
         '</div>';
@@ -671,7 +671,7 @@ export async function mount(root, ctx = {}) {
       return emptyStateHtml({
         iconName: 'brain',
         title: '还没有假设',
-        hint: '运行项目后，智能体会在「提出假设」步骤写入可检验的假设。',
+        hint: '运行项目后，可检验的假设会写入这里。',
       });
     }
     return `<div class="hypothesis-list">${hypotheses.map(hypothesisCardHtml).join('')}</div>`;
@@ -683,7 +683,7 @@ export async function mount(root, ctx = {}) {
       return emptyStateHtml({
         iconName: 'table',
         title: '还没有证据',
-        hint: '智能体执行实验或分析数据后，会把结果登记为证据。',
+        hint: '执行实验或分析后，结果会登记为证据。',
       });
     }
     return `<div class="evidence-list">${evidence.map(evidenceCardHtml).join('')}</div>`;
@@ -695,7 +695,7 @@ export async function mount(root, ctx = {}) {
       return emptyStateHtml({
         iconName: 'wand',
         title: '还没有洞察',
-        hint: '随着证据累积，智能体会提炼跨轮次的研究洞察。',
+        hint: '证据累积后，跨轮次洞察会显示在这里。',
       });
     }
     return `<div class="insight-list">${insights.map(insightItemHtml).join('')}</div>`;
@@ -708,7 +708,7 @@ export async function mount(root, ctx = {}) {
         emptyStateHtml({
           iconName: 'layers',
           title: '策略库为空',
-          hint: '可以从内置种子策略开始，智能体会在运行中为策略累计使用次数与奖励。',
+          hint: '从内置策略开始，使用次数与奖励会记录在这里。',
           actionLabel: '导入种子策略',
           actionId: 'discovery-seed',
         }) || ''
@@ -1344,7 +1344,7 @@ export async function mount(root, ctx = {}) {
       fieldHtml(
         '研究目标 *',
         '<textarea class="input" id="np-objective" rows="4" placeholder="描述要回答的科学问题、可用数据与期望产出"></textarea>',
-        '目标越具体，智能体提出的假设越可检验',
+        '目标越具体，假设越可检验',
       ) +
       '<div class="field-grid">' +
       fieldHtml('领域', '<input class="input" id="np-domain" placeholder="如 肿瘤免疫 / 单细胞" />') +
@@ -1353,7 +1353,7 @@ export async function mount(root, ctx = {}) {
       fieldHtml(
         '数据线索',
         '<input class="input" id="np-hints" placeholder="工作区路径或数据说明，例如 data/demo.h5ad" />',
-        '可选：帮助智能体快速定位可用数据',
+        '可选：用路径或说明标出可用数据',
       ) +
       '<div class="field-grid">' +
       fieldHtml('最大轮数', '<input class="input" type="number" id="np-rounds" min="1" max="20" value="3" />') +
@@ -1362,7 +1362,7 @@ export async function mount(root, ctx = {}) {
         '<input class="input" type="number" id="np-budget" min="1" max="600" value="30" />',
       ) +
       '</div>' +
-      '<div class="field-hint">创建后点击「运行」，智能体会按 7 步流程自主推进，并实时写入假设、证据与报告。</div>' +
+      '<div class="field-hint">创建后点击「运行」，7 个阶段和产出会显示在这里。</div>' +
       '</form>';
 
     openModal({

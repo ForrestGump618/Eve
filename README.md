@@ -2,13 +2,13 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
-[![Release](https://img.shields.io/badge/release-1.2.0-202020)](https://github.com/ForrestGump618/suwen/releases)
+[![Release](https://img.shields.io/badge/release-1.3.0-202020)](https://github.com/ForrestGump618/suwen/releases/tag/eve-v1.3.0)
 [![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
 [![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
 
-> 本轮交付 Eve 1.2.0 源码与 Windows x64 安装包。功能验收与安装包校验值见 [本轮报告](docs/verification/wish-research-1.2.0/README.md)。
+> 本轮交付 Eve 1.3.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/eve-1.3.0/README.md)。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
@@ -52,13 +52,21 @@ flowchart LR
 <details>
 <summary>30 秒上手清单</summary>
 
-- [ ] 下载并安装 Eve 1.2.0
+- [ ] 下载并安装 Eve 1.3.0
 - [ ] 在“设置 → 模型连接”保存一个可用模型
 - [ ] 选择本地目录或 SSH 工作区
 - [ ] 在输入框发送一个只读任务
 - [ ] 在“运行轨迹”检查工具结果和证据
 
 </details>
+
+## 研究总览与经验整理
+
+启动后先进入「研究总览」：进行中的课题、运行任务、最近会话和待确认经验建议都在一页显示。每个入口继续使用既有运行、科研愿望或会话服务，不会另建任务队列。
+
+![研究总览](docs/verification/eve-1.3.0/dashboard-desktop.png)
+
+「设置 → 做梦与经验整理」默认关闭。开启后由用户手动发起整理；Eve 只读取当前工作区脱敏后的资料，候选必须通过 Sage 证据门禁并由用户逐条确认。记忆与修正进入可检索知识库，技能草稿保持停用，后续课题保持未启动。
 
 ## 能做什么
 
@@ -76,7 +84,7 @@ flowchart LR
 
 在「科研与证据 → 科学工作台」选择研究流程。文献、遗传变异、靶点药物、结构序列、分子设计、测序、单细胞、蛋白代谢组、仪器数据和实验设计使用同一个任务执行框架，结果可在原对话中继续追问或修改。
 
-发行版的共享目录包含 373 项技能，覆盖科研、数据处理和通用工作区操作；用户安装的扩展包在本机合并检索。技能数量表示已收录的流程与资源，实际计算还取决于执行主机的依赖、数据和服务权限。
+发行版的共享目录包含 390 项技能，覆盖科研、数据处理、前端设计和通用工作区操作；用户安装的扩展包在本机合并检索。技能数量表示已收录的流程与资源，实际计算还取决于执行主机的依赖、数据和服务权限。
 
 ![科学工作台](docs/screenshots/science-workbench.png)
 
@@ -213,7 +221,7 @@ Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其�
 
 | 项目 | 当前值 |
 | --- | --- |
-| 版本 | `1.2.0` |
+| 版本 | `1.3.0` |
 | 平台 | Windows x64 |
 | 当前交付 | 源码更新 + 本机构建的无签名安装包 |
 | 默认界面 | 浅色工作台 |

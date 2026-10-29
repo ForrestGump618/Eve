@@ -1,4 +1,4 @@
-import {esc,escAttr} from './util.js?v=1.2.0';
+import {esc,escAttr} from './util.js?v=1.3.0';
 
 export function contextRequestsHtml(requests={}){
  const items=requests.items||[],max=Math.max(1,...items.map(r=>Object.values(r.composition).reduce((n,v)=>n+v,0)));

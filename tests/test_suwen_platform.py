@@ -14,9 +14,10 @@ from fastapi.responses import JSONResponse
 
 from omicslab.config import Settings
 from omicslab.agent.tools import build_registry,ToolContext
-from omicslab.agent.types import ToolResult
+from omicslab.agent.types import ChatMessage,ToolResult
 from omicslab.agent.templates import load_agents
 from omicslab.agent.approvals import Approver
+from omicslab.session.store import ConversationStore
 from omicslab.server.routes import router as api_router
 from omicslab.server.routes_platform import router,sync_desktop_mcp
 from omicslab.server import files
@@ -84,6 +85,52 @@ async def test_settings_keys_keep_multiple_provider_credentials(p,client_app):
     assert p.settings.auth()['OPENAI_API_KEY']=='openai-test-key'
     assert second.json()['providers']['deepseek']['has_key'] is True
     assert second.json()['providers']['openai']['has_key'] is True
+
+
+@pytest.mark.asyncio
+async def test_dashboard_returns_scoped_research_overview(p,client_app):
+    store=ConversationStore(p.settings)
+    p.state.store=store
+    conversation=store.create(agent='lead',title='既往分析')
+    conversation.messages.append(ChatMessage(role='user',content='检查表达矩阵'))
+    conversation.meta['workspace_id']='ws_main'
+    store.save(conversation)
+    wish=await p.wishes.start('ws_main',{'title':'验证调控假设','wish':'核对公共数据与证据','boundaries':['不自动启动']})
+    created=time.time()
+    with p.store.lock,p.store.db:
+        p.store.db.execute(
+            'INSERT INTO usage(scope,task,agent,model,input,output,cost,estimated,latency,created) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?)',
+            ('ws_main','dashboard-test','lead','mock-model',1200,300,0.0123,1,1.25,created),
+        )
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        response=await client.get('/api/platform/dashboard?scope=ws_main')
+    assert response.status_code==200
+    data=response.json()
+    assert data['scope']=='ws_main'
+    assert data['metrics']['active_wishes']>=1
+    assert data['metrics']['tokens']==1500
+    assert data['metrics']['requests']==1
+    assert data['metrics']['avg_latency_ms']==1250.0
+    assert data['metrics']['cost']==0.0123
+    assert data['metrics']['pricing_configured'] is False
+    assert any(item['id']==wish['id'] for item in data['wishes'])
+    assert any(item['id']==conversation.id for item in data['conversations'])
+    projected=next(item for item in data['wishes'] if item['id']==wish['id'])
+    assert projected['progress']['total']==wish['stages'].__len__()
+    assert projected['progress']['recorded']==0
+    assert projected['progress']['percent']==0
+    assert data['trends']['range_days']==30
+    assert len(data['trends']['days'])==30
+    today=data['trends']['days'][-1]
+    assert today['input_tokens']==1200
+    assert today['output_tokens']==300
+    assert today['tokens']==1500
+    assert today['requests']==1
+    assert today['cost']==0.0123
+    assert today['latency_ms']==1250.0
+    assert any(plan['wish_id']==wish['id'] for plan in data['plans'])
+    assert data['dreaming']['enabled'] is False
 
 
 def test_migration_is_backed_up_and_repeatable(p):

@@ -66,6 +66,25 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --speed: 160ms;
 
+  /* Design-system tokens. Components consume these instead of local values. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --control-height: 40px;
+  --font-size-overlay-title: 1.375rem;
+  --font-size-purpose: 0.9375rem;
+  --font-size-control: 0.875rem;
+  --overlay-onboarding-width: 29rem;
+  --content-wide: 82.5rem;
+  --color-accent: #8ea8ff;
+  --color-accent-hover: #afc2ff;
+  --color-accent-contrast: #171b21;
+
   --scrollbar-thumb: #2b3448;
   --scrollbar-thumb-hover: #3a465f;
 }
@@ -110,6 +129,10 @@
   --shadow-1: 0 1px 2px rgba(20, 30, 55, 0.06);
   --shadow-2: 0 12px 30px -14px rgba(20, 30, 55, 0.22);
   --shadow-pop: 0 24px 60px -22px rgba(20, 30, 55, 0.3);
+
+  --color-accent: #3157d5;
+  --color-accent-hover: #2445b0;
+  --color-accent-contrast: #ffffff;
 
   --scrollbar-thumb: #cbd3e3;
   --scrollbar-thumb-hover: #b2bdd3;
@@ -424,7 +447,6 @@ hr {
 .brand-logo {
   display: inline-flex;
   flex: none;
-  filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.35));
 }
 
 .brand-text {
@@ -438,10 +460,7 @@ hr {
   font-size: 16.5px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  background: linear-gradient(100deg, var(--text) 30%, var(--accent) 75%, var(--accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text);
 }
 
 .brand-sub {

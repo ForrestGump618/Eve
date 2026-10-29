@@ -167,7 +167,14 @@ async def chat(request: Request) -> StreamingResponse:
             **({"collaboration_mode": body["collaboration_mode"]} if "collaboration_mode" in body else {}),
         )
     except RunConflict:
-        active = state.events.active_run_for_session(conversation.id) or {}
+        events = getattr(state, "events", None)
+        active = events.active_run_for_session(conversation.id) if events else None
+        if created_new and not active:
+            try:
+                state.store.delete(conversation.id)
+            except Exception:
+                pass
+        active = active or {}
         raise HTTPException(
             status_code=409,
             detail={
@@ -180,8 +187,20 @@ async def chat(request: Request) -> StreamingResponse:
             },
         )
     except KeyError:
+        if created_new:
+            try:
+                state.store.delete(conversation.id)
+            except Exception:
+                pass
         raise HTTPException(status_code=404, detail={"error": {"message": "会话不存在", "code": "session_not_found"}})
     except Exception as exc:
+        events = getattr(state, "events", None)
+        active = events.active_run_for_session(conversation.id) if events else None
+        if created_new and not active:
+            try:
+                state.store.delete(conversation.id)
+            except Exception:
+                pass
         raise HTTPException(status_code=500, detail={"error": {"message": f"提交运行失败：{exc}", "code": "submit_failed"}})
 
     snapshot = submitted["run"]

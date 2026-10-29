@@ -1,6 +1,6 @@
 /** Guided channel setup. QR/status comes from the actual server, never a placeholder. */
-import { esc, escAttr } from '../util.js?v=1.2.0';
-import { openModal, toastSuccess, toastError } from '../ui.js?v=1.2.0';
+import { esc, escAttr } from '../util.js?v=1.3.0';
+import { openModal, toastSuccess, toastError } from '../ui.js?v=1.3.0';
 
 export async function renderChannels(root,{request,scope,reload}){
  const controller=new AbortController();let qrModal=null,qrTimer=0,disposed=false;

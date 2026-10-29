@@ -2,8 +2,8 @@
 // Everything is HTML-escaped first; generated tags are inserted only by this module,
 // which keeps model output and user text inert (no raw HTML passthrough).
 
-import { esc, safeUrl } from './util.js?v=1.2.0';
-import { icon } from './icons.js?v=1.2.0';
+import { esc, safeUrl } from './util.js?v=1.3.0';
+import { icon } from './icons.js?v=1.3.0';
 
 const FENCE_RE = /^(\s*)(```+|~~~+)\s*([A-Za-z0-9_+.#-]{0,20})\s*$/;
 const HEADING_RE = /^(#{1,6})\s+(.*)$/;

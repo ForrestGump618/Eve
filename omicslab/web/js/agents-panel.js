@@ -1,8 +1,8 @@
 // Sidebar child-agent panel: team membership is an agent-autonomous runtime
 // fact, not a standalone user feature. The panel only observes and opens sessions.
-import {api,errorMessage} from './api.js?v=1.2.0';
-import {esc,escAttr} from './util.js?v=1.2.0';
-import {icon} from './icons.js?v=1.2.0';
+import {api,errorMessage} from './api.js?v=1.3.0';
+import {esc,escAttr} from './util.js?v=1.3.0';
+import {icon} from './icons.js?v=1.3.0';
 
 const POLL_MS = 8000;
 const HIDDEN_POLL_MS = 15000;
@@ -120,7 +120,7 @@ export async function mountAgentsPanel(root, {getContext, onSelectConversation, 
     if (!teams) {
       return error
         ? `<p class="sidebar-agents-note" role="alert">${esc(truncate(errorMessage(error), 120))}</p>`
-        : '<p class="sidebar-agents-note">智能体按任务需要自行组建协作成员；无需手动开启。</p>';
+        : '<p class="sidebar-agents-note">任务需要协作时，成员会显示在这里。</p>';
     }
     return teams.map((team) => {
       const controls = team.draft

@@ -69,7 +69,7 @@ STAGES = (
     },
     {
         "id": "figures",
-        "label": "图表与证据叙事",
+        "label": "图表与证据整合",
         "depends_on": ("analysis", "experiment_design"),
         "output": "figures/",
         "purpose": "先规划 Figure 1..N 的证据递进，再基于真实结果生成可追溯图表。",
@@ -860,6 +860,16 @@ class ResearchWishes:
                 "不要声称已经完成任何数据分析或科学验证。\n"
                 f"推进方式：{continuation}"
             )
+        scouting_guidance = ""
+        if stage_id == "scouting":
+            scouting_guidance = (
+                "公共组学数据按 Collector → Evaluator → Curator 处理：优先搜索并加载 "
+                "science-public-biomedical-data；默认只登记 accession、许可、样本和文件元数据，"
+                "不要把“找到元数据”写成“已获得数据”。只有公开可下载且当前任务明确允许时才使用 "
+                "--download。保留 raw_record、评分理由、冲突字段和 SHA-256，并把 "
+                "data/public/manifest.json 作为证据矩阵与预注册的数据入口。受控访问、DUA、"
+                "登录或含个体信息的数据只登记申请路径，不得绕过授权。\n"
+            )
         return (
             f"推进许愿式科研课题 {wish_id}，本次只执行 {stage_def['label']} 节点。\n"
             f"愿望：{wish['wish']}\n"
@@ -869,6 +879,7 @@ class ResearchWishes:
             "工作方法：先用 wish_status 和 research_list 恢复状态；按需 skill_search/skill_load 只加载必要技能；"
             "实际读取数据、运行脚本或查询数据库。把输入、代码、环境、日志、结果和图表写入项目工作区，"
             "保留失败、阴性和不支持假设的结果。不要输出未执行的伪结果。\n"
+            f"{scouting_guidance}"
             f"建议交付位置：{outputs}\n"
             f"完成后调用 wish_record，id={wish_id}，stage={stage_id}，artifacts 传入真实存在的相对路径，"
             "summary 写明支持什么、反对什么、仍不知道什么。不要重复登记已记录节点。"

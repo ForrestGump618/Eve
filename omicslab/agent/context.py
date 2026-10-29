@@ -113,8 +113,8 @@ def build_system_prompt(
 
 def welcome_hint(settings: Settings) -> str:
     return (
-        "Eve 已就绪。可以直接用中文描述分析目标，例如：\n"
-        "- 读取工作区里的 CSV 数据并做质量检查\n"
-        "- 对单细胞数据做 QC、聚类和 UMAP 可视化\n"
-        "- 帮我画一张出版级的多面板图并导出 PDF"
+        "写下目标、数据位置和期望产物即可开始。例如：\n"
+        "- 检查 data/expression.csv 并输出质量控制表\n"
+        "- 对 data/single-cell/ 做 QC、聚类和 UMAP\n"
+        "- 把 results/metrics.json 整理成带来源说明的多面板图"
     )

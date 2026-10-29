@@ -1,10 +1,10 @@
 // SSH 主机管理视图：档案列表、远程命令终端、SFTP 目录浏览与远端信息。
 // 仅使用项目内置 API/UI 工具，无外部依赖；所有动态文本均经 esc() 转义。
 
-import { setWorkspace, navigate } from '../store.js?v=1.2.0';
-import { icon } from '../icons.js?v=1.2.0';
-import { esc, fmtBytes, fmtDuration, relTime, copyText } from '../util.js?v=1.2.0';
-import { api, errorMessage } from '../api.js?v=1.2.0';
+import { setWorkspace, navigate } from '../store.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.3.0';
+import { esc, fmtBytes, fmtDuration, relTime, copyText } from '../util.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
 import {
   toastSuccess,
   toastError,
@@ -13,7 +13,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.2.0';
+} from '../ui.js?v=1.3.0';
 
 const AUTH_PASSWORD = 'password';
 const AUTH_KEY = 'key';
@@ -1094,7 +1094,7 @@ function createView(root) {
       const profile = selectedProfile();
       if (!profile) return;
       openModal({title: '打开 SSH 工作区', size: 'md',
-        html: '<div class="form-stack"><label class="field"><span class="field-label">工作区名称</span><input class="input" id="ssh-ws-name" value="' + esc(profile.name || profile.host) + '" /></label><label class="field"><span class="field-label">远程工作目录</span><input class="input" id="ssh-ws-root" value="' + esc(state.tab === 'files' ? state.fsPath : '~') + '" placeholder="/home/user/project" /></label><p class="field-hint">文件、Python 控制台和智能体将在这个远程目录中工作。</p></div>',
+        html: '<div class="form-stack"><label class="field"><span class="field-label">工作区名称</span><input class="input" id="ssh-ws-name" value="' + esc(profile.name || profile.host) + '" /></label><label class="field"><span class="field-label">远程工作目录</span><input class="input" id="ssh-ws-root" value="' + esc(state.tab === 'files' ? state.fsPath : '~') + '" placeholder="/home/user/project" /></label><p class="field-hint">文件、控制台和任务都使用这个远程目录。</p></div>',
         actions: [{label: '取消', kind: 'ghost'}, {label: '验证并打开', kind: 'primary', onClick: async ({body}) => {
           try {
             const data = await api.workspaces.create({name: body.querySelector('#ssh-ws-name').value.trim() || profile.name,

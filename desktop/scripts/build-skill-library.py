@@ -230,3 +230,9 @@ if __name__ == "__main__":
     if archify.is_dir():
         subprocess.run([sys.executable, str(Path(__file__).with_name("import-archify.py")),
                         "--checkout", str(archify), "--output", str(args.output)], check=True)
+    emil = args.cache / "emil-skills-source"
+    if emil.is_dir():
+        subprocess.run([sys.executable, str(Path(__file__).with_name("import-emil-skills.py")),
+                        "--checkout", str(emil), "--output", str(args.output)], check=True)
+    subprocess.run([sys.executable, str(Path(__file__).with_name("import-public-data.py")),
+                    "--output", str(args.output)], check=True)

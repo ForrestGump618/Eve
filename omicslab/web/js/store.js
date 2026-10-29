@@ -1,10 +1,11 @@
 // Shell-level application state shared by the router, top bar and views.
 // Views never import app.js; they read/write this store and emit events via bus.js.
 
-import { emit } from './bus.js?v=1.2.0';
-import { getPref, setPref } from './util.js?v=1.2.0';
+import { emit } from './bus.js?v=1.3.0';
+import { getPref, setPref } from './util.js?v=1.3.0';
 
 export const ROUTES = [
+  {id:'dashboard',label:'研究总览',icon:'discovery',subtitle:'课题、运行、会话与待审建议'},
   {id:'evolution',label:'自我改进',icon:'discovery',subtitle:'Proteus 实验、回归与版本'},
   {id:'context',label:'上下文',icon:'memory',subtitle:'上下文组成、压缩与原文'},
   // Team collaboration is agent-autonomous and surfaced in the chat sidebar
@@ -37,7 +38,7 @@ export const ROUTES = [
 export const ROUTE_IDS = ROUTES.map((r) => r.id);
 
 export const state = {
-  route: 'workbench',
+  route: 'dashboard',
   routeParams: {},
   agents: [],
   agentId: getPref('agent', ''),
@@ -73,7 +74,7 @@ export function setState(patch) {
 /** Parse the route id out of a location hash (`#/files` -> `files`). */
 export function parseHash(hash = window.location.hash) {
   const raw = String(hash || '').replace(/^#\/?/, '').split('?')[0].trim();
-  const preferred = getPref('homeRoute', 'workbench');
+  const preferred = getPref('homeRoute', 'dashboard');
   if (raw === 'chat') return 'workbench';
   if (raw === 'connections') return 'settings';
   return ROUTE_IDS.includes(raw) ? raw : ROUTE_IDS.includes(preferred) ? preferred : 'workbench';
@@ -82,7 +83,7 @@ export function parseHash(hash = window.location.hash) {
 /** Navigate to a view by updating the hash (the router reacts to hashchange). */
 export function navigate(route, params = null) {
   const target = route === 'chat' ? 'workbench' : route === 'connections' ? 'settings' : ROUTE_IDS.includes(route) ? route : 'workbench';
-  if (params && typeof params === 'object') state.routeParams = { ...params };
+  state.routeParams = params && typeof params === 'object' ? { ...params } : {};
   const next = `#/${target}`;
   if (window.location.hash === next) {
     emit('route:request', { route: target, params });

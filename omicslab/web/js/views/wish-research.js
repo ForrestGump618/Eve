@@ -1,6 +1,6 @@
-import {closeAllModals,confirmDialog,openModal,toastError,toastSuccess} from '../ui.js?v=1.2.0';
-import {esc,escAttr,setPref} from '../util.js?v=1.2.0';
-import {navigate} from '../store.js?v=1.2.0';
+import {closeAllModals,confirmDialog,openModal,toastError,toastSuccess} from '../ui.js?v=1.3.0';
+import {esc,escAttr,setPref} from '../util.js?v=1.3.0';
+import {navigate} from '../store.js?v=1.3.0';
 
 const statusLabels={
  active:'进行中',blocked:'等待条件',awaiting_review:'等待用户复核',completed:'已人工结题',
@@ -9,7 +9,7 @@ const statusLabels={
 };
 const kindLabels={
  charter:'章程',scouting:'侦察',evidence_matrix:'证据',hypotheses:'假设',
- preregistration:'预注册',analysis:'分析',experiment_design:'实验',figures:'图表',review:'复核',
+ preregistration:'预注册',analysis:'分析',experiment_design:'实验',figures:'图表与证据',review:'复核',
 };
 const actionButton=(kind,label,id='',stage='',primary=false)=>
  `<button type="button" class="${primary?'btn btn-primary':'btn btn-ghost'} btn-sm" data-wish-action="${kind}" data-id="${escAttr(id)}" data-stage="${escAttr(stage)}">${esc(label)}</button>`;
@@ -36,7 +36,7 @@ export async function mountWishResearch(root,{request}){
  }
  function render(){
   root.innerHTML=`<section class="sw-card wish-hero">
-   <div class="wish-hero-copy"><span class="sw-overline">科研愿望</span><h2>说清课题，Eve 按证据链推进。</h2><p>从一句话开始建立持久项目。Eve 盘点数据与文献、提出可证伪假设、预注册分析、执行计算并规划验证；遇到阻塞或人工复核时停下。真实输入、代码、结果与图表都留在项目工作区。</p></div>
+   <div class="wish-hero-copy"><span class="sw-overline">科研愿望</span><h2>从课题目标到分析、图表与复核。</h2><p>盘点数据与文献，提出可证伪假设，预注册分析并执行计算。遇到阻塞或人工复核时暂停；输入、代码、结果与图表保留在项目工作区。</p></div>
    <div class="wish-hero-action">${actionButton('new','新建科研愿望','', '', true)}</div>
   </section>
   <div class="wish-layout">
@@ -63,23 +63,23 @@ export async function mountWishResearch(root,{request}){
   return `${blockers.length?blockerCard(blockers):''}
   <section class="sw-card wish-summary">
    <header><div><span class="sw-overline">${esc(kindLabels[wish.phase]||wish.phase)}</span><h2>${esc(wish.title)}</h2><p class="wish-question">${esc(wish.wish)}</p></div>${statusBadge(wish.status)}</header>
-   <div class="wish-next">${nextAgent?`<div><span>下一步</span><strong>${esc(nextAgent.label)}</strong><p>${esc(nextAgent.reason)} · 完成后 Eve 会按依赖继续，直到阻塞或需要你复核。</p><code>${esc(nextAgent.output)}</code></div>${actionButton('launch','让 Eve 连续推进',wish.id,nextAgent.stage,true)}`:nextUser?`<div><span>等待你</span><strong>${esc(nextUser.label)}</strong><p>证据链已齐，需要你核对局限与未完成项。</p></div>${actionButton('review','复核并结题',wish.id,'','')}`:`<div><span>当前状态</span><strong>${esc(statusLabels[wish.status]||wish.status)}</strong><p>${wish.status==='completed'?'此愿望已由用户复核结题。':'当前没有可执行节点；请查看阻塞项或进度。'}</p></div>`}</div>
+   <div class="wish-next">${nextAgent?`<div><span>下一步</span><strong>${esc(nextAgent.label)}</strong><p>${esc(nextAgent.reason)} · 遇到阻塞、审批或人工复核时暂停。</p><code>${esc(nextAgent.output)}</code></div>${actionButton('launch','继续执行下一阶段',wish.id,nextAgent.stage,true)}`:nextUser?`<div><span>等待你</span><strong>${esc(nextUser.label)}</strong><p>证据链已齐，需要你核对局限与未完成项。</p></div>${actionButton('review','复核并结题',wish.id,'','')}`:`<div><span>当前状态</span><strong>${esc(statusLabels[wish.status]||wish.status)}</strong><p>${wish.status==='completed'?'已完成人工复核并结题。':'当前没有可执行节点；请查看阻塞项或进度。'}</p></div>`}</div>
    <div class="sw-inline">${actionButton('charter','调整章程',wish.id)}${actionButton('refresh','刷新')}</div>
   </section>
-  <section class="sw-card wish-charter"><header><div><h3>成功画面</h3><p>先约定“什么算完成”，避免智能体用热闹的过程替代证据。</p></div><span class="wish-count">${wish.charter.success_criteria.length} 条判据</span></header>
+  <section class="sw-card wish-charter"><header><div><h3>完成标准</h3><p>用于判断课题何时可以进入人工复核。</p></div><span class="wish-count">${wish.charter.success_criteria.length} 条判据</span></header>
    <div class="wish-criteria">${wish.charter.success_criteria.map((item,index)=>`<div><span>${String(index+1).padStart(2,'0')}</span><p>${esc(item)}</p></div>`).join('')}</div>
    <div class="wish-boundary-grid"><div><h4>边界</h4>${wish.charter.boundaries.map(item=>`<p>${esc(item)}</p>`).join('')}</div><div><h4>停止条件</h4>${wish.charter.stop_conditions.map(item=>`<p>${esc(item)}</p>`).join('')}</div></div>
   </section>
-  <section class="sw-card wish-workspace"><header><div><h3>项目工作区</h3><p>分析、实验和图表都有固定位置；平台只记录真实文件哈希。</p></div><code>${esc(wish.workspace.base)}</code></header>
+  <section class="sw-card wish-workspace"><header><div><h3>项目工作区</h3><p>分析、实验与图表按目录归档，并记录真实文件哈希。</p></div><code>${esc(wish.workspace.base)}</code></header>
    <div class="wish-workspace-grid">${wish.workspace.directories.map(directory=>`<div><span>${esc(directory.split('/').pop())}</span><code>${esc(directory)}</code></div>`).join('')}</div>
   </section>
   <section class="wish-pipeline" aria-label="研究节点">${wish.stages.map(stageCard).join('')}</section>
-  <section class="sw-card wish-activity"><header><div><h3>证据与失败记录</h3><p>阴性结果、阻塞和失败不会被“成功叙事”删除。</p></div><span class="wish-count">${wish.stages.reduce((count,stage)=>count+(stage.evidence?.length||0),0)} 个产物</span></header>
+  <section class="sw-card wish-activity"><header><div><h3>证据与失败记录</h3><p>保留阴性结果、阻塞和失败记录。</p></div><span class="wish-count">${wish.stages.reduce((count,stage)=>count+(stage.evidence?.length||0),0)} 个产物</span></header>
    ${wish.stages.filter(stage=>stage.summary).slice().reverse().map(stage=>`<article><span>${esc(stage.label)}</span><p>${esc(stage.summary)}</p><small>${stage.evidence?.length||0} 个产物${stage.skipped?' · 已说明不适用':''}</small></article>`).join('')||'<p class="sw-muted">尚未登记节点结论。</p>'}
   </section>`;
  }
  function blockerCard(blockers){
-  return `<section class="sw-card wish-blocker"><div><span class="sw-overline">BLOCKED</span><h3>Eve 需要一个不可推断的条件</h3>${blockers.map(item=>`<p><strong>${esc(item.reason)}</strong><br>${esc(item.needed)}</p><button type="button" class="btn btn-ghost btn-sm" data-wish-action="resolve-block" data-id="${escAttr(selected.id)}" data-stage="${escAttr(item.id)}">条件已补齐</button>`).join('')}</div></section>`;
+  return `<section class="sw-card wish-blocker"><div><span class="sw-overline">BLOCKED</span><h3>需要补充条件</h3>${blockers.map(item=>`<p><strong>${esc(item.reason)}</strong><br>${esc(item.needed)}</p><button type="button" class="btn btn-ghost btn-sm" data-wish-action="resolve-block" data-id="${escAttr(selected.id)}" data-stage="${escAttr(item.id)}">条件已补齐</button>`).join('')}</div></section>`;
  }
  function stageCard(stage,index){
   const evidence=stage.evidence||[];
@@ -94,13 +94,13 @@ export async function mountWishResearch(root,{request}){
   openModal({title,size:'lg',html,actions:[
    {label:'取消'},
    {label,kind:'primary',onClick:async ({body})=>{
-    try{await submit(body);closeAllModals();await reload();toastSuccess('愿望项目已更新');return true;}
+    try{await submit(body);closeAllModals();await reload();toastSuccess('课题已更新');return true;}
     catch(error){toastError(error.message);return false;}
    }},
   ]});
  }
  function startForm(){
-  form('新建科研愿望',area('你希望 Eve 帮你完成什么？','wish-text','','用自然语言描述目标、困惑或想验证的课题。',6)+
+  form('新建科研愿望',area('课题目标','wish-text','','描述目标、已知条件或待验证的问题。',6)+
    area('你认为什么算完成？（每行一条，可选）','wish-success','','例如：找到可复现的候选细胞状态，并给出独立验证实验',3)+
    area('不能越过的边界（每行一条，可选）','wish-boundaries','','例如：只使用公开数据；不发送未脱敏样本信息',3),
   async body=>{
@@ -108,10 +108,10 @@ export async function mountWishResearch(root,{request}){
    const success=lines(body.querySelector('#wish-success').value);if(success.length)data.success_criteria=success;
    const boundaries=lines(body.querySelector('#wish-boundaries').value);if(boundaries.length)data.boundaries=boundaries;
    selected=await request('/wishes','POST',data);
-  },'建立愿望项目');
+  },'创建课题');
  }
  function charterForm(wish){
-  form('调整愿望章程',field('课题标题','wish-title',wish.title)+area('可验证目标','wish-goal',wish.charter.goal,'',5)+
+  form('调整课题章程',field('课题标题','wish-title',wish.title)+area('可验证目标','wish-goal',wish.charter.goal,'',5)+
    area('成功判据（每行一条）','wish-success',wish.charter.success_criteria.join('\n'),'',4)+
    area('边界（每行一条）','wish-boundaries',wish.charter.boundaries.join('\n'),'',3)+
    area('未知项（每行一条）','wish-unknowns',wish.charter.unknowns.join('\n'),'',3)+
@@ -156,12 +156,12 @@ export async function mountWishResearch(root,{request}){
    if(kind==='review')return reviewForm(selected);
    if(kind==='resolve-block')return resolveBlockerForm(selected,stage);
    if(kind==='launch'){
-    if(!await confirmDialog({title:'让 Eve 连续推进研究',message:'Eve 会沿当前依赖继续执行，真实读取、计算并登记证据；遇到阻塞、审批或人工复核时停止。',confirmText:'开始'}))return;
+    if(!await confirmDialog({title:'继续执行下一阶段',message:'将运行当前节点，并在遇到阻塞、审批或人工复核时停止。',confirmText:'继续'}))return;
     target.disabled=true;
     try{
      const result=await request(`/wishes/${encodeURIComponent(id)}/launch`,'POST',{stage,advance:true});
      setPref('activeConversationId',result.session_id);
-     toastSuccess('任务已交给 Eve，可在对话中跟进');
+     toastSuccess('任务已创建，可在对话中跟进');
      navigate('workbench');
     }finally{target.disabled=false;}
    }

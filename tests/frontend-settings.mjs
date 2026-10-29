@@ -67,6 +67,10 @@ test('model parameters and permission form save real structured values', {timeou
   await page.waitForTimeout(250);
   const cap = page.locator('[data-cap-model="research-model"]');
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme), 'light');
+  await page.waitForFunction(() => {
+    const input = document.querySelector('[data-cap-model="research-model"] [data-cap-field="temperature"]');
+    return input && getComputedStyle(input).backgroundColor === 'rgb(250, 250, 250)';
+  });
   assert.equal(await cap.locator('[data-cap-field="temperature"]').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(250, 250, 250)');
   assert.equal(await cap.locator('[data-cap-field="temperature"]').inputValue(), '0.7');
   assert.equal(await cap.locator('[data-cap-field="context_window"]').inputValue(), '64000');

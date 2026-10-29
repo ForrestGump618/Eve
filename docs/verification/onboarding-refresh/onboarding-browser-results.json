@@ -1,0 +1,53 @@
+{
+  "browser": "156.0.4314.50",
+  "checks": [
+    "single primary action",
+    "wrapped title and purpose typography",
+    "desktop and mobile containment",
+    "focus placement",
+    "dark mode contrast and solid accent",
+    "opt-out unchecked keeps next prompt",
+    "opt-out checked suppresses next prompt"
+  ],
+  "viewports": [
+    "1440x900",
+    "390x844"
+  ],
+  "desktop": {
+    "modalWidth": 464,
+    "modalLeft": 488,
+    "modalRight": 952,
+    "titleWhiteSpace": "normal",
+    "titleOverflow": "visible",
+    "titleFits": true,
+    "purposeFontSize": 15,
+    "purposeLineHeight": 24.75,
+    "purposeLines": 1,
+    "purposeFits": true,
+    "buttonHeight": 40,
+    "optoutFocused": true,
+    "viewportWidth": 1440,
+    "pageOverflow": false
+  },
+  "mobile": {
+    "modalLeft": 12,
+    "modalRight": 378,
+    "modalWidth": 366,
+    "titleFits": true,
+    "purposeFits": true,
+    "optoutFits": true,
+    "buttonHeight": 40,
+    "viewportWidth": 390,
+    "overflow": false
+  },
+  "dark": {
+    "surface": "rgb(38, 38, 38)",
+    "buttonBackground": "rgb(142, 168, 255)",
+    "buttonImage": "none",
+    "buttonColor": "rgb(23, 27, 33)",
+    "purposeColor": "rgb(192, 192, 192)",
+    "buttonContrast": 7.5670399849242,
+    "purposeContrast": 8.317894025889624
+  },
+  "errors": []
+}

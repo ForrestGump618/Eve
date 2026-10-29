@@ -1,9 +1,9 @@
 // Memory view: long-lived project notes stored as slugged markdown documents.
 
-import { icon } from '../icons.js?v=1.2.0';
-import { renderMarkdown } from '../markdown.js?v=1.2.0';
-import { esc, relTime, fmtBytes } from '../util.js?v=1.2.0';
-import { api, errorMessage } from '../api.js?v=1.2.0';
+import { icon } from '../icons.js?v=1.3.0';
+import { renderMarkdown } from '../markdown.js?v=1.3.0';
+import { esc, relTime, fmtBytes } from '../util.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
 import {
   toastSuccess,
   toastError,
@@ -11,7 +11,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.2.0';
+} from '../ui.js?v=1.3.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();
@@ -37,7 +37,7 @@ export async function mount(root, ctx = {}) {
       el.list.innerHTML = emptyStateHtml({
         iconName: 'memory',
         title: '还没有记忆',
-        hint: '把项目约定、数据字典或分析结论写进记忆，智能体在后续对话中可以使用。',
+        hint: '保存项目约定、数据字典或分析结论，后续对话可检索。',
         actionLabel: '新建记忆',
         actionId: 'memory-new-inline',
       });

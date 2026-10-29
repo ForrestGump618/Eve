@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from test_suwen_platform import client_app, p  # shared real platform fixture
+from omicslab import __version__
 
 
 WISH = "找出公开数据中与耐药相关的细胞状态，并设计能独立验证它的实验。"
@@ -308,3 +309,54 @@ async def test_launch_removes_conversation_when_run_submission_fails(client_app,
     saved = p.store.get("research_wish", wish["id"], "ws_main")
     scouting = next(stage for stage in saved["stages"] if stage["id"] == "scouting")
     assert scouting["status"] == "pending"
+
+
+@pytest.mark.asyncio
+async def test_quest_launch_removes_placeholder_when_submission_fails(client_app, p):
+    quest = p.research.create("ws_main", {
+        "title": "Submission failure regression",
+        "question": "Can the launch path avoid orphan conversations?",
+        "dataset": "fixture",
+        "protocol": "deterministic",
+        "metrics": [{"name": "score", "direction": "max"}],
+    })
+    deleted = []
+
+    def create_conversation(**_):
+        return SimpleNamespace(id="quest-submit-failed", meta={}, messages=[], agent="lead")
+
+    async def submit(**_):
+        raise RuntimeError("run engine unavailable")
+
+    p.state.store = SimpleNamespace(
+        create=create_conversation,
+        save=lambda conversation: conversation,
+        delete=lambda session_id: deleted.append(session_id),
+    )
+    p.state.default_agent_info = lambda: {"agent_id": "lead"}
+    p.state.runs = SimpleNamespace(submit=submit)
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=client_app, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        response = await client.post(
+            f"/api/platform/quests/{quest['id']}/launch?scope=ws_main",
+            json={"stage": "scout"},
+        )
+
+    assert response.status_code == 503
+    assert deleted == ["quest-submit-failed"]
+    saved = p.store.get("research_quest", quest["id"], "ws_main")
+    assert next(stage for stage in saved["stages"] if stage["id"] == "scout")["status"] == "pending"
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_reports_the_running_package_version(client_app):
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=client_app),
+        base_url="http://test",
+    ) as client:
+        response = await client.get("/api/platform/bootstrap")
+    assert response.status_code == 200
+    assert response.json()["version"] == __version__

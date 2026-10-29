@@ -1,18 +1,18 @@
 /** Eve platform: every control talks to a real, scoped service. */
-import { api, errorMessage } from '../api.js?v=1.2.0';
-import { getState, navigate } from '../store.js?v=1.2.0';
-import { esc, escAttr, getPref, setPref } from '../util.js?v=1.2.0';
-import { icon } from '../icons.js?v=1.2.0';
-import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.2.0';
-import { applyAppearance } from '../suwen.js?v=1.2.0';
-import { renderChannels } from './channel-setup.js?v=1.2.0';
-import {mountResearchWorkspace} from './research-workspace.js?v=1.2.0';
-import {mountWishResearch} from './wish-research.js?v=1.2.0';
-import {mountScienceWorkbench} from './science-workbench.js?v=1.2.0';
-import {mountProviderModels} from '../provider-models.js?v=1.2.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
+import { getState, navigate } from '../store.js?v=1.3.0';
+import { esc, escAttr, getPref, setPref } from '../util.js?v=1.3.0';
+import { icon } from '../icons.js?v=1.3.0';
+import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.3.0';
+import { applyAppearance } from '../suwen.js?v=1.3.0';
+import { renderChannels } from './channel-setup.js?v=1.3.0';
+import {mountResearchWorkspace} from './research-workspace.js?v=1.3.0';
+import {mountWishResearch} from './wish-research.js?v=1.3.0';
+import {mountScienceWorkbench} from './science-workbench.js?v=1.3.0';
+import {mountProviderModels} from '../provider-models.js?v=1.3.0';
 
 const GROUPS={
- settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['advanced','版本与迁移','settings']],
+ settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['dreaming','做梦与经验整理','memory'],['advanced','版本与迁移','settings']],
  extensions:[['mcp','MCP 服务','layers'],['skill','Skills','skills'],['agent','Agent 角色','brain'],['channel','消息渠道','chat']],
  tasks2:[['tasks','持续任务','jobs'],['schedule','自动化','clock'],['debate','多 Agent 讨论','chat']],
  knowledge:[['knowledge','记忆与知识库','memory'],['memory','检索设置','settings']],
@@ -35,7 +35,10 @@ export async function mount(root){
  const listen=(type,handler)=>root.addEventListener(type,handler,{signal:events.signal});
  const route=GROUPS[getState().route]?getState().route:'settings';
  const groups=GROUPS[route];const [title,subtitle]=TITLES[route];
- let section=groups[0][0],disposed=false,timer=0,bootstrap,items=[],flow={name:'新工作流',nodes:[]},channelView=null,skillPage=0,skillQuery='';
+ const routeParams=getState().routeParams||{};
+ const requestedSection=groups.some(([key])=>key===routeParams.section)?routeParams.section:groups[0][0];
+ let section=requestedSection,dreamRequestedId=String(routeParams.candidateId||''),dreamStatus=null;
+ let disposed=false,timer=0,bootstrap,items=[],flow={name:'新工作流',nodes:[]},channelView=null,skillPage=0,skillQuery='';
  const scope=()=>getState().workspaceId||'ws_main';
  const request=(path,method='GET',body)=>api.request(`/api/platform${path}${path.includes('?')?'&':'?'}scope=${encodeURIComponent(scope())}`,{method,...(body===undefined?{}:{body}),timeout:180000});
  root.innerHTML=`<div class="sw-page"><header class="sw-page-head"><div><div class="sw-eyebrow">Eve</div><h1>${esc(title)}</h1></div><span class="sw-scope">${icon('folder',{size:14})}${esc(getState().workspace?.name||scope())}</span></header><div class="sw-center"><aside class="sw-secondary"><input class="input" id="sw-search" placeholder="搜索设置与能力…" aria-label="搜索设置与能力"/><nav>${groups.map(([key,label,ico])=>`<button class="sw-section ${key===section?'is-active':''}" data-section="${key}">${icon(ico,{size:16})}<span>${label}</span></button>`).join('')}</nav></aside><main class="sw-content" id="sw-content">${spinnerHtml('正在连接平台服务…')}</main></div></div>`;
@@ -54,6 +57,7 @@ export async function mount(root){
    if(section==='models')await models();
    else if(['appearance','permissions','budget','vision','memory'].includes(section))await settings(section);
    else if(section==='advanced')await advanced();
+   else if(section==='dreaming')await dreaming();
    else if(section==='channel')channelView=await renderChannels(content,{request,scope,reload:load});
    else if(section==='wishes')channelView=await mountWishResearch(content,{request});
    else if(section==='science')channelView=await mountScienceWorkbench(content,{request});
@@ -157,7 +161,7 @@ export async function mount(root){
  }
  async function settings(key){
   const c=await config(key);let html='';
-  if(key==='appearance')html=`<div class="sw-form-grid">${select('主题','theme',[['system','跟随系统'],['light','浅色'],['dark','深色']],c.theme)}${select('字体','font',[['system','系统字体'],['sans','无衬线'],['mono','等宽']],c.font)}${field('字号','font-size',c.font_size,'','number')}${field('强调色','accent',c.accent,'','color')}${select('界面密度','density',[['comfortable','舒适'],['compact','紧凑']],c.density)}${field('圆角','radius',c.radius,'','number')}${select('工作模式','ui-mode',[['research','科研'],['minimal','极简'],['developer','开发者']],c.mode)}${select('默认首页','home',[['workbench','工作台'],['tasks2','任务中心'],['research','科研证据'],['knowledge','知识与记忆']],c.home)}${field('助手名称','agent-name',c.agent_name)}${field('助手头像（单个字符或 Emoji）','avatar',c.avatar)}${field('命令面板快捷键（Ctrl / ⌘ + 字母）','shortcut-palette',c.shortcuts?.palette||'k')}</div><p class="sw-muted">面板宽度和隐藏状态分别保存到当前工作区，可从工作台“布局”调整。</p>${button('reset-layout','恢复当前工作区布局')}`;
+  if(key==='appearance')html=`<div class="sw-form-grid">${select('主题','theme',[['system','跟随系统'],['light','浅色'],['dark','深色']],c.theme)}${select('字体','font',[['system','系统字体'],['sans','无衬线'],['mono','等宽']],c.font)}${field('字号','font-size',c.font_size,'','number')}${field('强调色','accent',c.accent,'','color')}${select('界面密度','density',[['comfortable','舒适'],['compact','紧凑']],c.density)}${field('圆角','radius',c.radius,'','number')}${select('工作模式','ui-mode',[['research','科研'],['minimal','极简'],['developer','开发者']],c.mode)}${select('默认首页','home',[['dashboard','研究总览'],['workbench','工作台'],['tasks2','任务中心'],['research','科研证据'],['knowledge','知识与记忆']],c.home)}${field('助手名称','agent-name',c.agent_name)}${field('助手头像（单个字符或 Emoji）','avatar',c.avatar)}${field('命令面板快捷键（Ctrl / ⌘ + 字母）','shortcut-palette',c.shortcuts?.palette||'k')}</div><p class="sw-muted">面板宽度和隐藏状态分别保存到当前工作区，可从工作台“布局”调整。</p>${button('reset-layout','恢复当前工作区布局')}`;
   if(key==='permissions'){const names={files:'文件系统',shell:'Shell',network:'外部网络',browser:'浏览器',messages:'消息发送',mcp:'MCP',memory:'记忆',skills:'技能',agents:'Agent 协作',python:'Python',system:'环境信息',notebook:'Notebook',jobs:'后台进程'};const modeOptions=[['allow','允许执行'],['ask','需确认'],['read_only','只读'],['deny','禁止使用']];html=`<div class="sw-notice">默认全部开放（新安装即启用）。Python 与 Shell 仍有系统级能力，目录隔离不等于安全沙箱；需要更严格环境时可选择断网 Docker 隔离执行。</div><div class="sw-permission-grid"><div class="permissions-bulk">${button('permissions-allow-all','一键全部允许')}</div>${Object.entries(c).filter(([k])=>k!=='tools').map(([k,v])=>`<label class="sw-permission-card"><span>${esc(names[k]||k)}</span><select class="input" id="permission-${escAttr(k)}">${modeOptions.map(([value,label])=>`<option value="${value}" ${v===value?'selected':''}>${label}</option>`).join('')}</select></label>`).join('')}</div><details class="sw-card"><summary>逐工具权限覆盖</summary><div class="permission-tools" id="permission-tools">${Object.entries(c.tools||{}).map(([name,mode])=>`<div class="sw-tool-permission" data-tool-permission="${escAttr(name)}"><code>${esc(name)}</code><select class="input">${modeOptions.map(([value,label])=>`<option value="${value}" ${mode===value?'selected':''}>${label}</option>`).join('')}</select><button type="button" class="btn btn-ghost btn-sm" data-tool-remove>移除</button></div>`).join('')||(Object.keys(c.tools||{}).length?'':'<p class="sw-muted">没有工具级覆盖。</p>')}</div><div class="sw-inline">${button('permissions-add-tool','添加工具覆盖')}</div></details>`;}
   if(key==='budget')html=`<div class="sw-notice">按工作区设置并发数。运行时保留取消、超时与 Token 预算，停止原因可在运行记录中查看。</div><div class="sw-form-grid">${field('任务并发数','budget-concurrency',c.concurrency,'','number')}</div><details><summary>费用统计价格（可选，不影响自动停止策略）</summary>${area('模型名 → 每百万输入 / 输出 Token 价格','budget-prices',c.prices)}</details>`;
   if(key==='vision')html=`<label class="sw-check"><input type="checkbox" id="vision-enabled" ${c.enabled?'checked':''}/>启用独立视觉复核</label><label class="sw-check"><input type="checkbox" id="vision-auto" ${c.auto_review?'checked':''}/>图表生成后自动复核</label><div class="sw-form-grid">${field('视觉模型','vision-model',c.model)}${field('API Base URL','vision-base',c.api_base)}${field('加密凭据引用','vision-ref',c.credential_ref,'例如 vision')}${field('最多修正轮次','vision-repairs',c.max_repairs,'','number')}</div>${button('credential','保存视觉 API Key')}<p class="sw-muted">视觉模型可检查布局与文字；不能仅凭图片确认科学事实。缺少原始数据会标记人工复核。</p>`;
@@ -168,6 +172,39 @@ export async function mount(root){
    queueMicrotask(()=>{const node=content.querySelector('#desktop-close-action');if(node){node.value=closeAction;node.addEventListener('change',async()=>{try{await window.suwenDesktop.setCloseAction(node.value);toastSuccess('关闭方式已保存');}catch(error){toastError(errorMessage(error));}});}});
   }
   content.innerHTML=`<section class="sw-card"><h2>${esc(groups.find(g=>g[0]===key)?.[1]||key)}</h2>${html}<div class="sw-form-footer">${button('save-'+key,'保存并应用','btn-primary')}${button('reset-config','恢复默认值')}</div></section>`;
+ }
+ async function dreaming(){
+  dreamStatus=await request('/dreaming');
+  const enabled=Boolean(dreamStatus.enabled);
+  const candidates=Array.isArray(dreamStatus.candidates)?dreamStatus.candidates:[];
+  const runs=Array.isArray(dreamStatus.runs)?dreamStatus.runs:[];
+  const requested=dreamRequestedId;
+  dreamRequestedId='';
+  const kindNames={memory:'记忆',skill:'技能草稿',follow_up:'后续课题',workflow:'流程草稿',correction:'修正'};
+  const runStatus={completed:'已完成',failed:'失败',running:'进行中'};
+  const focusNames={all:'全部资料',sessions:'会话',memory:'记忆',projects:'科研项目'};
+  const cards=candidates.map(candidate=>{
+   const evidence=(candidate.evidence||[]).slice(0,3);
+   const confidence=Math.round(Math.max(0,Math.min(1,Number(candidate.confidence)||0))*100);
+   return `<article class="sw-card sw-dream-candidate ${candidate.id===requested?'is-focus':''}" data-candidate-id="${escAttr(candidate.id)}">
+    <header class="sw-dream-candidate-head"><div><span class="sw-overline">${esc(kindNames[candidate.kind]||candidate.kind||'建议')}</span><h3>${esc(candidate.title||'待复核建议')}</h3></div><span class="sw-badge">${confidence}% 置信</span></header>
+    <p>${esc(candidate.summary||'')}</p>
+    <details><summary>依据与建议步骤</summary><div class="sw-dream-details"><p>${esc(candidate.rationale||'')}</p>${evidence.length?`<ul>${evidence.map(item=>`<li>${esc(item.label||item.ref||'当前工作区来源')}</li>`).join('')}</ul>`:''}${(candidate.suggested_steps||[]).length?`<ol>${candidate.suggested_steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol>`:''}</div></details>
+    <div class="sw-inline">${button('dream-accept','确认采纳','btn-primary',candidate.id)}${button('dream-reject','忽略','',candidate.id)}</div>
+   </article>`;
+  }).join('');
+  const runRows=runs.map(run=>`<div class="sw-dream-run"><span class="sw-badge status-${escAttr(run.status||'')}">${esc(runStatus[run.status]||run.status||'记录')}</span><span>${esc(focusNames[run.focus]||run.focus||'全部资料')}</span><small>${esc((run.candidate_ids||[]).length)} 条候选 · ${run.finished_at?new Date(run.finished_at*1000).toLocaleString():'进行中'}</small></div>`).join('');
+  content.innerHTML=`<section class="sw-card sw-dream-hero">
+   <div><span class="sw-kicker">经验整理</span><h2>从历史记录提取可复用经验</h2><p>整理当前工作区的会话、记忆和科研项目，查找重复模式。只生成待确认建议，不自动改动技能、记忆或课题。</p></div>
+   <div class="sw-dream-controls">
+    <label class="sw-check"><input type="checkbox" id="dream-enabled" ${enabled?'checked':''}/>允许在当前工作区使用经验整理</label>
+    <label class="sw-field"><span>本次整理范围</span><select class="input" id="dream-focus"><option value="all">全部资料</option><option value="sessions">会话</option><option value="memory">记忆</option><option value="projects">科研项目</option></select></label>
+    <div class="sw-inline">${button('dream-save',enabled?'保存开关':'保存并启用','btn-primary')}${button('dream-run','运行经验整理',enabled?'':'')}</div>
+   </div>
+  </section>
+  <section class="sw-dream-section"><header><div><h2>待审建议</h2><p>${dreamStatus.pending_count?`${dreamStatus.pending_count} 条建议尚未影响记忆、技能或课题。`:'没有待审建议。'}</p></div>${button('reload','刷新')}</header><div class="sw-stack">${cards||blank('暂无建议','开启后，从当前工作区的历史记录中整理重复模式。')}</div></section>
+  <details class="sw-card sw-dream-history"><summary>最近的整理记录</summary>${runRows||'<p class="sw-muted">还没有整理记录。</p>'}</details>`;
+  if(requested)queueMicrotask(()=>content.querySelector(`[data-candidate-id="${CSS.escape(requested)}"]`)?.scrollIntoView({block:'center',behavior:'smooth'}));
  }
  async function advanced(){
   content.innerHTML=`<section class="sw-card"><h2>配置与迁移</h2><p>Schema V2 与旧版数据目录并存。配置修改保留版本，升级前已备份旧设置与任务数据库。</p><div class="sw-inline">${button('export-config','导出脱敏配置','btn-primary')}${button('import-config','导入配置')}${button('backup','备份平台数据库')}${button('connections','旧版连接设置')}</div><input type="file" id="config-file" accept=".json" hidden/><details><summary>查看配置历史与回滚</summary>${select('设置分类','history-section',Object.keys(bootstrap.settings).map(k=>[k,k]),'models')}${button('config-history','载入历史版本')}<div id="sw-history"></div></details><details><summary>迁移记录</summary>${code(bootstrap.migration)}</details></section>`;
@@ -268,6 +305,23 @@ export async function mount(root){
    else if(action==='save-budget')await save('budget',{concurrency:Number(val('budget-concurrency')),prices:json('budget-prices')});
    else if(action==='save-vision')await save('vision',{enabled:checked('vision-enabled'),auto_review:checked('vision-auto'),model:val('vision-model'),api_base:val('vision-base'),credential_ref:val('vision-ref'),max_repairs:Number(val('vision-repairs'))});
    else if(action==='save-memory'){if(val('memory-embedding')==='api'&&!await confirmDialog({title:'启用外部嵌入服务',message:'检索和索引时，会向你配置的 API 发送当前工作区的文本。确认已完成敏感数据检查。',confirmText:'确认启用'}))return;await save('memory',{enabled:checked('memory-enabled'),auto_capture:checked('memory-auto'),embedding:val('memory-embedding'),embedding_url:val('memory-url'),embedding_model:val('memory-model'),top_k:Number(val('memory-top')),retention_days:Number(val('memory-retention'))});}
+   else if(action==='dream-save'){const enabled=checked('dream-enabled');await request('/dreaming/settings','PATCH',{enabled});toastSuccess(enabled?'经验整理已开启':'经验整理已关闭');await load();}
+   else if(action==='dream-run'){
+    if(!checked('dream-enabled'))throw new Error('请先保存并启用经验整理');
+    if(!await confirmDialog({title:'开始整理历史记录',message:'将读取当前工作区脱敏后的会话、记忆与科研项目，只生成待确认建议；不会自动写入或启动任务。',confirmText:'开始整理'}))return;
+    const result=await request('/dreaming/run','POST',{focus:val('dream-focus')});
+    if(!result.ok)toastWarn(result.run?.error||'经验整理未完成，请检查模型连接');else toastSuccess(result.run?.summary||'经验整理完成，建议等待确认');
+    await load();
+   }
+   else if(action==='dream-accept'){
+    const candidate=(dreamStatus?.candidates||[]).find(row=>row.id===id);
+    const effects={memory:'写入当前工作区的长期记忆',correction:'写入一条可检索的修正记录',skill:'生成一个默认停用、尚未测试的技能草稿',follow_up:'创建一个尚未启动的科研愿望',workflow:'生成一个尚未执行的流程草稿'};
+    if(!await confirmDialog({title:'采纳这条经验建议',message:`${effects[candidate?.kind]||'生成一条待继续处理的草稿'}。此操作不会自动运行技能、命令或科研任务。`,confirmText:'确认采纳'}))return;
+    await request(`/dreaming/candidates/${encodeURIComponent(id)}/accept`,'POST',{confirmed:true,note:'用户从设置页确认采纳'});
+    toastSuccess('建议已采纳；相关能力仍按各自的安全边界保持停用或未启动');
+    await load();
+   }
+   else if(action==='dream-reject'){const reason=await promptDialog({title:'忽略这条建议',message:'可以记录忽略原因，便于以后减少类似建议。',placeholder:'可选'});if(reason===null)return;await request(`/dreaming/candidates/${encodeURIComponent(id)}/reject`,'POST',{reason:String(reason||'')});toastSuccess('建议已忽略');await load();}
    else if(action==='reset-config'){if(await confirmDialog({title:'恢复默认设置',message:'将当前分类恢复默认值，修改历史仍会保留。'})){await request('/config/'+section+'/reset','POST');await load();}}
    else if(action==='credential'||action==='embedding-key')modalForm('加密保存凭据',field('凭据名称','vault-id',action==='embedding-key'?'embedding':'vision')+field('API Key / Token / 完整 Authorization 值','vault-value','','','password')+'<p class="sw-muted">Windows 使用当前账户的 DPAPI 加密，不写入普通配置与日志。</p>',async body=>{await request('/credentials/'+encodeURIComponent(modalValue(body,'vault-id')),'POST',{value:modalValue(body,'vault-value'),persist:true});toastSuccess('凭据已加密保存');});
    else if(action==='reembed'){const result=await request('/knowledge/reembed','POST',{});toastSuccess(`已更新 ${result.updated} 条索引`);}

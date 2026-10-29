@@ -2,16 +2,56 @@
 import json
 import re
 import secrets
+from datetime import datetime, time as dt_time, timedelta
 
 from fastapi import APIRouter,Request,HTTPException,UploadFile
 from fastapi.responses import JSONResponse
 
+from .. import __version__
 from ..suwen.configuration import DEFAULTS
 from ..suwen.extensions import SCIENTIFIC
 from ..suwen.store import uid,redact,Conflict
 from ..suwen.tasks import validate_workflow
 
 router=APIRouter(prefix='/api/platform',tags=['Suwen platform'])
+
+
+def _session_has_runs(state,session_id):
+    """Return true when submission produced a durable run before raising."""
+    events=getattr(state,'events',None)
+    list_runs=getattr(events,'list_runs',None)
+    if callable(list_runs):
+        try:
+            return bool(list_runs(session_id=session_id,limit=1))
+        except (AttributeError,KeyError,TypeError):
+            pass
+    active=getattr(events,'active_run_for_session',None)
+    if callable(active):
+        try:
+            return bool(active(session_id))
+        except (AttributeError,KeyError,TypeError):
+            pass
+    return False
+
+
+def _discard_placeholder(state,conversation):
+    """Remove an empty conversation only when no durable run can reference it."""
+    if _session_has_runs(state,conversation.id):
+        return False
+    try:
+        state.store.delete(conversation.id)
+        return True
+    except Exception:
+        return False
+
+
+async def _cancel_after_state_error(state,run_id):
+    if not run_id:
+        return
+    try:
+        await state.runs.cancel(run_id,'科研项目状态更新失败，已取消未登记运行')
+    except Exception:
+        pass
 
 
 @router.get('/file-changes')
@@ -62,13 +102,18 @@ async def science_launch(request:Request,scope:str='ws_main'):
     from ..suwen.science_workbench import task_prompt
     try:
         _,skills=await desktop_skills(p)
-        flow,prompt=task_prompt(data.get('lane'),data.get('goal'),data.get('inputs',''),skills)
+        goal=data.get('goal')
+        flow,prompt=task_prompt(data.get('lane'),goal,data.get('inputs',''),skills)
         conversation=p.state.store.create(agent=p.state.default_agent_info()['agent_id'],
-            title=f"{flow['label']} · {data['goal'][:60]}")
+            title=f"{flow['label']} · {str(goal).strip()[:60]}")
         from .chat import _workspace_binding
         _workspace_binding(p.state,conversation,scope)
-        result=await p.state.runs.submit(session_id=conversation.id,message=prompt,
-            workspace_id=scope,conversation=conversation,permission_mode='ask')
+        try:
+            result=await p.state.runs.submit(session_id=conversation.id,message=prompt,
+                workspace_id=scope,conversation=conversation,permission_mode='ask')
+        except Exception as exc:
+            _discard_placeholder(p.state,conversation)
+            raise HTTPException(503,'任务提交失败，请检查模型、工作区与运行引擎状态') from exc
         return {'session_id':conversation.id,'run':result.get('run') or {}}
     except ValueError as exc:raise HTTPException(422,str(exc)) from exc
 
@@ -104,11 +149,19 @@ async def quest_launch(request:Request,id:str,scope:str='ws_main'):
             conversation=p.state.store.create(agent=p.state.default_agent_info()['agent_id'],title=f"Eve · {quest['title'][:60]} · {stage['label']}")
             from .chat import _workspace_binding
             _workspace_binding(p.state,conversation,scope)
-            result=await p.state.runs.submit(session_id=conversation.id,message=prompt,workspace_id=scope,
-                conversation=conversation,permission_mode='ask')
+            try:
+                result=await p.state.runs.submit(session_id=conversation.id,message=prompt,workspace_id=scope,
+                    conversation=conversation,permission_mode='ask')
+            except Exception as exc:
+                _discard_placeholder(p.state,conversation)
+                raise HTTPException(503,'任务提交失败，请检查模型、工作区与运行引擎状态') from exc
             run=result.get('run') or {}
             stage.update(status='running',run_id=run.get('run_id'),session_id=conversation.id)
-            p.store.put('research_quest',id,quest,scope,expected=quest['revision'])
+            try:
+                p.store.put('research_quest',id,quest,scope,expected=quest['revision'])
+            except Exception as exc:
+                await _cancel_after_state_error(p.state,run.get('run_id'))
+                raise HTTPException(409,'课题状态已变化，任务已取消；请刷新后重新启动') from exc
             return {'quest_id':id,'run':run,'session_id':conversation.id}
     except ValueError as exc:raise HTTPException(422,str(exc)) from exc
 
@@ -181,10 +234,7 @@ async def wish_launch(request:Request,id:str,scope:str='ws_main'):
                 # Validation happens before creation, but the durable engine can
                 # still reject a submission. Do not leave an empty conversation
                 # in the sidebar when no run was created.
-                try:
-                    p.state.store.delete(conversation.id)
-                except Exception:
-                    pass
+                _discard_placeholder(p.state,conversation)
                 raise HTTPException(503,'任务提交失败，请检查模型、工作区与运行引擎状态') from exc
             run=result.get('run') or {}
             # launch_target reconciled a stale failed run to "failed". Use the
@@ -194,12 +244,357 @@ async def wish_launch(request:Request,id:str,scope:str='ws_main'):
             fresh=p.wishes._reconcile(p.store.get('research_wish',id,scope))
             stage=next(s for s in fresh['stages'] if s['id']==stage_id)
             if stage['status'] in {'recorded','running'}:
-                raise ValueError('节点状态已变化，未启动重复执行')
+                await _cancel_after_state_error(p.state,run.get('run_id'))
+                raise ValueError('节点状态已变化，重复任务已取消')
             stage.update(status='running',run_id=run.get('run_id'),session_id=conversation.id)
-            p.store.put('research_wish',id,fresh,scope,expected=fresh['revision'])
+            try:
+                p.store.put('research_wish',id,fresh,scope,expected=fresh['revision'])
+            except Exception as exc:
+                await _cancel_after_state_error(p.state,run.get('run_id'))
+                raise HTTPException(409,'科研愿望状态已变化，任务已取消；请刷新后重试') from exc
             p.store.audit('research_wish.launch',{'id':id,'stage':stage_id,'run':run.get('run_id')},scope)
             return {'wish_id':id,'run':run,'session_id':conversation.id,'stage':stage_id}
     except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+def _dashboard_time(value):
+    """Parse run timestamps without making dashboard reads depend on one format."""
+    if value in (None, ''):
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            return datetime.fromtimestamp(float(value)).astimezone()
+        except (OverflowError, OSError, ValueError):
+            return None
+    text = str(value).strip().replace('Z', '+00:00')
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        try:
+            return datetime.fromtimestamp(float(text)).astimezone()
+        except (OverflowError, OSError, ValueError):
+            return None
+    if parsed.tzinfo is None:
+        parsed = parsed.astimezone()
+    return parsed.astimezone()
+
+
+def _dashboard_timestamp(value):
+    parsed=_dashboard_time(value)
+    return parsed.timestamp() if parsed else 0
+
+
+def _dashboard_scoped_runs(state,scope):
+    events=getattr(state,'events',None)
+    rows=[]
+    if events is None:
+        return rows
+    try:
+        summaries=events.list_run_summaries(500)
+    except Exception:
+        return rows
+    for run in summaries:
+        workspace=run.get('workspace') if isinstance(run.get('workspace'),dict) else {}
+        if str(workspace.get('workspace_id') or workspace.get('id') or 'ws_main')!=scope:
+            continue
+        created=_dashboard_time(run.get('created_at'))
+        started=_dashboard_time(run.get('started_at'))
+        ended=_dashboard_time(run.get('ended_at'))
+        duration_ms=None
+        if started and ended and ended>=started:
+            duration_ms=round((ended-started).total_seconds()*1000)
+        usage=run.get('usage') if isinstance(run.get('usage'),dict) else {}
+        tokens=int(usage.get('total_tokens') or 0)
+        if not tokens:
+            tokens=int(usage.get('prompt_tokens') or 0)+int(usage.get('completion_tokens') or 0)
+        rows.append({
+            'run_id':run.get('run_id'),
+            'session_id':run.get('session_id'),
+            'status':run.get('status'),
+            'created_at':run.get('created_at'),
+            'created':created,
+            'started':started,
+            'ended':ended,
+            'duration_ms':duration_ms,
+            'usage':usage,
+            'tokens':tokens,
+        })
+    return rows
+
+
+def _dashboard_usage_days(store,scope,days):
+    """Return daily model usage in the server timezone with zero-filled days."""
+    today=datetime.now().astimezone().date()
+    dates=[today-timedelta(days=offset) for offset in range(days-1,-1,-1)]
+    values={
+        day.isoformat(): {
+            'date':day.isoformat(),
+            'input_tokens':0,
+            'output_tokens':0,
+            'tokens':0,
+            'requests':0,
+            'cost':0.0,
+            'latency_ms':0.0,
+        }
+        for day in dates
+    }
+    start=datetime.combine(dates[0],dt_time.min).astimezone().timestamp()
+    latency={key:[] for key in values}
+    try:
+        with store.lock:
+            rows=store.db.execute(
+                'SELECT input,output,cost,latency,created FROM usage '
+                'WHERE scope=? AND created>=? ORDER BY created',
+                (scope,start),
+            ).fetchall()
+    except Exception:
+        rows=[]
+    for row in rows:
+        created=_dashboard_time(row['created'])
+        if created is None:
+            continue
+        bucket=values.get(created.date().isoformat())
+        if bucket is None:
+            continue
+        incoming=int(row['input'] or 0)
+        outgoing=int(row['output'] or 0)
+        bucket['input_tokens']+=incoming
+        bucket['output_tokens']+=outgoing
+        bucket['tokens']+=incoming+outgoing
+        bucket['requests']+=1
+        bucket['cost']+=float(row['cost'] or 0)
+        if row['latency'] is not None:
+            latency[bucket['date']].append(float(row['latency']))
+    for day, samples in latency.items():
+        if samples:
+            values[day]['latency_ms']=round(sum(samples)/len(samples)*1000,1)
+        values[day]['cost']=round(values[day]['cost'],6)
+    return [values[day.isoformat()] for day in dates]
+
+
+@router.get('/dashboard')
+async def dashboard(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope)
+    wishes=p.wishes.list(scope)
+    active=[wish for wish in wishes if wish.get('status') not in {'completed','archived'}]
+    conversations=[
+        row for row in p.state.store.list()
+        if str(row.get('workspace_id') or 'ws_main')==scope
+    ][:6]
+    runs=_dashboard_scoped_runs(p.state,scope)
+    dream=p.dreaming.status(scope)
+    usage=p.models.usage(scope)
+    usage_days=_dashboard_usage_days(p.store,scope,30)
+    trend_by_day={item['date']:item for item in usage_days}
+    for item in usage_days:
+        item.update({
+            'runs':0,
+            'succeeded':0,
+            'failed':0,
+            'other':0,
+            'duration_ms':0.0,
+        })
+    duration_sum={day:0 for day in trend_by_day}
+    duration_count={day:0 for day in trend_by_day}
+    for run in runs:
+        created=run.get('created')
+        if created is None:
+            continue
+        item=trend_by_day.get(created.date().isoformat())
+        if item is None:
+            continue
+        item['runs']+=1
+        status=run.get('status')
+        if status=='succeeded':
+            item['succeeded']+=1
+        elif status in {'failed','interrupted'}:
+            item['failed']+=1
+        else:
+            item['other']+=1
+        if run.get('duration_ms') is not None:
+            key=item['date']
+            duration_sum[key]+=run['duration_ms']
+            duration_count[key]+=1
+    for item in usage_days:
+        if duration_count[item['date']]:
+            item['duration_ms']=round(duration_sum[item['date']]/duration_count[item['date']],1)
+
+    active_states={'queued','preparing','running','waiting_approval','stopping'}
+    succeeded=sum(1 for run in runs if run.get('status')=='succeeded')
+    failed=sum(1 for run in runs if run.get('status') in {'failed','interrupted'})
+    durations=[run['duration_ms'] for run in runs if run.get('duration_ms') is not None]
+    run_tokens=sum(run.get('tokens',0) for run in runs)
+    usage_tokens=int(usage.get('tokens') or 0)
+
+    projected_wishes=[]
+    plans=[]
+    blocked_wishes=0
+    for wish in active:
+        stages=wish.get('stages') or []
+        recorded=sum(1 for stage in stages if stage.get('status')=='recorded')
+        total=len(stages)
+        blockers=[item for item in wish.get('blockers',[]) if item.get('resolved') is not True]
+        if blockers:
+            blocked_wishes+=1
+        current=next(
+            (stage for stage in stages if stage.get('status')!='recorded'),
+            None,
+        )
+        next_actions=wish.get('next_actions') or []
+        projected_wishes.append({
+            'id':wish['id'],
+            'title':wish['title'],
+            'status':wish['status'],
+            'phase':wish['phase'],
+            'updated_at':wish.get('updated_at'),
+            'next_action':next_actions[0] if next_actions else None,
+            'next_actions':next_actions[:3],
+            'blockers_count':len(blockers),
+            'progress':{
+                'recorded':recorded,
+                'total':total,
+                'percent':round(recorded/total*100) if total else 0,
+                'current_stage':current.get('label') if current else '已进入复核',
+                'current_stage_id':current.get('id') if current else 'review',
+            },
+        })
+        for action in next_actions[:2]:
+            plans.append({
+                'wish_id':wish['id'],
+                'wish_title':wish['title'],
+                'stage':action.get('stage'),
+                'label':action.get('label'),
+                'owner':action.get('owner'),
+                'reason':action.get('reason'),
+                'output':action.get('output'),
+                'updated_at':wish.get('updated_at'),
+            })
+        if blockers:
+            plans.append({
+                'wish_id':wish['id'],
+                'wish_title':wish['title'],
+                'stage':blockers[0].get('id'),
+                'label':'补齐阻塞条件',
+                'owner':'user',
+                'reason':blockers[0].get('needed') or blockers[0].get('reason'),
+                'output':'',
+                'updated_at':wish.get('updated_at'),
+            })
+    plans.sort(key=lambda item:(
+        0 if item.get('owner')=='user' else 1,
+        -_dashboard_timestamp(item.get('updated_at')),
+    ))
+    user_actions=sum(1 for plan in plans if plan.get('owner')=='user')
+    pricing_configured=bool(
+        p.config.get('budget',scope)['value'].get('prices')
+    )
+    return {
+        'scope':scope,
+        'metrics':{
+            'active_wishes':len(active),
+            'running_runs':sum(1 for run in runs if run.get('status') in active_states),
+            'pending_insights':dream['pending_count'],
+            'tokens':usage_tokens or run_tokens,
+            'total_runs':len(runs),
+            'succeeded_runs':succeeded,
+            'failed_runs':failed,
+            'success_rate':round(succeeded/(succeeded+failed)*100,1) if succeeded+failed else 0,
+            'avg_duration_ms':round(sum(durations)/len(durations)) if durations else 0,
+            'requests':int(usage.get('requests') or 0),
+            'avg_latency_ms':round(float(usage.get('latency') or 0)*1000,1),
+            'cost':round(float(usage.get('cost') or 0),4),
+            'pricing_configured':pricing_configured,
+        },
+        'brief':{
+            'user_actions':user_actions,
+            'agent_actions':sum(1 for plan in plans if plan.get('owner')=='agent'),
+            'blocked_wishes':blocked_wishes,
+        },
+        'trends':{
+            'range_days':30,
+            'days':usage_days,
+        },
+        'plans':plans[:8],
+        'wishes':projected_wishes[:6],
+        'conversations':conversations,
+        'runs':[
+            {
+                'run_id':run.get('run_id'),
+                'session_id':run.get('session_id'),
+                'status':run.get('status'),
+                'created_at':run.get('created_at'),
+                'usage':run.get('usage') or {},
+                'tokens':run.get('tokens',0),
+                'duration_ms':run.get('duration_ms'),
+            }
+            for run in runs[:6]
+        ],
+        'insights':dream['candidates'],
+        'dreaming':{
+            'enabled':dream['enabled'],
+            'auto':dream['auto'],
+            'last_run':dream['last_run'],
+        },
+    }
+
+
+@router.get('/dreaming')
+async def dreaming_status(request:Request,scope:str='ws_main'):
+    return platform(request).dreaming.status(scope)
+
+
+@router.patch('/dreaming/settings')
+async def dreaming_settings(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    try:
+        value=p.dreaming.update(scope,data)
+        return {'ok':True,'settings':value,'status':p.dreaming.status(scope)}
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/dreaming/run')
+async def dreaming_run(request:Request,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    try:
+        result=await p.dreaming.run(
+            scope,
+            trigger='manual',
+            focus=str(data.get('focus') or 'all'),
+        )
+        return {'ok':result.get('status')!='failed','run':result,'status':p.dreaming.status(scope)}
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.get('/dreaming/candidates')
+async def dreaming_candidates(request:Request,scope:str='ws_main',status:str='pending'):
+    try:
+        return {'items':platform(request).dreaming.candidates(scope,status)}
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/dreaming/candidates/{id}/accept')
+async def dreaming_accept(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    if data.get('confirmed') is not True:
+        raise HTTPException(400,'需要用户明确确认')
+    try:
+        return await p.dreaming.accept(scope,id,note=str(data.get('note') or ''))
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/dreaming/candidates/{id}/reject')
+async def dreaming_reject(request:Request,id:str,scope:str='ws_main'):
+    p=platform(request);p.require_workspace(scope);data=await body(request)
+    try:
+        return p.dreaming.reject(scope,id,reason=str(data.get('reason') or ''))
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
 
 
 def platform(request):
@@ -280,7 +675,7 @@ def guarded(fn):
 @router.get('/bootstrap')
 async def bootstrap(request:Request,scope:str='ws_main'):
     p=platform(request);p.require_workspace(scope)
-    return {'brand':'素问 Suwen','version':'1.0.0','schema_version':2,'scope':scope,
+    return {'brand':'素问 Suwen','version':__version__,'schema_version':2,'scope':scope,
         'settings':{key:p.config.get(key,scope) for key in DEFAULTS},
         'sections':list(DEFAULTS),'migration':redact(p.store.get('migration','v2')),
         'scientific':SCIENTIFIC,'capabilities':{'persistent_tasks':True,'mcp':['stdio','http'],'knowledge':['text','markdown','docx','pdf_optional'],

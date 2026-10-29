@@ -3,6 +3,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import httpx
 import pytest
@@ -145,3 +146,47 @@ async def test_scoped_api_catalog_and_bad_launch(p, client_app):
         assert (await client.get("/api/platform/science?scope=missing")).status_code == 400
         response = await client.post("/api/platform/science/launch?scope=ws_main", json={"lane": "bad", "goal": "x"})
         assert response.status_code == 422
+        missing = await client.post("/api/platform/science/launch?scope=ws_main", json={"lane": "instrument"})
+        assert missing.status_code == 422 and "研究问题" in missing.text
+
+
+@pytest.mark.asyncio
+async def test_science_launch_removes_placeholder_when_submission_fails(p, client_app):
+    class Adapter:
+        async def rpc(self, method, **_):
+            assert method == "skill.list"
+            return {"skills": [{
+                "id": "instrument",
+                "name": "science-bio-instrument-data-to-allotrope",
+                "enabled": True,
+                "executable": True,
+            }]}
+
+    deleted = []
+
+    def create(**_):
+        return SimpleNamespace(id="science-submit-failed", meta={}, messages=[], agent="lead")
+
+    async def submit(**_):
+        raise RuntimeError("runtime unavailable")
+
+    p.state.loop.desktop_harness = Adapter()
+    p.state.store = SimpleNamespace(
+        create=create,
+        save=lambda conversation: conversation,
+        delete=lambda session_id: deleted.append(session_id),
+    )
+    p.state.default_agent_info = lambda: {"agent_id": "lead"}
+    p.state.runs = SimpleNamespace(submit=submit)
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=client_app, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        response = await client.post(
+            "/api/platform/science/launch?scope=ws_main",
+            json={"lane": "instrument", "goal": "Convert the supplied instrument export"},
+        )
+
+    assert response.status_code == 503
+    assert deleted == ["science-submit-failed"]

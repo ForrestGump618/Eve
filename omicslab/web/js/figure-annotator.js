@@ -1,8 +1,8 @@
-import {api} from './api.js?v=1.2.0';
-import {esc, getPref, setPref} from './util.js?v=1.2.0';
-import {emit} from './bus.js?v=1.2.0';
-import {artifactConfig, ensureArtifactStyles} from './artifact-config.js?v=1.2.0';
-import {getArtifactSidebar} from './artifact-tabs.js?v=1.2.0';
+import {api} from './api.js?v=1.3.0';
+import {esc, getPref, setPref} from './util.js?v=1.3.0';
+import {emit} from './bus.js?v=1.3.0';
+import {artifactConfig, ensureArtifactStyles} from './artifact-config.js?v=1.3.0';
+import {getArtifactSidebar} from './artifact-tabs.js?v=1.3.0';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const validColor = value => /^#[\da-f]{6}$/i.test(String(value));

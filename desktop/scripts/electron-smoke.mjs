@@ -35,7 +35,23 @@ function forceStopElectron(handle){
  if(process.platform==='win32')execFileSync('taskkill.exe',['/PID',String(handle.pid),'/F'],{stdio:'ignore'});
  else handle.kill('SIGKILL');
 }
-let app,connection,appProcessHandle=null;const closes=[];const log={modelProtocol:'local HTTP fixture only; no external model account',checks:[]};
+function forceStopPid(pid){
+ if(!pid)return;
+ try{if(process.platform==='win32')execFileSync('taskkill.exe',['/PID',String(pid),'/F'],{stdio:'ignore'});else process.kill(pid,'SIGKILL');}catch{}
+}
+async function boundedCleanup(label,task,timeoutMs=5000){
+ let timer;
+ const timeout=new Promise(resolve=>{timer=setTimeout(()=>{
+  log.cleanupTimeouts??=[];log.cleanupTimeouts.push(label);resolve(false);
+ },timeoutMs);});
+ try{
+  const completed=Promise.resolve().then(task).then(()=>true,error=>{
+   log.cleanupErrors??=[];log.cleanupErrors.push(`${label}: ${error.message}`);return false;
+  });
+  return await Promise.race([completed,timeout]);
+ }finally{clearTimeout(timer);}
+}
+let app,connection,appProcessHandle=null;const log={modelProtocol:'local HTTP fixture only; no external model account',checks:[]};
 try{
  app=await _electron.launch({executablePath,args:launchArgs,env,timeout:30000});
  const page=await app.firstWindow();page.on('pageerror',e=>console.log('PAGE_ERROR',e.message));await page.waitForSelector('#health');
@@ -87,7 +103,19 @@ try{
 }catch(err){log.result='failed';log.error=err.message;console.log(err.stack);process.exitCode=1;}
 finally{
  if(appProcessHandle){try{forceStopElectron(appProcessHandle);}catch{}}
- if(connection){try{await rpc(connection,'shutdown');}catch{}}
- if(app)closes.push(app.close());await Promise.allSettled(closes);server.close();server.closeAllConnections();
+ if(connection){
+  const stopped=await boundedCleanup('daemon shutdown',()=>rpc(connection,'shutdown'));
+  if(!stopped)forceStopPid(connection.pid);
+ }
+ if(app){
+  const handle=app.process();
+  const closed=await boundedCleanup('Electron close',()=>app.close());
+  if(!closed)forceStopElectron(handle);
+ }
+ server.closeAllConnections();
+ await boundedCleanup('fixture server close',()=>new Promise(resolve=>server.close(resolve)),3000);
  writeFileSync(workspace+'/work/electron-e2e-result.json',JSON.stringify(log,null,2));console.log(JSON.stringify(log,null,2));
+ // Playwright can retain an already-dead Electron transport; don't let CI hang
+ // after the result has been written and bounded cleanup has run.
+ setTimeout(()=>process.exit(log.result==='passed'?0:1),25);
 }

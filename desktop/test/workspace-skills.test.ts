@@ -35,8 +35,8 @@ test('all built-in workbench workflows seed into the native registry and load wi
   const root=resolve('dist/bundled-skills');
   const first=await installBundledSkills(registry,root) as any;
   await installBundledSkills(registry,root);
-  assert.equal(first.count,36);assert.equal(registry.list().length,36);
-  for(const name of ['biomedical-discovery','primer-design','remote-compute-ssh','statistical-rigor']){
+  assert.equal(first.count,37);assert.equal(registry.list().length,37);
+  for(const name of ['biomedical-discovery','primer-design','public-biomedical-data','remote-compute-ssh','statistical-rigor']){
    const skill=registry.list().find(s=>s.name===name)!;assert.ok(skill);
    assert.match((registry.load(skill.id) as any).instructions,/Eve 运行适配/);
    assert.equal(skill.executable,false);

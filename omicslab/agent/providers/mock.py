@@ -123,14 +123,9 @@ class MockProvider(BaseProvider):
             return
 
         answer = (
-            "你好，我是 Eve 的演示助手（离线 mock 模型）。\n\n"
-            "我可以演示完整工作流：调用共享 Jupyter 内核执行 Python、读取工作区文件、"
-            "生成图表并保存到 `figures/`、管理后台任务与记忆。\n\n"
-            "试试这些指令：\n"
-            "- 「生成一组随机数据并统计」\n"
-            "- 「画一张正弦曲线图」\n"
-            "- 「读取工作区的 demo_counts.csv 并展示前几行」\n\n"
-            "在「设置」中填入 DeepSeek/OpenAI/Qwen 等 API Key 后即可切换到真实模型。"
+            "当前为离线 mock 模型，未连接外部服务。\n\n"
+            "可在本地执行 Python、读取工作区文件并生成图表。"
+            "配置真实模型后可获得完整推理与工具链。"
         )
         async for event in self._emit_text(answer, reasoning="演示模型：返回欢迎与使用引导"):
             yield event

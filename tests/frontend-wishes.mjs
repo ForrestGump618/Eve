@@ -39,7 +39,7 @@ const wish = {
     ['preregistration', '预注册方案', 'pending', ['hypotheses'], null],
     ['analysis', '数据分析', 'pending', ['preregistration'], null],
     ['experiment_design', '实验与独立验证', 'pending', ['preregistration'], null],
-    ['figures', '图表与证据叙事', 'pending', ['analysis', 'experiment_design'], null],
+    ['figures', '图表与证据整合', 'pending', ['analysis', 'experiment_design'], null],
     ['review', '用户复核', 'needs_review', ['figures'], null],
   ].map(([id, label, status, depends_on, summary]) => ({
     id, label, status, depends_on, summary,
@@ -122,7 +122,7 @@ try {
   const desktopStarted = performance.now();
   await page.goto(base + '/__wish-test');
   const desktopMountMs = await page.evaluate(async () => {
-    const {setState} = await import('/js/store.js?v=1.2.0');
+    const {setState} = await import('/js/store.js?v=1.3.0');
     setState({route: 'research', workspaceId: 'ws_main', workspace: {name: 'Research'}});
     const {mount} = await import('/js/views/platform.js');
     const started = performance.now();
@@ -133,21 +133,21 @@ try {
   const desktopVisibleMs = performance.now() - desktopStarted;
   await page.waitForTimeout(400);
 
-  assert.match(await page.locator('.wish-hero h2').textContent(), /按证据链推进/);
+  assert.match(await page.locator('.wish-hero h2').textContent(), /从课题目标到分析、图表与复核/);
   assert.equal(await page.locator('[data-wish-stage]').count(), 9);
   assert.match(await page.locator('[data-wish-stage="figures"] footer').textContent(), /前置：分析、实验/);
   assert.match(await page.locator('[data-wish-stage="charter"] footer').textContent(), /起始节点/);
-  assert.match(await page.locator('#view').textContent(), /让 Eve 连续推进/);
+  assert.match(await page.locator('#view').textContent(), /继续执行下一阶段/);
   assert.doesNotMatch(await page.locator('#view').textContent(), /"stages"\s*:/);
   assert.doesNotMatch(await page.locator('#view').textContent(), /"run_id"\s*:/);
   await page.locator('.wish-hero').screenshot({path: path.join(output, 'wish-hero-element.png')});
   await page.screenshot({path: path.join(output, 'wish-research-desktop.png'), animations: 'disabled'});
 
-  await page.getByRole('button', {name: '让 Eve 连续推进'}).click();
+  await page.getByRole('button', {name: '继续执行下一阶段'}).click();
   const dialog = page.getByRole('dialog');
   await dialog.waitFor();
   assert.match(await dialog.textContent(), /遇到阻塞、审批或人工复核时停止/);
-  await dialog.getByRole('button', {name: '开始', exact: true}).click();
+  await dialog.getByRole('button', {name: '继续', exact: true}).click();
   await page.waitForFunction(() => location.hash === '#/workbench');
   assert.deepEqual(calls.find(call => call.method === 'POST').body, {stage: 'scouting', advance: true});
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('omicslab.activeConversationId'))), 'session-wish-demo');
@@ -155,7 +155,7 @@ try {
   const mobileStarted = performance.now();
   await page.goto(base + '/__wish-test');
   const mobileMountMs = await page.evaluate(async () => {
-    const {setState} = await import('/js/store.js?v=1.2.0');
+    const {setState} = await import('/js/store.js?v=1.3.0');
     setState({route: 'research', workspaceId: 'ws_main', workspace: {name: 'Research'}});
     const {mount} = await import('/js/views/platform.js');
     const started = performance.now();
@@ -168,7 +168,7 @@ try {
   await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   assert.equal(await page.locator('.wish-detail').evaluate(node => node.scrollWidth <= node.clientWidth), true);
-  assert.equal(await page.getByRole('button', {name: '让 Eve 连续推进'}).evaluate(node => node.getBoundingClientRect().height >= 32), true);
+  assert.equal(await page.getByRole('button', {name: '继续执行下一阶段'}).evaluate(node => node.getBoundingClientRect().height >= 32), true);
   await page.screenshot({path: path.join(output, 'wish-research-mobile.png'), animations: 'disabled'});
   assert.deepEqual(errors, []);
   const browserMetrics = await page.evaluate(() => {

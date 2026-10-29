@@ -7,9 +7,9 @@
 // atomically persists provider/model/api_base and immediately runs a live
 // test_llm call, which is what makes "配置 API 后无效" impossible to hit again.
 
-import { icon } from '../icons.js?v=1.2.0';
-import { esc, fmtDuration, copyText, clamp } from '../util.js?v=1.2.0';
-import { api, errorMessage } from '../api.js?v=1.2.0';
+import { icon } from '../icons.js?v=1.3.0';
+import { esc, fmtDuration, copyText, clamp } from '../util.js?v=1.3.0';
+import { api, errorMessage } from '../api.js?v=1.3.0';
 import {
   toastSuccess,
   toastError,
@@ -17,9 +17,9 @@ import {
   spinnerHtml,
   currentTheme,
   applyTheme,
-} from '../ui.js?v=1.2.0';
-import { setState } from '../store.js?v=1.2.0';
-import { emit } from '../bus.js?v=1.2.0';
+} from '../ui.js?v=1.3.0';
+import { setState } from '../store.js?v=1.3.0';
+import { emit } from '../bus.js?v=1.3.0';
 
 const DEFAULT_TEMPERATURE = 0.3;
 const DEFAULT_MAX_TOKENS = 4096;

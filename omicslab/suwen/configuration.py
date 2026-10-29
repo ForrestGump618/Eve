@@ -7,10 +7,11 @@ from urllib.parse import urlsplit
 DEFAULTS = {
  'models': {'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[], 'capabilities':{},'context_window':32000,'sage_verification':False,'orchestration':True,'verification':'standard'},
  'memory': {'enabled':True,'auto_capture':False,'embedding':'keyword','embedding_url':'','embedding_model':'','top_k':5,'retention_days':365},
- 'appearance': {'theme':'light','font':'system','font_size':14,'accent':'#404040','density':'comfortable','radius':12,'mode':'research','home':'workbench','onboarded':False,'agent_name':'Eve助手','avatar':'','shortcuts':{'palette':'k'}},
+ 'appearance': {'theme':'light','font':'system','font_size':14,'accent':'#404040','density':'comfortable','radius':12,'mode':'research','home':'dashboard','onboarded':False,'agent_name':'Eve助手','avatar':'','shortcuts':{'palette':'k'}},
  'permissions': {'files':'allow','shell':'allow','network':'allow','browser':'allow','messages':'allow','mcp':'allow','memory':'allow','skills':'allow','agents':'allow','python':'allow','system':'allow','notebook':'allow','jobs':'allow','research':'allow','tools':{}},
  'budget': {'concurrency':2,'prices':{}},
  'vision': {'enabled':False,'auto_review':False,'max_repairs':2,'model':'','api_base':'','credential_ref':''},
+ 'dreaming': {'enabled':False,'auto':False},
 }
 
 
