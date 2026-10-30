@@ -88,7 +88,19 @@ async def test_settings_keys_keep_multiple_provider_credentials(p,client_app):
 
 
 @pytest.mark.asyncio
-async def test_named_connections_keep_models_keys_and_endpoints_independent_after_reload(p,client_app):
+async def test_named_connections_keep_models_keys_and_endpoints_independent_after_reload(p,client_app,monkeypatch):
+    from omicslab.suwen.vault import Vault
+
+    # Exercise persisted reference resolution without requiring the CI host's
+    # Windows DPAPI. This codec is confined to this test, not a product fallback.
+    def fixture_codec(raw, decrypt=False):
+        prefix = b"fixture-vault:"
+        if decrypt:
+            assert raw.startswith(prefix)
+            return raw[len(prefix):]
+        return prefix + raw
+
+    monkeypatch.setattr(Vault, '_crypt', staticmethod(fixture_codec))
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
         ids=[]
         for name in ('实验室 A','实验室 B'):
