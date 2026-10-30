@@ -1,8 +1,8 @@
 // Variables view: kernel workspace variables with a detail inspector.
 
-import { icon } from '../icons.js?v=1.5.0';
-import { esc, fmtBytes, fmtShape, debounce, truncate } from '../util.js?v=1.5.0';
-import { api, errorMessage } from '../api.js?v=1.5.0';
+import { icon } from '../icons.js?v=1.0.0';
+import { esc, fmtBytes, fmtShape, debounce, truncate } from '../util.js?v=1.0.0';
+import { api, errorMessage } from '../api.js?v=1.0.0';
 import {
   h,
   toast,
@@ -12,7 +12,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.5.0';
+} from '../ui.js?v=1.0.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();

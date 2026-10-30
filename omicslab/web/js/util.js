@@ -137,6 +137,68 @@ export function truncate(text, max = 200) {
   return s.length > max ? `${s.slice(0, Math.max(0, max - 1))}…` : s;
 }
 
+/**
+ * Turn tool/API payloads into a short, readable line. Raw JSON remains
+ * available through an explicit technical-details disclosure.
+ */
+export function summarizeValue(value, max = 220) {
+  let current = value;
+  if (typeof current === 'string') {
+    const text = current.trim();
+    if (!text) return '无输出';
+    if (/^[{[]/.test(text)) {
+      try {
+        current = JSON.parse(text);
+      } catch {
+        return truncate(text.split(/\r?\n/, 1)[0], max);
+      }
+    } else {
+      return truncate(text.split(/\r?\n/, 1)[0], max);
+    }
+  }
+  if (current == null) return '无输出';
+  if (typeof current !== 'object') return truncate(String(current), max);
+  if (Array.isArray(current)) {
+    const first = current.length
+      ? summarizeValue(current[0], Math.max(40, Math.floor(max / 2)))
+      : '';
+    return truncate(`${current.length} 项${first ? ` · ${first}` : ''}`, max);
+  }
+  const source = current;
+  const keys = ['summary', 'message', 'title', 'status', 'text', 'content', 'output', 'stdout', 'stderr', 'result', 'value', 'path', 'file'];
+  for (const key of keys) {
+    const candidate = source[key];
+    if (typeof candidate === 'string' && candidate.trim() && !/^[{[]/.test(candidate.trim())) {
+      return truncate(candidate.trim().split(/\r?\n/, 1)[0], max);
+    }
+  }
+  if (source.metrics && typeof source.metrics === 'object' && !Array.isArray(source.metrics)) {
+    const metrics = Object.entries(source.metrics)
+      .filter(([, value]) => typeof value === 'number' || typeof value === 'string')
+      .slice(0, 4)
+      .map(([key, value]) => `${key} ${value}`);
+    if (metrics.length) return truncate(`指标 · ${metrics.join(' · ')}`, max);
+  }
+  if (Array.isArray(source.items)) return truncate(`${source.items.length} 项结果`, max);
+  if (Array.isArray(source.rows)) {
+    const columns = Array.isArray(source.columns) ? ` · ${source.columns.length} 列` : '';
+    return truncate(`${source.rows.length} 行${columns}`, max);
+  }
+  if (source.count != null) return truncate(`${source.count} 项结果`, max);
+  const fields = Object.keys(source).filter((key) => source[key] != null);
+  return fields.length ? `${fields.length} 个字段` : '无输出';
+}
+
+export function prettyValue(value, max = 200_000) {
+  if (value == null || value === '') return '';
+  try {
+    const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+    return truncate(text, max);
+  } catch {
+    return truncate(String(value), max);
+  }
+}
+
 export function extOf(name) {
   const s = String(name ?? '');
   const base = s.split(/[\\/]/).pop() || '';

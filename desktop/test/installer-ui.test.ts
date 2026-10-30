@@ -28,6 +28,7 @@ test('Windows installer uses branded pages instead of the default wizard flow', 
   assert.equal(pkg.build.directories.buildResources, 'installer');
   assert.equal(pkg.build.nsis.oneClick, false);
   assert.equal(pkg.build.nsis.perMachine, false);
+  assert.equal(pkg.build.nsis.allowElevation, true);
   assert.equal(pkg.build.nsis.allowToChangeInstallationDirectory, false);
   assert.equal(pkg.build.nsis.include, 'installer.nsh');
   assert.equal(pkg.build.nsis.language, '2052');
@@ -35,8 +36,11 @@ test('Windows installer uses branded pages instead of the default wizard flow', 
   assert.match(pkg.scripts['generate:installer'] ?? '', /generate-installer-assets\.ps1/);
 
   const script = read('installer/installer.nsh');
+  assert.match(script, /!include "UAC\.nsh"/);
   assert.match(script, /!macro customWelcomePage/);
   assert.match(script, /Page custom EveWelcomeShow EveWelcomeLeave/);
+  assert.match(script, /EveWelcomeShow[\s\S]*EveElevatedResume == "1"[\s\S]*Abort/);
+  assert.match(script, /!macro customHeader[\s\S]*EveDeferredWelcomeLeave/);
   assert.match(script, /!macro customFinishPage/);
   assert.match(script, /Page custom EveFinishShow EveFinishLeave/);
   assert.match(script, /!macro customUnWelcomePage/);
@@ -46,8 +50,18 @@ test('Windows installer uses branded pages instead of the default wizard flow', 
     script,
     /UninstPage custom un\.EveUninstallFinishShow un\.EveUninstallFinishLeave/,
   );
-  assert.match(script, /!macro customInit[\s\S]*setInstallModePerUser/);
-  assert.match(script, /!macro customInstallMode[\s\S]*isForceCurrentInstall/);
+  assert.match(script, /!macro customInit[\s\S]*UAC_IsInnerInstance[\s\S]*setInstallModePerUser/);
+  assert.match(script, /!macro customInit[\s\S]*setInstallModePerAllUsers/);
+  assert.match(script, /!macro customInstallMode[\s\S]*isForceMachineInstall[\s\S]*isForceCurrentInstall/);
+  assert.match(script, /EveWelcomeLeave[\s\S]*UAC_RunElevated[\s\S]*安装尚未开始/);
+  assert.match(script, /UAC_RunElevated[\s\S]*\$1 == 2[\s\S]*Return/);
+  assert.match(
+    script,
+    /EveSelectCurrent[\s\S]*\$LOCALAPPDATA\\Programs\\Eve[\s\S]*EveSelectAllUsers[\s\S]*\$PROGRAMFILES64\\Eve/,
+  );
+  assert.match(script, /仅为我/);
+  assert.match(script, /所有用户/);
+  assert.doesNotMatch(script, /管理员|无需管理员权限/);
   assert.match(script, /!define EVE_ACCENT 0x3157D5/);
   assert.match(script, /DwmSetWindowAttribute/);
   assert.match(script, /StrCpy \$0 "0"[\s\S]*DwmSetWindowAttribute[\s\S]*i 20/);
@@ -103,6 +117,14 @@ test('Windows installer uses branded pages instead of the default wizard flow', 
   assert.match(script, /GetRoot/);
   assert.match(script, /SelectFolderDialog/);
   assert.match(script, /EVE_MAX_INSTALL_PATH/);
+  assert.match(script, /PathIsRelativeW/);
+  assert.match(script, /PathIsUNCW/);
+  assert.match(script, /StrStrW[\s\S]*上级目录标记/);
+  assert.match(script, /PathIsPrefixW[\s\S]*Program Files/);
+  assert.match(
+    script,
+    /EveSelectedInstallPath[\s\S]*EveNormalizePath[\s\S]*EvePathValid[\s\S]*PROGRAMFILES64\\Eve/,
+  );
   assert.match(script, /SetOutPath \$PLUGINSDIR[\s\S]*File \/oname=eve-\$\{FILE\}/);
   assert.match(
     script,
@@ -112,6 +134,7 @@ test('Windows installer uses branded pages instead of the default wizard flow', 
   assert.match(script, /!macro EveShowPageBody[\s\S]*Call \$\{PREFIX\}EveFitPage/);
   assert.match(script, /ExecShell "open" "\$INSTDIR\\Eve\.exe"/);
   assert.match(script, /安装 Eve/);
+  assert.match(script, /Eve 已安装到本机/);
   assert.match(script, /installerUninstallProgress\.bmp/);
   assert.doesNotMatch(
     script,

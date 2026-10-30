@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/wet-lab-1.5.0/', import.meta.url));
+const output = fileURLToPath(new URL('../docs/verification/eve-1.0.0-release/', import.meta.url));
 const calls = [];
 const now = 1_793_246_400;
 const browserBlockedPorts = new Set([
@@ -127,10 +127,10 @@ ${['base', 'components', 'views', 'platform', 'literature'].map(name => `<link r
 </head><body><main id="view"></main><script type="module">
 window.mountLiterature = async () => {
   window.view?.destroy?.();
-  const store = await import('/js/store.js?v=1.5.0');
+  const store = await import('/js/store.js?v=1.0.0');
   window.eveStore = store;
   store.setState({route:'literature',routeParams:{},workspaceId:'ws_main',workspace:{name:'肿瘤微环境项目'}});
-  const {mount} = await import('/js/views/literature.js?v=1.5.0');
+  const {mount} = await import('/js/views/literature.js?v=1.0.0');
   window.view = await mount(document.querySelector('#view'));
 };
 </script></body></html>`;

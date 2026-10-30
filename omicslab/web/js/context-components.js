@@ -1,4 +1,4 @@
-import {esc,escAttr} from './util.js?v=1.5.0';
+import {esc,escAttr,summarizeValue} from './util.js?v=1.0.0';
 
 export function contextRequestsHtml(requests={}){
  const items=requests.items||[],max=Math.max(1,...items.map(r=>Object.values(r.composition).reduce((n,v)=>n+v,0)));
@@ -11,7 +11,7 @@ export function contextActivityHtml(data){
  const runs=data.runs||[],events=data.events||[];
  const activity=events.filter(e=>/tool|command|file|context|compact|error|fail/i.test(e.type));
  return `<section class="eve-dashboard-card"><h2>运行与成员轨迹</h2>${runs.map(r=>`<button class="context-source" data-context-run="${escAttr(r.run_id)}">${esc(r.status)} · ${esc(r.created_at)} · ${Number(r.usage?.total_tokens||0).toLocaleString()} Token${r.parent_run_id?' · 子任务':''}</button>`).join('')||'<p class="eve-muted">暂无运行</p>'}</section>
- <section class="eve-dashboard-card"><h2>文件、命令与上下文事件</h2><p class="eve-detail-note">最近 5 次运行，每次至多 200 条事件；展开可查看原始事件和状态。空记录不代表操作成功。</p>${activity.slice(-100).reverse().map(e=>`<details class="context-snapshot"><summary>${esc(e.type)} · ${esc(e.data?.name||e.data?.tool||'')} <span>${esc(e.ts||'')}</span></summary><pre class="context-original">${esc(JSON.stringify(e.data,null,2))}</pre></details>`).join('')||'<p class="eve-muted">暂无相关事件</p>'}</section>`;
+ <section class="eve-dashboard-card"><h2>文件、命令与上下文事件</h2><p class="eve-detail-note">最近 5 次运行，每次至多 200 条事件。</p>${activity.slice(-100).reverse().map(e=>`<details class="context-snapshot"><summary>${esc(e.type)} · ${esc(summarizeValue(e.data, 120))} <span>${esc(e.ts||'')}</span></summary><details class="technical-details"><summary>事件数据</summary><pre class="context-original">${esc(JSON.stringify(e.data,null,2))}</pre></details></details>`).join('')||'<p class="eve-muted">暂无相关事件</p>'}</section>`;
 }
 export function contextOverviewHtml(data,{query='',sort='recent',day=''}={}){
  const days=data.daily||[],max=Math.max(1,...days.map(d=>d.tokens));

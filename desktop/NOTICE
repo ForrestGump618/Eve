@@ -1,4 +1,4 @@
-Eve desktop 1.5.0
+Eve desktop 1.0.0
 The Electron/TypeScript application is MIT licensed. The Python implementation
 retains its original Apache-2.0 license and module/API identifiers for compatibility.
 The shared skill library contains upstream reference instructions and resources.

@@ -1,0 +1,172 @@
+{
+  "tool": "suwen-performance-baseline",
+  "startedAt": "2026-10-30T01:34:30.674Z",
+  "root": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop",
+  "environment": {
+    "platform": "win32",
+    "osRelease": "10.0.26200",
+    "cpus": "Intel(R) Core(TM) i7-14700HX",
+    "cpuCount": 28,
+    "totalMemBytes": 34124718080,
+    "node": "v24.14.0",
+    "electronRuntime": null,
+    "daemonDist": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\dist\\src\\daemon.js",
+    "python": "Python 3.12.11"
+  },
+  "benchmarks": {
+    "daemonStartup": {
+      "coldStartupMs": {
+        "values": [
+          1055.0539999604225,
+          1054.6289999485016,
+          1272.6100000143051
+        ],
+        "n": 3,
+        "p50": 1055.0539999604225,
+        "p95": 1272.6100000143051,
+        "max": 1272.6100000143051,
+        "min": 1054.6289999485016,
+        "mean": 1127.4309999744098
+      },
+      "warmStartupMs": {
+        "values": [
+          969.4929999709129,
+          670.3959999680519
+        ],
+        "n": 2,
+        "p50": 670.3959999680519,
+        "p95": 969.4929999709129,
+        "max": 969.4929999709129,
+        "min": 670.3959999680519,
+        "mean": 819.9444999694824
+      }
+    },
+    "rpcBurst": {
+      "taskCount": 60,
+      "createLatencyMs": {
+        "values": [
+          3.8070000410079956,
+          1.5070000290870667,
+          1.4619999527931213,
+          1.6929999589920044,
+          1.1179999709129333,
+          1.0339999794960022,
+          1.1309999823570251,
+          1.4350000023841858,
+          1.2129999995231628,
+          1.152999997138977
+        ],
+        "n": 60,
+        "p50": 1.1600000262260437,
+        "p95": 1.7889999747276306,
+        "max": 3.8070000410079956,
+        "min": 0.7989999651908875,
+        "mean": 1.2813999950885773
+      },
+      "eventsStreamMs": {
+        "values": [
+          13.798000037670135,
+          1.9079999923706055,
+          1.7070000171661377,
+          1.6790000200271606,
+          1.6100000143051147,
+          1.543999969959259,
+          1.6570000052452087,
+          1.4459999799728394,
+          1.4690000414848328,
+          1.4079999923706055
+        ],
+        "n": 10,
+        "p50": 1.6100000143051147,
+        "p95": 13.798000037670135,
+        "max": 13.798000037670135,
+        "min": 1.4079999923706055,
+        "mean": 2.82260000705719
+      },
+      "eventsStreamPayloadBytes": 26467,
+      "eventsStreamEventCount": 90,
+      "snapshotMs": 5.49099999666214,
+      "sqliteBytes": 4096,
+      "sqliteWalBytes": 4099432,
+      "sqliteShmBytes": 32768,
+      "daemonRssKb": 99840,
+      "daemonPid": 48528
+    },
+    "pythonWorker": {
+      "demoFcs": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\omicslab\\data\\demo.fcs",
+      "demoFcsBytes": 120811,
+      "healthMs": 433.9269999861717,
+      "health": {
+        "status": "ok",
+        "python": "3.12.11",
+        "version": "2.0.0",
+        "protocol": "suwen-research-worker/2",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "system": "Windows",
+        "machine": "AMD64",
+        "executable": "C:\\ProgramData\\miniconda3\\python.exe",
+        "capabilities": [
+          "health",
+          "describe",
+          "flowSummary",
+          "datasetProfile",
+          "discoveryScan",
+          "runScript"
+        ],
+        "features": {
+          "fcs": true,
+          "fcsSpillover": true,
+          "datasetProfile": true,
+          "discoveryScan": true,
+          "runScript": true,
+          "runScriptLanguage": true,
+          "externalDependencies": true
+        },
+        "deps": {
+          "numpy": "2.2.5",
+          "pandas": "2.2.3",
+          "flowio": null,
+          "flowkit": null,
+          "scipy": "1.15.3"
+        },
+        "isolation": "subprocess with a fresh working directory, allowlisted environment and no shell; not an OS security sandbox",
+        "limits": {
+          "maxRequestBytes": 8388608,
+          "maxResponseBytes": 16777216,
+          "maxStdoutBytes": 262144,
+          "maxStderrBytes": 262144,
+          "defaultTimeoutMs": 120000,
+          "maxTimeoutMs": 600000,
+          "maxFcsBytes": 536870912,
+          "maxFcsEvents": 1000000,
+          "maxFcsEventsOverride": 5000000,
+          "maxDatasetBytes": 268435456,
+          "maxDatasetRows": 200000,
+          "maxScanFiles": 50000,
+          "maxArtifacts": 256
+        }
+      },
+      "describeMs": 3.2070000171661377,
+      "describeOps": null,
+      "flowSummaryMs": 22.44099998474121,
+      "flowSummaryOk": true,
+      "flowSummary": {
+        "events": 6000,
+        "channels": 5,
+        "firstChannels": [
+          "FSC-A",
+          "SSC-A",
+          "FL1-A",
+          "FL2-A",
+          "FL3-A"
+        ]
+      }
+    }
+  },
+  "notMeasured": [
+    "Electron UI cold/warm launch (owned by T2 UI evidence; packaged timing in installer-lifecycle artifacts)",
+    "Markdown render CPU for 10k deltas (T2 visual/streaming audit owns the browser measurement)",
+    "First-token latency against a real vendor provider (no real account; local fixture only)",
+    "8h/24h/72h endurance (NOT VERIFIED — not run on this host)"
+  ]
+}

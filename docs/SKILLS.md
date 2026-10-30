@@ -1,6 +1,6 @@
 # 内置技能库（SKILLS）
 
-技能（Skill）是 SuWen 的「按需操作手册」。默认只把技能目录（`name + description + when_to_use`）注入模型上下文；当模型判断需要时，才用 `skill_view` 读取完整正文与附带脚本。因此技能可以写得很详细，而不会挤占日常对话的上下文。
+技能（Skill）是 Eve 的按需操作手册。默认只把技能目录（`name + description + when_to_use`）注入模型上下文；当模型判断需要时，才用 `skill_search`、`skill_load` 和 `skill_read_resource` 读取完整正文与附带脚本。因此技能可以写得很详细，而不会挤占日常对话的上下文。
 
 > **状态说明**：`omicslab/skills/` 当前共 **32 个本机技能**，另有桌面扩展技能和 390 项共享技能库。本页保留核心科研方法目录；湿实验与 K-Dense 的完整来源、加载方式和执行边界见 [湿实验技能](WET-LAB-SKILLS.md)。每个技能对应 `omicslab/skills/<name>/SKILL.md`，正文为最终事实来源。
 
@@ -63,6 +63,21 @@
 | `wet-lab-result-interpretation` | 对活力、qPCR、Western 和 ELISA 原始读数做确定性 QC、归一化与证据分级 | 前两项、`statistical-rigor` |
 
 实验设计、结果解释和真实执行必须分开：技能可以给出方案、计算和缺口，不会替代伦理/生物安全审批、仪器操作或独立重复。
+
+### 1.2 CNS / Sci 写作与出版级绘图
+
+以下技能来自 `K-Dense-AI/scientific-agent-skills` 的固定提交，已同时安装到本机 Codex 技能目录和 Eve 共享技能库。正文按需读取；技能存在不代表上游依赖、期刊模板或外部服务已经可用。
+
+| 技能 | 主要用途 | 使用边界 |
+| --- | --- | --- |
+| `scientific-writing` | 论文结构、证据来源、报告规范、声明、表格与投稿准备 | 不补写不存在的实验结果，不虚构引用或作者贡献 |
+| `scientific-visualization` | Matplotlib / Seaborn / Plotly 出版图、面板布局、不确定性、缺失值与色觉可及性 | 先保证数据与统计含义，再调整视觉样式 |
+| `scientific-schematics` | 生物通路、系统流程、神经网络和复杂科学示意图草案 | 需要 OpenRouter 凭据；生成图必须人工核对科学内容 |
+| `citation-management` | PubMed、OpenAlex、DOI 元数据与 BibTeX 校验 | 网络和数据库可用性单独检查，不把元数据当作论文结论 |
+| `venue-templates` | Nature / Science / Cell、PLOS、Elsevier、会议与基金模板 | 投稿前重新核对期刊最新作者指南 |
+| `peer-review` | 结构化同行评审、claim–evidence、统计可复现性、图表与引文检查 | 仅支持获授权的评审材料；不替代编辑或领域专家决定 |
+
+典型组合：`scientific-writing` 负责正文与声明，`citation-management` 校验引文，`scientific-visualization` 生成图，`venue-templates` 检查投稿格式，`peer-review` 做提交前审阅。绘图后仍必须检查原始数据、坐标单位、统计标注和最终导出的 PDF/TIFF。
 
 ## 2. 技能详情
 
@@ -269,4 +284,4 @@ pytest tests/test_skills.py -q
 
 ---
 
-本文件对应 Eve 1.5.0；旧版 2.x 文档中的历史工具名仍可在归档中查到。
+本文件对应 Eve 1.0.0；旧版 2.x 文档中的历史工具名仍可在归档中查到。

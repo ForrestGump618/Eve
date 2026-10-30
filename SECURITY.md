@@ -17,7 +17,7 @@
 
 1. 打开仓库页面 → **Security** → **Advisories**
 2. 点击 **Report a vulnerability**
-3. 直达链接：<https://github.com/ForrestGump618/suwen/security/advisories/new>
+3. 直达链接：<https://github.com/ForrestGump618/Eve/security/advisories/new>
 
 如果该入口不可用，请通过 GitHub 联系维护者 [@ForrestGump618](https://github.com/ForrestGump618) 说明情况，我们会安排私密渠道。请不要发送真实凭据、他人数据或未脱敏的生产日志。
 

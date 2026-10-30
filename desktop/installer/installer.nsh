@@ -2,10 +2,12 @@
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
 !include "WinMessages.nsh"
+!include "UAC.nsh"
 
 !define EVE_WIDTH 620
 !define EVE_HEIGHT 450
 !define EVE_MAX_INSTALL_PATH 220
+!define EVE_INSTALL_STATE_KEY "Software\Eve\Installer"
 
 ; SetCtlColors consumes RGB hex. Raw Win32 messages still need COLORREF.
 !define EVE_ACCENT 0x3157D5
@@ -55,6 +57,15 @@ Var EveButtonCaption
   Var EvePathValid
   Var EveErrorText
   Var EveLaunchOnFinish
+  Var EveInstallAllUsers
+  Var EveSelectedInstallPath
+  Var EveElevatedResume
+  Var EveScopeCurrentCheck
+  Var EveScopeAllCheck
+  Var EveScopeCurrentTitle
+  Var EveScopeAllTitle
+  Var EveScopeCurrentDetail
+  Var EveScopeAllDetail
 !endif
 
 !macro EveRawStatic OUT TEXT X Y WIDTH HEIGHT PARENT FG BG FACE SIZE WEIGHT STYLE
@@ -245,12 +256,12 @@ Var EveButtonCaption
 
   !if "${MODE}" == "install"
     !insertmacro EveRawStatic $R3 "正在安装 Eve" 64 90 470 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "22" "650" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R4 "正在写入应用文件，请保持窗口开启。" 64 134 470 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R5 "完成后可立即打开 Eve，已有科研数据不会受到影响。" 64 251 470 24 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R4 "正在写入应用文件。" 64 134 470 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R5 "现有项目与设置会保留。" 64 251 470 24 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
   !else
     !insertmacro EveRawStatic $R3 "正在卸载 Eve" 64 90 470 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "22" "650" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R4 "正在移除应用文件，请保持窗口开启。" 64 134 470 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R5 "科研项目、技能、记忆和设置会保留。" 64 251 470 24 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R4 "正在移除应用文件。" 64 134 470 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R5 "项目、技能、记忆和设置会保留。" 64 251 470 24 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
   !endif
 
   ; ID 2 is the install page's cancel command. SS_NOTIFY makes a fully
@@ -360,6 +371,25 @@ Var EveButtonCaption
       Return
     ${EndIf}
 
+    System::Call 'shlwapi::PathIsRelativeW(w "$0") i .r5'
+    ${If} $5 != 0
+      StrCpy $EveErrorText "请输入完整的安装路径，而不是相对路径。"
+      Return
+    ${EndIf}
+
+    System::Call 'shlwapi::PathIsUNCW(w "$0") i .r5'
+    ${If} $5 != 0
+      StrCpy $EveErrorText "安装位置不能使用网络共享路径。"
+      Return
+    ${EndIf}
+
+    ; Do not let a path traversal segment silently resolve to another folder.
+    System::Call 'shlwapi::StrStrW(w "$0", w "..") p .r5'
+    ${If} $5 P<> 0
+      StrCpy $EveErrorText "安装位置不能包含上级目录标记。"
+      Return
+    ${EndIf}
+
     ClearErrors
     ExpandEnvStrings $1 "$0"
     ${If} ${Errors}
@@ -385,6 +415,18 @@ Var EveButtonCaption
       Return
     ${EndIf}
 
+    ; The elevated instance consumes a path supplied through HKCU. Re-check
+    ; the scope here so a tampered registry value cannot redirect a machine
+    ; install outside Program Files.
+    ${If} $EveInstallAllUsers == "1"
+      StrCpy $4 "$PROGRAMFILES64\"
+      System::Call 'shlwapi::PathIsPrefixW(w "$4", w "$2") i .r5'
+      ${If} $5 == 0
+        StrCpy $EveErrorText "所有用户安装位置必须位于 Program Files 文件夹内。"
+        Return
+      ${EndIf}
+    ${EndIf}
+
     StrCpy $INSTDIR "$2"
     StrCpy $EvePathValid "1"
   FunctionEnd
@@ -397,25 +439,74 @@ Var EveButtonCaption
     ${EndIf}
   FunctionEnd
 
+  Function EveRefreshScope
+    Call EveClearPathError
+    ${If} $EveInstallAllUsers == "1"
+      ShowWindow $EveScopeCurrentCheck ${SW_HIDE}
+      ShowWindow $EveScopeAllCheck ${SW_SHOW}
+      SetCtlColors $EveScopeCurrentTitle ${EVE_TEXT_SECONDARY} ${EVE_SURFACE}
+      SetCtlColors $EveScopeCurrentDetail ${EVE_TEXT_TERTIARY} ${EVE_SURFACE}
+      SetCtlColors $EveScopeAllTitle ${EVE_ACCENT} ${EVE_SURFACE}
+      SetCtlColors $EveScopeAllDetail ${EVE_TEXT_SECONDARY} ${EVE_SURFACE}
+    ${Else}
+      ShowWindow $EveScopeCurrentCheck ${SW_SHOW}
+      ShowWindow $EveScopeAllCheck ${SW_HIDE}
+      SetCtlColors $EveScopeCurrentTitle ${EVE_ACCENT} ${EVE_SURFACE}
+      SetCtlColors $EveScopeCurrentDetail ${EVE_TEXT_SECONDARY} ${EVE_SURFACE}
+      SetCtlColors $EveScopeAllTitle ${EVE_TEXT_SECONDARY} ${EVE_SURFACE}
+      SetCtlColors $EveScopeAllDetail ${EVE_TEXT_TERTIARY} ${EVE_SURFACE}
+    ${EndIf}
+    ${NSD_SetText} $EvePathField "$INSTDIR"
+  FunctionEnd
+
+  Function EveSelectCurrent
+    Pop $0
+    StrCpy $EveInstallAllUsers "0"
+    StrCpy $INSTDIR "$LOCALAPPDATA\Programs\Eve"
+    Call EveRefreshScope
+  FunctionEnd
+
+  Function EveSelectAllUsers
+    Pop $0
+    StrCpy $EveInstallAllUsers "1"
+    StrCpy $INSTDIR "$PROGRAMFILES64\Eve"
+    Call EveRefreshScope
+  FunctionEnd
+
   Function EveWelcomeShow
+    ; An elevated replacement instance resumes at the install page; the user
+    ; already made the scope choice in the visible instance.
+    ${If} $EveElevatedResume == "1"
+      Abort
+    ${EndIf}
     !insertmacro EveBeginPageBody "" "installerWelcome.bmp"
 
-    !insertmacro EveRawStatic $R3 "安装 Eve" 64 90 450 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "24" "650" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R4 "安装到当前账户，无需管理员权限。" 64 132 450 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R5 "安装位置" 64 178 180 18 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "600" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R3 "安装 Eve" 64 82 450 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "24" "650" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R4 "选择安装范围，然后确认安装位置。" 64 119 450 22 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
 
-    System::Call 'user32::CreateWindowExW(i 0, w "EDIT", w "$INSTDIR", i ${EVE_EDIT_STYLE}, i 68, i 205, i 424, i 32, p $EveDialog, p 0, p 0, p 0) p.r0'
+    !insertmacro EveRawStatic $EveScopeCurrentTitle "仅为我" 82 162 170 21 $EveDialog ${EVE_ACCENT} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "650" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $EveScopeCurrentDetail "只在此账户可用" 82 187 174 18 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "9" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $EveScopeAllTitle "所有用户" 342 162 166 21 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "650" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $EveScopeAllDetail "安装到本机，所有账户可用" 342 187 166 18 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "9" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $EveScopeCurrentCheck "✓" 266 162 18 20 $EveDialog ${EVE_ACCENT} ${EVE_SURFACE} "Segoe UI Symbol" "11" "650" ${EVE_STATIC_CENTER}
+    !insertmacro EveRawStatic $EveScopeAllCheck "✓" 526 162 18 20 $EveDialog ${EVE_ACCENT} ${EVE_SURFACE} "Segoe UI Symbol" "11" "650" ${EVE_STATIC_CENTER}
+    ShowWindow $EveScopeAllCheck ${SW_HIDE}
+    !insertmacro EveTransparentClickTarget $R0 64 151 232 70 $EveDialog EveSelectCurrent
+    !insertmacro EveTransparentClickTarget $R1 324 151 232 70 $EveDialog EveSelectAllUsers
+
+    !insertmacro EveRawStatic $R5 "安装位置" 64 238 180 18 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "600" ${EVE_STATIC_LEFT}
+
+    System::Call 'user32::CreateWindowExW(i 0, w "EDIT", w "$INSTDIR", i ${EVE_EDIT_STYLE}, i 68, i 260, i 424, i 36, p $EveDialog, p 0, p 0, p 0) p.r0'
     StrCpy $EvePathField $0
     SetCtlColors $EvePathField ${EVE_TEXT} ${EVE_INPUT}
     CreateFont $R8 "Microsoft YaHei UI" "10" "400"
     SendMessage $EvePathField ${WM_SETFONT} $R8 1
     SendMessage $EvePathField 0x00D3 0x0003 0x00080008
 
-    !insertmacro EveTextButton $R6 "更改" 506 206 58 34 ${EVE_TEXT} ${EVE_SOFT} EveChangeFolder
+    !insertmacro EveTextButton $R6 "更改" 506 261 58 34 ${EVE_TEXT} ${EVE_SOFT} EveChangeFolder
 
-    !insertmacro EveRawStatic $EvePathError "" 64 250 492 18 $EveDialog ${EVE_DANGER} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "500" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $EvePathError "" 64 304 492 18 $EveDialog ${EVE_DANGER} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "500" ${EVE_STATIC_LEFT}
     ShowWindow $EvePathError ${SW_HIDE}
-    !insertmacro EveRawStatic $R7 "已有会话、技能和科研项目会保留。" 64 276 400 18 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R8 "Eve ${VERSION}" 32 417 120 18 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_BG_BOTTOM} "Segoe UI Variable Text" "9" "400" ${EVE_STATIC_LEFT}
 
     !insertmacro EveTextButton $EveSecondary "取消" 332 346 106 40 ${EVE_TEXT} ${EVE_SURFACE} EveWelcomeCancel
@@ -424,19 +515,55 @@ Var EveButtonCaption
     !insertmacro EveShowPageBody ""
   FunctionEnd
 
-  Function EveWelcomeLeave
-    Call EveReadInstallPath
-    ${If} $EvePathValid != "1"
-      Call EveShowPathError
-      Abort
-    ${EndIf}
-  FunctionEnd
+  !macro EveDeferredWelcomeLeave
+    Function EveWelcomeLeave
+      Call EveReadInstallPath
+      ${If} $EvePathValid != "1"
+        Call EveShowPathError
+        Abort
+      ${EndIf}
+      StrCpy $EveSelectedInstallPath "$INSTDIR"
+      ${If} $EveInstallAllUsers == "1"
+        WriteRegStr HKCU "${EVE_INSTALL_STATE_KEY}" "Scope" "all"
+        WriteRegStr HKCU "${EVE_INSTALL_STATE_KEY}" "Path" "$EveSelectedInstallPath"
+        ShowWindow $HWNDPARENT ${SW_HIDE}
+        !insertmacro UAC_RunElevated
+        ${If} $0 == 0
+          ${If} $1 == 1
+            Quit
+          ${ElseIf} $1 == 2
+            DeleteRegKey HKCU "${EVE_INSTALL_STATE_KEY}"
+            ShowWindow $HWNDPARENT ${SW_SHOW}
+            BringToFront
+            Return
+          ${ElseIf} $1 == 3
+            !insertmacro UAC_RunElevated
+            ${If} $0 == 0
+            ${AndIf} $1 == 1
+              Quit
+            ${EndIf}
+          ${EndIf}
+        ${EndIf}
+        DeleteRegKey HKCU "${EVE_INSTALL_STATE_KEY}"
+        ShowWindow $HWNDPARENT ${SW_SHOW}
+        BringToFront
+        StrCpy $EveErrorText "系统确认未完成，安装尚未开始。"
+        Call EveShowPathError
+        Abort
+      ${EndIf}
+      DeleteRegKey HKCU "${EVE_INSTALL_STATE_KEY}"
+    FunctionEnd
+  !macroend
 
   Function EveChangeFolder
     Pop $0
     ${NSD_GetText} $EvePathField $0
     ${If} $0 == ""
-      StrCpy $0 "$LOCALAPPDATA\Programs\Eve"
+      ${If} $EveInstallAllUsers == "1"
+        StrCpy $0 "$PROGRAMFILES64\Eve"
+      ${Else}
+        StrCpy $0 "$LOCALAPPDATA\Programs\Eve"
+      ${EndIf}
     ${EndIf}
     nsDialogs::SelectFolderDialog "选择 Eve 安装位置" "$0"
     Pop $1
@@ -479,7 +606,7 @@ Var EveButtonCaption
     StrCpy $EveLaunchOnFinish "1"
 
     !insertmacro EveRawStatic $R3 "安装完成" 128 92 400 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "24" "650" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R4 "Eve 已准备就绪，可以开始新的科研工作。" 128 136 400 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R4 "Eve 已安装到本机。" 128 136 400 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R5 "安装位置" 80 222 180 18 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_BG} "Microsoft YaHei UI" "9" "500" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R6 "$INSTDIR" 80 246 456 22 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_BG} "Segoe UI Variable Text" "10" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R7 "Eve ${VERSION}" 32 417 120 18 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_BG_BOTTOM} "Segoe UI Variable Text" "9" "400" ${EVE_STATIC_LEFT}
@@ -515,7 +642,7 @@ Var EveButtonCaption
     !insertmacro EveBeginPageBody "un." "installerUninstall.bmp"
 
     !insertmacro EveRawStatic $R3 "卸载 Eve" 64 90 450 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "24" "650" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R4 "只移除应用程序，不删除你的科研资料。" 64 132 450 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R4 "移除应用，保留科研资料。" 64 132 450 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R5 "会保留" 80 193 180 18 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_BG} "Microsoft YaHei UI" "10" "600" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R6 "科研项目与数据 · 技能与记忆 · 设置与偏好" 80 223 448 20 $EveDialog ${EVE_TEXT} ${EVE_BG} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R7 "当前安装位置" 80 253 180 16 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_BG} "Microsoft YaHei UI" "9" "400" ${EVE_STATIC_LEFT}
@@ -545,7 +672,7 @@ Var EveButtonCaption
     !insertmacro EveBeginPageBody "un." "installerUninstallFinish.bmp"
 
     !insertmacro EveRawStatic $R3 "卸载完成" 128 92 400 38 $EveDialog ${EVE_TEXT} ${EVE_SURFACE} "Segoe UI Variable Display" "24" "650" ${EVE_STATIC_LEFT}
-    !insertmacro EveRawStatic $R4 "Eve 已从当前账户移除。" 128 136 400 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
+    !insertmacro EveRawStatic $R4 "Eve 已从本机移除。" 128 136 400 24 $EveDialog ${EVE_TEXT_SECONDARY} ${EVE_SURFACE} "Microsoft YaHei UI" "11" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R5 "科研项目、技能、记忆和设置均已保留。" 128 188 400 24 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_SURFACE} "Microsoft YaHei UI" "10" "400" ${EVE_STATIC_LEFT}
     !insertmacro EveRawStatic $R6 "Eve ${VERSION}" 32 417 120 18 $EveDialog ${EVE_TEXT_TERTIARY} ${EVE_BG_BOTTOM} "Segoe UI Variable Text" "9" "400" ${EVE_STATIC_LEFT}
 
@@ -571,17 +698,58 @@ Var EveButtonCaption
 !endif
 
 !macro customInit
-  !insertmacro setInstallModePerUser
+  ${If} ${UAC_IsInnerInstance}
+    ReadRegStr $EveInstallAllUsers HKCU "${EVE_INSTALL_STATE_KEY}" "Scope"
+    ReadRegStr $EveSelectedInstallPath HKCU "${EVE_INSTALL_STATE_KEY}" "Path"
+    StrCpy $EveElevatedResume "1"
+    DeleteRegKey HKCU "${EVE_INSTALL_STATE_KEY}"
+    ${If} $EveInstallAllUsers == "all"
+      StrCpy $EveInstallAllUsers "1"
+      !insertmacro setInstallModePerAllUsers
+      ${If} "$EveSelectedInstallPath" != ""
+        StrCpy $INSTDIR "$EveSelectedInstallPath"
+        Call EveNormalizePath
+        ${If} $EvePathValid != "1"
+          ; Fail closed rather than honoring an untrusted elevated path.
+          StrCpy $INSTDIR "$PROGRAMFILES64\Eve"
+          StrCpy $EveSelectedInstallPath "$INSTDIR"
+          StrCpy $EvePathValid "1"
+        ${EndIf}
+      ${EndIf}
+    ${Else}
+      StrCpy $EveInstallAllUsers "0"
+      !insertmacro setInstallModePerUser
+    ${EndIf}
+  ${Else}
+    DeleteRegKey HKCU "${EVE_INSTALL_STATE_KEY}"
+    StrCpy $EveElevatedResume "0"
+    StrCpy $EveInstallAllUsers "0"
+    !insertmacro setInstallModePerUser
+  ${EndIf}
 !macroend
 
 !macro customInstallMode
-  StrCpy $isForceCurrentInstall "1"
+  !ifndef BUILD_UNINSTALLER
+    ${If} $EveInstallAllUsers == "1"
+      StrCpy $isForceCurrentInstall "0"
+      StrCpy $isForceMachineInstall "1"
+      !insertmacro setInstallModePerAllUsers
+    ${Else}
+      StrCpy $isForceMachineInstall "0"
+      StrCpy $isForceCurrentInstall "1"
+      !insertmacro setInstallModePerUser
+    ${EndIf}
+    ${If} "$EveSelectedInstallPath" != ""
+      StrCpy $INSTDIR "$EveSelectedInstallPath"
+    ${EndIf}
+  !endif
 !macroend
 
 !ifndef BUILD_UNINSTALLER
   !macro customInstall
     !insertmacro EveHideChromeBody
     !insertmacro EvePostNextBody
+    DeleteRegKey HKCU "${EVE_INSTALL_STATE_KEY}"
   !macroend
 !else
   !macro customUnInstall
@@ -592,6 +760,12 @@ Var EveButtonCaption
 
 !macro customWelcomePage
   Page custom EveWelcomeShow EveWelcomeLeave
+!macroend
+
+!macro customHeader
+  !ifndef BUILD_UNINSTALLER
+    !insertmacro EveDeferredWelcomeLeave
+  !endif
 !macroend
 
 !ifndef BUILD_UNINSTALLER

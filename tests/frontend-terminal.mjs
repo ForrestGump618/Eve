@@ -113,7 +113,7 @@ test('appearance reads existing CSS tokens for light and dark themes',()=>{
  for(const prefix of ['light','dark']){
   const appearance=terminalAppearance({getPropertyValue:name=>`${prefix}:${name}`});
   assert.equal(appearance.theme.background,`${prefix}:--panel`);
-  assert.equal(appearance.theme.selectionBackground,`${prefix}:--accent-soft-2`);
+  assert.equal(appearance.theme.selectionBackground,`${prefix}:--selection-bg`);
   assert.equal(appearance.theme.red,`${prefix}:--red`);
   assert.equal(appearance.fontFamily,`${prefix}:--font-mono`);
  }

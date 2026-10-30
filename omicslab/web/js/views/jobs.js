@@ -1,8 +1,8 @@
 // Background jobs view: submit python/shell tasks, watch incremental logs, cancel.
 
-import { icon } from '../icons.js?v=1.5.0';
-import { esc, fmtBytes, relTime, fmtTime, fmtDuration, uid } from '../util.js?v=1.5.0';
-import { api, errorMessage } from '../api.js?v=1.5.0';
+import { icon } from '../icons.js?v=1.0.0';
+import { esc, fmtBytes, relTime, fmtTime, fmtDuration, uid } from '../util.js?v=1.0.0';
+import { api, errorMessage } from '../api.js?v=1.0.0';
 import {
   toastSuccess,
   toastError,
@@ -10,7 +10,7 @@ import {
   confirmDialog,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.5.0';
+} from '../ui.js?v=1.0.0';
 
 const LOG_POLL_MS = 1500;
 const LIST_POLL_MS = 5000;

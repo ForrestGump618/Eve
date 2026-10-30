@@ -1,10 +1,10 @@
-import {api,errorMessage} from '../api.js?v=1.5.0';
-import {esc,escAttr} from '../util.js?v=1.5.0';
-import {getState} from '../store.js?v=1.5.0';
-import {on} from '../bus.js?v=1.5.0';
-import {openModal,toastError,toastSuccess} from '../ui.js?v=1.5.0';
-import {contextRequestsHtml,contextActivityHtml,contextOverviewHtml} from '../context-components.js?v=1.5.0';
-import {openRunDetail} from '../runview.js?v=1.5.0';
+import {api,errorMessage} from '../api.js?v=1.0.0';
+import {esc,escAttr} from '../util.js?v=1.0.0';
+import {getState} from '../store.js?v=1.0.0';
+import {on} from '../bus.js?v=1.0.0';
+import {openModal,toastError,toastSuccess} from '../ui.js?v=1.0.0';
+import {contextRequestsHtml,contextActivityHtml,contextOverviewHtml} from '../context-components.js?v=1.0.0';
+import {openRunDetail} from '../runview.js?v=1.0.0';
 
 export async function mount(root){
  const abort=new AbortController();let disposed=false,epoch=0,data=null,sourceRefs=[],overview=null,overviewEpoch=0,overviewMode=false;
@@ -37,7 +37,7 @@ export async function mount(root){
    <section class="eve-dashboard-card"><div class="eve-card-heading"><h2>压缩记录</h2><button class="btn btn-sm" data-context-action="compact" ${data.task_id?'':'disabled'}>生成摘要</button></div><p class="eve-detail-note">自动压缩由运行时执行。此处管理摘要视图；恢复摘要不回滚文件、工具操作或会话原文。执行中的会话禁止手动压缩与恢复。</p>${data.harness_error?`<p role="alert">${esc(data.harness_error)}</p>`:''}
    ${snapshots.map(snapshot=>{
     const refs=[...(snapshot.userGoals||[]),...(snapshot.observedFacts||[])];
-    return `<details class="context-snapshot"><summary>版本 ${snapshot.version} · ${new Date(snapshot.createdAt).toLocaleString()}<span>${snapshot.stats.beforeTokens.toLocaleString()} → ${snapshot.stats.afterTokens.toLocaleString()}</span></summary><div class="context-snapshot-body"><p>显式字段校验保留率 ${Math.round(snapshot.stats.explicitFactRetention*100)}%（不代表全文语义无损）</p><pre>${esc(JSON.stringify(snapshot.state,null,2))}</pre><div>${refs.slice(0,30).map(ref=>{const index=sourceRefs.push(ref.source)-1;return `<button class="context-source" data-context-source="${index}">${esc(ref.text.slice(0,180))}</button>`;}).join('')}</div><button class="btn btn-sm" data-context-action="restore" data-version="${snapshot.version}">恢复此摘要视图</button></div></details>`;
+    return `<details class="context-snapshot"><summary>版本 ${snapshot.version} · ${new Date(snapshot.createdAt).toLocaleString()}<span>${snapshot.stats.beforeTokens.toLocaleString()} → ${snapshot.stats.afterTokens.toLocaleString()}</span></summary><div class="context-snapshot-body"><p>显式字段保留 ${Math.round(snapshot.stats.explicitFactRetention*100)}%</p><div>${refs.slice(0,30).map(ref=>{const index=sourceRefs.push(ref.source)-1;return `<button class="context-source" data-context-source="${index}">${esc(ref.text.slice(0,180))}</button>`;}).join('')}</div><div class="sw-inline"><button class="btn btn-sm" data-context-action="restore" data-version="${snapshot.version}">恢复此摘要视图</button><details class="technical-details"><summary>技术快照</summary><pre class="context-original">${esc(JSON.stringify(snapshot.state,null,2))}</pre></details></div></div></details>`;
    }).join('')||'<p class="eve-muted">尚无压缩摘要。原始上下文仍保留。</p>'}</section>
    ${contextRequestsHtml(harness?.requests)}${contextActivityHtml(data)}
    <section class="eve-dashboard-card"><h2>查找会话与压缩前原文</h2><form id="context-search"><input class="input" id="context-query" placeholder="关键词、路径或错误信息" aria-label="检索上下文"/><button class="btn btn-sm">查找</button></form><div id="context-matches"></div></section>`;
@@ -57,7 +57,7 @@ export async function mount(root){
     const result=await api.request(`/api/conversations/${encodeURIComponent(cid)}/context/${request?'request':'requests'}`,{method:'POST',body:{task_id:currentTask,...(request?{sequence:Number(request.dataset.contextRequest)}:{offset:Number(more.dataset.contextMore)})}});
     if(disposed||selector.value!==cid)return;
     if(request){
-     const modal=openModal({title:`模型请求 ${result.sequence}`,size:'lg',html:`<div class="context-request-browser">${(result.messages||[]).map(m=>`<details class="context-snapshot"><summary>${esc(m.role)} · ${m.content.length} 字符</summary><pre class="context-original">${esc(m.content)}</pre>${m.tool_calls?`<pre>${esc(JSON.stringify(m.tool_calls,null,2))}</pre>`:''}<button class="btn btn-sm" data-original-index="${m.source.messageIndex}">原文来源</button></details>`).join('')}<details><summary>工具 Schema（${result.tools?.length||0}）</summary><pre class="context-original">${esc(JSON.stringify(result.tools,null,2))}</pre></details></div>`});
+     const modal=openModal({title:`模型请求 ${result.sequence}`,size:'lg',html:`<div class="context-request-browser">${(result.messages||[]).map(m=>`<details class="context-snapshot"><summary>${esc(m.role)} · ${m.content.length} 字符</summary><pre class="context-original">${esc(m.content)}</pre>${m.tool_calls?`<details class="technical-details"><summary>工具调用数据</summary><pre class="context-original">${esc(JSON.stringify(m.tool_calls,null,2))}</pre></details>`:''}<button class="btn btn-sm" data-original-index="${m.source.messageIndex}">原文来源</button></details>`).join('')}<details class="technical-details"><summary>工具定义（${result.tools?.length||0}）</summary><pre class="context-original">${esc(JSON.stringify(result.tools,null,2))}</pre></details></div>`});
      modal.body.onclick=async e=>{const source=e.target.closest('[data-original-index]');if(!source)return;source.disabled=true;try{
       const m=result.messages.find(m=>m.source.messageIndex===Number(source.dataset.originalIndex));
       const original=await api.request(`/api/conversations/${encodeURIComponent(cid)}/context/source`,{method:'POST',body:{task_id:currentTask,source:m.source}});

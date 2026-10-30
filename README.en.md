@@ -1,4 +1,4 @@
-# Eve 1.5.0
+# Eve 1.0.0
 
 A Windows research agent with a light integrated workbench, durable tasks, local and SSH execution, tool traces, permissions, steering, MCP and progressively loaded skills.
 

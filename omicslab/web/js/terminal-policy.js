@@ -12,7 +12,7 @@ export function terminalAppearance(styles){
  const token=name=>styles.getPropertyValue(name).trim();
  const colors={
   background:'--panel',foreground:'--text',cursor:'--text',cursorAccent:'--panel',
-  selectionBackground:'--accent-soft-2',selectionInactiveBackground:'--accent-soft',
+ selectionBackground:'--selection-bg',selectionInactiveBackground:'--accent-soft',
   black:'--bg-deep',brightBlack:'--text-3',red:'--red',brightRed:'--red',
   green:'--green',brightGreen:'--green',yellow:'--amber',brightYellow:'--amber',
   blue:'--blue',brightBlue:'--blue',magenta:'--accent',brightMagenta:'--accent',

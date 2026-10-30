@@ -16,8 +16,8 @@
 
 ## 提问渠道
 
-- **Bug 或功能建议**：请使用 [issue 模板](https://github.com/ForrestGump618/suwen/issues/new/choose)，它们会提示你附上必要信息。
-- **开放式问题、使用心得、方案讨论**：欢迎使用 [GitHub Discussions](https://github.com/ForrestGump618/suwen/discussions)（若已启用）。
+- **Bug 或功能建议**：请使用 [issue 模板](https://github.com/ForrestGump618/Eve/issues/new/choose)，它们会提示你附上必要信息。
+- **开放式问题、使用心得、方案讨论**：欢迎使用 [GitHub Discussions](https://github.com/ForrestGump618/Eve/discussions)（若已启用）。
 - **安全问题**：**不要**开公开 issue，请按 [SECURITY.md](SECURITY.md) 私下报告。
 - **贡献代码或文档**：先读 [CONTRIBUTING.md](CONTRIBUTING.md)。
 

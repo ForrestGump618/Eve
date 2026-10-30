@@ -1,6 +1,6 @@
-import {api} from './api.js?v=1.5.0';
-import {artifactConfig} from './artifact-config.js?v=1.5.0';
-import {getArtifactSidebar} from './artifact-tabs.js?v=1.5.0';
+import {api} from './api.js?v=1.0.0';
+import {artifactConfig} from './artifact-config.js?v=1.0.0';
+import {getArtifactSidebar} from './artifact-tabs.js?v=1.0.0';
 
 // Each srcdoc gets an opaque origin. A trusted outer frame also blocks the
 // artifact's own frame navigation, which its document CSP alone cannot do.
@@ -96,7 +96,7 @@ registerArtifactRenderer('html', async (artifact, {signal}) => {
     source.addEventListener('click', async () => {
       source.disabled = true;
       try {
-        const {openWorkspaceEditor} = await import('./workspace-editor.js?v=1.5.0');
+        const {openWorkspaceEditor} = await import('./workspace-editor.js?v=1.0.0');
         const data = await api.request(`/api/workspaces/${encodeURIComponent(workspaceId)}`, {signal});
         if (!signal.aborted) await openWorkspaceEditor(data.workspace || data, path);
       } catch (error) {

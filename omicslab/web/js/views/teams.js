@@ -1,10 +1,10 @@
-import {api, errorMessage} from '../api.js?v=1.5.0';
-import {esc, escAttr, setPref} from '../util.js?v=1.5.0';
-import {getState, navigate, setState} from '../store.js?v=1.5.0';
-import {on, emit} from '../bus.js?v=1.5.0';
-import {openModal, toastError, confirmDialog, promptDialog} from '../ui.js?v=1.5.0';
-import {openRunDetail} from '../runview.js?v=1.5.0';
-import {teamConfig, teamLabels, deliveryLabels, teamActions, ensureTeamStyles} from '../team-config.js?v=1.5.0';
+import {api, errorMessage} from '../api.js?v=1.0.0';
+import {esc, escAttr, setPref, summarizeValue, prettyValue} from '../util.js?v=1.0.0';
+import {getState, navigate, setState} from '../store.js?v=1.0.0';
+import {on, emit} from '../bus.js?v=1.0.0';
+import {openModal, toastError, confirmDialog, promptDialog} from '../ui.js?v=1.0.0';
+import {openRunDetail} from '../runview.js?v=1.0.0';
+import {teamConfig, teamLabels, deliveryLabels, teamActions, ensureTeamStyles} from '../team-config.js?v=1.0.0';
 
 const actionLabels = {approve: '批准并运行', pause: '暂停', resume: '恢复', cancel: '取消任务', archive: '归档'};
 const statusLabel = status => teamLabels[status] || status || '任务缺失';
@@ -64,7 +64,7 @@ export async function mount(root) {
           <div class="team-member-identity"><h4>${esc(member.name || member.id)}</h4><span class="team-note">${esc(member.provider || '默认供应商')} / ${esc(member.model || '默认模型')}</span></div>
           <div class="team-member-goal"><p>${esc(member.goal || '尚未分配目标')}</p><span class="team-dependency">${member.depends_on?.length ? '依赖：' + member.depends_on.map(id => esc(name(id))).join('、') : '无依赖，可独立执行'}</span>
             ${task.error ? `<p class="team-error" role="alert">${esc(task.error)}</p>` : ''}
-            ${task.result ? `<details class="team-result"><summary>执行结果</summary><pre>${esc(task.result)}</pre></details>` : ''}</div>
+            ${task.result ? `<details class="team-result"><summary>执行结果 · ${esc(summarizeValue(task.result, 180))}</summary><pre>${esc(prettyValue(task.result, 20_000))}</pre></details>` : ''}</div>
           <div class="team-member-controls"><span class="team-status" data-status="${escAttr(task.status || (team.draft ? 'draft' : 'missing'))}">${esc(team.draft ? '待批准' : statusLabel(task.status))}</span><div class="team-row-actions">
             ${node.run_id ? button('轨迹', `data-run="${escAttr(node.run_id)}"`) : ''}${node.session_id ? button('打开会话', `data-session="${escAttr(node.session_id)}"`) : ''}
             ${!team.draft && !team.archived && member.task ? button('后续任务', `data-member-followup="${escAttr(member.id)}"`) : ''}</div></div></article>`;

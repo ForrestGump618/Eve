@@ -2,13 +2,13 @@
 
 Eve 是一个面向科研工作的桌面智能体。它把文献、实验、数据和计算环境放在同一条可追溯的工作流里，帮助研究者从问题出发，完成资料整理、分析执行、结果核验和报告交付。
 
-[![Release](https://img.shields.io/badge/release-1.5.0-202020)](https://github.com/ForrestGump618/suwen/releases/tag/eve-v1.5.0)
-[![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/suwen/releases)
+[![Release](https://img.shields.io/badge/release-1.0.0-202020)](https://github.com/ForrestGump618/Eve/releases/latest)
+[![Windows](https://img.shields.io/badge/platform-Windows-202020)](https://github.com/ForrestGump618/Eve/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-202020)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/suwen?style=flat&logo=github)](https://github.com/ForrestGump618/suwen/stargazers)
-[![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/suwen?style=flat)](https://github.com/ForrestGump618/suwen/commits/codex/eve-1.0-science)
+[![GitHub stars](https://img.shields.io/github/stars/ForrestGump618/Eve?style=flat&logo=github)](https://github.com/ForrestGump618/Eve/stargazers)
+[![Latest commit](https://img.shields.io/github/last-commit/ForrestGump618/Eve?style=flat)](https://github.com/ForrestGump618/Eve/commits/main)
 
-> 本轮交付 Eve 1.5.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/wet-lab-1.5.0/README.md)。
+> 本轮交付 Eve 1.0.0 源码与 Windows x64 安装包。功能验收、安装包校验值和未验证边界见 [本轮报告](docs/verification/eve-1.0.0-release/README.md)。
 
 | 深度调研 | 实验设计 | 多组学 | 工作区 | 图表批注 |
 | --- | --- | --- | --- | --- |
@@ -53,7 +53,7 @@ flowchart LR
 <details>
 <summary>30 秒上手清单</summary>
 
-- [ ] 下载并安装 Eve 1.5.0
+- [ ] 下载并安装 Eve 1.0.0
 - [ ] 在“设置 → 模型连接”保存一个可用模型
 - [ ] 选择本地目录或 SSH 工作区
 - [ ] 在输入框发送一个只读任务
@@ -237,7 +237,7 @@ Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其�
 
 | 项目 | 当前值 |
 | --- | --- |
-| 版本 | `1.5.0` |
+| 版本 | `1.0.0` |
 | 平台 | Windows x64 |
 | 当前交付 | 源码更新 + 本机构建的无签名安装包 |
 | 默认界面 | 浅色工作台 |
@@ -245,9 +245,9 @@ Eve 明确掌握三类受控自我改进能力，并由系统提示词固定其�
 | 数据策略 | 结果、轨迹和证据保存在本机工作区 |
 
 <p align="center">
-  <a href="https://github.com/ForrestGump618/suwen/releases">查看 Release</a> ·
-  <a href="https://github.com/ForrestGump618/suwen/issues">提交问题</a> ·
-  <a href="https://github.com/ForrestGump618/suwen/discussions">参与讨论</a>
+  <a href="https://github.com/ForrestGump618/Eve/releases">查看 Release</a> ·
+  <a href="https://github.com/ForrestGump618/Eve/issues">提交问题</a> ·
+  <a href="https://github.com/ForrestGump618/Eve/discussions">参与讨论</a>
 </p>
 
 ## 使用方法

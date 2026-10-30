@@ -25,7 +25,7 @@
 Windows PowerShell：
 
 ```powershell
-git clone https://github.com/ForrestGump618/suwen.git
+git clone https://github.com/ForrestGump618/Eve.git
 cd suwen
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned   # 仅当前用户，允许执行本地脚本
 .\scripts\bootstrap.ps1 -Extras dev
@@ -34,7 +34,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned   # 仅当前用户，允许
 macOS / Linux：
 
 ```bash
-git clone https://github.com/ForrestGump618/suwen.git
+git clone https://github.com/ForrestGump618/Eve.git
 cd suwen
 chmod +x scripts/*.sh
 ./scripts/bootstrap.sh --extras dev

@@ -29,6 +29,35 @@ test('all science skills retain runnable scripts, legal notices and pinned metad
   }
 });
 
+test('CNS and Sci writing, citation, review and publication-figure skills stay pinned and discoverable',()=>{
+  const library=new SkillLibrary(resolve('skill-library'));
+  const expected=new Map([
+    ['scientific-writing','511a2096bebecd8cf0f8212b9d262d37154ae1ba566eb385d93ac968682edbd1'],
+    ['scientific-visualization','8cbde7cdc10d959cf72cfd08335cc8ce996247eee6ebdb900eb64a4cb0ff34a3'],
+    ['scientific-schematics','e15d761ef88013c98fd5b19cc144aba7336e20dbadf340db17bd1ba2227d1d69'],
+    ['citation-management','dc79fe1e8438dcf598040615d5323360c6a7ed0b868fc3ffc82512c871a1e3ff'],
+    ['venue-templates','8607993327f451cc6b9d7ca7502c0e7d5f5060954fec12e2ea779d96841e78b5'],
+    ['peer-review','a042ccdc76d3399431b9a6c4cd4f98968eab964b1c14baeea4d9e73de82c7d19'],
+  ]);
+  for(const [name,sha256] of expected){
+    const skill=library.skills.find(item=>item.name===name);
+    assert.ok(skill,name);
+    assert.equal(skill.sha256,sha256,name);
+    assert.match(skill.source,/K-Dense-AI\/scientific-agent-skills\/tree\/5f2bc0341354fd5590aef76a533ada1e1e5b4e62/,name);
+    assert.ok(library.read(skill.id,'SKILL.md').length>500,name);
+  }
+  for(const [query,skillName] of [
+    ['论文写作','scientific-writing'],
+    ['出版图','scientific-visualization'],
+    ['示意图','scientific-schematics'],
+    ['引文','citation-management'],
+    ['投稿','venue-templates'],
+    ['同行评审','peer-review'],
+  ] as const){
+    assert.ok(library.search(query).map(result=>library.get(result.id).name).includes(skillName),query);
+  }
+});
+
 test('scientific execution requires loading and stays on the bound SSH environment',async t=>{
   const home=mkdtempSync(join(tmpdir(),'eve-science-registry-')),store=new Store(':memory:');
   t.after(()=>{store.close();rmSync(home,{recursive:true,force:true});});

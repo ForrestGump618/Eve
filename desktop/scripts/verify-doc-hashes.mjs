@@ -13,7 +13,7 @@ const allowMissingRelease = process.argv.includes('--allow-missing-release');
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 if(pkg.build?.productName==='Eve'){
   const records={
-    '1.0.0':'docs/verification/eve-1.0/installer.json',
+    '1.0.0':'docs/verification/eve-1.0.0-release/installer.json',
     '1.1.0':'docs/verification/platform-upgrade/installer.json',
     '1.2.0':'docs/verification/wish-research-1.2.0/installer.json',
     '1.3.0':'docs/verification/eve-1.3.0/installer.json',

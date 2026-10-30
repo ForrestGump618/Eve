@@ -1,5 +1,5 @@
-import {api,errorMessage} from './api.js?v=1.5.0';
-import {esc,escAttr} from './util.js?v=1.5.0';
+import {api,errorMessage} from './api.js?v=1.0.0';
+import {esc,escAttr} from './util.js?v=1.0.0';
 
 export function mountProviderModels(body,initial=[]){
  let selected=new Set(initial),available=[...selected],generation=0;

@@ -70,11 +70,11 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/__artifact-test`);
   await page.waitForLoadState('networkidle');
   await page.evaluate(async () => {
-    window.viewer = await import('/js/artifact-viewer.js?v=1.5.0');
-    window.annotator = await import('/js/figure-annotator.js?v=1.5.0');
-    window.tabs = await import('/js/artifact-tabs.js?v=1.5.0');
-    window.bus = await import('/js/bus.js?v=1.5.0');
-    window.config = (await import('/js/artifact-config.js?v=1.5.0')).artifactConfig;
+    window.viewer = await import('/js/artifact-viewer.js?v=1.0.0');
+    window.annotator = await import('/js/figure-annotator.js?v=1.0.0');
+    window.tabs = await import('/js/artifact-tabs.js?v=1.0.0');
+    window.bus = await import('/js/bus.js?v=1.0.0');
+    window.config = (await import('/js/artifact-config.js?v=1.0.0')).artifactConfig;
     window.blobUrls = new Set();
     const createURL = URL.createObjectURL.bind(URL), revokeURL = URL.revokeObjectURL.bind(URL);
     URL.createObjectURL = blob => { const url = createURL(blob); blobUrls.add(url); return url; };
@@ -160,7 +160,7 @@ try {
   assert.equal(await page.locator('.artifact-text').textContent(), '{\n  "safe": true\n}');
   await page.evaluate(() => tabs.closeArtifactSidebar());
   const sidebar = await page.evaluate(async () => {
-    const {workspaceSidebarHtml, conversationListHtml} = await import('/js/workspace-sidebar.js?v=1.5.0');
+    const {workspaceSidebarHtml, conversationListHtml} = await import('/js/workspace-sidebar.js?v=1.0.0');
     const html = conversationListHtml([{id: 'c1', title: '<script>unsafe</script>', archived: false, pinned: false, meta: {archived: true, pinned: true}}]);
     return {html, links: workspaceSidebarHtml()};
   });

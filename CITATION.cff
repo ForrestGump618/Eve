@@ -1,22 +1,24 @@
 cff-version: 1.2.0
-message: "If you use Suwen (素问) in your research or product, please cite it as below."
-title: "Suwen (素问)"
-abstract: "A local-first, single-cell and spatial-omics analysis workbench built on a Python kernel, a FastAPI backend, a vanilla ES-module Web UI, and an evidence chain with reproducible run records."
+message: "If you use Eve in your research or product, please cite it as below."
+title: "Eve"
+abstract: "A local-first AI research workspace with durable agent tasks, progressively loaded scientific skills, local and SSH execution, evidence gates and reproducible run records."
 type: software
 authors:
   - name: "ForrestGump618"
   - name: "OmicsLab contributors"
-version: "1.5.0"
+version: "1.0.0"
 date-released: "2026-10-30"
 license: Apache-2.0
-repository-code: "https://github.com/ForrestGump618/suwen"
-url: "https://github.com/ForrestGump618/suwen"
+repository-code: "https://github.com/ForrestGump618/Eve"
+url: "https://github.com/ForrestGump618/Eve"
 keywords:
   - bioinformatics
   - single-cell
   - spatial-omics
   - analysis workbench
   - LLM agents
+  - scientific writing
+  - scientific visualization
   - reproducibility
   - Python
   - FastAPI

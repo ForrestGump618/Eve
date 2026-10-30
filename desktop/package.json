@@ -1,6 +1,6 @@
 {
   "name": "eve-desktop",
-  "version": "1.5.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Eve research workspace with durable local and SSH task execution",
   "main": "dist/main.js",
@@ -100,6 +100,7 @@
     "nsis": {
       "oneClick": false,
       "perMachine": false,
+      "allowElevation": true,
       "allowToChangeInstallationDirectory": false,
       "deleteAppDataOnUninstall": false,
       "shortcutName": "Eve",

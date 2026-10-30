@@ -1,8 +1,8 @@
-# Suwen 文档
+# Eve 文档
 
-素问 Suwen 是面向日常工作与科研的本地 AI Agent 工作室：在本机或 SSH 工作区里运行持久的 Agent 任务，用技能扩展分析方法，并对科研结论执行证据门控。本目录是它的公开文档入口。
+Eve 是面向日常工作与科研的本地 AI Agent 工作室：在本机或 SSH 工作区里运行持久的 Agent 任务，用按需加载的技能扩展分析方法，并对科研结论执行证据门控。本目录是它的公开文档入口。
 
-> 当前版本 **1.5.0**（Python 发行包名仍为 `omicslab`）。项目根目录的 [README](../README.md) 给出定位、启动方式和能力边界；本页负责把文档按读者和主题组织起来。
+> 当前版本 **1.0.0**。对外名称和仓库使用 Eve；Python 包名、命令别名和部分持久化目录继续保留 `omicslab` / `suwen` 以兼容已有数据。项目根目录的 [README](../README.md) 给出定位、启动方式和能力边界；本页负责把文档按读者和主题组织起来。
 
 消息渠道：[微信扫码与引导设置](CHANNELS.md)。
 
@@ -78,8 +78,9 @@
 | [WISH-RESEARCH.md](WISH-RESEARCH.md) | 一句话愿望到持久科研项目、证据门禁与工作区 | 当前 |
 | [LITERATURE.md](LITERATURE.md) | 文献雷达、辅助模型、技能图、主动分享与生命周期 | 当前 |
 | [WET-LAB-SKILLS.md](WET-LAB-SKILLS.md) | K-Dense 技能来源、湿实验设计、assay 选择、结果解读与证据边界 | 当前 |
-| [verification/literature-1.4.0/README.md](verification/literature-1.4.0/README.md) | 1.4.0 文献雷达、技能图、界面与安装包验收 | 当前 |
-| [verification/wet-lab-1.5.0/README.md](verification/wet-lab-1.5.0/README.md) | 1.5.0 K-Dense 接入、湿实验技能、界面与安装包验收 | 当前 |
+| [verification/eve-1.0.0-release/README.md](verification/eve-1.0.0-release/README.md) | 1.0.0 正式版：科研写作/绘图技能、UI、安装器、安全与发布验收 | 当前 |
+| [verification/literature-1.4.0/README.md](verification/literature-1.4.0/README.md) | 1.4.0 文献雷达、技能图、界面与安装包验收 | 历史 |
+| [verification/wet-lab-1.5.0/README.md](verification/wet-lab-1.5.0/README.md) | 1.5.0 K-Dense 接入、湿实验技能、界面与安装包验收 | 历史 |
 | [REFERENCES-V2.md](REFERENCES-V2.md) | 参考项目清单、借鉴点与许可证边界 | 当前 |
 | [COMPARISON.md](COMPARISON.md) | 与商业组学工作台的功能对照及边界声明（内容整理于 1.3.0 时期） | 当前 |
 | [UPGRADE-1.3.md](UPGRADE-1.3.md) | 1.3.0 SSH 工作区升级说明与验证范围 | 当前 |
@@ -108,13 +109,13 @@
 
 ## 文档约定
 
-- 版本对应：未特别标注时，文档描述 Suwen 2.0.0；正文里的“1.2.0 起”“1.3.0”用于说明能力首次引入的版本或历史记录。
+- 版本对应：未特别标注时，本索引描述 Eve 1.0.0；各独立文档保留其自身标注的版本。正文里的“1.2.0 起”“1.3.0”用于说明能力首次引入的版本或历史记录。
 - 状态用词统一为 **已实现**、**部分实现**、**待实现**、**外部依赖限制**，与 [实现清单](SUWEN-V2-CHECKLIST.md) 保持一致。
 - 界面相关描述以当前 Web UI 为准；接口细节可能随代码变化，发现文档与实现不一致时，请以代码与 `GET /api/health`、`GET /api/runtime/diagnostics` 为准，并提交 Issue。
 
 ---
 
-本文件对应 Suwen 2.0.0。
+本文件对应 Eve 1.0.0。`omicslab`、`suwen` 和素问仅作为兼容标识保留。
 
 ## 2.1 增量
 

@@ -111,12 +111,22 @@ function Draw-PageChrome($graphics, [string]$kind) {
   Draw-BrandMark $graphics
 
   if ($kind -eq 'welcome') {
-    Fill-RoundedRect $graphics '#f7f8fa' 64 201 432 44 12
-    Stroke-RoundedRect $graphics '#d9dde3' 64.5 201.5 431 43 12
-    Fill-RoundedRect $graphics '#f0f2f5' 506 206 58 34 10
+    Fill-RoundedRect $graphics '#f7f8fa' 64 151 232 70 14
+    Stroke-RoundedRect $graphics '#d9dde3' 64.5 151.5 231 69 14
+    Fill-RoundedRect $graphics '#f7f8fa' 324 151 232 70 14
+    Stroke-RoundedRect $graphics '#d9dde3' 324.5 151.5 231 69 14
+
+    $checkRing = New-Object System.Drawing.Pen((Get-Color '#c9d0da'), [single]1.2)
+    $graphics.DrawEllipse($checkRing, 266, 163, 18, 18)
+    $graphics.DrawEllipse($checkRing, 526, 163, 18, 18)
+    $checkRing.Dispose()
+
+    Fill-RoundedRect $graphics '#f7f8fa' 64 259 432 38 11
+    Stroke-RoundedRect $graphics '#d9dde3' 64.5 259.5 431 37 11
+    Fill-RoundedRect $graphics '#f0f2f5' 506 260 58 36 10
 
     $separator = New-Object System.Drawing.Pen((Get-Color '#e8ebef'), 1)
-    $graphics.DrawLine($separator, 64, 323, 556, 323)
+    $graphics.DrawLine($separator, 64, 331, 556, 331)
     $separator.Dispose()
 
     Fill-RoundedRect $graphics '#ffffff' 332 346 106 40 12

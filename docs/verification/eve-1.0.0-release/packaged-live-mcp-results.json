@@ -1,0 +1,944 @@
+{
+  "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+  "name": "Packaged live MCP public database QA",
+  "parentId": null,
+  "status": "completed",
+  "version": 4,
+  "createdAt": 1793324021438,
+  "updatedAt": 1793324032651,
+  "limits": {},
+  "calls": 2,
+  "cost": 0,
+  "tokens": 0,
+  "steps": [
+    {
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "id": "literature",
+      "kind": "pubmed",
+      "input": {
+        "query": "TP53 cancer"
+      },
+      "dependsOn": [],
+      "sideEffect": false,
+      "maxAttempts": 1,
+      "timeoutMs": 30000,
+      "status": "completed",
+      "version": 2,
+      "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+      "attempts": 1,
+      "owner": null,
+      "fence": 1,
+      "leaseUntil": null,
+      "dueAt": null,
+      "output": {
+        "database": "Europe PMC / PubMed",
+        "query": "TP53 cancer",
+        "retrievedAt": "2026-10-30T01:33:42.318Z",
+        "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+        "results": [
+          {
+            "id": "PPR1340521",
+            "source": "PPR",
+            "pmid": null,
+            "title": "Pan-Cancer Proteomic Profiling Reveals Context-Dependent Dysregulation of TP53 Across Tumor Types and Oncogenic Pathways",
+            "doi": "10.21203/rs.3.rs-11149736/v1",
+            "year": "2026",
+            "authors": "Gupta R, Singh DK.",
+            "abstract": " Abstract    Background  The p53 protein, which is a key regulator of genomic stability, cell cycle control, apoptosis, and stress responses, is encoded by TP53, the most commonly mutated tumor suppressor gene in human malignancies. Although TP53 mutations are well-characterized at the genomic level, transcriptomic and mutational data do not always accurately represent protein abundance and functional activity. Therefore, proteomic analysis offers vital information about the functional dysregulation of the p53 pathway in cancer. Methods  Using uniformly processed Clinical Proteomic Tumor Analysis Consortium (CPTAC) datasets, a pan-cancer analysis of TP53 (p53) protein expression was carried out via the UALCAN online platform. Tumor and matched normal tissues from various cancer types were analyzed for TP53 protein expression. Molecular subtype, patient age, and important oncogenic signaling pathways were used to further stratify breast cancer samples. Protein expression levels were statistically assessed using Student's t-test, displayed using box-and-whisker plots, and analyzed as Z-score-normalized data. Results  Heterogeneous control of p53 stability and degradation was reflected in significant, cancer-specific variations in TP53 protein expression across tumor types. TP53 expression in breast cancer differed significantly amongst molecular subtypes, with triple-negative breast cancer showing the highest levels. Age-stratified analysis revealed varying p53 expression patterns, suggesting that demographic factors play a role in p53 regulation. A pathway-based stratification emphasized the context-specific modulation of p53 signaling, uncovering distinct TP53 expression patterns associated with alterations in WNT, HIPPO, NRF2, mTOR, RTK, and p53/Rb pathways. Conclusions  A comprehensive pan-cancer study indicates considerable differences in TP53 protein expression influenced by tumor type, molecular subtype, and the context of signaling pathways. These findings underscore the importance of p53 proteome profiling at both molecular and clinical levels, supporting its application in treatment stratification and the development of biomarkers. ",
+            "url": "https://europepmc.org/article/PPR/PPR1340521"
+          },
+          {
+            "id": "42901386",
+            "source": "MED",
+            "pmid": "42901386",
+            "title": "Brief Report: Characterization of the Potentially Actionable TP53 Y220C Mutation in Non-Small Cell Lung Cancer. A Multicenter, European Thoracic Oncology Platform Study.",
+            "doi": "10.1016/j.jtho.2026.106162",
+            "year": "2026",
+            "authors": "Molina-Vila MA, Tsourti Z, Stenzinger A, Thüsen JV, Hillen LM, Hofman P, Rahmani-Khajouei S, Hegedüs B, Radonic T, Bubendorf L, Madsen LB, Pokharel S, Jordana-Ariza N, Kazdal D, Speel EM, Hendriks LEL, Hofman V, Zoche M, Bölükbas S, Bahce I, Kashima J, Rosell R, Peters S, Kammler R, Dafni U, Finn SP, Stahel RA.",
+            "abstract": " Introduction The tumor suppressor TP53 is the most frequently mutated gene in human cancer, and drugs targeting specific mutant p53 proteins have been developed. Rezatapopt, which reactivates the Y220C p53 protein, was recently evaluated in the Phase I PYNNACLE trial in patients with solid tumors, with promising results. The trial did not enrol any non-small cell lung cancer (NSCLC) cases, and little is known about the clinicopathological characteristics and genetic profile of the TP53 Y220C NSCLC patients. Methods In this multicenter, European Thoracic Oncology Platform-sponsored study, we retrospectively collected data from NSCLC patients from several European institutions with Next Generation Sequencing data available. Results The study included 28,244 NSCLC patients. We found that 195 (0.7%) harbored the TP53 Y220C mutation, a prevalence higher than the average in solid tumors (0.4%). Half of these TP53 Y220C NSCLC patients did not carry any known drivers. No significant association was observed between the TP53 Y220C and gender, smoking status, histology or stage. However, the mutation was significantly more prevalent in EGFR-mutant than EGFR-wild-type tumors (1.7% vs. 0.7%; p=0.029). Finally, 17.0% of Y220C patients carried a second mutation in TP53. Conclusions The TP53 Y220C has a frequency similar to other low abundance, actionable alterations in NSCLC. Patients with NSCLC should be screened and included in future trials of Y220C reactivators. Co-mutations in TP53 should also be analyzed, since they might be associated with intrinsic resistance.",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/42901386/"
+          },
+          {
+            "id": "42938823",
+            "source": "MED",
+            "pmid": "42938823",
+            "title": "Combined &lt;i&gt;TP53&lt;/i&gt; Codon 72 Genotype and p53 Expression in Association with Vitamin D Benefit in Digestive Tract Cancer: A Post-Hoc Study of the AMATERASU Trial.",
+            "doi": "10.3390/cancers18203286",
+            "year": "2026",
+            "authors": "Fukuzato S, Akutsu T, Ohdaira H, Suzuki Y, Urashima M.",
+            "abstract": " Background : Accumulating evidence suggests that vitamin D may influence cancer prognosis. We aimed to explore whether the  TP53  codon 72 polymorphism (p.Pro72Arg; rs1042522) may be associated with differential effects of vitamin D supplementation on digestive tract cancer prognosis.  Methods : This post hoc analysis of the AMATERASU randomized controlled trial included patients in whom both germline  TP53  codon 72 genotype and p53 immunohistochemistry (IHC) assessment were available. Patients were stratified according to  TP53  codon 72 genotype and p53 IHC expression. The association between vitamin D supplementation and relapse-free survival (RFS) was evaluated using Cox proportional hazards regression models within each subgroup.  Results : A total of 333 participants (79.9%) out of 417 in the AMATERASU trial were included in the analysis. RFS was comparable between the vitamin D and placebo groups across the  TP53  codon 72 genotype subgroups. The vitamin D group was significantly associated with more favorable RFS compared with the placebo group in patients with both the Arg/Arg genotype and high p53 IHC expression (HR, 0.32; 95% CI, 0.12-0.87;  p  = 0.03). However, with a fragility index of 2 and a non-significant three-way interaction among vitamin D supplementation, p53 IHC expression, and the Arg/Arg genotype ( p  for interaction = 0.09), these findings remain fragile despite reaching statistical significance, warranting careful interpretation.  Conclusions : Vitamin D supplementation was associated with more favorable RFS among patients with digestive tract cancer who had both the Arg/Arg genotype and high p53 IHC expression. These exploratory findings warrant further investigation in prospective studies.",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/42938823/"
+          },
+          {
+            "id": "42891904",
+            "source": "MED",
+            "pmid": "42891904",
+            "title": "Association of TP53 Truncating Mutations with Time to Treatment Failure after First-Line Chemoimmunotherapy in HER2-Mutant Non-Small Cell Lung Cancer.",
+            "doi": "10.1007/s11523-026-01263-8",
+            "year": "2026",
+            "authors": "Yoshimura A, Yoshida J, Takumi C, Takayama K.",
+            "abstract": " Background Biomarkers associated with first-line chemoimmunotherapy outcomes in HER2-mutant non-small cell lung cancer (NSCLC) remain incompletely characterized. Objective To evaluate whether TP53 truncating mutations are associated with clinical outcomes after first-line pembrolizumab plus pemetrexed-platinum in patients with HER2-mutant NSCLC. Patients and methods We conducted a retrospective clinicogenomic study using the nationwide Center for Cancer Genomics and Advanced Therapeutics (C-CAT) database. Patients with advanced or recurrent HER2-mutant NSCLC who received first-line pembrolizumab plus pemetrexed-platinum were included. The primary endpoint was time to treatment failure (TTF). Results Among 69 patients, 21 (30.4%) harbored TP53 truncating mutations. Patients with TP53 truncating mutations had shorter TTF than those without TP53 truncating mutations (median, 6.0 versus 7.6 months; hazard ratio [HR], 1.97; 95% confidence interval [CI] 1.11-3.49; log-rank P = 0.018). The 9-month TTF rates were 4.8% and 40.6%, respectively. After adjustment for age, Eastern Cooperative Oncology Group performance status, and programmed death-ligand 1 tumor proportion score, TP53 truncating mutations remained associated with shorter TTF (HR, 1.98; 95% CI 1.08-3.63; P = 0.026). No significant differences were observed in overall survival or objective response rate. Conclusions TP53 truncating mutations were associated with shorter TTF during first-line pembrolizumab plus pemetrexed-platinum in HER2-mutant NSCLC, without significant differences in overall survival or objective response rate. These findings suggest a potential association with shorter treatment durability and require validation in independent cohorts.",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/42891904/"
+          },
+          {
+            "id": "42909660",
+            "source": "MED",
+            "pmid": "42909660",
+            "title": "Molecular, histopathological, and clinical risk factors for overall metastatic disease and brain metastases in surgically resected stage I-III lung cancer.",
+            "doi": "10.1007/s10585-026-10444-8",
+            "year": "2026",
+            "authors": "Dyrbekk APH, Suhrke P, Ludahl MO, Zecic N, Moe JO, Eide IJZ, Lund-Iversen M, Brustugun OT.",
+            "abstract": "Lung cancer remains a major cause of cancer-related mortality, including among patients diagnosed with potentially curable disease. Current decisions regarding perioperative treatment and follow-up rely on a limited number of established prognostic factors. Further knowledge is needed regarding the clinical, histopathological, and molecular factors associated with subsequent metastatic disease, particularly brain metastasis (BM), which is associated with poor prognosis. We investigated these factors in a large cohort of patients with surgically resected stage I-III lung cancer followed for more than five years. BM was associated with higher pathological tumour and lymph-node stage and younger age at surgery. Lung adenocarcinoma was associated with a higher risk of BM than lung squamous cell carcinoma. Several molecular alterations were associated with metastatic disease or BM, including KRAS mutations in lung adenocarcinoma and NFE2L2 mutations in lung squamous cell carcinoma. Additional associations involving specific EGFR and KRAS mutation subtypes and rarer alterations were observed, but were based on small numbers of cases and should be considered exploratory. Several of the associated genes are involved in the RAS/MAPK, PI3K/AKT/mTOR, or NRF2-related pathways. However, pathway activation and causality could not be established in this observational study. These findings support further investigation of clinical, histopathological, and molecular factors associated with metastatic progression after surgical resection. Validation in larger, independent, stage-stratified and contemporary cohorts with comprehensive treatment data is required before the identified molecular alterations can be considered for clinical risk stratification or surveillance.",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/42909660/"
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "id": "protein",
+      "kind": "uniprot",
+      "input": {
+        "query": "gene:TP53 AND organism_id:9606"
+      },
+      "dependsOn": [],
+      "sideEffect": false,
+      "maxAttempts": 1,
+      "timeoutMs": 30000,
+      "status": "completed",
+      "version": 4,
+      "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+      "attempts": 1,
+      "owner": null,
+      "fence": 1,
+      "leaseUntil": null,
+      "dueAt": null,
+      "output": {
+        "database": "UniProt via EBI Proteins",
+        "query": "gene:TP53 AND organism_id:9606",
+        "retrievedAt": "2026-10-30T01:33:42.665Z",
+        "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
+        "fallback": true,
+        "fallbackReason": "The operation was aborted due to timeout",
+        "results": [
+          {
+            "id": "A0A087WT22",
+            "name": "A0A087WT22_HUMAN",
+            "protein": "Cellular tumor antigen p53",
+            "organism": "Homo sapiens",
+            "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+          },
+          {
+            "id": "A0A087WXZ1",
+            "name": "A0A087WXZ1_HUMAN",
+            "protein": "Cellular tumor antigen p53",
+            "organism": "Homo sapiens",
+            "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+          },
+          {
+            "id": "A0A087X1Q1",
+            "name": "A0A087X1Q1_HUMAN",
+            "protein": "Cellular tumor antigen p53",
+            "organism": "Homo sapiens",
+            "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+          },
+          {
+            "id": "A0A0R9RRX7",
+            "name": "A0A0R9RRX7_HUMAN",
+            "protein": "Tumor protein p53",
+            "organism": "Homo sapiens",
+            "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
+          },
+          {
+            "id": "A0A0U1RQC9",
+            "name": "A0A0U1RQC9_HUMAN",
+            "protein": "Cellular tumor antigen p53",
+            "organism": "Homo sapiens",
+            "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+          }
+        ]
+      },
+      "error": null
+    }
+  ],
+  "events": [
+    {
+      "sequence": 21,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": null,
+      "type": "task.created",
+      "version": 1,
+      "at": 1793324021438,
+      "data": {
+        "stepCount": 2
+      }
+    },
+    {
+      "sequence": 22,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "literature",
+      "type": "step.claimed",
+      "version": 1,
+      "at": 1793324021509,
+      "data": {
+        "owner": "worker-71188-0c267c99-95e0-4324-9953-fc13ef3906c4",
+        "fence": 1,
+        "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+        "attempt": 1
+      }
+    },
+    {
+      "sequence": 23,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "protein",
+      "type": "step.claimed",
+      "version": 1,
+      "at": 1793324021510,
+      "data": {
+        "owner": "worker-71188-0c267c99-95e0-4324-9953-fc13ef3906c4",
+        "fence": 1,
+        "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+        "attempt": 1
+      }
+    },
+    {
+      "sequence": 24,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "literature",
+      "type": "step.completed",
+      "version": 1,
+      "at": 1793324023499,
+      "data": {
+        "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+        "usage": {
+          "output": {
+            "database": "Europe PMC / PubMed",
+            "query": "TP53 cancer",
+            "retrievedAt": "2026-10-30T01:33:42.318Z",
+            "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            "results": [
+              {
+                "id": "PPR1340521",
+                "source": "PPR",
+                "pmid": null,
+                "title": "Pan-Cancer Proteomic Profiling Reveals Context-Dependent Dysregulation of TP53 Across Tumor Types and Oncogenic Pathways",
+                "doi": "10.21203/rs.3.rs-11149736/v1",
+                "year": "2026",
+                "authors": "Gupta R, Singh DK.",
+                "abstract": " Abstract    Background  The p53 protein, which is a key regulator of genomic stability, cell cycle control, apoptosis, and stress responses, is encoded by TP53, the most commonly mutated tumor suppressor gene in human malignancies. Although TP53 mutations are well-characterized at the genomic level, transcriptomic and mutational data do not always accurately represent protein abundance and functional activity. Therefore, proteomic analysis offers vital information about the functional dysregulation of the p53 pathway in cancer. Methods  Using uniformly processed Clinical Proteomic Tumor Analysis Consortium (CPTAC) datasets, a pan-cancer analysis of TP53 (p53) protein expression was carried out via the UALCAN online platform. Tumor and matched normal tissues from various cancer types were analyzed for TP53 protein expression. Molecular subtype, patient age, and important oncogenic signaling pathways were used to further stratify breast cancer samples. Protein expression levels were statistically assessed using Student's t-test, displayed using box-and-whisker plots, and analyzed as Z-score-normalized data. Results  Heterogeneous control of p53 stability and degradation was reflected in significant, cancer-specific variations in TP53 protein expression across tumor types. TP53 expression in breast cancer differed significantly amongst molecular subtypes, with triple-negative breast cancer showing the highest levels. Age-stratified analysis revealed varying p53 expression patterns, suggesting that demographic factors play a role in p53 regulation. A pathway-based stratification emphasized the context-specific modulation of p53 signaling, uncovering distinct TP53 expression patterns associated with alterations in WNT, HIPPO, NRF2, mTOR, RTK, and p53/Rb pathways. Conclusions  A comprehensive pan-cancer study indicates considerable differences in TP53 protein expression influenced by tumor type, molecular subtype, and the context of signaling pathways. These findings underscore the importance of p53 proteome profiling at both molecular and clinical levels, supporting its application in treatment stratification and the development of biomarkers. ",
+                "url": "https://europepmc.org/article/PPR/PPR1340521"
+              },
+              {
+                "id": "42901386",
+                "source": "MED",
+                "pmid": "42901386",
+                "title": "Brief Report: Characterization of the Potentially Actionable TP53 Y220C Mutation in Non-Small Cell Lung Cancer. A Multicenter, European Thoracic Oncology Platform Study.",
+                "doi": "10.1016/j.jtho.2026.106162",
+                "year": "2026",
+                "authors": "Molina-Vila MA, Tsourti Z, Stenzinger A, Thüsen JV, Hillen LM, Hofman P, Rahmani-Khajouei S, Hegedüs B, Radonic T, Bubendorf L, Madsen LB, Pokharel S, Jordana-Ariza N, Kazdal D, Speel EM, Hendriks LEL, Hofman V, Zoche M, Bölükbas S, Bahce I, Kashima J, Rosell R, Peters S, Kammler R, Dafni U, Finn SP, Stahel RA.",
+                "abstract": " Introduction The tumor suppressor TP53 is the most frequently mutated gene in human cancer, and drugs targeting specific mutant p53 proteins have been developed. Rezatapopt, which reactivates the Y220C p53 protein, was recently evaluated in the Phase I PYNNACLE trial in patients with solid tumors, with promising results. The trial did not enrol any non-small cell lung cancer (NSCLC) cases, and little is known about the clinicopathological characteristics and genetic profile of the TP53 Y220C NSCLC patients. Methods In this multicenter, European Thoracic Oncology Platform-sponsored study, we retrospectively collected data from NSCLC patients from several European institutions with Next Generation Sequencing data available. Results The study included 28,244 NSCLC patients. We found that 195 (0.7%) harbored the TP53 Y220C mutation, a prevalence higher than the average in solid tumors (0.4%). Half of these TP53 Y220C NSCLC patients did not carry any known drivers. No significant association was observed between the TP53 Y220C and gender, smoking status, histology or stage. However, the mutation was significantly more prevalent in EGFR-mutant than EGFR-wild-type tumors (1.7% vs. 0.7%; p=0.029). Finally, 17.0% of Y220C patients carried a second mutation in TP53. Conclusions The TP53 Y220C has a frequency similar to other low abundance, actionable alterations in NSCLC. Patients with NSCLC should be screened and included in future trials of Y220C reactivators. Co-mutations in TP53 should also be analyzed, since they might be associated with intrinsic resistance.",
+                "url": "https://pubmed.ncbi.nlm.nih.gov/42901386/"
+              },
+              {
+                "id": "42938823",
+                "source": "MED",
+                "pmid": "42938823",
+                "title": "Combined &lt;i&gt;TP53&lt;/i&gt; Codon 72 Genotype and p53 Expression in Association with Vitamin D Benefit in Digestive Tract Cancer: A Post-Hoc Study of the AMATERASU Trial.",
+                "doi": "10.3390/cancers18203286",
+                "year": "2026",
+                "authors": "Fukuzato S, Akutsu T, Ohdaira H, Suzuki Y, Urashima M.",
+                "abstract": " Background : Accumulating evidence suggests that vitamin D may influence cancer prognosis. We aimed to explore whether the  TP53  codon 72 polymorphism (p.Pro72Arg; rs1042522) may be associated with differential effects of vitamin D supplementation on digestive tract cancer prognosis.  Methods : This post hoc analysis of the AMATERASU randomized controlled trial included patients in whom both germline  TP53  codon 72 genotype and p53 immunohistochemistry (IHC) assessment were available. Patients were stratified according to  TP53  codon 72 genotype and p53 IHC expression. The association between vitamin D supplementation and relapse-free survival (RFS) was evaluated using Cox proportional hazards regression models within each subgroup.  Results : A total of 333 participants (79.9%) out of 417 in the AMATERASU trial were included in the analysis. RFS was comparable between the vitamin D and placebo groups across the  TP53  codon 72 genotype subgroups. The vitamin D group was significantly associated with more favorable RFS compared with the placebo group in patients with both the Arg/Arg genotype and high p53 IHC expression (HR, 0.32; 95% CI, 0.12-0.87;  p  = 0.03). However, with a fragility index of 2 and a non-significant three-way interaction among vitamin D supplementation, p53 IHC expression, and the Arg/Arg genotype ( p  for interaction = 0.09), these findings remain fragile despite reaching statistical significance, warranting careful interpretation.  Conclusions : Vitamin D supplementation was associated with more favorable RFS among patients with digestive tract cancer who had both the Arg/Arg genotype and high p53 IHC expression. These exploratory findings warrant further investigation in prospective studies.",
+                "url": "https://pubmed.ncbi.nlm.nih.gov/42938823/"
+              },
+              {
+                "id": "42891904",
+                "source": "MED",
+                "pmid": "42891904",
+                "title": "Association of TP53 Truncating Mutations with Time to Treatment Failure after First-Line Chemoimmunotherapy in HER2-Mutant Non-Small Cell Lung Cancer.",
+                "doi": "10.1007/s11523-026-01263-8",
+                "year": "2026",
+                "authors": "Yoshimura A, Yoshida J, Takumi C, Takayama K.",
+                "abstract": " Background Biomarkers associated with first-line chemoimmunotherapy outcomes in HER2-mutant non-small cell lung cancer (NSCLC) remain incompletely characterized. Objective To evaluate whether TP53 truncating mutations are associated with clinical outcomes after first-line pembrolizumab plus pemetrexed-platinum in patients with HER2-mutant NSCLC. Patients and methods We conducted a retrospective clinicogenomic study using the nationwide Center for Cancer Genomics and Advanced Therapeutics (C-CAT) database. Patients with advanced or recurrent HER2-mutant NSCLC who received first-line pembrolizumab plus pemetrexed-platinum were included. The primary endpoint was time to treatment failure (TTF). Results Among 69 patients, 21 (30.4%) harbored TP53 truncating mutations. Patients with TP53 truncating mutations had shorter TTF than those without TP53 truncating mutations (median, 6.0 versus 7.6 months; hazard ratio [HR], 1.97; 95% confidence interval [CI] 1.11-3.49; log-rank P = 0.018). The 9-month TTF rates were 4.8% and 40.6%, respectively. After adjustment for age, Eastern Cooperative Oncology Group performance status, and programmed death-ligand 1 tumor proportion score, TP53 truncating mutations remained associated with shorter TTF (HR, 1.98; 95% CI 1.08-3.63; P = 0.026). No significant differences were observed in overall survival or objective response rate. Conclusions TP53 truncating mutations were associated with shorter TTF during first-line pembrolizumab plus pemetrexed-platinum in HER2-mutant NSCLC, without significant differences in overall survival or objective response rate. These findings suggest a potential association with shorter treatment durability and require validation in independent cohorts.",
+                "url": "https://pubmed.ncbi.nlm.nih.gov/42891904/"
+              },
+              {
+                "id": "42909660",
+                "source": "MED",
+                "pmid": "42909660",
+                "title": "Molecular, histopathological, and clinical risk factors for overall metastatic disease and brain metastases in surgically resected stage I-III lung cancer.",
+                "doi": "10.1007/s10585-026-10444-8",
+                "year": "2026",
+                "authors": "Dyrbekk APH, Suhrke P, Ludahl MO, Zecic N, Moe JO, Eide IJZ, Lund-Iversen M, Brustugun OT.",
+                "abstract": "Lung cancer remains a major cause of cancer-related mortality, including among patients diagnosed with potentially curable disease. Current decisions regarding perioperative treatment and follow-up rely on a limited number of established prognostic factors. Further knowledge is needed regarding the clinical, histopathological, and molecular factors associated with subsequent metastatic disease, particularly brain metastasis (BM), which is associated with poor prognosis. We investigated these factors in a large cohort of patients with surgically resected stage I-III lung cancer followed for more than five years. BM was associated with higher pathological tumour and lymph-node stage and younger age at surgery. Lung adenocarcinoma was associated with a higher risk of BM than lung squamous cell carcinoma. Several molecular alterations were associated with metastatic disease or BM, including KRAS mutations in lung adenocarcinoma and NFE2L2 mutations in lung squamous cell carcinoma. Additional associations involving specific EGFR and KRAS mutation subtypes and rarer alterations were observed, but were based on small numbers of cases and should be considered exploratory. Several of the associated genes are involved in the RAS/MAPK, PI3K/AKT/mTOR, or NRF2-related pathways. However, pathway activation and causality could not be established in this observational study. These findings support further investigation of clinical, histopathological, and molecular factors associated with metastatic progression after surgical resection. Validation in larger, independent, stage-stratified and contemporary cohorts with comprehensive treatment data is required before the identified molecular alterations can be considered for clinical risk stratification or surveillance.",
+                "url": "https://pubmed.ncbi.nlm.nih.gov/42909660/"
+              }
+            ]
+          },
+          "artifacts": [
+            {
+              "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
+              "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
+              "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+              "bytes": 11432,
+              "mediaType": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "sequence": 25,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "protein",
+      "type": "step.heartbeat",
+      "version": 1,
+      "at": 1793324026973,
+      "data": {
+        "fence": 1
+      }
+    },
+    {
+      "sequence": 26,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "protein",
+      "type": "step.heartbeat",
+      "version": 1,
+      "at": 1793324031987,
+      "data": {
+        "fence": 1
+      }
+    },
+    {
+      "sequence": 27,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "protein",
+      "type": "step.completed",
+      "version": 1,
+      "at": 1793324032651,
+      "data": {
+        "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+        "usage": {
+          "output": {
+            "database": "UniProt via EBI Proteins",
+            "query": "gene:TP53 AND organism_id:9606",
+            "retrievedAt": "2026-10-30T01:33:42.665Z",
+            "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
+            "fallback": true,
+            "fallbackReason": "The operation was aborted due to timeout",
+            "results": [
+              {
+                "id": "A0A087WT22",
+                "name": "A0A087WT22_HUMAN",
+                "protein": "Cellular tumor antigen p53",
+                "organism": "Homo sapiens",
+                "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+              },
+              {
+                "id": "A0A087WXZ1",
+                "name": "A0A087WXZ1_HUMAN",
+                "protein": "Cellular tumor antigen p53",
+                "organism": "Homo sapiens",
+                "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+              },
+              {
+                "id": "A0A087X1Q1",
+                "name": "A0A087X1Q1_HUMAN",
+                "protein": "Cellular tumor antigen p53",
+                "organism": "Homo sapiens",
+                "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+              },
+              {
+                "id": "A0A0R9RRX7",
+                "name": "A0A0R9RRX7_HUMAN",
+                "protein": "Tumor protein p53",
+                "organism": "Homo sapiens",
+                "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
+              },
+              {
+                "id": "A0A0U1RQC9",
+                "name": "A0A0U1RQC9_HUMAN",
+                "protein": "Cellular tumor antigen p53",
+                "organism": "Homo sapiens",
+                "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+              }
+            ]
+          },
+          "artifacts": [
+            {
+              "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
+              "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
+              "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
+              "bytes": 1077,
+              "mediaType": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "sequence": 28,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": null,
+      "type": "task.completed",
+      "version": 1,
+      "at": 1793324032651,
+      "data": {}
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": 11,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "at": 1793324023499,
+      "reason": "step.completed",
+      "snapshot": {
+        "task": {
+          "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+          "name": "Packaged live MCP public database QA",
+          "parentId": null,
+          "status": "running",
+          "version": 3,
+          "createdAt": 1793324021438,
+          "updatedAt": 1793324023499,
+          "limits": {},
+          "calls": 2,
+          "cost": 0,
+          "tokens": 0
+        },
+        "steps": [
+          {
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "literature",
+            "kind": "pubmed",
+            "input": {
+              "query": "TP53 cancer"
+            },
+            "dependsOn": [],
+            "sideEffect": false,
+            "maxAttempts": 1,
+            "timeoutMs": 30000,
+            "status": "completed",
+            "version": 2,
+            "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+            "attempts": 1,
+            "owner": null,
+            "fence": 1,
+            "leaseUntil": null,
+            "dueAt": null,
+            "output": {
+              "database": "Europe PMC / PubMed",
+              "query": "TP53 cancer",
+              "retrievedAt": "2026-10-30T01:33:42.318Z",
+              "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+              "results": [
+                {
+                  "id": "PPR1340521",
+                  "source": "PPR",
+                  "pmid": null,
+                  "title": "Pan-Cancer Proteomic Profiling Reveals Context-Dependent Dysregulation of TP53 Across Tumor Types and Oncogenic Pathways",
+                  "doi": "10.21203/rs.3.rs-11149736/v1",
+                  "year": "2026",
+                  "authors": "Gupta R, Singh DK.",
+                  "abstract": " Abstract    Background  The p53 protein, which is a key regulator of genomic stability, cell cycle control, apoptosis, and stress responses, is encoded by TP53, the most commonly mutated tumor suppressor gene in human malignancies. Although TP53 mutations are well-characterized at the genomic level, transcriptomic and mutational data do not always accurately represent protein abundance and functional activity. Therefore, proteomic analysis offers vital information about the functional dysregulation of the p53 pathway in cancer. Methods  Using uniformly processed Clinical Proteomic Tumor Analysis Consortium (CPTAC) datasets, a pan-cancer analysis of TP53 (p53) protein expression was carried out via the UALCAN online platform. Tumor and matched normal tissues from various cancer types were analyzed for TP53 protein expression. Molecular subtype, patient age, and important oncogenic signaling pathways were used to further stratify breast cancer samples. Protein expression levels were statistically assessed using Student's t-test, displayed using box-and-whisker plots, and analyzed as Z-score-normalized data. Results  Heterogeneous control of p53 stability and degradation was reflected in significant, cancer-specific variations in TP53 protein expression across tumor types. TP53 expression in breast cancer differed significantly amongst molecular subtypes, with triple-negative breast cancer showing the highest levels. Age-stratified analysis revealed varying p53 expression patterns, suggesting that demographic factors play a role in p53 regulation. A pathway-based stratification emphasized the context-specific modulation of p53 signaling, uncovering distinct TP53 expression patterns associated with alterations in WNT, HIPPO, NRF2, mTOR, RTK, and p53/Rb pathways. Conclusions  A comprehensive pan-cancer study indicates considerable differences in TP53 protein expression influenced by tumor type, molecular subtype, and the context of signaling pathways. These findings underscore the importance of p53 proteome profiling at both molecular and clinical levels, supporting its application in treatment stratification and the development of biomarkers. ",
+                  "url": "https://europepmc.org/article/PPR/PPR1340521"
+                },
+                {
+                  "id": "42901386",
+                  "source": "MED",
+                  "pmid": "42901386",
+                  "title": "Brief Report: Characterization of the Potentially Actionable TP53 Y220C Mutation in Non-Small Cell Lung Cancer. A Multicenter, European Thoracic Oncology Platform Study.",
+                  "doi": "10.1016/j.jtho.2026.106162",
+                  "year": "2026",
+                  "authors": "Molina-Vila MA, Tsourti Z, Stenzinger A, Thüsen JV, Hillen LM, Hofman P, Rahmani-Khajouei S, Hegedüs B, Radonic T, Bubendorf L, Madsen LB, Pokharel S, Jordana-Ariza N, Kazdal D, Speel EM, Hendriks LEL, Hofman V, Zoche M, Bölükbas S, Bahce I, Kashima J, Rosell R, Peters S, Kammler R, Dafni U, Finn SP, Stahel RA.",
+                  "abstract": " Introduction The tumor suppressor TP53 is the most frequently mutated gene in human cancer, and drugs targeting specific mutant p53 proteins have been developed. Rezatapopt, which reactivates the Y220C p53 protein, was recently evaluated in the Phase I PYNNACLE trial in patients with solid tumors, with promising results. The trial did not enrol any non-small cell lung cancer (NSCLC) cases, and little is known about the clinicopathological characteristics and genetic profile of the TP53 Y220C NSCLC patients. Methods In this multicenter, European Thoracic Oncology Platform-sponsored study, we retrospectively collected data from NSCLC patients from several European institutions with Next Generation Sequencing data available. Results The study included 28,244 NSCLC patients. We found that 195 (0.7%) harbored the TP53 Y220C mutation, a prevalence higher than the average in solid tumors (0.4%). Half of these TP53 Y220C NSCLC patients did not carry any known drivers. No significant association was observed between the TP53 Y220C and gender, smoking status, histology or stage. However, the mutation was significantly more prevalent in EGFR-mutant than EGFR-wild-type tumors (1.7% vs. 0.7%; p=0.029). Finally, 17.0% of Y220C patients carried a second mutation in TP53. Conclusions The TP53 Y220C has a frequency similar to other low abundance, actionable alterations in NSCLC. Patients with NSCLC should be screened and included in future trials of Y220C reactivators. Co-mutations in TP53 should also be analyzed, since they might be associated with intrinsic resistance.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42901386/"
+                },
+                {
+                  "id": "42938823",
+                  "source": "MED",
+                  "pmid": "42938823",
+                  "title": "Combined &lt;i&gt;TP53&lt;/i&gt; Codon 72 Genotype and p53 Expression in Association with Vitamin D Benefit in Digestive Tract Cancer: A Post-Hoc Study of the AMATERASU Trial.",
+                  "doi": "10.3390/cancers18203286",
+                  "year": "2026",
+                  "authors": "Fukuzato S, Akutsu T, Ohdaira H, Suzuki Y, Urashima M.",
+                  "abstract": " Background : Accumulating evidence suggests that vitamin D may influence cancer prognosis. We aimed to explore whether the  TP53  codon 72 polymorphism (p.Pro72Arg; rs1042522) may be associated with differential effects of vitamin D supplementation on digestive tract cancer prognosis.  Methods : This post hoc analysis of the AMATERASU randomized controlled trial included patients in whom both germline  TP53  codon 72 genotype and p53 immunohistochemistry (IHC) assessment were available. Patients were stratified according to  TP53  codon 72 genotype and p53 IHC expression. The association between vitamin D supplementation and relapse-free survival (RFS) was evaluated using Cox proportional hazards regression models within each subgroup.  Results : A total of 333 participants (79.9%) out of 417 in the AMATERASU trial were included in the analysis. RFS was comparable between the vitamin D and placebo groups across the  TP53  codon 72 genotype subgroups. The vitamin D group was significantly associated with more favorable RFS compared with the placebo group in patients with both the Arg/Arg genotype and high p53 IHC expression (HR, 0.32; 95% CI, 0.12-0.87;  p  = 0.03). However, with a fragility index of 2 and a non-significant three-way interaction among vitamin D supplementation, p53 IHC expression, and the Arg/Arg genotype ( p  for interaction = 0.09), these findings remain fragile despite reaching statistical significance, warranting careful interpretation.  Conclusions : Vitamin D supplementation was associated with more favorable RFS among patients with digestive tract cancer who had both the Arg/Arg genotype and high p53 IHC expression. These exploratory findings warrant further investigation in prospective studies.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42938823/"
+                },
+                {
+                  "id": "42891904",
+                  "source": "MED",
+                  "pmid": "42891904",
+                  "title": "Association of TP53 Truncating Mutations with Time to Treatment Failure after First-Line Chemoimmunotherapy in HER2-Mutant Non-Small Cell Lung Cancer.",
+                  "doi": "10.1007/s11523-026-01263-8",
+                  "year": "2026",
+                  "authors": "Yoshimura A, Yoshida J, Takumi C, Takayama K.",
+                  "abstract": " Background Biomarkers associated with first-line chemoimmunotherapy outcomes in HER2-mutant non-small cell lung cancer (NSCLC) remain incompletely characterized. Objective To evaluate whether TP53 truncating mutations are associated with clinical outcomes after first-line pembrolizumab plus pemetrexed-platinum in patients with HER2-mutant NSCLC. Patients and methods We conducted a retrospective clinicogenomic study using the nationwide Center for Cancer Genomics and Advanced Therapeutics (C-CAT) database. Patients with advanced or recurrent HER2-mutant NSCLC who received first-line pembrolizumab plus pemetrexed-platinum were included. The primary endpoint was time to treatment failure (TTF). Results Among 69 patients, 21 (30.4%) harbored TP53 truncating mutations. Patients with TP53 truncating mutations had shorter TTF than those without TP53 truncating mutations (median, 6.0 versus 7.6 months; hazard ratio [HR], 1.97; 95% confidence interval [CI] 1.11-3.49; log-rank P = 0.018). The 9-month TTF rates were 4.8% and 40.6%, respectively. After adjustment for age, Eastern Cooperative Oncology Group performance status, and programmed death-ligand 1 tumor proportion score, TP53 truncating mutations remained associated with shorter TTF (HR, 1.98; 95% CI 1.08-3.63; P = 0.026). No significant differences were observed in overall survival or objective response rate. Conclusions TP53 truncating mutations were associated with shorter TTF during first-line pembrolizumab plus pemetrexed-platinum in HER2-mutant NSCLC, without significant differences in overall survival or objective response rate. These findings suggest a potential association with shorter treatment durability and require validation in independent cohorts.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42891904/"
+                },
+                {
+                  "id": "42909660",
+                  "source": "MED",
+                  "pmid": "42909660",
+                  "title": "Molecular, histopathological, and clinical risk factors for overall metastatic disease and brain metastases in surgically resected stage I-III lung cancer.",
+                  "doi": "10.1007/s10585-026-10444-8",
+                  "year": "2026",
+                  "authors": "Dyrbekk APH, Suhrke P, Ludahl MO, Zecic N, Moe JO, Eide IJZ, Lund-Iversen M, Brustugun OT.",
+                  "abstract": "Lung cancer remains a major cause of cancer-related mortality, including among patients diagnosed with potentially curable disease. Current decisions regarding perioperative treatment and follow-up rely on a limited number of established prognostic factors. Further knowledge is needed regarding the clinical, histopathological, and molecular factors associated with subsequent metastatic disease, particularly brain metastasis (BM), which is associated with poor prognosis. We investigated these factors in a large cohort of patients with surgically resected stage I-III lung cancer followed for more than five years. BM was associated with higher pathological tumour and lymph-node stage and younger age at surgery. Lung adenocarcinoma was associated with a higher risk of BM than lung squamous cell carcinoma. Several molecular alterations were associated with metastatic disease or BM, including KRAS mutations in lung adenocarcinoma and NFE2L2 mutations in lung squamous cell carcinoma. Additional associations involving specific EGFR and KRAS mutation subtypes and rarer alterations were observed, but were based on small numbers of cases and should be considered exploratory. Several of the associated genes are involved in the RAS/MAPK, PI3K/AKT/mTOR, or NRF2-related pathways. However, pathway activation and causality could not be established in this observational study. These findings support further investigation of clinical, histopathological, and molecular factors associated with metastatic progression after surgical resection. Validation in larger, independent, stage-stratified and contemporary cohorts with comprehensive treatment data is required before the identified molecular alterations can be considered for clinical risk stratification or surveillance.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42909660/"
+                }
+              ]
+            },
+            "error": null
+          },
+          {
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "protein",
+            "kind": "uniprot",
+            "input": {
+              "query": "gene:TP53 AND organism_id:9606"
+            },
+            "dependsOn": [],
+            "sideEffect": false,
+            "maxAttempts": 1,
+            "timeoutMs": 30000,
+            "status": "running",
+            "version": 1,
+            "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+            "attempts": 1,
+            "owner": "worker-71188-0c267c99-95e0-4324-9953-fc13ef3906c4",
+            "fence": 1,
+            "leaseUntil": 1793324036510,
+            "dueAt": null,
+            "error": null
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "stepId": "literature",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
+            "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+            "bytes": 11432,
+            "mediaType": "application/json",
+            "createdAt": 1793324023499
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "at": 1793324032651,
+      "reason": "completed",
+      "snapshot": {
+        "task": {
+          "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+          "name": "Packaged live MCP public database QA",
+          "parentId": null,
+          "status": "completed",
+          "version": 4,
+          "createdAt": 1793324021438,
+          "updatedAt": 1793324032651,
+          "limits": {},
+          "calls": 2,
+          "cost": 0,
+          "tokens": 0
+        },
+        "steps": [
+          {
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "literature",
+            "kind": "pubmed",
+            "input": {
+              "query": "TP53 cancer"
+            },
+            "dependsOn": [],
+            "sideEffect": false,
+            "maxAttempts": 1,
+            "timeoutMs": 30000,
+            "status": "completed",
+            "version": 2,
+            "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+            "attempts": 1,
+            "owner": null,
+            "fence": 1,
+            "leaseUntil": null,
+            "dueAt": null,
+            "output": {
+              "database": "Europe PMC / PubMed",
+              "query": "TP53 cancer",
+              "retrievedAt": "2026-10-30T01:33:42.318Z",
+              "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+              "results": [
+                {
+                  "id": "PPR1340521",
+                  "source": "PPR",
+                  "pmid": null,
+                  "title": "Pan-Cancer Proteomic Profiling Reveals Context-Dependent Dysregulation of TP53 Across Tumor Types and Oncogenic Pathways",
+                  "doi": "10.21203/rs.3.rs-11149736/v1",
+                  "year": "2026",
+                  "authors": "Gupta R, Singh DK.",
+                  "abstract": " Abstract    Background  The p53 protein, which is a key regulator of genomic stability, cell cycle control, apoptosis, and stress responses, is encoded by TP53, the most commonly mutated tumor suppressor gene in human malignancies. Although TP53 mutations are well-characterized at the genomic level, transcriptomic and mutational data do not always accurately represent protein abundance and functional activity. Therefore, proteomic analysis offers vital information about the functional dysregulation of the p53 pathway in cancer. Methods  Using uniformly processed Clinical Proteomic Tumor Analysis Consortium (CPTAC) datasets, a pan-cancer analysis of TP53 (p53) protein expression was carried out via the UALCAN online platform. Tumor and matched normal tissues from various cancer types were analyzed for TP53 protein expression. Molecular subtype, patient age, and important oncogenic signaling pathways were used to further stratify breast cancer samples. Protein expression levels were statistically assessed using Student's t-test, displayed using box-and-whisker plots, and analyzed as Z-score-normalized data. Results  Heterogeneous control of p53 stability and degradation was reflected in significant, cancer-specific variations in TP53 protein expression across tumor types. TP53 expression in breast cancer differed significantly amongst molecular subtypes, with triple-negative breast cancer showing the highest levels. Age-stratified analysis revealed varying p53 expression patterns, suggesting that demographic factors play a role in p53 regulation. A pathway-based stratification emphasized the context-specific modulation of p53 signaling, uncovering distinct TP53 expression patterns associated with alterations in WNT, HIPPO, NRF2, mTOR, RTK, and p53/Rb pathways. Conclusions  A comprehensive pan-cancer study indicates considerable differences in TP53 protein expression influenced by tumor type, molecular subtype, and the context of signaling pathways. These findings underscore the importance of p53 proteome profiling at both molecular and clinical levels, supporting its application in treatment stratification and the development of biomarkers. ",
+                  "url": "https://europepmc.org/article/PPR/PPR1340521"
+                },
+                {
+                  "id": "42901386",
+                  "source": "MED",
+                  "pmid": "42901386",
+                  "title": "Brief Report: Characterization of the Potentially Actionable TP53 Y220C Mutation in Non-Small Cell Lung Cancer. A Multicenter, European Thoracic Oncology Platform Study.",
+                  "doi": "10.1016/j.jtho.2026.106162",
+                  "year": "2026",
+                  "authors": "Molina-Vila MA, Tsourti Z, Stenzinger A, Thüsen JV, Hillen LM, Hofman P, Rahmani-Khajouei S, Hegedüs B, Radonic T, Bubendorf L, Madsen LB, Pokharel S, Jordana-Ariza N, Kazdal D, Speel EM, Hendriks LEL, Hofman V, Zoche M, Bölükbas S, Bahce I, Kashima J, Rosell R, Peters S, Kammler R, Dafni U, Finn SP, Stahel RA.",
+                  "abstract": " Introduction The tumor suppressor TP53 is the most frequently mutated gene in human cancer, and drugs targeting specific mutant p53 proteins have been developed. Rezatapopt, which reactivates the Y220C p53 protein, was recently evaluated in the Phase I PYNNACLE trial in patients with solid tumors, with promising results. The trial did not enrol any non-small cell lung cancer (NSCLC) cases, and little is known about the clinicopathological characteristics and genetic profile of the TP53 Y220C NSCLC patients. Methods In this multicenter, European Thoracic Oncology Platform-sponsored study, we retrospectively collected data from NSCLC patients from several European institutions with Next Generation Sequencing data available. Results The study included 28,244 NSCLC patients. We found that 195 (0.7%) harbored the TP53 Y220C mutation, a prevalence higher than the average in solid tumors (0.4%). Half of these TP53 Y220C NSCLC patients did not carry any known drivers. No significant association was observed between the TP53 Y220C and gender, smoking status, histology or stage. However, the mutation was significantly more prevalent in EGFR-mutant than EGFR-wild-type tumors (1.7% vs. 0.7%; p=0.029). Finally, 17.0% of Y220C patients carried a second mutation in TP53. Conclusions The TP53 Y220C has a frequency similar to other low abundance, actionable alterations in NSCLC. Patients with NSCLC should be screened and included in future trials of Y220C reactivators. Co-mutations in TP53 should also be analyzed, since they might be associated with intrinsic resistance.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42901386/"
+                },
+                {
+                  "id": "42938823",
+                  "source": "MED",
+                  "pmid": "42938823",
+                  "title": "Combined &lt;i&gt;TP53&lt;/i&gt; Codon 72 Genotype and p53 Expression in Association with Vitamin D Benefit in Digestive Tract Cancer: A Post-Hoc Study of the AMATERASU Trial.",
+                  "doi": "10.3390/cancers18203286",
+                  "year": "2026",
+                  "authors": "Fukuzato S, Akutsu T, Ohdaira H, Suzuki Y, Urashima M.",
+                  "abstract": " Background : Accumulating evidence suggests that vitamin D may influence cancer prognosis. We aimed to explore whether the  TP53  codon 72 polymorphism (p.Pro72Arg; rs1042522) may be associated with differential effects of vitamin D supplementation on digestive tract cancer prognosis.  Methods : This post hoc analysis of the AMATERASU randomized controlled trial included patients in whom both germline  TP53  codon 72 genotype and p53 immunohistochemistry (IHC) assessment were available. Patients were stratified according to  TP53  codon 72 genotype and p53 IHC expression. The association between vitamin D supplementation and relapse-free survival (RFS) was evaluated using Cox proportional hazards regression models within each subgroup.  Results : A total of 333 participants (79.9%) out of 417 in the AMATERASU trial were included in the analysis. RFS was comparable between the vitamin D and placebo groups across the  TP53  codon 72 genotype subgroups. The vitamin D group was significantly associated with more favorable RFS compared with the placebo group in patients with both the Arg/Arg genotype and high p53 IHC expression (HR, 0.32; 95% CI, 0.12-0.87;  p  = 0.03). However, with a fragility index of 2 and a non-significant three-way interaction among vitamin D supplementation, p53 IHC expression, and the Arg/Arg genotype ( p  for interaction = 0.09), these findings remain fragile despite reaching statistical significance, warranting careful interpretation.  Conclusions : Vitamin D supplementation was associated with more favorable RFS among patients with digestive tract cancer who had both the Arg/Arg genotype and high p53 IHC expression. These exploratory findings warrant further investigation in prospective studies.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42938823/"
+                },
+                {
+                  "id": "42891904",
+                  "source": "MED",
+                  "pmid": "42891904",
+                  "title": "Association of TP53 Truncating Mutations with Time to Treatment Failure after First-Line Chemoimmunotherapy in HER2-Mutant Non-Small Cell Lung Cancer.",
+                  "doi": "10.1007/s11523-026-01263-8",
+                  "year": "2026",
+                  "authors": "Yoshimura A, Yoshida J, Takumi C, Takayama K.",
+                  "abstract": " Background Biomarkers associated with first-line chemoimmunotherapy outcomes in HER2-mutant non-small cell lung cancer (NSCLC) remain incompletely characterized. Objective To evaluate whether TP53 truncating mutations are associated with clinical outcomes after first-line pembrolizumab plus pemetrexed-platinum in patients with HER2-mutant NSCLC. Patients and methods We conducted a retrospective clinicogenomic study using the nationwide Center for Cancer Genomics and Advanced Therapeutics (C-CAT) database. Patients with advanced or recurrent HER2-mutant NSCLC who received first-line pembrolizumab plus pemetrexed-platinum were included. The primary endpoint was time to treatment failure (TTF). Results Among 69 patients, 21 (30.4%) harbored TP53 truncating mutations. Patients with TP53 truncating mutations had shorter TTF than those without TP53 truncating mutations (median, 6.0 versus 7.6 months; hazard ratio [HR], 1.97; 95% confidence interval [CI] 1.11-3.49; log-rank P = 0.018). The 9-month TTF rates were 4.8% and 40.6%, respectively. After adjustment for age, Eastern Cooperative Oncology Group performance status, and programmed death-ligand 1 tumor proportion score, TP53 truncating mutations remained associated with shorter TTF (HR, 1.98; 95% CI 1.08-3.63; P = 0.026). No significant differences were observed in overall survival or objective response rate. Conclusions TP53 truncating mutations were associated with shorter TTF during first-line pembrolizumab plus pemetrexed-platinum in HER2-mutant NSCLC, without significant differences in overall survival or objective response rate. These findings suggest a potential association with shorter treatment durability and require validation in independent cohorts.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42891904/"
+                },
+                {
+                  "id": "42909660",
+                  "source": "MED",
+                  "pmid": "42909660",
+                  "title": "Molecular, histopathological, and clinical risk factors for overall metastatic disease and brain metastases in surgically resected stage I-III lung cancer.",
+                  "doi": "10.1007/s10585-026-10444-8",
+                  "year": "2026",
+                  "authors": "Dyrbekk APH, Suhrke P, Ludahl MO, Zecic N, Moe JO, Eide IJZ, Lund-Iversen M, Brustugun OT.",
+                  "abstract": "Lung cancer remains a major cause of cancer-related mortality, including among patients diagnosed with potentially curable disease. Current decisions regarding perioperative treatment and follow-up rely on a limited number of established prognostic factors. Further knowledge is needed regarding the clinical, histopathological, and molecular factors associated with subsequent metastatic disease, particularly brain metastasis (BM), which is associated with poor prognosis. We investigated these factors in a large cohort of patients with surgically resected stage I-III lung cancer followed for more than five years. BM was associated with higher pathological tumour and lymph-node stage and younger age at surgery. Lung adenocarcinoma was associated with a higher risk of BM than lung squamous cell carcinoma. Several molecular alterations were associated with metastatic disease or BM, including KRAS mutations in lung adenocarcinoma and NFE2L2 mutations in lung squamous cell carcinoma. Additional associations involving specific EGFR and KRAS mutation subtypes and rarer alterations were observed, but were based on small numbers of cases and should be considered exploratory. Several of the associated genes are involved in the RAS/MAPK, PI3K/AKT/mTOR, or NRF2-related pathways. However, pathway activation and causality could not be established in this observational study. These findings support further investigation of clinical, histopathological, and molecular factors associated with metastatic progression after surgical resection. Validation in larger, independent, stage-stratified and contemporary cohorts with comprehensive treatment data is required before the identified molecular alterations can be considered for clinical risk stratification or surveillance.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42909660/"
+                }
+              ]
+            },
+            "error": null
+          },
+          {
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "protein",
+            "kind": "uniprot",
+            "input": {
+              "query": "gene:TP53 AND organism_id:9606"
+            },
+            "dependsOn": [],
+            "sideEffect": false,
+            "maxAttempts": 1,
+            "timeoutMs": 30000,
+            "status": "completed",
+            "version": 4,
+            "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+            "attempts": 1,
+            "owner": null,
+            "fence": 1,
+            "leaseUntil": null,
+            "dueAt": null,
+            "output": {
+              "database": "UniProt via EBI Proteins",
+              "query": "gene:TP53 AND organism_id:9606",
+              "retrievedAt": "2026-10-30T01:33:42.665Z",
+              "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
+              "fallback": true,
+              "fallbackReason": "The operation was aborted due to timeout",
+              "results": [
+                {
+                  "id": "A0A087WT22",
+                  "name": "A0A087WT22_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+                },
+                {
+                  "id": "A0A087WXZ1",
+                  "name": "A0A087WXZ1_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+                },
+                {
+                  "id": "A0A087X1Q1",
+                  "name": "A0A087X1Q1_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+                },
+                {
+                  "id": "A0A0R9RRX7",
+                  "name": "A0A0R9RRX7_HUMAN",
+                  "protein": "Tumor protein p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
+                },
+                {
+                  "id": "A0A0U1RQC9",
+                  "name": "A0A0U1RQC9_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+                }
+              ]
+            },
+            "error": null
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "stepId": "literature",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
+            "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+            "bytes": 11432,
+            "mediaType": "application/json",
+            "createdAt": 1793324023499
+          },
+          {
+            "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "stepId": "protein",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
+            "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
+            "bytes": 1077,
+            "mediaType": "application/json",
+            "createdAt": 1793324032651
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "at": 1793324032651,
+      "reason": "step.completed",
+      "snapshot": {
+        "task": {
+          "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+          "name": "Packaged live MCP public database QA",
+          "parentId": null,
+          "status": "completed",
+          "version": 4,
+          "createdAt": 1793324021438,
+          "updatedAt": 1793324032651,
+          "limits": {},
+          "calls": 2,
+          "cost": 0,
+          "tokens": 0
+        },
+        "steps": [
+          {
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "literature",
+            "kind": "pubmed",
+            "input": {
+              "query": "TP53 cancer"
+            },
+            "dependsOn": [],
+            "sideEffect": false,
+            "maxAttempts": 1,
+            "timeoutMs": 30000,
+            "status": "completed",
+            "version": 2,
+            "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+            "attempts": 1,
+            "owner": null,
+            "fence": 1,
+            "leaseUntil": null,
+            "dueAt": null,
+            "output": {
+              "database": "Europe PMC / PubMed",
+              "query": "TP53 cancer",
+              "retrievedAt": "2026-10-30T01:33:42.318Z",
+              "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+              "results": [
+                {
+                  "id": "PPR1340521",
+                  "source": "PPR",
+                  "pmid": null,
+                  "title": "Pan-Cancer Proteomic Profiling Reveals Context-Dependent Dysregulation of TP53 Across Tumor Types and Oncogenic Pathways",
+                  "doi": "10.21203/rs.3.rs-11149736/v1",
+                  "year": "2026",
+                  "authors": "Gupta R, Singh DK.",
+                  "abstract": " Abstract    Background  The p53 protein, which is a key regulator of genomic stability, cell cycle control, apoptosis, and stress responses, is encoded by TP53, the most commonly mutated tumor suppressor gene in human malignancies. Although TP53 mutations are well-characterized at the genomic level, transcriptomic and mutational data do not always accurately represent protein abundance and functional activity. Therefore, proteomic analysis offers vital information about the functional dysregulation of the p53 pathway in cancer. Methods  Using uniformly processed Clinical Proteomic Tumor Analysis Consortium (CPTAC) datasets, a pan-cancer analysis of TP53 (p53) protein expression was carried out via the UALCAN online platform. Tumor and matched normal tissues from various cancer types were analyzed for TP53 protein expression. Molecular subtype, patient age, and important oncogenic signaling pathways were used to further stratify breast cancer samples. Protein expression levels were statistically assessed using Student's t-test, displayed using box-and-whisker plots, and analyzed as Z-score-normalized data. Results  Heterogeneous control of p53 stability and degradation was reflected in significant, cancer-specific variations in TP53 protein expression across tumor types. TP53 expression in breast cancer differed significantly amongst molecular subtypes, with triple-negative breast cancer showing the highest levels. Age-stratified analysis revealed varying p53 expression patterns, suggesting that demographic factors play a role in p53 regulation. A pathway-based stratification emphasized the context-specific modulation of p53 signaling, uncovering distinct TP53 expression patterns associated with alterations in WNT, HIPPO, NRF2, mTOR, RTK, and p53/Rb pathways. Conclusions  A comprehensive pan-cancer study indicates considerable differences in TP53 protein expression influenced by tumor type, molecular subtype, and the context of signaling pathways. These findings underscore the importance of p53 proteome profiling at both molecular and clinical levels, supporting its application in treatment stratification and the development of biomarkers. ",
+                  "url": "https://europepmc.org/article/PPR/PPR1340521"
+                },
+                {
+                  "id": "42901386",
+                  "source": "MED",
+                  "pmid": "42901386",
+                  "title": "Brief Report: Characterization of the Potentially Actionable TP53 Y220C Mutation in Non-Small Cell Lung Cancer. A Multicenter, European Thoracic Oncology Platform Study.",
+                  "doi": "10.1016/j.jtho.2026.106162",
+                  "year": "2026",
+                  "authors": "Molina-Vila MA, Tsourti Z, Stenzinger A, Thüsen JV, Hillen LM, Hofman P, Rahmani-Khajouei S, Hegedüs B, Radonic T, Bubendorf L, Madsen LB, Pokharel S, Jordana-Ariza N, Kazdal D, Speel EM, Hendriks LEL, Hofman V, Zoche M, Bölükbas S, Bahce I, Kashima J, Rosell R, Peters S, Kammler R, Dafni U, Finn SP, Stahel RA.",
+                  "abstract": " Introduction The tumor suppressor TP53 is the most frequently mutated gene in human cancer, and drugs targeting specific mutant p53 proteins have been developed. Rezatapopt, which reactivates the Y220C p53 protein, was recently evaluated in the Phase I PYNNACLE trial in patients with solid tumors, with promising results. The trial did not enrol any non-small cell lung cancer (NSCLC) cases, and little is known about the clinicopathological characteristics and genetic profile of the TP53 Y220C NSCLC patients. Methods In this multicenter, European Thoracic Oncology Platform-sponsored study, we retrospectively collected data from NSCLC patients from several European institutions with Next Generation Sequencing data available. Results The study included 28,244 NSCLC patients. We found that 195 (0.7%) harbored the TP53 Y220C mutation, a prevalence higher than the average in solid tumors (0.4%). Half of these TP53 Y220C NSCLC patients did not carry any known drivers. No significant association was observed between the TP53 Y220C and gender, smoking status, histology or stage. However, the mutation was significantly more prevalent in EGFR-mutant than EGFR-wild-type tumors (1.7% vs. 0.7%; p=0.029). Finally, 17.0% of Y220C patients carried a second mutation in TP53. Conclusions The TP53 Y220C has a frequency similar to other low abundance, actionable alterations in NSCLC. Patients with NSCLC should be screened and included in future trials of Y220C reactivators. Co-mutations in TP53 should also be analyzed, since they might be associated with intrinsic resistance.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42901386/"
+                },
+                {
+                  "id": "42938823",
+                  "source": "MED",
+                  "pmid": "42938823",
+                  "title": "Combined &lt;i&gt;TP53&lt;/i&gt; Codon 72 Genotype and p53 Expression in Association with Vitamin D Benefit in Digestive Tract Cancer: A Post-Hoc Study of the AMATERASU Trial.",
+                  "doi": "10.3390/cancers18203286",
+                  "year": "2026",
+                  "authors": "Fukuzato S, Akutsu T, Ohdaira H, Suzuki Y, Urashima M.",
+                  "abstract": " Background : Accumulating evidence suggests that vitamin D may influence cancer prognosis. We aimed to explore whether the  TP53  codon 72 polymorphism (p.Pro72Arg; rs1042522) may be associated with differential effects of vitamin D supplementation on digestive tract cancer prognosis.  Methods : This post hoc analysis of the AMATERASU randomized controlled trial included patients in whom both germline  TP53  codon 72 genotype and p53 immunohistochemistry (IHC) assessment were available. Patients were stratified according to  TP53  codon 72 genotype and p53 IHC expression. The association between vitamin D supplementation and relapse-free survival (RFS) was evaluated using Cox proportional hazards regression models within each subgroup.  Results : A total of 333 participants (79.9%) out of 417 in the AMATERASU trial were included in the analysis. RFS was comparable between the vitamin D and placebo groups across the  TP53  codon 72 genotype subgroups. The vitamin D group was significantly associated with more favorable RFS compared with the placebo group in patients with both the Arg/Arg genotype and high p53 IHC expression (HR, 0.32; 95% CI, 0.12-0.87;  p  = 0.03). However, with a fragility index of 2 and a non-significant three-way interaction among vitamin D supplementation, p53 IHC expression, and the Arg/Arg genotype ( p  for interaction = 0.09), these findings remain fragile despite reaching statistical significance, warranting careful interpretation.  Conclusions : Vitamin D supplementation was associated with more favorable RFS among patients with digestive tract cancer who had both the Arg/Arg genotype and high p53 IHC expression. These exploratory findings warrant further investigation in prospective studies.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42938823/"
+                },
+                {
+                  "id": "42891904",
+                  "source": "MED",
+                  "pmid": "42891904",
+                  "title": "Association of TP53 Truncating Mutations with Time to Treatment Failure after First-Line Chemoimmunotherapy in HER2-Mutant Non-Small Cell Lung Cancer.",
+                  "doi": "10.1007/s11523-026-01263-8",
+                  "year": "2026",
+                  "authors": "Yoshimura A, Yoshida J, Takumi C, Takayama K.",
+                  "abstract": " Background Biomarkers associated with first-line chemoimmunotherapy outcomes in HER2-mutant non-small cell lung cancer (NSCLC) remain incompletely characterized. Objective To evaluate whether TP53 truncating mutations are associated with clinical outcomes after first-line pembrolizumab plus pemetrexed-platinum in patients with HER2-mutant NSCLC. Patients and methods We conducted a retrospective clinicogenomic study using the nationwide Center for Cancer Genomics and Advanced Therapeutics (C-CAT) database. Patients with advanced or recurrent HER2-mutant NSCLC who received first-line pembrolizumab plus pemetrexed-platinum were included. The primary endpoint was time to treatment failure (TTF). Results Among 69 patients, 21 (30.4%) harbored TP53 truncating mutations. Patients with TP53 truncating mutations had shorter TTF than those without TP53 truncating mutations (median, 6.0 versus 7.6 months; hazard ratio [HR], 1.97; 95% confidence interval [CI] 1.11-3.49; log-rank P = 0.018). The 9-month TTF rates were 4.8% and 40.6%, respectively. After adjustment for age, Eastern Cooperative Oncology Group performance status, and programmed death-ligand 1 tumor proportion score, TP53 truncating mutations remained associated with shorter TTF (HR, 1.98; 95% CI 1.08-3.63; P = 0.026). No significant differences were observed in overall survival or objective response rate. Conclusions TP53 truncating mutations were associated with shorter TTF during first-line pembrolizumab plus pemetrexed-platinum in HER2-mutant NSCLC, without significant differences in overall survival or objective response rate. These findings suggest a potential association with shorter treatment durability and require validation in independent cohorts.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42891904/"
+                },
+                {
+                  "id": "42909660",
+                  "source": "MED",
+                  "pmid": "42909660",
+                  "title": "Molecular, histopathological, and clinical risk factors for overall metastatic disease and brain metastases in surgically resected stage I-III lung cancer.",
+                  "doi": "10.1007/s10585-026-10444-8",
+                  "year": "2026",
+                  "authors": "Dyrbekk APH, Suhrke P, Ludahl MO, Zecic N, Moe JO, Eide IJZ, Lund-Iversen M, Brustugun OT.",
+                  "abstract": "Lung cancer remains a major cause of cancer-related mortality, including among patients diagnosed with potentially curable disease. Current decisions regarding perioperative treatment and follow-up rely on a limited number of established prognostic factors. Further knowledge is needed regarding the clinical, histopathological, and molecular factors associated with subsequent metastatic disease, particularly brain metastasis (BM), which is associated with poor prognosis. We investigated these factors in a large cohort of patients with surgically resected stage I-III lung cancer followed for more than five years. BM was associated with higher pathological tumour and lymph-node stage and younger age at surgery. Lung adenocarcinoma was associated with a higher risk of BM than lung squamous cell carcinoma. Several molecular alterations were associated with metastatic disease or BM, including KRAS mutations in lung adenocarcinoma and NFE2L2 mutations in lung squamous cell carcinoma. Additional associations involving specific EGFR and KRAS mutation subtypes and rarer alterations were observed, but were based on small numbers of cases and should be considered exploratory. Several of the associated genes are involved in the RAS/MAPK, PI3K/AKT/mTOR, or NRF2-related pathways. However, pathway activation and causality could not be established in this observational study. These findings support further investigation of clinical, histopathological, and molecular factors associated with metastatic progression after surgical resection. Validation in larger, independent, stage-stratified and contemporary cohorts with comprehensive treatment data is required before the identified molecular alterations can be considered for clinical risk stratification or surveillance.",
+                  "url": "https://pubmed.ncbi.nlm.nih.gov/42909660/"
+                }
+              ]
+            },
+            "error": null
+          },
+          {
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "protein",
+            "kind": "uniprot",
+            "input": {
+              "query": "gene:TP53 AND organism_id:9606"
+            },
+            "dependsOn": [],
+            "sideEffect": false,
+            "maxAttempts": 1,
+            "timeoutMs": 30000,
+            "status": "completed",
+            "version": 4,
+            "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+            "attempts": 1,
+            "owner": null,
+            "fence": 1,
+            "leaseUntil": null,
+            "dueAt": null,
+            "output": {
+              "database": "UniProt via EBI Proteins",
+              "query": "gene:TP53 AND organism_id:9606",
+              "retrievedAt": "2026-10-30T01:33:42.665Z",
+              "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
+              "fallback": true,
+              "fallbackReason": "The operation was aborted due to timeout",
+              "results": [
+                {
+                  "id": "A0A087WT22",
+                  "name": "A0A087WT22_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+                },
+                {
+                  "id": "A0A087WXZ1",
+                  "name": "A0A087WXZ1_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+                },
+                {
+                  "id": "A0A087X1Q1",
+                  "name": "A0A087X1Q1_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+                },
+                {
+                  "id": "A0A0R9RRX7",
+                  "name": "A0A0R9RRX7_HUMAN",
+                  "protein": "Tumor protein p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
+                },
+                {
+                  "id": "A0A0U1RQC9",
+                  "name": "A0A0U1RQC9_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+                }
+              ]
+            },
+            "error": null
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "stepId": "literature",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
+            "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+            "bytes": 11432,
+            "mediaType": "application/json",
+            "createdAt": 1793324023499
+          },
+          {
+            "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
+            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "stepId": "protein",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
+            "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
+            "bytes": 1077,
+            "mediaType": "application/json",
+            "createdAt": 1793324032651
+          }
+        ]
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "literature",
+      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
+      "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+      "bytes": 11432,
+      "mediaType": "application/json",
+      "createdAt": 1793324023499
+    },
+    {
+      "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
+      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "stepId": "protein",
+      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
+      "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
+      "bytes": 1077,
+      "mediaType": "application/json",
+      "createdAt": 1793324032651
+    }
+  ],
+  "stream": null
+}

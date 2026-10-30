@@ -1,0 +1,62 @@
+[
+  {
+    "suite": "frontend-agents",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:43:49.4059233Z"
+  },
+  {
+    "suite": "frontend-artifacts",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:08.0427792Z"
+  },
+  {
+    "suite": "frontend-dashboard",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:13.1969411Z"
+  },
+  {
+    "suite": "frontend-literature",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:16.3986152Z"
+  },
+  {
+    "suite": "frontend-onboarding",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:19.7530217Z"
+  },
+  {
+    "suite": "frontend-settings",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:22.3549318Z"
+  },
+  {
+    "suite": "frontend-teams",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:37.1026076Z"
+  },
+  {
+    "suite": "frontend-terminal-benchmark",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:39.0355648Z"
+  },
+  {
+    "suite": "frontend-terminal",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:39.2005144Z"
+  },
+  {
+    "suite": "frontend-wishes",
+    "exitCode": 0,
+    "passed": true,
+    "finishedAt": "2026-10-30T00:44:42.5694780Z"
+  }
+]

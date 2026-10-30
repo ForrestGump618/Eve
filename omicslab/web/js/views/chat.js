@@ -1,15 +1,15 @@
 // Chat view: conversation list, message stream, markdown rendering, SSE consumption,
 // tool cards, approval prompts, figures, retry/stop and the composer.
 
-import { renderMarkdown } from '../markdown.js?v=1.5.0';
-import {openHtmlArtifact} from '../artifact-viewer.js?v=1.5.0';
-import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.5.0';
-import {mountProjectFiles} from '../project-files.js?v=1.5.0';
-import {mountGuidance} from '../guidance-ui.js?v=1.5.0';
-import {mountFileChanges} from '../file-changes.js?v=1.5.0';
-import {chooseComposerSkills} from '../composer-skills.js?v=1.5.0';
-import {mountAgentsPanel} from '../agents-panel.js?v=1.5.0';
-import { icon, brandMark } from '../icons.js?v=1.5.0';
+import { renderMarkdown } from '../markdown.js?v=1.0.0';
+import {openHtmlArtifact} from '../artifact-viewer.js?v=1.0.0';
+import {workspaceSidebarHtml,conversationListHtml,conversationFlag} from '../workspace-sidebar.js?v=1.0.0';
+import {mountProjectFiles} from '../project-files.js?v=1.0.0';
+import {mountGuidance} from '../guidance-ui.js?v=1.0.0';
+import {mountFileChanges} from '../file-changes.js?v=1.0.0';
+import {chooseComposerSkills} from '../composer-skills.js?v=1.0.0';
+import {mountAgentsPanel} from '../agents-panel.js?v=1.0.0';
+import { icon, brandMark } from '../icons.js?v=1.0.0';
 import {
   esc,
   escAttr,
@@ -23,9 +23,11 @@ import {
   removePref,
   uid,
   truncate,
-} from '../util.js?v=1.5.0';
-import { api, errorMessage } from '../api.js?v=1.5.0';
-import { streamChat, streamTrace } from '../sse.js?v=1.5.0';
+  summarizeValue,
+  prettyValue,
+} from '../util.js?v=1.0.0';
+import { api, errorMessage } from '../api.js?v=1.0.0';
+import { streamChat, streamTrace } from '../sse.js?v=1.0.0';
 import {
   toast,
   toastSuccess,
@@ -39,10 +41,10 @@ import {
   emptyStateHtml,
   openLightbox,
   spinnerHtml,
-} from '../ui.js?v=1.5.0';
-import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.5.0';
-import { on, emit } from '../bus.js?v=1.5.0';
-import { openRunDetail, openRunList } from '../runview.js?v=1.5.0';
+} from '../ui.js?v=1.0.0';
+import { getState, setState, setAgent, setAgentDefault, setWorkspace, navigate } from '../store.js?v=1.0.0';
+import { on, emit } from '../bus.js?v=1.0.0';
+import { openRunDetail, openRunList } from '../runview.js?v=1.0.0';
 
 const SIDEBAR_MIN = 210;
 const SIDEBAR_MAX = 420;
@@ -227,7 +229,7 @@ function childTaskHtml(task) {
   const tail = task.error
     ? `<div class="child-task-error">${esc(truncate(task.error.message || '子任务失败', 180))}</div>`
     : task.resultText
-      ? `<div class="child-task-result">${esc(truncate(task.resultText, 180))}</div>`
+      ? `<div class="child-task-result">${esc(summarizeValue(task.resultText, 180))}</div>`
       : '';
   return (
     `<div class="child-task is-${esc(task.status)}" data-task-id="${escAttr(task.taskId)}" role="button" tabindex="0">` +
@@ -913,7 +915,7 @@ export async function mount(root, ctx = {}) {
         ? `<details class="tool-args"><summary>参数</summary><pre>${esc(argsText)}</pre></details>`
         : '';
     const resultBlock = result
-      ? `<div class="tool-result-label">${ok ? '结果' : '错误'}</div>${preview ? `<pre class="tool-result">${esc(truncate(preview, 4000))}</pre>` : '<div class="tool-result-empty">无输出</div>'}`
+      ? resultBlockHtml(preview, ok)
       : '';
     return (
       `<div class="tool-card ${stateClass}" data-label="${esc(label)}" data-tool-id="${esc(call.id || '')}">` +
@@ -1088,9 +1090,7 @@ export async function mount(root, ctx = {}) {
           const preview = typeof data.preview === 'string' ? data.preview : previewOf(data.data);
           body.querySelector('.tool-result-entry')?.remove();
           const entry=h('<div class="tool-result-entry"></div>');
-          entry.innerHTML =
-            `<div class="tool-result-label">${ok ? '结果' : '错误'}</div>` +
-            (preview ? `<pre class="tool-result">${esc(truncate(preview, 4000))}</pre>` : '<div class="tool-result-empty">无输出</div>');
+          entry.innerHTML = resultBlockHtml(preview, ok);
           body.appendChild(entry);
         }
         updateToolGroup(refs.toolGroup);
@@ -1202,6 +1202,22 @@ export async function mount(root, ctx = {}) {
     } catch {
       return String(data);
     }
+  }
+
+  function resultBlockHtml(value, ok) {
+    const raw = prettyValue(value, 20_000);
+    if (!raw) return `<div class="tool-result-label">${ok ? '结果' : '错误'}</div><div class="tool-result-empty">无输出</div>`;
+    const summary = summarizeValue(raw, 240);
+    const structured = /^[{[]/.test(raw.trim());
+    const multiline = raw.split(/\r?\n/).length > 2 || raw.length > 240;
+    const technical = structured || multiline || !ok;
+    return (
+      `<div class="tool-result-label">${ok ? '结果' : '错误'}</div>` +
+      `<p class="tool-result-summary">${esc(summary)}</p>` +
+      (technical
+        ? `<details class="technical-details"${ok ? '' : ' open'}><summary>${ok ? '完整输出' : '错误详情'}</summary><pre class="tool-result">${esc(raw)}</pre></details>`
+        : '')
+    );
   }
 
   function cssEscape(value) {
@@ -1438,7 +1454,7 @@ export async function mount(root, ctx = {}) {
       (budget ? `<div class="task-section"><div class="task-section-title">预算</div><div class="task-grid">${budget}</div></div>` : '') +
       (usage ? `<div class="task-section"><div class="task-section-title">用量</div><div class="task-grid">${usage}</div></div>` : '') +
       (task.resultText
-        ? `<div class="task-section"><div class="task-section-title">结果</div><pre class="task-result">${esc(truncate(task.resultText, 6000))}</pre></div>`
+        ? `<div class="task-section"><div class="task-section-title">结果</div><p>${esc(summarizeValue(task.resultText, 360))}</p><details class="technical-details"><summary>完整结果</summary><pre class="task-result">${esc(prettyValue(task.resultText, 20_000))}</pre></details></div>`
         : '') +
       runsHtml +
       '</div>'

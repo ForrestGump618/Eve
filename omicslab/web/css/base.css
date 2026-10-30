@@ -49,6 +49,10 @@
   --accent-soft-2: rgba(142, 168, 255, 0.22);
   --cyan-soft: rgba(142, 168, 255, 0.12);
   --accent-contrast: #171b21;
+  --selection-bg: #33518f;
+  --selection-text: #f7f9ff;
+  --highlight-bg: #3b321e;
+  --highlight-text: #ffe8a8;
 
   /* status */
   --green: #34d399;
@@ -145,6 +149,10 @@
   --accent-soft-2: rgba(49, 87, 213, 0.17);
   --cyan-soft: rgba(49, 87, 213, 0.1);
   --accent-contrast: #ffffff;
+  --selection-bg: #dce5ff;
+  --selection-text: #17213b;
+  --highlight-bg: #fff0c2;
+  --highlight-text: #604000;
 
   --green: #059669;
   --green-soft: rgba(5, 150, 105, 0.1);
@@ -275,8 +283,8 @@ hr {
 }
 
 ::selection {
-  background: var(--accent-soft-2);
-  color: var(--text);
+  background: var(--selection-bg);
+  color: var(--selection-text);
 }
 
 :focus-visible {

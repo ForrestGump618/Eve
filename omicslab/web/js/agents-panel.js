@@ -1,8 +1,8 @@
 // Sidebar child-agent panel: team membership is an agent-autonomous runtime
 // fact, not a standalone user feature. The panel only observes and opens sessions.
-import {api,errorMessage} from './api.js?v=1.5.0';
-import {esc,escAttr} from './util.js?v=1.5.0';
-import {icon} from './icons.js?v=1.5.0';
+import {api,errorMessage} from './api.js?v=1.0.0';
+import {esc,escAttr} from './util.js?v=1.0.0';
+import {icon} from './icons.js?v=1.0.0';
 
 const POLL_MS = 8000;
 const HIDDEN_POLL_MS = 15000;

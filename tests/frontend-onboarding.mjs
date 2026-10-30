@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/wet-lab-1.5.0/', import.meta.url));
+const output = fileURLToPath(new URL('../docs/verification/eve-1.0.0-release/', import.meta.url));
 const appearance = {
   theme: 'light',
   font: 'system',
@@ -31,7 +31,7 @@ ${['base', 'components', 'views', 'studio', 'platform'].map(name => `<link rel="
 <style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:var(--bg)}#fixture{color:var(--text-2);font:13px var(--font-sans)}</style>
 </head><body><main id="fixture">Eve workbench</main><script type="module">
 window.openOnboarding = async () => {
-  const {initPlatform} = await import('/js/suwen.js?v=1.5.0');
+  const {initPlatform} = await import('/js/suwen.js?v=1.0.0');
   await initPlatform();
 };
 </script></body></html>`;

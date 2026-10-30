@@ -1,8 +1,8 @@
 /** Shared appearance and workspace-local layout preferences. Legacy keys remain readable. */
-import { api } from './api.js?v=1.5.0';
-import { getPref, setPref } from './util.js?v=1.5.0';
-import { getState, navigate } from './store.js?v=1.5.0';
-import { applyTheme, openModal } from './ui.js?v=1.5.0';
+import { api } from './api.js?v=1.0.0';
+import { getPref, setPref } from './util.js?v=1.0.0';
+import { getState, navigate } from './store.js?v=1.0.0';
+import { applyTheme, openModal } from './ui.js?v=1.0.0';
 
 export function applyAppearance(settings){
  if(!settings)return;

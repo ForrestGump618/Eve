@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/wet-lab-1.5.0/', import.meta.url));
+const output = fileURLToPath(new URL('../docs/verification/eve-1.0.0-release/', import.meta.url));
 const calls = [];
 const fixtureNow = 1_793_246_400;
 
@@ -165,16 +165,16 @@ ${['base', 'components', 'views', 'platform', 'literature'].map(name => `<link r
 </head><body><main id="view"></main><script type="module">
 window.mountDashboard = async () => {
   window.view?.destroy?.();
-  const {setState} = await import('/js/store.js?v=1.5.0');
+  const {setState} = await import('/js/store.js?v=1.0.0');
   setState({route:'dashboard',routeParams:{},workspaceId:'ws_main',workspace:{name:'肿瘤微环境项目'}});
-  const {mount} = await import('/js/views/dashboard.js?v=1.5.0');
+  const {mount} = await import('/js/views/dashboard.js?v=1.0.0');
   window.view = await mount(document.querySelector('#view'));
 };
 window.mountDreaming = async () => {
   window.view?.destroy?.();
-  const {setState} = await import('/js/store.js?v=1.5.0');
+  const {setState} = await import('/js/store.js?v=1.0.0');
   setState({route:'settings',routeParams:{section:'dreaming',candidateId:'dream-2'},workspaceId:'ws_main',workspace:{name:'肿瘤微环境项目'}});
-  const {mount} = await import('/js/views/platform.js?v=1.5.0');
+  const {mount} = await import('/js/views/platform.js?v=1.0.0');
   window.view = await mount(document.querySelector('#view'));
 };
 </script></body></html>`;
@@ -334,7 +334,7 @@ test('research dashboard and review-gated reflection render without raw JSON', {
   await page.locator('.dashboard-project').click();
   assert.equal(await page.evaluate(() => location.hash), '#/research');
   assert.deepEqual(await page.evaluate(async () => {
-    const {getState} = await import('/js/store.js?v=1.5.0');
+    const {getState} = await import('/js/store.js?v=1.0.0');
     return getState().routeParams;
   }), {section: 'wishes', wishId: 'wish-1'});
 

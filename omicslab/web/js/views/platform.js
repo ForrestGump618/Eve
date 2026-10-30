@@ -1,15 +1,15 @@
 /** Eve platform: every control talks to a real, scoped service. */
-import { api, errorMessage } from '../api.js?v=1.5.0';
-import { getState, navigate } from '../store.js?v=1.5.0';
-import { esc, escAttr, getPref, setPref } from '../util.js?v=1.5.0';
-import { icon } from '../icons.js?v=1.5.0';
-import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.5.0';
-import { applyAppearance } from '../suwen.js?v=1.5.0';
-import { renderChannels } from './channel-setup.js?v=1.5.0';
-import {mountResearchWorkspace} from './research-workspace.js?v=1.5.0';
-import {mountWishResearch} from './wish-research.js?v=1.5.0';
-import {mountScienceWorkbench} from './science-workbench.js?v=1.5.0';
-import {mountProviderModels} from '../provider-models.js?v=1.5.0';
+import { api, errorMessage } from '../api.js?v=1.0.0';
+import { getState, navigate } from '../store.js?v=1.0.0';
+import { esc, escAttr, getPref, setPref } from '../util.js?v=1.0.0';
+import { icon } from '../icons.js?v=1.0.0';
+import { openModal, closeAllModals, toastError, toastSuccess, toastWarn, confirmDialog, promptDialog, spinnerHtml } from '../ui.js?v=1.0.0';
+import { applyAppearance } from '../suwen.js?v=1.0.0';
+import { renderChannels } from './channel-setup.js?v=1.0.0';
+import {mountResearchWorkspace} from './research-workspace.js?v=1.0.0';
+import {mountWishResearch} from './wish-research.js?v=1.0.0';
+import {mountScienceWorkbench} from './science-workbench.js?v=1.0.0';
+import {mountProviderModels} from '../provider-models.js?v=1.0.0';
 
 const GROUPS={
  settings:[['models','智能模型','brain'],['appearance','外观与交互','eye'],['permissions','权限与执行','shield'],['budget','资源与用量','cpu'],['vision','视觉复核','figures'],['literature','文献雷达','book'],['dreaming','做梦与经验整理','memory'],['advanced','版本与迁移','settings']],

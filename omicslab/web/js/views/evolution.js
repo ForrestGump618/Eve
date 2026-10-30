@@ -1,7 +1,7 @@
-import {api} from '../api.js?v=1.5.0';
-import {esc} from '../util.js?v=1.5.0';
-import {toastError} from '../ui.js?v=1.5.0';
-import {getState} from '../store.js?v=1.5.0';
+import {api} from '../api.js?v=1.0.0';
+import {esc} from '../util.js?v=1.0.0';
+import {toastError} from '../ui.js?v=1.0.0';
+import {getState} from '../store.js?v=1.0.0';
 
 const labels={planned:'待确认',running:'运行中',failed:'未通过',completed:'实验结束',cancelled:'已取消',interrupted:'已中断'};
 

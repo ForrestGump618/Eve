@@ -1,8 +1,8 @@
 // Shell-level application state shared by the router, top bar and views.
 // Views never import app.js; they read/write this store and emit events via bus.js.
 
-import { emit } from './bus.js?v=1.5.0';
-import { getPref, setPref } from './util.js?v=1.5.0';
+import { emit } from './bus.js?v=1.0.0';
+import { getPref, setPref } from './util.js?v=1.0.0';
 
 export const ROUTES = [
   {id:'dashboard',label:'研究总览',icon:'discovery',subtitle:'课题、运行、会话与待审建议'},

@@ -1,9 +1,9 @@
 // Application shell: sidebar navigation, hash router, health polling,
 // offline banner, theme switching and the Ctrl/Cmd+K command palette.
 
-import { icon, brandMark } from './icons.js?v=1.5.0';
-import { esc, getPref, relTime } from './util.js?v=1.5.0';
-import { api, errorMessage } from './api.js?v=1.5.0';
+import { icon, brandMark } from './icons.js?v=1.0.0';
+import { esc, getPref, relTime } from './util.js?v=1.0.0';
+import { api, errorMessage } from './api.js?v=1.0.0';
 import {
   initUi,
   toastError,
@@ -17,11 +17,11 @@ import {
   confirmDialog,
   closeAllModals,
   h,
-} from './ui.js?v=1.5.0';
-import { on, emit } from './bus.js?v=1.5.0';
-import {workspaceSidebarHtml,mountSidebarNavigation} from './workspace-sidebar.js?v=1.5.0';
-import { initApprovalCenter } from './approvals.js?v=1.5.0';
-import { mountEveSelects } from './eve-select.js?v=1.5.0';
+} from './ui.js?v=1.0.0';
+import { on, emit } from './bus.js?v=1.0.0';
+import {workspaceSidebarHtml,mountSidebarNavigation} from './workspace-sidebar.js?v=1.0.0';
+import { initApprovalCenter } from './approvals.js?v=1.0.0';
+import { mountEveSelects } from './eve-select.js?v=1.0.0';
 import {
   ROUTES,
   state,
@@ -31,35 +31,35 @@ import {
   parseHash,
   routeMeta,
   requestShellRefresh,
-} from './store.js?v=1.5.0';
+} from './store.js?v=1.0.0';
 
 const HEALTH_INTERVAL_MS = 15000;
 
 const VIEW_LOADERS = {
-  dashboard: () => import('./views/dashboard.js?v=1.5.0'),
-  literature: () => import('./views/literature.js?v=1.5.0'),
-  evolution: () => import('./views/evolution.js?v=1.5.0'),
-  context: () => import('./views/context-dashboard.js?v=1.5.0'),
-  teams: () => import('./views/teams.js?v=1.5.0'),
-  settings: () => import('./views/platform.js?v=1.5.0'),
-  tasks2: () => import('./views/platform.js?v=1.5.0'),
-  extensions: () => import('./views/platform.js?v=1.5.0'),
-  knowledge: () => import('./views/platform.js?v=1.5.0'),
-  workflow: () => import('./views/platform.js?v=1.5.0'),
-  research: () => import('./views/platform.js?v=1.5.0'),
-  artifacts: () => import('./views/platform.js?v=1.5.0'),
-  diagnostics: () => import('./views/platform.js?v=1.5.0'),
-  connections: () => import('./views/settings.js?v=1.5.0'),
-  workbench: () => import('./views/workbench.js?v=1.5.0'),
-  chat: () => import('./views/chat.js?v=1.5.0'),
-  discovery: () => import('./views/discovery.js?v=1.5.0'),
-  vars: () => import('./views/vars.js?v=1.5.0'),
-  files: () => import('./views/files.js?v=1.5.0'),
-  figures: () => import('./views/figures.js?v=1.5.0'),
-  jobs: () => import('./views/jobs.js?v=1.5.0'),
-  skills: () => import('./views/skills.js?v=1.5.0'),
-  registry: () => import('./views/registry.js?v=1.5.0'),
-  memory: () => import('./views/memory.js?v=1.5.0'),
+  dashboard: () => import('./views/dashboard.js?v=1.0.0'),
+  literature: () => import('./views/literature.js?v=1.0.0'),
+  evolution: () => import('./views/evolution.js?v=1.0.0'),
+  context: () => import('./views/context-dashboard.js?v=1.0.0'),
+  teams: () => import('./views/teams.js?v=1.0.0'),
+  settings: () => import('./views/platform.js?v=1.0.0'),
+  tasks2: () => import('./views/platform.js?v=1.0.0'),
+  extensions: () => import('./views/platform.js?v=1.0.0'),
+  knowledge: () => import('./views/platform.js?v=1.0.0'),
+  workflow: () => import('./views/platform.js?v=1.0.0'),
+  research: () => import('./views/platform.js?v=1.0.0'),
+  artifacts: () => import('./views/platform.js?v=1.0.0'),
+  diagnostics: () => import('./views/platform.js?v=1.0.0'),
+  connections: () => import('./views/settings.js?v=1.0.0'),
+  workbench: () => import('./views/workbench.js?v=1.0.0'),
+  chat: () => import('./views/chat.js?v=1.0.0'),
+  discovery: () => import('./views/discovery.js?v=1.0.0'),
+  vars: () => import('./views/vars.js?v=1.0.0'),
+  files: () => import('./views/files.js?v=1.0.0'),
+  figures: () => import('./views/figures.js?v=1.0.0'),
+  jobs: () => import('./views/jobs.js?v=1.0.0'),
+  skills: () => import('./views/skills.js?v=1.0.0'),
+  registry: () => import('./views/registry.js?v=1.0.0'),
+  memory: () => import('./views/memory.js?v=1.0.0'),
   ssh: () => loadSshView(),
 };
 
@@ -69,7 +69,7 @@ const VIEW_LOADERS = {
 async function loadSshView() {
   let mod = null;
   try {
-    mod = await import('./views/ssh.js?v=1.5.0');
+    mod = await import('./views/ssh.js?v=1.0.0');
   } catch (err) {
     console.warn('[app] views/ssh.js 尚未就绪', err);
     return sshPlaceholderView();
@@ -657,7 +657,7 @@ function bindGlobalKeys() {
   });
   // Bridge: CustomEvent from the palette -> bus event (chat view subscribes).
   window.addEventListener('omicslab:new-conversation', async () => {
-    const { emit } = await import('./bus.js?v=1.5.0');
+    const { emit } = await import('./bus.js?v=1.0.0');
     emit('chat:new-conversation', {});
   });
 }
@@ -719,7 +719,7 @@ async function boot() {
 
   const bootRoute = parseHash();
   await renderRoute(bootRoute);
-  const { initPlatform } = await import("./suwen.js?v=1.5.0");
+  const { initPlatform } = await import("./suwen.js?v=1.0.0");
   await initPlatform();
   document.documentElement.dataset.ready='true';
   window.addEventListener('beforeunload', () => {

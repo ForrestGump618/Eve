@@ -82,7 +82,19 @@ async function waitForProcessExit(handle, timeoutMs) {
 function forceStopElectron(handle) {
   if (!handle?.pid || handle.exitCode !== null) return;
   if (process.platform === 'win32') {
-    execFileSync('taskkill.exe', ['/PID', String(handle.pid), '/F'], {stdio: 'ignore'});
+    try {
+      execFileSync('taskkill.exe', ['/PID', String(handle.pid), '/F'], {stdio: 'ignore'});
+    } catch (error) {
+      // The app can exit between the timeout and taskkill. Treat only that
+      // already-stopped race as success; a live process remains a failure.
+      let alive = true;
+      try {
+        process.kill(handle.pid, 0);
+      } catch (probeError) {
+        alive = probeError.code !== 'ESRCH';
+      }
+      if (alive) throw error;
+    }
   } else {
     handle.kill('SIGKILL');
   }

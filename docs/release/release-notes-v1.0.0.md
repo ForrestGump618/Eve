@@ -1,32 +1,34 @@
-# 素问 SuWen 1.0.0
+# Eve 1.0.0
 
-素问 1.0 是一次围绕“任务是否真的完成”的可靠性版本。桌面端和 Python 工作台统一为 1.0.0，保留原有科研 Skills、Python Worker、历史会话、用户配置与多模型能力，同时由一个 Agent Loop 统一模型和工具执行。
+Eve 1.0.0 是科研桌面智能体的统一发布基线。本版本保留现有 Agent Loop、持久任务、工作区、技能图、多智能体协作和证据门禁，完成正式界面、安装器、科研写作/绘图技能与公共数据接口收口。
 
-## 主要变化
+## 新增与改进
 
-- SSH 工作区支持保活、自动重连、密码复用和每主机连接锁；文件、搜索、写入、Shell、Python 与 Skill 均在选定的本地或远程目标执行，失败时不静默回退。
-- 增加请求批准、帮我审核、完全权限三种模式，合并同轮审批，并将权限与模型配置按会话隔离。
-- 增加 Plan → Act → Observe → Verify、有限重试、取消、检查点恢复、结构化工具结果、上下文压缩和 Trace ID。
-- Web 检索统一为 Search → Fetch → Evidence → Answer 流程；能力中心可安装、导入和启停 MCP，Skill 支持渐进加载、创建、安装与远程执行。
-- 正式页面采用默认浅色灰阶工作台和 Codex 风格单侧栏；支持长会话虚拟化、稳定流式渲染、运行中引导、批注与候选排队。
-- 能力中心可在正式页面新增、导入、启停和删除 MCP server；写入型 MCP 复用统一审批通道，并验证实际动态发现和工具调用。
-- 修复关闭动画期间再次打开对话框造成的模态框堆叠，统一权限选择器、工具状态与审批呈现。
-- Windows 使用一体化窗口与系统托盘，关闭时可退出、最小化到托盘或取消，并持久记忆用户选择。
+- 固定接入 K-Dense-AI/scientific-agent-skills 提交 `5f2bc0341354fd5590aef76a533ada1e1e5b4e62` 中的论文写作、出版图、示意图、引文管理、投稿模板和同行评审技能。
+- 六项技能已安装到全局 Codex 并通过结构校验，同时保留在 Eve 共享技能库；技能继续按需读取，不整体注入上下文。
+- Agent 提示词和中文检索增加论文、引文、投稿、出版图与示意图意图，新技能仍需经过检索和执行反馈进入主路径。
+- UniProt 主接口异常时增加有界 EBI Proteins 回退，支持 accession、gene、organism/taxid 查询；PubMed 保留 Europe PMC → NCBI 回退。
+- 统一中性灰、单一强调色和语义状态色；压缩聊天气泡、空状态与提示语；原始 JSON、工具参数和长输出默认折叠。
+- Windows 安装与卸载器使用与主程序一致的自绘界面，提供“仅为我”和“所有用户”安装范围，不展示管理员概念。
+- 安装路径在普通与提权实例双重校验，拒绝相对路径、UNC、目录穿越和越界 Program Files 路径。
+- 补充生产依赖审计、SBOM、静态安全扫描、打包 smoke、实时数据库 smoke、安装生命周期和性能证据。
 
-## 验收
+## 验证
 
-- 固定 22 项真实模型任务：最终 22/22，同一任务集 SHA-256 为 `08e2cc0eddd7db3d0bd87c4f0027e9825e7fccd0fa1f68a0015f3d4776caf2e6`。
-- 同条件 P50 8,867 → 7,649 ms，P95 59,442 → 21,697 ms；Token 286,212 → 283,308。提供方未返回金额，因此不列估算成本。
-- TypeScript 252 项：251 通过、1 跳过、0 失败；Python 560 通过。
-- 正式页面源码 E2E 69/69，打包受控 E2E 69/69，打包受控 + 真实 SSH 74/74，打包真实模型 + 真实 SSH 37/37，Tray 8/8。
-- 实际 SSH 主机完成文件、搜索、编辑、Shell、Python、Skill、断线重连、凭据复用与本地隔离检查，16/16；P50 226.52 ms，P95 777.33 ms。
-- 同机短时性能观测中窗口数 2 → 1，跟踪工作集 612 → 525.5 MB；启动时间 9,506 → 9,675 ms，因此不宣称启动提速。外部奇安信 `LHShield64.dll` 是本次采样中的主要 CPU 时间来源。
-- 安装包未签名；干净虚拟机、8/24/72 小时耐久、跨重启/休眠、实际私钥/系统 SSH Agent、第二台物理主机与远程 stdio MCP 仍未验收。
+- Python：911 passed, 2 skipped, 1 upstream warning。
+- 桌面：267 项，266 passed, 1 skipped, 0 failed。
+- 真实 Edge 前端：10/10 套件通过。
+- 打包态 smoke：10/10；实时 PubMed/UniProt smoke：11/11。
+- 安装生命周期：10/10。
+- `npm audit --omit=dev`：0 vulnerabilities。
+- CycloneDX SBOM：294 个组件。
+- 静态安全扫描：0 HIGH / 322 LOW，20 个测试夹具已登记。
 
 ## 发布资产
 
-- `SuWen-Setup-1.0.0-win-x64.exe`
-- SHA-256：`AF4C3C33053080E67D1F1A84231A4A0F1D36ABE75A726B483E82815DEB6D03FA`
-- Blockmap、CycloneDX SBOM 与 `SHA256SUMS.txt` 随 Release 一并发布。
+- `Eve-Setup-1.0.0-win-x64.exe`
+- 大小：142,895,973 bytes
+- SHA-256：`a52dd5ea28909391055759a605580413c093f05ba17694429b94075eb17f0627`
+- Blockmap、SBOM、依赖审计、安全扫描、生命周期、smoke、性能和验收包随 Release 发布。
 
-完整证据与限制见仓库的 [1.0 验收报告](../verification/release-1.0/REPORT.md)。
+安装包未签名，Windows SmartScreen 可能提示未知发布者。完整证据、复现命令和未验证边界见 [1.0.0 验收报告](../verification/eve-1.0.0-release/README.md)。

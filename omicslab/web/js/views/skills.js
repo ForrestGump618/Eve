@@ -1,16 +1,16 @@
 // Skills view: catalogue of reusable analysis skill packs + markdown detail pane.
 
-import { icon } from '../icons.js?v=1.5.0';
-import { renderMarkdown } from '../markdown.js?v=1.5.0';
-import { esc, relTime, copyText } from '../util.js?v=1.5.0';
-import { api, errorMessage } from '../api.js?v=1.5.0';
+import { icon } from '../icons.js?v=1.0.0';
+import { renderMarkdown } from '../markdown.js?v=1.0.0';
+import { esc, relTime, copyText } from '../util.js?v=1.0.0';
+import { api, errorMessage } from '../api.js?v=1.0.0';
 import {
   toastError,
   toastSuccess,
   emptyStateHtml,
   spinnerHtml,
-} from '../ui.js?v=1.5.0';
-import { navigate } from '../store.js?v=1.5.0';
+} from '../ui.js?v=1.0.0';
+import { navigate } from '../store.js?v=1.0.0';
 
 export async function mount(root, ctx = {}) {
   root.innerHTML = layout();

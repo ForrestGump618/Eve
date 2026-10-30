@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "omicslab"
-version = "1.5.0"
+version = "1.0.0"
 description = "Eve - local-first AI agent workspace with persistent tasks, skills, remote workspaces and scientific evidence gates."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -76,11 +76,11 @@ suwen = "omicslab.cli:main"
 omicslab = "omicslab.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/ForrestGump618/suwen"
-Repository = "https://github.com/ForrestGump618/suwen"
-Issues = "https://github.com/ForrestGump618/suwen/issues"
-Documentation = "https://github.com/ForrestGump618/suwen/blob/main/docs/README.md"
-Changelog = "https://github.com/ForrestGump618/suwen/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/ForrestGump618/Eve"
+Repository = "https://github.com/ForrestGump618/Eve"
+Issues = "https://github.com/ForrestGump618/Eve/issues"
+Documentation = "https://github.com/ForrestGump618/Eve/blob/main/docs/README.md"
+Changelog = "https://github.com/ForrestGump618/Eve/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 include-package-data = true
