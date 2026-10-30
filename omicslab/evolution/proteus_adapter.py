@@ -263,6 +263,9 @@ class EveHarness:
                                             timeout=self.policy.validation_timeout_s)
                 if result.returncode:
                     return f'Trusted regression gate failed ({result.returncode})'
-        except (OSError, ValueError, KeyError, SyntaxError, subprocess.SubprocessError) as exc:
+        except ValueError as exc:
+            detail = str(exc).strip()
+            return f'Candidate validation failed: {detail}' if detail else 'Candidate validation failed: invalid value'
+        except (OSError, KeyError, SyntaxError, subprocess.SubprocessError) as exc:
             return f'Candidate validation failed: {type(exc).__name__}'
         return ''

@@ -18,8 +18,13 @@ class ShellProcess:
             if not executable:
                 raise RuntimeError("PowerShell 未安装")
             self.label = "PowerShell"
+            startup = (
+                "try {[Console]::InputEncoding=[Text.UTF8Encoding]::new($false)} catch {}; "
+                "try {[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)} catch {}; "
+                "$OutputEncoding=[Console]::OutputEncoding"
+            )
             self.process = PtyProcess.spawn(
-                [executable, "-NoLogo", "-NoProfile"],
+                [executable, "-NoLogo", "-NoProfile", "-NoExit", "-Command", startup],
                 cwd=cwd, env=env, dimensions=(rows, cols),
             )
             self.pid = self.process.pid

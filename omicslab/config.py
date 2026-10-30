@@ -509,6 +509,10 @@ class Settings:
                         temporary_store.close()
                 else:
                     out[name] = vault.get(value.split(':', 1)[1])
+        volatile = getattr(self, '_volatile_keys', None)
+        if isinstance(volatile, dict):
+            out.update({str(k): str(v) for k, v in volatile.items()
+                        if isinstance(v, str) and v.strip()})
         # environment wins over the file, matching typical CLI conventions
         for provider, meta in PROVIDERS.items():
             env_key = str(meta.get("env_key") or "")
@@ -524,6 +528,10 @@ class Settings:
 
     def set_keys(self, keys: dict[str, str]) -> None:
         data = _read_json(self.auth_path)
+        volatile = getattr(self, '_volatile_keys', None)
+        if not isinstance(volatile, dict):
+            volatile = {}
+            self._volatile_keys = volatile
         for key, value in keys.items():
             if not key or not isinstance(key, str):
                 continue
@@ -534,12 +542,25 @@ class Settings:
                 vault = getattr(self, '_secure_vault', None)
                 if vault is not None:
                     reference = 'legacy_' + re.sub(r'[^A-Za-z0-9_-]', '_', key)[:60]
-                    vault.put(reference, value.strip(), persist=True)
-                    data[key] = 'suwen-vault:' + reference
+                    try:
+                        result = vault.put(reference, value.strip(), persist=True)
+                    except (OSError, RuntimeError, ValueError):
+                        # Keep the app usable without writing plaintext when the
+                        # host has no supported OS credential vault.
+                        volatile[key] = value.strip()
+                        data.pop(key, None)
+                    else:
+                        if isinstance(result, dict) and result.get('stored'):
+                            data[key] = 'suwen-vault:' + reference
+                            volatile.pop(key, None)
+                        else:
+                            volatile[key] = value.strip()
+                            data.pop(key, None)
                 else:
                     data[key] = value.strip()
             else:
                 data.pop(key, None)
+                volatile.pop(key, None)
         _write_json(self.auth_path, data)
 
     # -- vision ------------------------------------------------------------

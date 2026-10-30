@@ -88,6 +88,22 @@ async def test_settings_keys_keep_multiple_provider_credentials(p,client_app):
 
 
 @pytest.mark.asyncio
+async def test_settings_keys_fall_back_to_session_without_plaintext(p,client_app,monkeypatch):
+    def unavailable(*_args,**_kwargs):
+        raise ValueError('OS credential vault unavailable')
+    monkeypatch.setattr(p.vault,'put',unavailable)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        first=await client.post('/api/settings/keys',json={'provider':'deepseek','model':'deepseek-chat','key':'session-deepseek','activate':False})
+        second=await client.post('/api/settings/keys',json={'provider':'openai','model':'gpt-4o-mini','key':'session-openai','activate':False})
+    assert first.status_code==200 and second.status_code==200
+    assert p.settings.auth()['DEEPSEEK_API_KEY']=='session-deepseek'
+    assert p.settings.auth()['OPENAI_API_KEY']=='session-openai'
+    auth_file=p.settings.auth_path.read_text(encoding='utf-8')
+    assert 'session-deepseek' not in auth_file
+    assert 'session-openai' not in auth_file
+
+
+@pytest.mark.asyncio
 async def test_dashboard_returns_scoped_research_overview(p,client_app):
     store=ConversationStore(p.settings)
     p.state.store=store
