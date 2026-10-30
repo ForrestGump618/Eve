@@ -57,6 +57,7 @@
 
 - 安装与卸载界面使用与主程序一致的中性灰、单一强调色、统一圆角和排版，不再使用标准 NSIS 向导外观。
 - 安装范围提供“仅为我”和“所有用户”，界面不展示管理员概念。
+- 最终安装包的欢迎、安装进度和完成页通过 14 项真实窗口探针，覆盖版本号、安装范围、无管理员文案、背景资源、原生按钮隐藏、安装完成与卸载程序落盘。
 - 当前自动化只实测了逐用户安装；“所有用户”路径需要 UAC 提权，当前非管理员验收进程未执行。
 - 安装器完成普通安装、版本元数据、应用启动、守护进程健康、界面关闭后守护进程存活、同版本重装、静默卸载、用户数据保留和注册表清理。
 - 安装器与主程序均未签名，Windows SmartScreen 可能显示未知发布者。
@@ -84,6 +85,8 @@
 | 打包态 smoke | [packaged-smoke.json](packaged-smoke.json) |
 | 打包态实时 smoke | [packaged-live-smoke.json](packaged-live-smoke.json) |
 | 安装器生命周期 | [installer-lifecycle.json](installer-lifecycle.json) |
+| 安装器页面交互 | [page-transitions.json](page-transitions.json) |
+| 安装器页面截图 | [installer-welcome.png](installer-welcome.png)、[installer-progress.png](installer-progress.png)、[installer-finish.png](installer-finish.png) |
 | 安装包与关键文件哈希 | [installer.json](installer.json) |
 | SBOM | [sbom.cdx.json](sbom.cdx.json) |
 | 生产依赖审计 | [npm-audit.json](npm-audit.json) |
