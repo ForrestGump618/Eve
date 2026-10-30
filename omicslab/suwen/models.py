@@ -66,6 +66,17 @@ class ModelGateway:
         elif 'code' in getattr(agent,'category','') or re.search(r'写代码|编写.*(?:代码|脚本)|修复.*(?:代码|程序)|debug|implement|write.*(?:code|script)',task_text,re.I):
             role='code'
         role_model=config['roles'].get(role,{})
+        shared_profile=config.get('shared_profile') or {}
+        # A shared text route is a convenience default, not a substitute for
+        # an embedding or vision model. Task-specific auxiliary routes still
+        # override it, and an explicitly selected Agent model wins over both.
+        shared_applies=role not in {'embedding','vision'} and not (
+            task_tag and task_tag.endswith('.embedding')
+        )
+        shared_route={
+            key:str(shared_profile.get(key) or '').strip()
+            for key in ('provider','model','api_base','credential_ref')
+        } if shared_profile.get('enabled') and shared_applies else {}
         profile=self.platform.store.get('agent',agent.id)
         if profile and not task_tag:
             if profile.get('workspaces') and scope not in profile['workspaces']:
@@ -75,18 +86,24 @@ class ModelGateway:
         auxiliary=config.get('auxiliary_profiles',{}).get(task_tag,{}) if task_tag else {}
         task_route={k:v for k,v in auxiliary.items() if v}
         if task_route:
-            route=dict(role_model)
+            # Shared mode deliberately replaces role defaults. Independent
+            # role values remain stored and become active again when shared
+            # mode is disabled.
+            route={**role_model,**shared_route}
             route.update(task_route)
             target=self.resolve_target(route)
             use_role=False
         else:
-            use_role=not provider and not model
-            if not provider and role_model:
-                provider=role_model.get('provider') or None
-            if not model and role_model:
-                model=role_model.get('model') or None
-            target=self.resolve_target(dict(role_model,provider=provider,model=model) if use_role else {'provider':provider,'model':model})
-        caps=config['capabilities'].get(target.model,{})
+            explicit=bool(provider or model)
+            use_role=not explicit
+            if explicit:
+                target=self.resolve_target({'provider':provider,'model':model})
+            else:
+                route={**role_model,**shared_route}
+                if not route.get('provider') and not route.get('model'):
+                    route={}
+                target=self.resolve_target(route)
+        caps=config['capabilities'].get(target.provider+'::'+target.model,config['capabilities'].get(target.model,{}))
         maximum={'fast':1024,'balanced':4096,'deep':8192}[config['mode']]
         temperature=None
         temp_cap=caps.get('temperature')
@@ -97,9 +114,9 @@ class ModelGateway:
         model_window=int(caps.get('context_window') or 0)
         ctx_window=int(config['context_window'])
         if model_window>=2048:
-            ctx_window=min(ctx_window,model_window)
+            ctx_window=model_window
         cfg=ProviderConfig(temperature=temperature,
-            max_tokens=min(maximum,int(caps.get('max_output',maximum))),timeout_s=float(settings.request_timeout_s),
+            max_tokens=int(caps.get('max_output',maximum)),timeout_s=float(settings.request_timeout_s),
             extra={'supported_parameters':caps.get('supported_parameters',[]),'token_parameter':caps.get('token_parameter','max_tokens'),
                    'modalities':caps.get('modalities',[]),'model_context_window':ctx_window})
         routed_config=dict(config);routed_config['context_window']=ctx_window
@@ -107,7 +124,7 @@ class ModelGateway:
         routed.task_tag=task_tag
         if task_tag:
             self.platform.store.audit('model.task_route',{'task_tag':task_tag,'model':target.model,
-                'source':'auxiliary' if task_route else 'fallback'},scope)
+                'source':'auxiliary' if task_route else 'shared' if shared_route else 'fallback'},scope)
         return routed,cfg,target
 
     def resolve_target(self,item):

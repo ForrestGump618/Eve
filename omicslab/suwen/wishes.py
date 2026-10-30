@@ -86,6 +86,8 @@ STAGES = (
 STAGE_BY_ID = {stage["id"]: stage for stage in STAGES}
 STAGE_INDEX = {stage["id"]: index for index, stage in enumerate(STAGES)}
 STAGE_IDS = tuple(stage["id"] for stage in STAGES)
+IDEATION_STAGES = frozenset({"scouting", "evidence_matrix", "hypotheses"})
+CHECKPOINT_STAGES = frozenset({"preregistration", "analysis", "experiment_design", "figures"})
 MAX_ARTIFACTS = 24
 MAX_ARTIFACT_BYTES = 20_000_000
 MAX_TEXT_FIELD = 20_000
@@ -108,6 +110,35 @@ STATUS_LABELS = {
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _stage_skills(stage_id: str) -> list[str]:
+    if stage_id in IDEATION_STAGES:
+        return ["agent4sci-research-ideation"]
+    if stage_id in CHECKPOINT_STAGES:
+        return ["agent4sci-research-checkpoint"]
+    return []
+
+
+def _research_skill_guidance(stage_id: str, *, advance: bool) -> str:
+    guidance: list[str] = []
+    if stage_id in IDEATION_STAGES:
+        guidance.append(
+            "科研构思：先用 skill_search 检索 agent4sci-research-ideation，读取返回 id 后调用 "
+            "skill_load。按领域科学方法与计算/AI 方法两条线核对真实文献，区分 Tier 1 "
+            "高风险机制方案与 Tier 2 文献支持方案；每个候选写机制、预测、主要指标、"
+            "证伪条件、竞争解释和资源预算。不得把调参、换调度器或简单集成写成创新。"
+        )
+    if stage_id in CHECKPOINT_STAGES or advance:
+        guidance.append(
+            "研究检查点：先用 skill_search 检索 agent4sci-research-checkpoint，读取返回 id 后调用 "
+            "skill_load。登记当前节点前检查研究漂移、真实 CPU/GPU/内存/墙钟、日志、产物、"
+            "失败原因、子智能体实现、剩余预算和停止规则；把行动项与简短结论写入当前阶段"
+            "主产物的 Research checkpoint 小节，完成可立即执行的纠偏后再登记。连续推进时，"
+            "进入下一节点前重新检查，不得沿用旧结论。若转向改变预注册判据，保留旧版本并"
+            "新增带时间和理由的修订版，禁止覆盖后假装原本如此。"
+        )
+    return "\n".join(guidance)
 
 
 def _text(value: Any, label: str, *, minimum: int = 1, maximum: int = MAX_TEXT_FIELD) -> str:
@@ -264,6 +295,7 @@ class ResearchWishes:
                 "stage": stage["id"],
                 "label": stage["label"],
                 "owner": "user" if stage.get("human_only") else "agent",
+                "skills": _stage_skills(stage["id"]),
                 "output": f"{wish['workspace']['base']}/{stage['output'].rstrip('/')}",
                 "reason": stage["purpose"],
             })
@@ -844,11 +876,16 @@ class ResearchWishes:
         continuation = (
             "这是连续许愿推进，不是只做一步。登记当前节点后立即调用 wish_status；"
             "只要 next_actions 中还有 owner=agent 的节点，就按依赖继续执行并登记，"
+            "每次进入新节点先按 next_actions.skills 检索并加载对应技能；资源侦察、证据矩阵和假设"
+            "使用 agent4sci-research-ideation，预注册、分析、实验设计和图表使用 "
+            "agent4sci-research-checkpoint。技能不可用时报告缺口，不得声称已加载。"
             "不要等待用户逐节点点击。遇到 wish_block、需要人工复核、预算耗尽或不可逆外部操作时才停止，"
             "并在最后汇总已完成节点、真实产物、失败和仍未知的事项。"
             if advance else
             "本次只完成当前节点；登记或阻塞后停止，让用户决定下一步。"
         )
+        skill_guidance = _research_skill_guidance(stage_id, advance=advance)
+        skill_block = f"{skill_guidance}\n" if skill_guidance else ""
         if stage_id == "charter":
             return (
                 f"推进许愿式科研课题 {wish_id} 的愿望章程阶段。\n"
@@ -858,6 +895,7 @@ class ResearchWishes:
                 f"必须保留或补全成功判据、边界、未知项和停止条件。完成后调用 wish_update，"
                 f"id={wish_id}，提交结构化章程。平台会把章程写入 {wish['workspace']['charter']}。\n"
                 "不要声称已经完成任何数据分析或科学验证。\n"
+                f"{skill_block}"
                 f"推进方式：{continuation}"
             )
         scouting_guidance = ""
@@ -880,6 +918,7 @@ class ResearchWishes:
             "实际读取数据、运行脚本或查询数据库。把输入、代码、环境、日志、结果和图表写入项目工作区，"
             "保留失败、阴性和不支持假设的结果。不要输出未执行的伪结果。\n"
             f"{scouting_guidance}"
+            f"{skill_block}"
             f"建议交付位置：{outputs}\n"
             f"完成后调用 wish_record，id={wish_id}，stage={stage_id}，artifacts 传入真实存在的相对路径，"
             "summary 写明支持什么、反对什么、仍不知道什么。不要重复登记已记录节点。"

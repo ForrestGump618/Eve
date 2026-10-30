@@ -2,7 +2,7 @@
 
 技能（Skill）是 Eve 的按需操作手册。默认只把技能目录（`name + description + when_to_use`）注入模型上下文；当模型判断需要时，才用 `skill_search`、`skill_load` 和 `skill_read_resource` 读取完整正文与附带脚本。因此技能可以写得很详细，而不会挤占日常对话的上下文。
 
-> **状态说明**：`omicslab/skills/` 当前共 **32 个本机技能**，另有桌面扩展技能和 390 项共享技能库。本页保留核心科研方法目录；湿实验与 K-Dense 的完整来源、加载方式和执行边界见 [湿实验技能](WET-LAB-SKILLS.md)。每个技能对应 `omicslab/skills/<name>/SKILL.md`，正文为最终事实来源。
+> **状态说明**：`omicslab/skills/` 当前共 **34 个本机技能**，另有桌面扩展技能和 390 项共享技能库。本页保留核心科研方法目录；湿实验与 K-Dense 的完整来源、加载方式和执行边界见 [湿实验技能](WET-LAB-SKILLS.md)。每个技能对应 `omicslab/skills/<name>/SKILL.md`，正文为最终事实来源。
 
 ## 1. 技能总览
 
@@ -21,18 +21,20 @@
 | [`rsi-discovery-loop`](#211-rsi-discovery-loop) | 科研发现 | RSI 闭环完整 playbook：观察→假设→预注册→执行→证据分级→反思 | 端到端科研发现、建 discovery 项目、多轮检验 |
 | [`hypothesis-generation`](#212-hypothesis-generation) | 科研发现 | 把观察/文献转成可证伪、有机制、有预测的假设卡 | 想法模糊、需要产出可写进账本的假设 |
 | [`experimental-design`](#213-experimental-design) | 科研发现 | 预注册实验/观察方案：对照、随机化、样本量、分析计划 | 假设已明确、准备投入真实样本或算力 |
+| [`agent4sci-research-ideation`](#2131-agent4sci-research-ideation) | 科研构思 | 领域与方法双线文献调研、Tier 1/2 方案比较与可执行设计 | 许愿式科研的资源侦察、证据矩阵与假设阶段 |
+| [`agent4sci-research-checkpoint`](#2132-agent4sci-research-checkpoint) | 科研质检 | 阶段推进前检查研究漂移、资源、日志、失败与预算 | 预注册、分析、实验、图表及连续推进边界 |
 | [`statistical-rigor`](#214-statistical-rigor) | 统计 | 检验选择、效应量与 CI、多重校正、置换检验 | 要写进报告的任何统计结论；审阅显著性声明 |
 | [`causal-inference`](#215-causal-inference) | 统计 | 从观察数据谨慎逼近因果：DAG、调整集、敏感性分析 | 结论用「导致/影响」措辞、决定调整哪些协变量 |
 | [`remote-compute-ssh`](#216-remote-compute-ssh) | 工程 | 通过 SSH profile 用远程算力：传数据、提交长任务、取回结果 | 任务超出本机算力，数据已在远程服务器 |
 | [`function-registry`](#217-function-registry) | 工程 | 用 `registry_lookup` 查真实签名再写代码 | 不确定 API/参数、遇到 ImportError/TypeError |
 | [`vision-interpretation`](#218-vision-interpretation) | 可视化 | 用 `analyze_image` 解读图表、显微图、门控图等 | 需要理解用户给的图、报告前检查图是否被误读 |
-| [`biomedical-discovery`](#219-biomedical-discovery) | 生物医学 | Biomni 风格：工具检索、文献/蛋白查询、证据门禁 | 生信分析、文献/蛋白查询、机制假设验证 |
+| [`biomedical-discovery`](#219-biomedical-discovery) | 生物医学 | 工具检索、文献/蛋白查询、证据门禁 | 生信分析、文献/蛋白查询、机制假设验证 |
 | [`co-scientist`](#220-co-scientist) | 科研方法 | 多角色假设、交叉批评、排序与实验设计 | 比较多个假设、组织学术讨论、形成实验计划 |
 | [`empirical-research`](#221-empirical-research) | 科研方法 | 独立可执行评估比较候选算法/科研程序 | 优化科研代码、比较计算实验、复现评估 |
 | [`paper2agent`](#222-paper2agent) | 科研方法 | 论文/仓库/可执行评估 → Skill 或 MCP 草稿 | 复现论文、把研究方法封装为工具 |
 | [`robin`](#223-robin) | 科研方法 | 文献—假设—实验策略—分析—假设修订迭代 | 根据实验数据持续更新假设与下一步策略 |
 
-> 前 18 个是领域与分析技能；最后 5 个是方法技能，通常与 `bio_*` 证据工具、`delegate_agent` 或 discovery 项目配合使用。
+> 表中的领域、方法与质检技能通常与证据工具、`delegate_agent`、许愿式科研或 discovery 项目配合使用。
 
 **技能与专职 Agent 的搭配**
 
@@ -172,6 +174,22 @@
 
 **产出检查**：主要终点与分析计划是否预注册；样本量/功效是否有依据；混杂与批次是否被显式控制；停止规则是否写明。
 
+### 2.13.1 `agent4sci-research-ideation`
+
+**用途**：把许愿式科研的课题拆成领域科学方法与计算/AI 方法两条真实文献线，比较 `Tier 1` 高风险机制方案和 `Tier 2` 文献支持方案；每个方案必须写机制、预测、主要指标、证伪条件、竞争解释、资源预算和停止理由。改编自 Agent4Sci 的 Research 技能，去除了上游 Claude/Codex 专属子智能体、bash 等待脚本与实验技能依赖。
+
+**何时触发**：资源侦察、证据矩阵和可证伪假设节点；需要判断一个想法是否真的改变机制或研究范式，而不是调参、换框架或简单集成。
+
+**产出检查**：引用能否追溯；高风险方案是否被认真比较；候选是否有可区分预测；资源预算是否来自真实执行环境。
+
+### 2.13.2 `agent4sci-research-checkpoint`
+
+**用途**：在预注册、分析、实验设计、图表和连续推进边界检查研究漂移、真实资源、日志、失败原因、子智能体实现、剩余预算和停止规则，并把检查结论转成当前节点内的行动项。检查绑定现有 `RunService` 的阶段节点，不是独立小时级调度器。
+
+**何时触发**：长时间运行、失败重试、资源紧张、结果与预测冲突、准备转向或连续推进多个科研节点时。
+
+**产出检查**：是否执行了纠偏动作；失败和阴性结果是否有解释；预注册变更是否保留版本；登记节点前是否有真实产物。
+
 ### 2.14 `statistical-rigor`
 
 **用途**：统计严谨性检查与实施 —— 检验选择与前提检查、效应量与 95% CI、多重比较校正（BH/Holm）、置换检验与 bootstrap、样本量/功效与常见统计伪影（p-hacking、选择性报告、伪重复），确保结论可复现。
@@ -209,7 +227,7 @@
 
 ### 2.19 `biomedical-discovery`
 
-**用途**：Biomni 风格的生物医学发现与证据门禁流程 —— 用 `bio_tool_search` 检索实际可用工具，用 `bio_literature_search`（Europe PMC）或 `bio_protein_lookup`（UniProt）查询并保留来源 ID、DOI/PMID 与检索时间，用 `bio_sequence_check` 做确定性的 DNA 质量检查，用 `run_python_code` 在当前工作区执行计算；每项发现用 `bio_record_claim` 区分 evidence / inference / hypothesis，再用 `bio_verify_claim` 读取真实指标 JSON 复核预先声明的规则。
+**用途**：生物医学发现与证据门禁流程 —— 用 `bio_tool_search` 检索实际可用工具，用 `bio_literature_search`（Europe PMC）或 `bio_protein_lookup`（UniProt）查询并保留来源 ID、DOI/PMID 与检索时间，用 `bio_sequence_check` 做确定性的 DNA 质量检查，用 `run_python_code` 在当前工作区执行计算；每项发现用 `bio_record_claim` 区分 evidence / inference / hypothesis，再用 `bio_verify_claim` 读取真实指标 JSON 复核预先声明的规则。
 **何时触发**：生物医学数据分析、蛋白或文献查询、机制假设与发现验证。
 
 **产出检查**：来源 ID 与检索参数是否留痕；claim 的 kind 是否与真实来源关联；数值检查通过后是否仍标为 `checks_passed_needs_human`；报告是否区分「执行完成」与「科学证据已复核」。

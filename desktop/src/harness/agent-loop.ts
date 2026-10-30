@@ -14,7 +14,8 @@ import {
 } from './tool-diagnostics.js';
 
 export interface AgentTrace { type:string; at:number; traceId:string; turn?:number; name?:string; callId?:string; durationMs?:number; error?:string; [key:string]:unknown }
-export interface AgentResult { text:string; tokens:number; traceId:string; trace:AgentTrace[]; sources:Source[]; verification:{passed:boolean;citationUrls:string[];checks:string[]}; completion:'verified'|'partial' }
+export interface AgentResult { text:string; tokens:number; traceId:string; trace:AgentTrace[]; sources:Source[]; verification:{passed:boolean;citationUrls:string[];checks:string[]}; completion:'verified'|'partial'; stopReason?:'token_budget' }
+export const AGENT_BUDGET_POLICY={minimumWindow:2048,outputFraction:.2} as const;
 export interface AgentOptions {
   model:ModelRuntime; registry:ToolRegistry; signal:AbortSignal; traceId:string;
   messages:TurnMessage[]; prompt:string;
@@ -23,6 +24,7 @@ export interface AgentOptions {
   onEvent:(event:AgentTrace)=>void;
   beforeModel:(turn:number,reservedTokens:number)=>void;
   afterModel:(tokens:number)=>void;
+  remainingTokens?:()=>number;
   persistTool:(call:ToolCall,result:Json)=>Promise<void>;
   checkpoint?:(history:TurnMessage[],sources:Source[])=>Promise<void>;
   initialEvidence?:Json;
@@ -63,7 +65,7 @@ function operationText(prompt:string):string {
     try{JSON.parse(line.slice(start));return line.slice(0,start);}catch{return line;}
   }).join('\n');
 }
-const RSI_HINT="需要自我改进时先 rsi_status 查看真实记录，再经任务审批 rsi_evaluate 评估候选；晋升由用户在 RSI 面板确认。Proteus 源码进化由自我改进页创建方案，副本回归通过不等于已部署。";
+const RSI_HINT="需要自我改进时先 rsi_status 查看真实记录，再经任务审批 rsi_evaluate 评估候选；晋升由用户在 RSI 面板确认。源码副本进化由自我改进页创建方案，副本回归通过不等于已部署。";
 const AGENT_PROMPT=`你是Eve，使用已注册的工具完成当前用户任务。简单任务直接执行，不必写计划或调用多 Agent。
 需要检索、读取、计算或执行时必须真实调用相应工具；不得凭记忆声称已经执行。普通网页搜索用 web_search；PubMed/蛋白用 database_search。
 用户给出的路径可能有大小写、分隔符、引号、全角字符或轻微拼写错误。读取失败时先用 resolve_path，再按唯一高置信候选执行；出现多个候选时用 list_directory/搜索缩小范围。只有无法安全判定时才让用户选择。写入不能猜目标：必须是唯一精确的工作区相对路径，并先读取旧文件取得哈希。
@@ -173,8 +175,19 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
   // budget, explicit cancellation, and checkpoints. ClawsGO's shipped daemon
   // spawns one turn process and does not expose a verified fixed model/tool
   // iteration threshold, so do not impose an unproven local counter here.
+  const budgetResult=async():Promise<AgentResult>=>{
+    await o.checkpoint?.(messages,[...sources.values()]);
+    const completed=[...new Set(trace.filter(item=>item.type==='tool.completed').map(item=>String(item.name)))];
+    const text='本轮预算已用尽，任务尚未完成。已保留执行记录和产物。'+(completed.length?'\n已执行：'+completed.join('、')+'。':'');
+    emit('agent.budget_limited',{remainingTokens:Math.max(0,o.remainingTokens?.()??0),toolCount});o.onText(text);
+    return {text,tokens,traceId:o.traceId,trace,sources:[...sources.values()],verification:{passed:false,citationUrls:[],checks:['task-incomplete','checkpoint-retained']},completion:'partial',stopReason:'token_budget'};
+  };
   for(let turn=0;;turn++){
     o.signal.throwIfAborted();
+    const remaining=o.remainingTokens?.()??Infinity;
+    if(remaining<AGENT_BUDGET_POLICY.minimumWindow)return await budgetResult();
+    window=Math.min(window,remaining);
+    outputBudget=Math.min(outputBudget,Math.floor(window*AGENT_BUDGET_POLICY.outputFraction));
     if(specs.length)refreshSpecs();
     const guidance=o.guidance?.take()??[];
     if(guidance.length){
@@ -230,7 +243,15 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
       reserved=estimate([messages,specs])+outputBudget;emit('agent.compacted',{reservedTokens:reserved});
     }
     if(o.admitContext){
-      const admitted=await o.admitContext(messages,specs,outputBudget,reserved>window*.8,window);
+      // Task spend and model context are different limits. Admit against both,
+      // shrinking recoverable history before rejecting a paid continuation.
+      if(Number.isFinite(remaining)&&reserved>remaining)emit('agent.budget_compacting',{turn,remainingTokens:remaining});
+      let admitted:Awaited<ReturnType<NonNullable<AgentOptions['admitContext']>>>;
+      try{admitted=await o.admitContext(messages,specs,outputBudget,reserved>window*.8,window);}
+      catch(error){
+        if(window<o.contextWindow&&/budget|window|上下文|预算|token/i.test(String(error)))return await budgetResult();
+        throw error;
+      }
       if(admitted.compacted){
         messages.splice(0,messages.length,...admitted.messages);
         emit('agent.context_compacted',{turn,reservedTokens:admitted.stats.afterTokens,originalsRetained:true});
@@ -245,6 +266,8 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
     for(let attempt=0;;attempt++){
       if(!o.admitContext)reserved=estimate([messages,specs])+outputBudget;
       if(reserved>o.contextWindow)throw new ValidationError('Continuation exceeds context budget; partial evidence retained');
+      const available=o.remainingTokens?.()??Infinity;
+      if(reserved>available)return await budgetResult();
       o.beforeModel(requests++,reserved);
       await recordContext?.(specs,{turn,reservedTokens:reserved});
       emit('model.started',{turn,attempt,messageCount:messages.length,reservedTokens:reserved});
@@ -266,7 +289,7 @@ export async function runAgent(options:AgentOptions):Promise<AgentResult> {
           const used=error.tokens||estimate(error.partialText);tokens+=used;o.afterModel(used);
           emit('model.truncated',{turn,tokens:used,partialChars:error.partialText.length,hasToolCalls:error.hasToolCalls});
           if(++truncations>3)throw new ValidationError('输出连续达到长度上限；已保留部分内容，请缩小任务范围后继续');
-          const next=Math.min(32768,Math.floor(window*.3),Math.max(outputBudget*2,8192));
+          const next=Math.min(o.maxOutput,Math.floor(window*.3),Math.max(outputBudget*2,8192));
           const config=o.model.current();if(config&&next>outputBudget){outputBudget=next;o.model.configure({...config,maxOutput:next});}
           if(error.partialText&&!error.hasToolCalls){prefix+=error.partialText;messages.push({role:'assistant',content:error.partialText},{role:'user',content:'输出因长度上限中断。直接从断点继续正文，不重复前文，不重做已经完成的工具；完成原始任务。'});}
           else if(!config||next<=config.maxOutput)throw error; // Never execute incomplete tool arguments.

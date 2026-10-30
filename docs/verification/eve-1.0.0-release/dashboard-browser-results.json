@@ -38,13 +38,13 @@
   "errors": [],
   "measurements": {
     "desktopMount": {
-      "durationMs": 44.2,
+      "durationMs": 41.5,
       "domNodes": 296,
-      "resourceBytes": 112864
+      "resourceBytes": 113006
     },
-    "chartSwitchMs": 56.2,
+    "chartSwitchMs": 60.3,
     "mobileMount": {
-      "durationMs": 10.4,
+      "durationMs": 11.6,
       "domNodes": 365,
       "resourceBytes": 7516
     }

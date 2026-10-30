@@ -15,6 +15,29 @@ import {join} from 'node:path';
 const parameters={type:'object',properties:{query:{type:'string',minLength:1}},required:['query'],additionalProperties:false} as const;
 function runtime(turn:(messages:TurnMessage[])=>Promise<ModelTurn>):ModelRuntime {const m=new ModelRuntime();m.turn=async(messages)=>turn(messages);return m;}
 const reply=(text:string):ModelTurn=>({text,tokens:20,toolCalls:[]});
+test('task spend shrinks admission independently from the model context window',async()=>{
+ let remaining=6000,calls=0,admittedWindow=0,reserved=0;
+ const model=runtime(async()=>{calls++;return reply('answer');});
+ const result=await runAgent({...options(model),contextWindow:128000,maxOutput:8192,
+  remainingTokens:()=>remaining,admitContext:async(messages,_tools,output,_force,window)=>{
+   admittedWindow=window;assert.ok(output<=1200);return {messages,stats:{afterTokens:2500},compacted:true};
+  },beforeModel:(_turn,n)=>{reserved=n;assert.ok(n<=remaining);},afterModel:n=>{remaining-=n;}});
+ assert.equal(result.completion,'verified');assert.equal(admittedWindow,6000);assert.equal(calls,1);assert.equal(reserved,2500);
+});
+test('budget depletion after a successful tool retains a checkpoint and an honest partial result',async()=>{
+ let remaining=8000,calls=0,executions=0,checkpoints=0;
+ const registry=new ToolRegistry().register({name:'lookup',kind:'tool',description:'lookup',parameters:{...parameters,required:['query']},execute:async()=>{executions++;return {value:42};}});
+ const model=runtime(async()=>{calls++;return {text:'',tokens:7000,toolCalls:[{id:'once',name:'lookup',arguments:'{"query":"cells"}'}]};});
+ const result=await runAgent({...options(model,registry),remainingTokens:()=>remaining,afterModel:n=>{remaining-=n;},checkpoint:async()=>{checkpoints++;}});
+ assert.equal(calls,1);assert.equal(executions,1);assert.ok(checkpoints>=2);
+ assert.equal(result.stopReason,'token_budget');assert.equal(result.completion,'partial');assert.equal(result.verification.passed,false);
+ assert.match(result.text,/预算/);assert.doesNotMatch(result.text,/traceId|observation/);
+});
+test('no remaining budget does not send a paid request',async()=>{
+ let calls=0;const model=runtime(async()=>{calls++;return reply('unused');});
+ const result=await runAgent({...options(model),remainingTokens:()=>0});
+ assert.equal(calls,0);assert.equal(result.stopReason,'token_budget');
+});
 test('unified admission receives the original large observed call before any fallback pruning',async()=>{
  let turns=0,sawOriginal=false,executions=0;
  const content='original scientific result '.repeat(2000);

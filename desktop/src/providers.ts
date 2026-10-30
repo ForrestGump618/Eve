@@ -1,15 +1,16 @@
 import { safeError } from './security.js';
 import type { Json } from './harness/types.js';
-export type InputModality='text'|'image';
-export interface ModelConfig { provider:'openai'|'anthropic'; baseUrl:string; model:string; apiKey:string; contextWindow:number; maxOutput:number; temperature:number|null; modalities:InputModality[] }
+export type InputModality='text'|'image'|'audio';
+export interface ModelConfig { provider:'openai'|'anthropic'; baseUrl:string; model:string; apiKey:string; contextWindow:number; maxOutput:number; temperature:number|null; modalities:InputModality[]; tokenParameter?:'max_tokens'|'max_completion_tokens' }
 export function validateModelConfig(value:unknown):ModelConfig {
- const c=value as ModelConfig;const fields=new Set(['provider','baseUrl','model','apiKey','contextWindow','maxOutput','temperature','modalities']);
+ const c=value as ModelConfig;const fields=new Set(['provider','baseUrl','model','apiKey','contextWindow','maxOutput','temperature','modalities','tokenParameter']);
  if(!c||Array.isArray(c)||typeof c!=='object'||Object.keys(c).some(k=>!fields.has(k))||!['openai','anthropic'].includes(c.provider)||typeof c.apiKey!=='string'||c.apiKey.length>4096||/[\u0000-\u001f\u007f]/.test(c.apiKey)||typeof c.model!=='string'||!c.model.trim()||c.model.length>160||/[\u0000-\u001f\u007f]/.test(c.model)||typeof c.baseUrl!=='string')throw new Error('模型配置无效');
  const url=new URL(c.baseUrl);if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['127.0.0.1','localhost','[::1]'].includes(url.hostname)))throw new Error('模型地址需要 HTTPS 或本地回环 HTTP');
  if(url.username||url.password||url.search||url.hash)throw new Error('模型地址不能包含凭据或查询参数');
- if(!Number.isSafeInteger(c.contextWindow)||c.contextWindow<4096||c.contextWindow>2_000_000||!Number.isSafeInteger(c.maxOutput)||c.maxOutput<128||c.maxOutput>32768||c.maxOutput>=c.contextWindow/2)throw new Error('上下文与输出预算无效');
+ if(!Number.isSafeInteger(c.contextWindow)||c.contextWindow<2048||c.contextWindow>2_000_000||!Number.isSafeInteger(c.maxOutput)||c.maxOutput<32||c.maxOutput>200000||c.maxOutput>=c.contextWindow)throw new Error('上下文与输出预算无效');
  if(c.temperature!==undefined&&c.temperature!==null&&(typeof c.temperature!=='number'||!Number.isFinite(c.temperature)||c.temperature<0||c.temperature>2))throw new Error('温度需要 0—2 的数值，或留空使用模型默认值');
- if(c.modalities!==undefined&&(!Array.isArray(c.modalities)||!c.modalities.length||new Set(c.modalities).size!==c.modalities.length||c.modalities.some(m=>m!=='text'&&m!=='image')))throw new Error('输入模态仅支持文本和图片');
+ if(c.modalities!==undefined&&(!Array.isArray(c.modalities)||!c.modalities.length||new Set(c.modalities).size!==c.modalities.length||c.modalities.some(m=>m!=='text'&&m!=='image'&&m!=='audio')))throw new Error('输入模态仅支持文本和图片');
+ if(c.tokenParameter!==undefined&&!['max_tokens','max_completion_tokens'].includes(c.tokenParameter))throw new Error('Token 参数名无效');
  return {...c,baseUrl:c.baseUrl.replace(/\/$/,''),temperature:c.temperature??null,modalities:[...(c.modalities??['text'])]};
 }
 export interface FunctionSpec { name:string; description:string; parameters:Record<string,Json> }
@@ -49,7 +50,7 @@ async function streamReply(c:ModelConfig,messages:TurnMessage[],signal:AbortSign
    ?{role:m.role,content:[...(m.content?[{type:'text',text:m.content}]:[]),...(m.images??[]).map(image=>({type:'image_url',image_url:{url:image.url}}))]}
    :m);
  const sampling=c.temperature===null?{}:{temperature:c.temperature};
- const body=anthropic?{model:c.model,max_tokens:c.maxOutput,system,messages:nativeMessages,stream:true,...sampling,...(tools.length?{tools:tools.map(t=>({name:t.name,description:t.description,input_schema:t.parameters}))}:{})}:{model:c.model,max_tokens:c.maxOutput,messages:nativeMessages,stream:true,stream_options:{include_usage:true},...sampling,...(tools.length?{tools:tools.map(t=>({type:'function',function:t})),tool_choice:'auto'}:{})};
+ const body=anthropic?{model:c.model,max_tokens:c.maxOutput,system,messages:nativeMessages,stream:true,...sampling,...(tools.length?{tools:tools.map(t=>({name:t.name,description:t.description,input_schema:t.parameters}))}:{})}:{model:c.model,[c.tokenParameter??'max_tokens']:c.maxOutput,messages:nativeMessages,stream:true,stream_options:{include_usage:true},...sampling,...(tools.length?{tools:tools.map(t=>({type:'function',function:t})),tool_choice:'auto'}:{})};
  const headers:Record<string,string>=anthropic?{'Content-Type':'application/json','x-api-key':c.apiKey,'anthropic-version':'2023-06-01'}:{'Content-Type':'application/json','Authorization':`Bearer ${c.apiKey}`};
  const response=await fetch(c.baseUrl+(anthropic?'/messages':'/chat/completions'),{method:'POST',headers,body:JSON.stringify(body),signal,redirect:'error'});
  if(!response.ok){

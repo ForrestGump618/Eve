@@ -35,14 +35,14 @@ export async function mountWishResearch(root,{request}){
   }
  }
  function render(){
-  root.innerHTML=`<section class="sw-card wish-hero">
-   <div class="wish-hero-copy"><span class="sw-overline">科研愿望</span><h2>从课题目标到分析、图表与复核。</h2><p>盘点数据与文献，提出可证伪假设，预注册分析并执行计算。遇到阻塞或人工复核时暂停；输入、代码、结果与图表保留在项目工作区。</p></div>
-   <div class="wish-hero-action">${actionButton('new','新建科研愿望','', '', true)}</div>
+  root.innerHTML=`<div class="wish-research"><section class="sw-card wish-hero">
+   <div class="wish-hero-copy"><span class="sw-overline">科研愿望</span><h2>课题设计</h2><p>文献、分析、实验与图表，在同一个工作区推进。</p></div>
+   ${wishes.length?`<div class="wish-hero-action">${actionButton('new','新建课题','', '', true)}</div>`:''}
   </section>
-  <div class="wish-layout">
-   <aside class="wish-list" aria-label="科研愿望">${wishes.map(wish=>wishListItem(wish)).join('')||`<div class="wish-list-empty"><span>还没有科研愿望</span><button type="button" class="btn btn-ghost btn-sm" data-wish-action="new">新建科研愿望</button></div>`}</aside>
+  <div class="wish-layout ${wishes.length?'':'is-empty'}">
+   ${wishes.length?`<aside class="wish-list" aria-label="科研愿望">${wishes.map(wish=>wishListItem(wish)).join('')}</aside>`:''}
    <main class="wish-detail">${selected?detail(selected):emptyState()}</main>
-  </div>`;
+  </div></div>`;
  }
  function wishListItem(wish){
   const recorded=wish.stages.filter(stage=>stage.status==='recorded').length;
@@ -54,7 +54,7 @@ export async function mountWishResearch(root,{request}){
   </button>`;
  }
  function emptyState(){
-  return `<section class="sw-card wish-empty"><span class="wish-empty-mark">W</span><h3>从一个问题开始</h3><p>例如：“我想知道这个公开单细胞数据集里，哪些细胞状态与耐药相关，并设计能验证它的实验。”</p>${actionButton('new','新建科研愿望','', '', true)}</section>`;
+  return `<section class="sw-card wish-empty"><h3>还没有课题</h3><p>描述研究问题，或从已有数据开始。</p>${actionButton('new','新建课题','', '', true)}</section>`;
  }
  function detail(wish){
   const nextAgent=wish.next_actions.find(action=>action.owner==='agent');

@@ -40,8 +40,8 @@
     "legacyTimeline": false,
     "bodyRoute": "dashboard"
   },
-  "daemonPid": 18580,
-  "workbenchPort": 4627,
+  "daemonPid": 64900,
+  "workbenchPort": 4281,
   "liveMcp": "skipped: EVE_SMOKE_LIVE is unset",
   "runtimeVersions": {
     "node": "24.22.0",

@@ -233,6 +233,16 @@ def _list_vars() -> list[dict[str, Any]]:
 
 
 def _handle(op: str, request: dict[str, Any]) -> dict[str, Any]:
+    if op == 'evolution':
+        # This channel carries private RPC data, not user code or notebook history.
+        source = os.environ.get('EVE_RSI_SOURCE_ROOT')
+        if source and os.path.isabs(source) and source not in sys.path:
+            sys.path.insert(0, source)
+        try:
+            from omicslab.evolution.remote import worker_request
+        except ImportError as exc:
+            raise WorkerError('远端科研运行环境未安装，请在 SSH 环境安装 Eve 科研依赖并配置 EVE_RSI_SOURCE_ROOT（完整源码和 tests）；未切换到本地') from exc
+        return {'result': worker_request(request)}
     if op in ("init", "ping", "hello"):
         return {
             "worker_version": WORKER_VERSION,

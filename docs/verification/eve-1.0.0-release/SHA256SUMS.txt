@@ -1,0 +1,2 @@
+b4c30a63bef9fb13758fae9e19081fb2cce3538b322a20cb68085fa25595fd07  Eve-Setup-1.0.0-win-x64.exe
+f3c8a0689912be9143edd36b64caa3a7223b6f250ea80f2600a8b4860c54a5ab  Eve-Setup-1.0.0-win-x64.exe.blockmap

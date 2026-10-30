@@ -1735,7 +1735,7 @@ export async function mount(root, ctx = {}) {
       case 'done':
         turn.doneReceived = true;
         setStatus('');
-        updateRunState({ status: 'succeeded' });
+        updateRunState({ status: turn.fatalError?'failed':local.run?.status&&RUN_TERMINAL_STATUSES.has(local.run.status)?local.run.status:'succeeded' });
         break;
       default:
         break;
@@ -2047,10 +2047,15 @@ export async function mount(root, ctx = {}) {
     const run = await fetchRun(saved.runId);
     if(epoch!==observerEpoch)return false;
     if (!run || RUN_TERMINAL_STATUSES.has(run.status)) {
+      if(run&&['failed','interrupted'].includes(run.status)&&!local.messages.some(message=>message.role==='assistant'&&message.meta?.run_id===run.runId)){
+        const error=run.record?.error;
+        local.messages.push({role:'assistant',content:`任务未完成：${typeof error==='string'?error:error?.message||runStatusLabel(run.status)}`,
+          meta:{run_id:run.runId,partial:true,status:run.status}});
+        renderMessages();if(el.messages)scrollToBottom(true);
+      }
       forgetActiveRun(local.activeId);
       return false;
     }
-    toastInfo('检测到该会话仍在运行的任务，正在恢复订阅…');
     resetTurn();
     local.live = createLiveBubble();
     const flow = createFlow(run.runId, run.traceId || saved.traceId, run.status);

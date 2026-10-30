@@ -1,8 +1,8 @@
 # 生物医学执行与证据验证
 
-## Biomni 的取舍
+## 工具边界
 
-用户提供的知乎文章在此环境返回 403，因此转为阅读 [Biomni 官方仓库](https://github.com/snap-stanford/Biomni) 与其 [工具注册代码](https://github.com/snap-stanford/Biomni/blob/main/biomni/tool/tool_registry.py)。本版本借鉴工具检索、任务规划、代码执行与可复现记录的组织方式，独立编写轻量工具；没有下载完整 E1 环境、数据湖或宣称达到 Biomni 评测表现。上游组件后续可通过实际 MCP 服务授权接入。
+Eve 只把已经接入并通过权限检查的工具列为可执行能力。工具检索、任务规划、代码执行与可复现记录使用同一工作区、同一权限和同一证据账本；未安装的数据环境不会出现在可执行结果中。
 
 | 工具 | 实际实现 | 如何判断结果 |
 |---|---|---|
@@ -75,4 +75,4 @@ flowchart LR
 
 ---
 
-本文件对应 Suwen 2.0.0；参考边界见 [REFERENCES-V2.md](REFERENCES-V2.md)。
+本文件描述 Eve 当前的科研执行与证据边界。

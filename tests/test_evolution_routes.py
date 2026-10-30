@@ -48,3 +48,31 @@ async def test_unknown_workspace_is_rejected_without_default_fallback(p):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url='http://test') as client:
         assert (await client.get('/api/evolution?scope=missing')).status_code == 404
         assert not getattr(p.state, 'evolution', None)
+
+
+async def test_remote_experiments_use_selected_ssh_worker_without_local_fallback(p,monkeypatch):
+    from types import SimpleNamespace
+    from omicslab.config import LLMTarget
+    from omicslab.evolution.remote import RemoteEvolutionService,invoke
+    calls=[]
+    class Backend:
+        kind='ssh'
+        async def evolution_request(self,method,**params):
+            calls.append((method,params))
+            if method=='readiness':return {'ready':True}
+            return {'id':'remote-only','scope':params['scope']}
+    async def backend(scope):return Backend()
+    monkeypatch.setattr(p,'backend',backend)
+    runner=RemoteEvolutionService(p,'ws_remote')
+    target=LLMTarget('openai','model','openai','https://example.invalid/v1','private-fixture','test')
+    await invoke(runner,'readiness',target=target)
+    result=await invoke(runner,'plan',scope='ws_remote',goal='Inspect evidence')
+    await invoke(runner,'start',scope='ws_remote',id='remote-only',plan_hash='approved',target=target)
+    assert result['scope']=='ws_remote'
+    assert calls[-1][1]['target']['api_key']=='private-fixture'
+    assert calls[-1][1]['plan_hash']=='approved'
+    assert not getattr(p.state,'evolution',None)
+    async def wrong_backend(scope):return SimpleNamespace(kind='local')
+    monkeypatch.setattr(p,'backend',wrong_backend)
+    with pytest.raises(ValueError,match='环境'):
+        await invoke(runner,'start',scope='ws_remote',id='remote-only',plan_hash='approved',target=target)

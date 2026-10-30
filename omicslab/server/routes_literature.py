@@ -60,8 +60,6 @@ async def search(request: Request, scope: str = "ws_main"):
     p.require_workspace(scope)
     data = await _json(request)
     query = str(data.get("query") or "").strip()
-    if not query:
-        raise HTTPException(422, "请输入检索主题")
     sources = data.get("sources")
     if sources is not None and (
         not isinstance(sources, list)
@@ -72,8 +70,7 @@ async def search(request: Request, scope: str = "ws_main"):
         unknown = sorted(set(sources) - set(SOURCE_LABELS))
         if unknown:
             raise HTTPException(422, "未知文献来源：" + ",".join(unknown))
-    return await _guarded_async(
-        p.literature.search(
+    action = lambda: p.literature.search(
             scope,
             query,
             sources=sources,
@@ -108,7 +105,9 @@ async def search(request: Request, scope: str = "ws_main"):
             ),
             ground_novelty=data.get("ground_novelty") is not False,
         )
-    )
+    if data.get('background') is True:
+        return p.literature.dispatch(scope, 'search', action)
+    return await _guarded_async(action())
 
 
 async def _guarded_async(awaitable):
@@ -146,6 +145,22 @@ async def ingest(request: Request, scope: str = "ws_main"):
             p.literature.ingest(scope, name=name, data=data)
         )
     body = await _json(request)
+    reference = str(
+        body.get("reference")
+        or body.get("title")
+        or body.get("url")
+        or body.get("doi")
+        or body.get("pmid")
+        or ""
+    ).strip()
+    if reference:
+        return await _guarded_async(
+            p.literature.ingest_reference(
+                scope,
+                reference,
+                name=str(body.get("name") or ""),
+            )
+        )
     return await _guarded_async(
         p.literature.ingest(
             scope,
@@ -167,6 +182,11 @@ async def run(request: Request, scope: str = "ws_main"):
     p = _platform(request)
     p.require_workspace(scope)
     data = await _json(request)
+    if data.get('background') is True:
+        if not p.literature.settings(scope).get('daily_enabled'):
+            raise HTTPException(422, '每日文献循环已关闭')
+        return p.literature.dispatch(scope, 'daily', lambda: p.literature.run(scope,
+            trigger=str(data.get('trigger') or 'manual'), force=data.get('force') is True))
     return await _guarded_async(
         p.literature.run(
             scope,
@@ -213,8 +233,8 @@ async def comment(request: Request, feed_id: str, scope: str = "ws_main"):
     p = _platform(request)
     p.require_workspace(scope)
     data = await _json(request)
-    return _guarded(
-        lambda: p.literature.comment(scope, feed_id, str(data.get("text") or ""))
+    return await _guarded_async(
+        p.literature.comment(scope, feed_id, str(data.get("text") or ""))
     )
 
 
@@ -291,8 +311,8 @@ async def proactive_reply(
     p = _platform(request)
     p.require_workspace(scope)
     data = await _json(request)
-    return _guarded(
-        lambda: p.literature.reply_proactive(
+    return await _guarded_async(
+        p.literature.reply_proactive(
             scope,
             message_id,
             str(data.get("text") or ""),

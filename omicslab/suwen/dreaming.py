@@ -289,6 +289,8 @@ class Dreaming:
             "wish": "research_wish",
             "skill": "skill",
             "literature": "literature",
+            "comment": "literature_comment",
+            "reply": "literature_reply",
         }.get(kind)
         if not record_kind:
             return None
@@ -298,7 +300,7 @@ class Dreaming:
         return {
             "kind": kind,
             "id": identifier,
-            "label": row.get("title") or row.get("name") or identifier,
+            "label": row.get("title") or row.get("name") or row.get("text") or identifier,
         }
 
     def candidate_from_evidence(

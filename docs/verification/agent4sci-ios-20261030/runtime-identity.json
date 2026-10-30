@@ -1,0 +1,9 @@
+{
+  "tested_files": 939,
+  "final_files": 939,
+  "mismatches": [],
+  "extra_files": [],
+  "excluded_runtime_generated": 98,
+  "exclusion_reason": "Python import bytecode created by the smoke run; explicitly excluded from package resources in package.json.",
+  "matched": true
+}

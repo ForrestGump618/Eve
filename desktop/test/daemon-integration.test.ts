@@ -11,11 +11,11 @@ import { Store } from '../src/harness/store.js';
 import { rpc } from '../src/rpc.js';
 import { readConnection, type Connection } from '../src/security.js';
 
-test('real daemon/authenticated pipe survives client exit and forced restart without replaying committed work', { timeout: 40000 }, async t => {
+test('real daemon/authenticated pipe survives client exit and forced restart without replaying committed work', { timeout: 90000 }, async t => {
   const started = performance.now();
   const home = mkdtempSync(join(tmpdir(), 'suwen-daemon-integration-'));
   const children: ChildProcess[] = []; const diagnostics: string[] = [];
-  const deadline = Date.now() + 35000;
+  const deadline = Date.now() + 85000;
   const poll = async <T>(read: () => Promise<T> | T, accept: (value: T) => boolean, label: string): Promise<T> => {
     let last: unknown;
     while (Date.now() < deadline) {

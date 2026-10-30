@@ -1,0 +1,86 @@
+﻿{
+    "text":  [
+                 "仅为我",
+                 "所有用户",
+                 "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                 "重置",
+                 "安装",
+                 "取消",
+                 "×",
+                 "−"
+             ],
+    "allText":  [
+                    "仅为我",
+                    "所有用户",
+                    "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                    "重置",
+                    "安装",
+                    "取消",
+                    "×",
+                    "−"
+                ],
+    "buttons":  [
+
+                ],
+    "allControls":  [
+                        {
+                            "id":  28772698,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "仅为我",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  11471466,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "所有用户",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  14684342,
+                            "class":  "WindowsForms10.EDIT.app.0.34f5582_r10_ad1",
+                            "text":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Local\\Programs\\Eve",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  37555832,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "重置",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  72224384,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "安装",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  20649206,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "取消",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  46139280,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "×",
+                            "visible":  true,
+                            "enabled":  true
+                        },
+                        {
+                            "id":  857568,
+                            "class":  "WindowsForms10.Window.8.app.0.34f5582_r10_ad1",
+                            "text":  "−",
+                            "visible":  true,
+                            "enabled":  true
+                        }
+                    ],
+    "backgroundImage":  "",
+    "pageWidth":  0,
+    "pageHeight":  0
+}

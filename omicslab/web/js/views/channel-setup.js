@@ -4,10 +4,10 @@ import { openModal, toastSuccess, toastError } from '../ui.js?v=1.0.0';
 
 export async function renderChannels(root,{request,scope,reload}){
  const controller=new AbortController();let qrModal=null,qrTimer=0,disposed=false;
- const rows=(await request('/registry/channel')).items;
- const names={wechat:'微信',telegram:'Telegram',webchat:'网页对话',wecom:'企业微信',feishu:'飞书',qq:'QQ',openclaw:'OpenClaw'};
+ const rows=(await request('/registry/channel')).items.filter(row=>row.adapter!=='webchat');
+ const names={wechat:'微信',telegram:'Telegram',wecom:'企业微信',feishu:'飞书',dingtalk:'钉钉',qq:'QQ',openclaw:'OpenClaw'};
  const action=(key,label,id='')=>`<button class="btn btn-ghost btn-sm" data-channel-action="${key}" data-channel-id="${escAttr(id)}">${esc(label)}</button>`;
- root.innerHTML=`<section class="sw-card sw-hero"><h2>消息连接</h2><p>连接当前工作区 ${esc(scope())}。手机确认后，凭据保存在本机。</p></section><div class="sw-grid sw-channel-options"><article class="sw-card"><span class="sw-channel-symbol">微</span><h3>微信</h3><p>扫码连接本人私聊，消息进入 Eve 任务中心。</p>${action('wechat','微信扫码连接')}</article><article class="sw-card"><span class="sw-channel-symbol">↗</span><h3>Telegram</h3><p>通过 BotFather 创建机器人并填写 Token。</p>${action('telegram','按步骤连接')}</article><article class="sw-card"><span class="sw-channel-symbol">问</span><h3>网页对话</h3><p>已内置，无需设置。</p><a class="btn btn-ghost btn-sm" href="#/chat">打开对话</a></article></div><div class="sw-toolbar"><h2>当前工作区的连接</h2>${action('reload','刷新连接状态')}</div><div class="sw-stack">${rows.map(c=>`<article class="sw-card"><header><div><span class="sw-overline">${esc(names[c.adapter]||c.adapter)}</span><h3>${esc(c.name)}</h3></div><span class="sw-badge">${!c.enabled?'已停用':c.connection?.status==='connected'?'接收消息中':c.connection?.status==='error'?'连接中断':c.adapter==='wechat'?'已扫码绑定':'已配置'}</span></header><p>${c.allow_send?'允许回复已授权联系人':'仅接收消息，结果在任务中心查看'} · ${c.read_only!==false?'只读 Agent':'按工作区权限执行'}</p>${c.connection?.error?`<p class="sw-error">${esc(c.connection.error)}</p>`:''}${c.capabilities?.reason?`<p>${esc(c.capabilities.reason)}</p>`:''}<div class="sw-inline">${action('test','测试连接',c.id)}${action('edit','连接设置',c.id)}${action('toggle',c.enabled?'停用':'启用',c.id)}${c.adapter==='wechat'?action('wechat','重新扫码'):''}</div></article>`).join('')||'<section class="sw-card"><p>还没有连接。选择微信或 Telegram 开始设置。</p></section>'}</div><p class="sw-muted">企业微信、飞书和 QQ 暂未内置接入向导。微信暂不支持群聊、图片、语音和文件。</p>`;
+ root.innerHTML=`<section class="sw-card sw-hero"><h2>消息连接</h2><p>当前工作区 ${esc(scope())}。凭据只保存在本机。</p></section><div class="sw-grid sw-channel-options"><article class="sw-card"><span class="sw-channel-symbol">微</span><h3>微信</h3><p>扫码连接本人私聊，消息进入 Eve 任务中心。</p>${action('wechat','微信扫码连接')}</article><article class="sw-card"><span class="sw-channel-symbol">↗</span><h3>Telegram</h3><p>通过 BotFather 创建机器人并填写 Token。</p>${action('telegram','按步骤连接')}</article><article class="sw-card"><span class="sw-channel-symbol">飞</span><h3>飞书</h3><p>群自定义机器人 Webhook，仅支持外发。</p>${action('feishu','配置飞书机器人')}</article><article class="sw-card"><span class="sw-channel-symbol">钉</span><h3>钉钉</h3><p>群自定义机器人 Webhook，仅支持外发。</p>${action('dingtalk','配置钉钉机器人')}</article></div><div class="sw-toolbar"><h2>当前工作区的连接</h2>${action('reload','刷新连接状态')}</div><div class="sw-stack">${rows.map(c=>`<article class="sw-card"><header><div><span class="sw-overline">${esc(names[c.adapter]||c.adapter)}</span><h3>${esc(c.name)}</h3></div><span class="sw-badge">${!c.enabled?'已停用':c.connection?.status==='connected'?'接收消息中':c.connection?.status==='error'?'连接中断':c.adapter==='wechat'?'已扫码绑定':c.capabilities?.outbound&&!c.capabilities?.inbound?'已配置外发':'已配置'}</span></header><p>${c.allow_send?'允许向授权目标发送':'仅接收，结果在任务中心查看'} · ${c.read_only!==false?'只读 Agent':'按工作区权限执行'}</p>${c.connection?.error?`<p class="sw-error">${esc(c.connection.error)}</p>`:''}${c.capabilities?.reason?`<p>${esc(c.capabilities.reason)}</p>`:''}<div class="sw-inline">${action('test','测试连接',c.id)}${action('edit','连接设置',c.id)}${action('toggle',c.enabled?'停用':'启用',c.id)}${c.adapter==='wechat'?action('wechat','重新扫码'):''}</div></article>`).join('')||'<section class="sw-card"><p>还没有连接。可选择微信、Telegram、飞书或钉钉。</p></section>'}</div><p class="sw-muted">飞书与钉钉当前仅支持群机器人外发；接收消息需要平台官方应用事件订阅。微信暂不支持群聊、图片、语音和文件。</p>`;
  const textInput=(label,id,value='',type='text')=>`<label class="sw-field"><span>${esc(label)}</span><input class="input" type="${type}" id="${id}" value="${escAttr(value)}" autocomplete="off"/></label>`;
  function options(existing={}){return textInput('连接名称','channel-name',existing.name||'我的微信助手')+`<p>工作区：${esc(scope())} · Agent：${esc(existing.agent||'lead')}</p><label class="sw-check"><input type="checkbox" id="channel-reply" ${existing.allow_send?'checked':''}/>${existing.adapter&&existing.adapter!=='wechat'?'允许向已授权联系人发送文字消息（仍需确认）':'将成功完成的文字回答自动回复给扫码本人'}</label><p class="sw-muted">默认只接收消息。权限受限或证据待复核的任务在Eve中处理，不会自动发送研究结论。</p>`;}
  function wechatOptions(){let modal=openModal({title:'连接微信',html:options(),actions:[{label:'取消'},{label:'生成二维码',kind:'primary',onClick:async()=>{
@@ -55,12 +55,34 @@ export async function renderChannels(root,{request,scope,reload}){
   }catch(err){status.textContent=err.message||String(err);}
   return false;
  }}]});}
+ function webhookChannel(adapter){
+  const label=adapter==='feishu'?'飞书':'钉钉';
+  const hint=adapter==='feishu'?'飞书群设置 → 群机器人 → 自定义机器人 → Webhook 地址':'钉钉群设置 → 机器人 → 自定义机器人 → Webhook 地址';
+  let connected=false;
+  const modal=openModal({title:`配置${label}机器人`,html:`<p class="sw-muted">${hint}</p>`+textInput('连接名称',`${adapter}-name`,`我的${label}通知`)+textInput('Webhook URL',`${adapter}-webhook`,'','password')+textInput('签名密钥（机器人启用签名时填写）',`${adapter}-secret`,'','password')+`<p class="sw-muted">Webhook 与签名密钥分别加密保存。当前只支持向群机器人发送文字。</p><p id="${adapter}-status" role="status"></p>`,actions:[{label:'取消'},{label:'保存并检查',kind:'primary',close:false,onClick:async()=>{
+   if(connected)return true;
+   const get=id=>modal.body.querySelector('#'+id).value.trim();
+   const status=modal.body.querySelector(`#${adapter}-status`);
+   try{
+    const webhook=get(`${adapter}-webhook`);
+    if(!webhook)throw new Error('请填写 Webhook URL');
+    const ref=`${adapter}-${crypto.randomUUID()}`;
+    await request('/credentials/'+ref+'-webhook','POST',{value:webhook});
+    if(get(`${adapter}-secret`))await request('/credentials/'+ref+'-secret','POST',{value:get(`${adapter}-secret`)});
+    const row=await request('/registry/channel','POST',{name:get(`${adapter}-name`),adapter,workspace:scope(),agent:'lead',contacts:[],webhook_ref:ref+'-webhook',credential_ref:get(`${adapter}-secret`)?ref+'-secret':'',enabled:true,read_only:true,allow_send:true});
+    await request(`/channels/${row.id}/test`,'POST',{});
+    status.textContent='配置已保存。可在“当前工作区的连接”中发送测试。';connected=true;modal.footer.querySelector('button:last-child').textContent='完成';await reload();
+   }catch(err){status.textContent=err.message||String(err);}
+   return false;
+  }}]});
+ }
  root.addEventListener('click',async event=>{
   const target=event.target.closest('[data-channel-action]');if(!target)return;
   const key=target.dataset.channelAction,row=rows.find(c=>c.id===target.dataset.channelId);
   try{
    if(key==='wechat')wechatOptions();
    else if(key==='telegram')telegram();
+   else if(key==='feishu'||key==='dingtalk')webhookChannel(key);
    else if(key==='edit')edit(row);
    else if(key==='reload')await reload();
    else if(key==='toggle'){await request(`/registry/channel/${row.id}`,'PUT',{enabled:!row.enabled});await reload();}

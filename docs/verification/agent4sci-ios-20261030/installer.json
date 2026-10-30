@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "buildId": "fe699eb4ce32cba9a52a76f2d2526e664a8b9aa80c9c6176d6b7e6e7e6a0c453",
+  "frontend": "Eve custom-painted Windows frontend",
+  "backend": "silent electron-builder NSIS package",
+  "bytes": 143032985,
+  "sha256": "ed0a0b6a9e9fb5db438561602eee54b84d764fdb7720bdd59749dc9afd9ebd67",
+  "signed": false,
+  "baseline_bytes": 142924407,
+  "increase_bytes": 108578,
+  "increase_percent": 0.076,
+  "blockmap_verified": true
+}

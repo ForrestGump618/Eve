@@ -1,70 +1,70 @@
 {
-    "at":  "2026-10-30T01:26:16.7540018Z",
+    "at":  "2026-10-30T09:30:26.0615648Z",
     "version":  "1.0.0",
     "installer":  "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\Eve-Setup-1.0.0-win-x64.exe",
-    "installerBytes":  142895973,
-    "installerSha256":  "A52DD5EA28909391055759A605580413C093F05BA17694429B94075EB17F0627",
+    "installerBytes":  143071342,
+    "installerSha256":  "B4C30A63BEF9FB13758FAE9E19081FB2CCE3538B322A20CB68085FA25595FD07",
     "upgradeFrom":  "",
     "steps":  [
                   {
                       "name":  "install",
                       "status":  "PASS",
-                      "detail":  "exit=0 installerBytes=142895973 sha256=A52DD5EA28909391055759A605580413C093F05BA17694429B94075EB17F0627 duration=~37s",
-                      "at":  "2026-10-30T01:24:36.7493145Z"
+                      "detail":  "exit=0 installerBytes=143071342 sha256=B4C30A63BEF9FB13758FAE9E19081FB2CCE3538B322A20CB68085FA25595FD07 duration=~58s",
+                      "at":  "2026-10-30T09:28:33.2454061Z"
                   },
                   {
                       "name":  "files",
                       "status":  "PASS",
                       "detail":  "Eve.exe bytes=249797632 FileVersion=1.0.0 ProductVersion=1.0.0.0",
-                      "at":  "2026-10-30T01:24:36.7655560Z"
+                      "at":  "2026-10-30T09:28:33.2617341Z"
                   },
                   {
                       "name":  "registry",
                       "status":  "PASS",
                       "detail":  "DisplayName=Eve DisplayVersion=1.0.0",
-                      "at":  "2026-10-30T01:24:36.8913650Z"
+                      "at":  "2026-10-30T09:28:33.2798176Z"
                   },
                   {
                       "name":  "app_launch",
                       "status":  "PASS",
-                      "detail":  "pid=43868 alive after 12s",
-                      "at":  "2026-10-30T01:24:59.6677179Z"
+                      "detail":  "pid=73440 alive after 12s",
+                      "at":  "2026-10-30T09:28:55.4184025Z"
                   },
                   {
                       "name":  "daemon_health",
                       "status":  "PASS",
-                      "detail":  "version=1.0.0 mode=user-background pid=65320",
-                      "at":  "2026-10-30T01:24:59.8894354Z"
+                      "detail":  "version=1.0.0 mode=user-background pid=70460",
+                      "at":  "2026-10-30T09:28:55.6128271Z"
                   },
                   {
                       "name":  "daemon_survives_ui_close",
                       "status":  "PASS",
-                      "detail":  "version=1.0.0 pid=65320",
-                      "at":  "2026-10-30T01:25:03.0742627Z"
+                      "detail":  "version=1.0.0 pid=70460",
+                      "at":  "2026-10-30T09:28:58.7691576Z"
                   },
                   {
                       "name":  "reinstall",
                       "status":  "PASS",
                       "detail":  "same-version reinstall kept the app executable",
-                      "at":  "2026-10-30T01:25:55.7574719Z"
+                      "at":  "2026-10-30T09:30:04.5238556Z"
                   },
                   {
                       "name":  "uninstall",
                       "status":  "PASS",
                       "detail":  "exit=0 install directory removed",
-                      "at":  "2026-10-30T01:26:16.6265153Z"
+                      "at":  "2026-10-30T09:30:26.0087655Z"
                   },
                   {
                       "name":  "user_data_preserved",
                       "status":  "PASS",
                       "detail":  "C:\\Users\\Qingyuan Zhuang\\AppData\\Roaming\\Eve",
-                      "at":  "2026-10-30T01:26:16.6280200Z"
+                      "at":  "2026-10-30T09:30:26.0097718Z"
                   },
                   {
                       "name":  "registry_removed",
                       "status":  "PASS",
                       "detail":  "HKCU uninstall entry removed",
-                      "at":  "2026-10-30T01:26:16.7420479Z"
+                      "at":  "2026-10-30T09:30:26.0414317Z"
                   }
               ],
     "passed":  10,

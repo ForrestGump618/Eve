@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-30",
+  "window": [
+    "2025-10-20",
+    "2025-10-21"
+  ],
+  "note": "Actual Eve source adapters; historical window tests transport and parsing, not current indexing completeness.",
+  "results": [
+    {
+      "source": "pubmed",
+      "status": "available",
+      "count": 2,
+      "elapsed_s": 1.55,
+      "sample_titles": [
+        "Beyond Cortisol! Physiological Indicators of Welfare for Dogs: Deficits, Misunderstandings and Opportunities.",
+        "DiTSim: A Diffusion-Transformers Based Single-Cell ATAC-seq Data Simulator."
+      ]
+    },
+    {
+      "source": "medrxiv",
+      "status": "available",
+      "count": 2,
+      "elapsed_s": 4.14,
+      "sample_titles": [
+        "Health-Related Quality of Life in Adults with Congenital Heart Disease - A Population-Based Study from the Australian National Registry",
+        "Prompt Engineering Enables Open-Source LLMs to Match Proprietary Models in Diagnostic Accuracy for Annotation of Radiology Reports"
+      ]
+    },
+    {
+      "source": "europe_pmc",
+      "status": "available",
+      "count": 2,
+      "elapsed_s": 1.11,
+      "sample_titles": [
+        "Beyond Cortisol! Physiological Indicators of Welfare for Dogs: Deficits, Misunderstandings and Opportunities.",
+        "Integrated epigenetic and genetic programming of primary human T cells."
+      ]
+    },
+    {
+      "source": "openalex",
+      "status": "available",
+      "count": 2,
+      "elapsed_s": 0.8,
+      "sample_titles": [
+        "Twist is the key to the gating of mechanosensitive ion channel NOMPC",
+        "Toward structure-preserving quantum encodings"
+      ]
+    },
+    {
+      "source": "biorxiv",
+      "status": "available",
+      "count": 2,
+      "elapsed_s": 8.59,
+      "sample_titles": [
+        "Reliable estimates of Japanese encephalitis virus evolutionary rate supported by a formal test of temporal signal",
+        "napariTFM: An Open-Source Tool for Traction ForceMicroscopy and Monolayer Stress Microscopy"
+      ]
+    },
+    {
+      "source": "arxiv",
+      "status": "available",
+      "count": 2,
+      "elapsed_s": 0.72,
+      "sample_titles": [
+        "Learning noisy tissue dynamics across time scales",
+        "Combinations of histone deacetylase inhibitors extend chronological lifespan in S. cerevisiae"
+      ]
+    }
+  ]
+}

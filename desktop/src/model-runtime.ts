@@ -19,7 +19,7 @@ export class ModelRuntime implements ModelCaller {
   provider(): string | null { return this.config?.provider ?? null; }
   publicConfig(): Json {
     const config = this.config;
-    return config ? { provider: config.provider, model: config.model, baseUrl: config.baseUrl, contextWindow: config.contextWindow, maxOutput: config.maxOutput, temperature: config.temperature, modalities: [...config.modalities] } : null;
+    return config ? { provider: config.provider, model: config.model, baseUrl: config.baseUrl, contextWindow: config.contextWindow, maxOutput: config.maxOutput, temperature: config.temperature, modalities: [...config.modalities], tokenParameter:config.tokenParameter??'max_tokens' } : null;
   }
   async turn(messages: TurnMessage[], tools: FunctionSpec[], signal: AbortSignal, onText?: (text:string)=>void): Promise<ModelTurn> {
     const config=this.config;

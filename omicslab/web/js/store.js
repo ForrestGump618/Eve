@@ -7,7 +7,7 @@ import { getPref, setPref } from './util.js?v=1.0.0';
 export const ROUTES = [
   {id:'dashboard',label:'研究总览',icon:'discovery',subtitle:'课题、运行、会话与待审建议'},
   {id:'literature',label:'文献雷达',icon:'book',subtitle:'检索、精读、反思与课题联动'},
-  {id:'evolution',label:'自我改进',icon:'discovery',subtitle:'Proteus 实验、回归与版本'},
+  {id:'evolution',label:'自我改进',icon:'discovery',subtitle:'源码副本、回归与版本'},
   {id:'context',label:'上下文',icon:'memory',subtitle:'上下文组成、压缩与原文'},
   // Team collaboration is agent-autonomous and surfaced in the chat sidebar
   // (child agents), not as a standalone feature page.

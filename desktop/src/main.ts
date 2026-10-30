@@ -28,7 +28,11 @@ let researchWindow:BrowserWindow|null=null;
 let quitting=false;
 let activationPending=false;
 const home=join(app.getPath('userData'),'runtime');
-const windowChrome={background:'#f7f8fa',symbol:'#202020',height:36};
+const windowChrome={
+ light:{background:'#f5f5f5',symbol:'#202020'},
+ dark:{background:'#181818',symbol:'#ececec'},
+ height:36,
+};
 /** Python selected for the detached daemon (frozen preferences.json), used by the workbench runtime. */
 function daemonPythonPath():string{try{const value=JSON.parse(readFileSync(join(home,'preferences.json'),'utf8')) as {pythonPath?:unknown};return typeof value.pythonPath==='string'&&value.pythonPath?value.pythonPath:'python';}catch{return 'python';}}
 /** Managed, pinned Python dependency set for the legacy web workbench (never bundled credentials). */
@@ -110,7 +114,7 @@ async function openResearchWorkspace():Promise<{ok:boolean}> {
  if(quitting)return {ok:false};
  if(liveWindow(researchWindow)){researchWindow.show();researchWindow.focus();return {ok:true};}
  const isolated=session.fromPartition(`suwen-research-${randomUUID()}`);
- const window=new BrowserWindow({width:1600,height:1000,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:windowChrome.background,symbolColor:windowChrome.symbol,height:windowChrome.height},backgroundColor:windowChrome.background,show:!process.argv.includes('--background'),webPreferences:{preload:join(here,'desktop-preload.cjs'),session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+ const window=new BrowserWindow({width:1600,height:1000,minWidth:980,minHeight:680,title:'Eve',titleBarStyle:'hidden',titleBarOverlay:{color:windowChrome.light.background,symbolColor:windowChrome.light.symbol,height:windowChrome.height},backgroundColor:windowChrome.light.background,show:!process.argv.includes('--background'),webPreferences:{preload:join(here,'desktop-preload.cjs'),session:isolated,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  researchWindow=window;
  lifecycle.attach(window);
  isolated.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
@@ -151,6 +155,13 @@ if(hasSingleInstanceLock)app.whenReady().then(async()=>{
   if(!liveWindow(target)||event.sender!==target.webContents||event.senderFrame!==target.webContents.mainFrame)throw new Error('Untrusted desktop sender');
   if(method==='getCloseAction')return lifecycle.getCloseAction();
   if(method==='setCloseAction')return lifecycle.setCloseAction(value);
+  if(method==='setWindowTheme'){
+   if(value!=='light'&&value!=='dark')throw new Error('Unsupported window theme');
+   const colors=windowChrome[value];
+   target.setTitleBarOverlay({color:colors.background,symbolColor:colors.symbol,height:windowChrome.height});
+   target.setBackgroundColor(colors.background);
+   return {ok:true,theme:value};
+  }
   if(method==='retryStartup'&&target.webContents.getURL().startsWith('data:text/html')){try{target.destroy();}catch{/* already closed */}if(researchWindow===target)researchWindow=null;void openResearchWorkspace();return {ok:true};}
   throw new Error('Unsupported desktop operation');
  });

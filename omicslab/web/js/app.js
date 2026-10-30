@@ -2,7 +2,8 @@
 // offline banner, theme switching and the Ctrl/Cmd+K command palette.
 
 import { icon, brandMark } from './icons.js?v=1.0.0';
-import { esc, getPref, relTime } from './util.js?v=1.0.0';
+import { esc, getPref, setPref, relTime } from './util.js?v=1.0.0';
+import {createRunFailureObserver} from './run-watch.js?v=1.0.0';
 import { api, errorMessage } from './api.js?v=1.0.0';
 import {
   initUi,
@@ -133,6 +134,27 @@ const app = {
   navOpen: false,
   selectDispose: null,
 };
+
+const observeFailures=createRunFailureObserver(runs=>{
+  const state=getState();
+  const unseen=runs.filter(run=>!(['workbench','chat'].includes(state.route)&&state.activeConversationId===run.session_id));
+  if(!unseen.length)return;
+  const run=unseen[0];
+  toastError(unseen.length>1?`${unseen.length} 个任务未完成`:'任务未完成',{
+    action:{label:'查看会话',onClick:()=>{
+      setPref('activeConversationId',run.session_id);setState({activeConversationId:run.session_id});
+      navigate('workbench');emit('chat:select',run.session_id);
+    }},
+  });
+});
+let watchingRuns=false;
+async function pollRunNotifications(){
+  if(watchingRuns)return;
+  watchingRuns=true;
+  try{const data=await api.request('/api/runtime/runs?limit=50',{quiet:true});observeFailures(data.runs||[]);}
+  catch{/* Network recovery is handled by the existing health indicator. */}
+  finally{watchingRuns=false;}
+}
 
 /* ------------------------------------------------------------------ */
 /* Shell                                                               */
@@ -296,6 +318,7 @@ async function pollHealth({ initial = false } = {}) {
     const health = await api.health();
     setState({ health, online: Boolean(health?.ok !== false) });
     updateHealthUi();
+    void pollRunNotifications();
     return health;
   } catch (err) {
     if (initial && state.online !== false) {

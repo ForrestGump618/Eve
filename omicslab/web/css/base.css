@@ -78,6 +78,7 @@
   --radius: 12px;
   --radius-sm: 9px;
   --radius-xs: 6px;
+  --radius-pill: 999px;
 
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.28);
   --shadow-2: 0 12px 32px -12px rgba(0, 0, 0, 0.55);
@@ -92,6 +93,8 @@
     "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --speed: 160ms;
+  --speed-fast: 90ms;
+  --speed-slow: 260ms;
   --press-scale: 0.985;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -108,6 +111,7 @@
   --space-7: 32px;
   --space-8: 40px;
   --control-height: 40px;
+  --control-height-sm: 32px;
   --font-size-overlay-title: 1.375rem;
   --font-size-purpose: 0.9375rem;
   --font-size-control: 0.875rem;

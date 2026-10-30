@@ -31,9 +31,12 @@ def parse_document(name,data):
     if ext=='pdf':
         try:
             from pypdf import PdfReader
-        except ImportError:
-            raise ValueError('PDF 解析未安装：请安装 pypdf；原文件未更改')
-        return [(f'page:{i+1}',p.extract_text() or '') for i,p in enumerate(PdfReader(io.BytesIO(data)).pages)]
+        except ImportError as exc:
+            raise ValueError('PDF 组件缺失，请在运行环境中修复依赖后重试（pypdf）') from exc
+        reader=PdfReader(io.BytesIO(data))
+        if reader.is_encrypted and not reader.decrypt(''):
+            raise ValueError('PDF 有密码保护，请上传解密后的副本')
+        return [(f'page:{i+1}',p.extract_text() or '') for i,p in enumerate(reader.pages)]
     if ext=='docx':
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             member=archive.getinfo('word/document.xml')

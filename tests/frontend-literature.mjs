@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/eve-1.0.0-release/', import.meta.url));
+const output = process.env.EVE_VERIFY_OUTPUT || fileURLToPath(new URL('../docs/verification/eve-1.0.1-release/', import.meta.url));
 const calls = [];
 const now = 1_793_246_400;
 const browserBlockedPorts = new Set([
@@ -38,7 +38,14 @@ const status = {
     warnings: [],
   },
   settings: {
-    sources: {europe_pmc: true, openalex: true, biorxiv: true, arxiv: true},
+    sources: {
+      pubmed: true,
+      medrxiv: true,
+      europe_pmc: true,
+      openalex: true,
+      biorxiv: true,
+      arxiv: true,
+    },
     min_interestingness: 0.35,
     cross_discipline_weight: 0.25,
   },
@@ -97,7 +104,15 @@ const feed = [{
   url: paper.url,
   note: '值得比较持久同调与密度特征的稳定性。',
   scores: paper.scores,
-  comments: [{text: '先检查样本批次。', created_at: now - 120}],
+  comments: [
+    {author: 'user', text: '先检查样本批次。', created_at: now - 120},
+    {
+      author: 'agent',
+      text: '同意，但还需要独立队列复核。',
+      stance: 'uncertain',
+      created_at: now - 100,
+    },
+  ],
   created_at: now - 600,
 }];
 
@@ -203,21 +218,28 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/api/literature/search' && req.method === 'POST') {
       const body = JSON.parse(await bodyText(req));
       calls.push({kind: 'search', body});
-      json(res, {
+      const result={
         items: [paper],
         warnings: [],
         sources: {europe_pmc: 1},
         range: {from: body.date_from || '2026-10-01', to: body.date_to || '2026-10-29'},
-      });
+      };
+      status.jobs={search:{job_id:'job-fixture',status:'running'}};
+      setTimeout(()=>{status.jobs.search={job_id:'job-fixture',status:'completed',result};},500);
+      json(res,status.jobs.search);
       return;
     }
     if (url.pathname === '/api/literature/ingest' && req.method === 'POST') {
+      const contentType = String(req.headers['content-type'] || '');
+      const raw = await bodyText(req);
       calls.push({
         kind: 'ingest',
-        contentType: String(req.headers['content-type'] || ''),
+        contentType,
+        body: raw,
       });
       json(res, {
-        item: {id: 'uploaded-paper', title: 'Uploaded PDF'},
+        item: {id: `uploaded-paper-${calls.filter(call => call.kind === 'ingest').length}`,
+          title: contentType.startsWith('application/json') ? 'Reference paper' : 'Uploaded PDF'},
         duplicate: false,
         reflection: {id: 'reflection-uploaded'},
         candidate_ids: [],
@@ -235,8 +257,46 @@ const server = createServer(async (req, res) => {
       return;
     }
     if (url.pathname === '/api/literature/feed/feed-1/comments') {
-      calls.push({kind: 'comment', body: JSON.parse(await bodyText(req))});
-      json(res, {comment: {id: 'comment-1'}});
+      const body = JSON.parse(await bodyText(req));
+      calls.push({kind: 'comment', body});
+      const user = {id: 'comment-user', author: 'user', text: body.text, created_at: now + 1};
+      const agent = {
+        id: 'comment-agent',
+        author: 'agent',
+        text: '这个判断需要独立队列验证。',
+        stance: 'adjust',
+        created_at: now + 2,
+      };
+      feed[0].comments = [...feed[0].comments, user, agent];
+      json(res, {
+        comment: user,
+        agent_comment: agent,
+        stance: 'adjust',
+        adjustment_candidate: {id: 'candidate-correction'},
+        model_error: '',
+      });
+      return;
+    }
+    if (url.pathname === '/api/literature/proactive/message-1/reply') {
+      const body = JSON.parse(await bodyText(req));
+      calls.push({kind: 'reply', body});
+      const user = {id: 'reply-user', author: 'user', text: body.text, created_at: now + 3};
+      const agent = {
+        id: 'reply-agent',
+        author: 'agent',
+        text: '接受质疑，我会收窄适用范围。',
+        stance: 'adjust',
+        created_at: now + 4,
+      };
+      proactive[0].replies = [...(proactive[0].replies || []), user, agent];
+      json(res, {
+        reply: user,
+        agent_reply: agent,
+        stance: 'adjust',
+        adjustment_candidate: {id: 'candidate-reply'},
+        model_error: '',
+        chat_prompt: '继续讨论。',
+      });
       return;
     }
     if (url.pathname === '/api/literature/proactive/message-1/dismiss') {
@@ -296,33 +356,84 @@ test('literature UI uses typed payloads, persistent upload feedback and responsi
 
   await page.locator('#lit-query').fill('拓扑 组织 影像');
   await page.locator('#lit-search-form button[type="submit"]').click();
+  // Detach while running, then remount after the server-owned job completes.
+  await page.waitForFunction(()=>document.querySelector('#lit-search-form button[type="submit"]')?.textContent.includes('检索中'));
+  await page.evaluate(()=>{window.view.destroy();document.querySelector('#view').replaceChildren();});
+  await page.waitForTimeout(650);
+  await page.evaluate(()=>window.mountLiterature());
   await page.waitForSelector('.lit-paper');
   const searchCall = calls.find(call => call.kind === 'search');
   assert.ok(searchCall);
   assert.equal(searchCall.body.query, '拓扑 组织 影像');
   assert.equal(searchCall.body.ground_novelty, true);
-  assert.deepEqual(searchCall.body.sources.sort(), ['arxiv', 'biorxiv', 'europe_pmc', 'openalex']);
+  assert.equal(searchCall.body.background,true);
+  await page.locator('#lit-query').fill('');
+  await page.locator('#lit-search-form button[type="submit"]').click();
+  await page.waitForTimeout(650);
+  await page.evaluate(()=>window.mountLiterature());
+  await page.waitForSelector('.lit-paper');
+  assert.equal(calls.filter(call=>call.kind==='search').at(-1).body.query,'');
+  assert.deepEqual(searchCall.body.sources.sort(), ['arxiv', 'biorxiv', 'europe_pmc', 'medrxiv', 'openalex', 'pubmed']);
   assert.match(await page.locator('.lit-paper').innerText(), /Topological signatures/);
   await page.screenshot({path: path.join(output, 'literature-desktop.png'), fullPage: true});
 
+  await page.locator('[data-lit-action="ingest"]').click();
+  await page.waitForSelector('#lit-pdf', {state: 'attached'});
   await page.locator('#lit-pdf').setInputFiles({
     name: 'uploaded-paper.pdf',
     mimeType: 'application/pdf',
     buffer: Buffer.from('%PDF-1.7 fixture'),
   });
-  await page.waitForFunction(() => document.querySelector('.lit-notice')?.textContent.includes('已投喂'));
+  await page.locator('.modal-foot .btn-primary').click();
+  await page.waitForFunction(() => document.querySelector('.lit-notice')?.textContent.includes('已加入'));
   assert.match(
     calls.find(call => call.kind === 'ingest').contentType,
     /^multipart\/form-data;/,
   );
   await page.waitForTimeout(250);
-  assert.match(await page.locator('.lit-notice').innerText(), /已投喂/);
+  assert.match(await page.locator('.lit-notice').innerText(), /已加入/);
   assert.equal(await page.locator('.lit-tab.is-active').getAttribute('data-lit-tab'), 'pending');
   assert.match(await page.locator('.lit-review-grid').innerText(), /拓扑影像检查/);
   assert.doesNotMatch(await page.locator('body').innerText(), /\{\s*"/);
 
+  await page.locator('[data-lit-action="ingest"]').click();
+  await page.waitForSelector('#lit-reference');
+  await page.locator('#lit-reference').fill('PMID: 12345678');
+  await page.locator('.modal-foot .btn-primary').click();
+  await page.waitForFunction(() => (
+    [...document.querySelectorAll('.lit-notice')].some(node => node.textContent.includes('Reference paper'))
+  ));
+  const referenceIngest = calls.filter(call => call.kind === 'ingest').at(-1);
+  assert.match(referenceIngest.contentType, /^application\/json/);
+  assert.equal(JSON.parse(referenceIngest.body).reference, 'PMID: 12345678');
+
+  await page.locator('.lit-tab[data-lit-tab="feed"]').click();
+  await page.waitForSelector('.lit-feed-post');
+  assert.match(await page.locator('.lit-feed-comments').innerText(), /Eve/);
+  await page.locator('.lit-comment-form input').fill('这个结论能外推到所有队列吗？');
+  await page.locator('.lit-comment-form button[type="submit"]').click();
+  await page.waitForFunction(() => (
+    document.querySelectorAll('.lit-feed-comments [data-comment-author="agent"]').length >= 2
+  ));
+  const commentCall = calls.find(call => call.kind === 'comment');
+  assert.equal(commentCall.body.text, '这个结论能外推到所有队列吗？');
+  assert.match(await page.locator('.lit-feed-comments').innerText(), /这个判断需要独立队列验证/);
+
   await page.locator('.lit-tab[data-lit-tab="proactive"]').click();
   await page.waitForSelector('.lit-proactive-card');
+  await page.locator('[data-lit-action="reply-message"]').first().click();
+  await page.waitForSelector('#lit-discussion-input');
+  await page.locator('#lit-discussion-input').fill('现有数据不足以支持这个外推。');
+  await page.locator('.modal-foot .btn-primary').click();
+  await page.waitForFunction(() => (
+    document.querySelectorAll('#lit-discussion-thread .lit-discussion-line').length >= 2
+  ));
+  const replyCall = calls.find(call => call.kind === 'reply');
+  assert.equal(replyCall.body.text, '现有数据不足以支持这个外推。');
+  assert.match(await page.locator('#lit-discussion-thread').innerText(), /接受质疑/);
+  await page.locator('.modal-foot button').first().click();
+  await page.waitForSelector('.modal-body', {state: 'detached'});
+
   await page.locator('[data-lit-action="dismiss-message"]').first().click();
   await page.locator('.modal-body input').fill('与当前课题无关');
   await page.locator('.modal-foot .btn-primary').click();

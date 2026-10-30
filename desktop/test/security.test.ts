@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, readdirSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
-import { newConnection, safeError, secretEqual, connectionPath, readConnection, atomicJson, atomicJsonAsync } from '../src/security.js';
+import { newConnection, safeError, secretEqual, connectionPath, readConnection, atomicJson, atomicJsonAsync, isEveRuntimeProcess } from '../src/security.js';
 import { rpc } from '../src/rpc.js';
 
 test('connection publication survives a real Windows sharing lock without blocking timers',
@@ -54,6 +54,36 @@ test('diagnostic redaction removes bearer, plain assignments and JSON credential
   const output = safeError(new Error('HTTP failure Bearer bearer-fixture-value apiKey=plain-fixture-value {"apiKey":"json-fixture-value"}'));
   for (const secret of secrets) assert.equal(output.includes(secret), false, 'Credentials must not appear in diagnostic messages');
   assert.ok(safeError('x'.repeat(1000)).length <= 600);
+});
+
+test('runtime process identity rejects missing and non-runtime pids', () => {
+  assert.equal(isEveRuntimeProcess(0), false);
+  assert.equal(isEveRuntimeProcess(Number.MAX_SAFE_INTEGER), false);
+  assert.equal(isEveRuntimeProcess(process.pid), true);
+});
+
+test('a reused non-runtime pid cannot block daemon recovery', { skip: process.platform !== 'win32', timeout: 20_000 }, async t => {
+  const directory = mkdtempSync(join(tmpdir(), 'eve-stale-lock-'));
+  const daemonPath = new URL('../src/daemon.js', import.meta.url);
+  const unrelated = spawn('powershell.exe', ['-NoProfile', '-Command', 'Start-Sleep -Seconds 20'], { windowsHide: true, stdio: 'ignore' });
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(join(directory, 'daemon.lock'), String(unrelated.pid));
+  const child = spawn(process.execPath, [fileURLToPath(daemonPath), '--home', directory], { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] });
+  let stderr = '';
+  child.stderr.on('data', chunk => { stderr += chunk.toString(); });
+  const closed = once(child, 'exit');
+  t.after(async () => {
+    if (child.exitCode === null) { child.kill(); await closed; }
+    if (unrelated.exitCode === null) unrelated.kill();
+    rmSync(directory, { recursive: true, force: true });
+  });
+  const deadline = Date.now() + 12_000;
+  while (!existsSync(connectionPath(directory)) && child.exitCode === null && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
+  assert.equal(existsSync(connectionPath(directory)), true, `Daemon failed to recover a reused pid lock: ${safeError(stderr)}`);
+  const connection = readConnection(directory);
+  assert.ok(connection);
+  await rpc(connection, 'shutdown');
+  await closed;
 });
 
 test('actual daemon named-pipe RPC rejects an unauthorized mutation and keeps authorized state intact', { timeout: 20_000 }, async t => {

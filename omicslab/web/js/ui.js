@@ -600,6 +600,10 @@ export function applyTheme(theme, { persist = true } = {}) {
   if (persist) setPref('theme', theme === 'system' ? 'system' : value);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', value === 'light' ? '#f5f6fa' : '#0f1117');
+  const desktopTheme = window.suwenDesktop?.setWindowTheme;
+  if (typeof desktopTheme === 'function') {
+    Promise.resolve(desktopTheme(value)).catch(() => {});
+  }
   emit('theme:change', { theme: value });
   return value;
 }

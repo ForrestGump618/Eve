@@ -85,6 +85,7 @@ class Platform:
         self._closed=True
         try:
             await self.literature_coordinator.close()
+            await self.literature.close()
         finally:
             try:
                 await self.channels.wechat.close()

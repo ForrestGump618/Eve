@@ -9,16 +9,16 @@
     "mobile overflow"
   ],
   "timings": {
-    "desktopMountMs": 8.9,
-    "desktopVisibleMs": 230.11,
-    "mobileMountMs": 3.5,
-    "mobileVisibleMs": 63.17,
+    "desktopMountMs": 28.5,
+    "desktopVisibleMs": 178.25,
+    "mobileMountMs": 5.1,
+    "mobileVisibleMs": 80.39,
     "note": "Local loopback fixture and in-process API response; this does not include model or scientific workload latency."
   },
   "browserMetrics": {
-    "domNodes": 239,
-    "resourceEntries": 22,
-    "resourceEncodedBytes": 491398
+    "domNodes": 72,
+    "resourceEntries": 24,
+    "resourceEncodedBytes": 501877
   },
   "calls": [
     {
@@ -34,6 +34,11 @@
         "stage": "scouting",
         "advance": true
       }
+    },
+    {
+      "path": "/api/platform/wishes",
+      "method": "GET",
+      "scope": "ws_main"
     },
     {
       "path": "/api/platform/wishes",

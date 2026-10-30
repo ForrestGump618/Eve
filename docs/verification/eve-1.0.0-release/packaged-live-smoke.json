@@ -41,14 +41,14 @@
     "legacyTimeline": false,
     "bodyRoute": "dashboard"
   },
-  "daemonPid": 71188,
-  "workbenchPort": 6262,
+  "daemonPid": 40940,
+  "workbenchPort": 1386,
   "runtimeVersions": {
     "node": "24.22.0",
     "electron": "45.0.0",
     "sqlite": "3.53.4"
   },
   "packaged": true,
-  "fixtureRequests": 2,
+  "fixtureRequests": 3,
   "result": "passed"
 }

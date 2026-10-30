@@ -726,6 +726,15 @@ Var EveButtonCaption
     StrCpy $EveInstallAllUsers "0"
     !insertmacro setInstallModePerUser
   ${EndIf}
+  ${If} ${Silent}
+    ${GetParameters} $R0
+    ClearErrors
+    ${GetOptions} $R0 "/allusers" $R1
+    ${IfNot} ${Errors}
+      StrCpy $EveInstallAllUsers "1"
+      !insertmacro setInstallModePerAllUsers
+    ${EndIf}
+  ${EndIf}
 !macroend
 
 !macro customInstallMode
@@ -784,6 +793,28 @@ Var EveButtonCaption
 
 !macro customUnWelcomePage
   UninstPage custom un.EveUninstallShow un.EveUninstallLeave
+!macroend
+
+!macro customUnInit
+  ${IfNot} ${Silent}
+    InitPluginsDir
+    ; Run both UI and removal engine outside the application directory.
+    ; The silent child bypasses this hook and retains NSIS cleanup semantics.
+    SetOutPath "$PLUGINSDIR"
+    File /oname=EveInstaller.exe "${BUILD_RESOURCES_DIR}\modern\EveInstaller.exe"
+    CopyFiles /SILENT "$EXEPATH" "$PLUGINSDIR\EveRemoval.exe"
+    StrCpy $R2 "current"
+    ${If} $installMode == "all"
+      StrCpy $R2 "all"
+    ${EndIf}
+    ClearErrors
+    ExecWait '"$PLUGINSDIR\EveInstaller.exe" --payload "$PLUGINSDIR\EveRemoval.exe" --version "${VERSION}" --uninstall "$INSTDIR" --scope "$R2"' $R1
+    ${If} ${Errors}
+      StrCpy $R1 1
+    ${EndIf}
+    SetErrorLevel $R1
+    Quit
+  ${EndIf}
 !macroend
 
 !macro customUninstallPage

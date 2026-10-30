@@ -7,8 +7,9 @@ import path from 'node:path';
 import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
-const output = fileURLToPath(new URL('../docs/verification/eve-1.0.0-release/', import.meta.url));
+const output = process.env.EVE_VERIFY_OUTPUT || fileURLToPath(new URL('../docs/verification/eve-1.0.0-release/', import.meta.url));
 const calls = [];
+let emptyWishes=false;
 const appearance = {theme: 'light', font: 'system', font_size: 14, accent: '#404040', density: 'comfortable', radius: 12, mode: 'research', home: 'workbench', agent_name: 'Eve', avatar: '', shortcuts: {palette: 'k'}};
 const wish = {
   id: 'wish-demo',
@@ -77,7 +78,7 @@ const server = createServer(async (req, res) => {
     }
     if (url.pathname === '/api/platform/wishes' && req.method === 'GET') {
       calls.push({path: url.pathname, method: req.method, scope: url.searchParams.get('scope')});
-      json({items: [structuredClone(wish)]});
+      json({items: emptyWishes?[]:[structuredClone(wish)]});
       return;
     }
     if (url.pathname === '/api/platform/wishes/wish-demo/launch' && req.method === 'POST') {
@@ -133,7 +134,8 @@ try {
   const desktopVisibleMs = performance.now() - desktopStarted;
   await page.waitForTimeout(400);
 
-  assert.match(await page.locator('.wish-hero h2').textContent(), /从课题目标到分析、图表与复核/);
+  assert.match(await page.locator('.wish-hero h2').textContent(), /课题设计/);
+  assert.ok(await page.locator('.wish-hero').evaluate(node=>parseFloat(getComputedStyle(node).paddingLeft)>=20));
   assert.equal(await page.locator('[data-wish-stage]').count(), 9);
   assert.match(await page.locator('[data-wish-stage="figures"] footer').textContent(), /前置：分析、实验/);
   assert.match(await page.locator('[data-wish-stage="charter"] footer').textContent(), /起始节点/);
@@ -170,6 +172,12 @@ try {
   assert.equal(await page.locator('.wish-detail').evaluate(node => node.scrollWidth <= node.clientWidth), true);
   assert.equal(await page.getByRole('button', {name: '继续执行下一阶段'}).evaluate(node => node.getBoundingClientRect().height >= 32), true);
   await page.screenshot({path: path.join(output, 'wish-research-mobile.png'), animations: 'disabled'});
+  emptyWishes=true;
+  await page.evaluate(async()=>{window.platformView.destroy();const {mount}=await import('/js/views/platform.js?v=1.0.0');window.platformView=await mount(document.querySelector('#view'));});
+  assert.equal(await page.locator('[data-wish-action="new"]').count(),1);
+  assert.equal(await page.locator('.wish-list').count(),0);
+  assert.ok(await page.locator('.wish-hero').evaluate(node=>parseFloat(getComputedStyle(node).paddingLeft)>=20));
+  await page.screenshot({path:path.join(output,'wish-empty-mobile.png'),animations:'disabled'});
   assert.deepEqual(errors, []);
   const browserMetrics = await page.evaluate(() => {
     const resources = performance.getEntriesByType('resource');

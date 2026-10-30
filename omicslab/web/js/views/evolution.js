@@ -19,7 +19,7 @@ export async function mount(root){
   function render(){
     if(disposed||!data)return;
     const ready=data.readiness?.ready??(data.dependency.available&&data.validation_ready);
-    root.querySelector('#evolution-status').textContent=ready?'Proteus 已就绪':
+    root.querySelector('#evolution-status').textContent=ready?'源码进化已就绪':
       !data.dependency.available?`请安装可选依赖：${data.dependency.install}`:'当前发行目录缺少基线测试，请在完整源码目录中运行实验。';
     if(data.readiness?.issues?.length)root.querySelector('#evolution-status').textContent=data.readiness.issues.map(issue=>`${issue.message} ${issue.action}`).join('\n');
     root.querySelector('#evolution-runs').innerHTML=data.runs.map(run=>`<button class="btn btn-ghost" data-evolution-pick="${esc(run.id)}">${esc(run.plan.goal)} · ${labels[run.status]||esc(run.status)}</button>`).join('')||'<p class="eve-muted">尚无实验</p>';

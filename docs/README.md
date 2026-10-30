@@ -37,7 +37,7 @@ Eve 是面向日常工作与科研的本地 AI Agent 工作室：在本机或 SS
 
 关心方法、证据和可复现性：
 
-- [科研证据设计](BIOMEDICAL-EVIDENCE.md) — Biomni 思路、证据/推断/假设分级与门控。
+- [科研证据设计](BIOMEDICAL-EVIDENCE.md) — 证据、推断、假设分级与执行门控。
 - [内置技能库](SKILLS.md) — 方法技能目录、触发时机与产出检查。
 - [V2 验证记录](VALIDATION-V2.md) — 439 项自动回归与真实环境实测范围。
 - [参考项目与许可证](REFERENCES-V2.md) — 借鉴了什么、没有打包什么。
@@ -74,7 +74,7 @@ Eve 是面向日常工作与科研的本地 AI Agent 工作室：在本机或 SS
 | [SUWEN-V2-CHECKLIST.md](SUWEN-V2-CHECKLIST.md) | 24 类 V2 需求的逐项实现状态（含尚缺子项） | 当前 |
 | [SUWEN-V2-REQUIREMENTS.md](SUWEN-V2-REQUIREMENTS.md) | V2 原始需求基线，用于对照验收范围 | 当前 |
 | [VALIDATION-V2.md](VALIDATION-V2.md) | 2.0.0 自动回归与实测记录 | 当前 |
-| [BIOMEDICAL-EVIDENCE.md](BIOMEDICAL-EVIDENCE.md) | Biomni 思路与科研证据门控设计 | 当前 |
+| [BIOMEDICAL-EVIDENCE.md](BIOMEDICAL-EVIDENCE.md) | 科研证据分级与执行门控设计 | 当前 |
 | [WISH-RESEARCH.md](WISH-RESEARCH.md) | 一句话愿望到持久科研项目、证据门禁与工作区 | 当前 |
 | [LITERATURE.md](LITERATURE.md) | 文献雷达、辅助模型、技能图、主动分享与生命周期 | 当前 |
 | [WET-LAB-SKILLS.md](WET-LAB-SKILLS.md) | K-Dense 技能来源、湿实验设计、assay 选择、结果解读与证据边界 | 当前 |

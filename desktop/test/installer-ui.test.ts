@@ -32,7 +32,7 @@ test('Windows installer uses branded pages instead of the default wizard flow', 
   assert.equal(pkg.build.nsis.allowToChangeInstallationDirectory, false);
   assert.equal(pkg.build.nsis.include, 'installer.nsh');
   assert.equal(pkg.build.nsis.language, '2052');
-  assert.match(pkg.scripts['dist:win'] ?? '', /generate:installer[\s\S]*--win nsis/);
+  assert.match(pkg.scripts['dist:win'] ?? '', /scripts\/package-windows\.mjs/);
   assert.match(pkg.scripts['generate:installer'] ?? '', /generate-installer-assets\.ps1/);
 
   const script = read('installer/installer.nsh');
@@ -174,4 +174,23 @@ test('installer visual assets fill the custom window at deterministic dimensions
   for (const page of pages) {
     assert.match(generator, new RegExp(page.replace('.', '\\.')));
   }
+});
+
+test('modern installer theme preserves text contrast and non-overlapping actions', () => {
+  const theme = JSON.parse(read('installer/modern/theme.json'));
+  const luminance = (hex: string): number => {
+    const rgb = hex.slice(1).match(/../g)!.map(value => parseInt(value, 16) / 255)
+      .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+  };
+  for (const [foreground, background] of [['text', 'surface'], ['secondary', 'surface'], ['surface', 'accent'], ['danger', 'surface']]) {
+    const values = [luminance(theme[foreground]), luminance(theme[background])].sort((a,b)=>b-a);
+    assert.ok((values[0] + 0.05) / (values[1] + 0.05) >= 4.5, `${foreground}/${background}`);
+  }
+  const layout = theme.layout;
+  assert.ok(layout.errorY + 22 <= layout.footerY);
+  assert.ok(layout.footerY + layout.buttonHeight < layout.cardY + layout.cardHeight);
+  assert.ok(layout.scopeWidth * 2 + layout.scopeGap <= layout.contentRight - layout.contentX);
+  assert.ok(layout.pathWidth + layout.buttonGap < layout.contentRight - layout.contentX);
+  assert.match(read('installer/modern/bootstrap.nsi'), /EveEngine\.exe[\s\S]*EveInstaller\.exe/);
 });

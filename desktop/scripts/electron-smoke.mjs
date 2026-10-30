@@ -58,7 +58,7 @@ const env = {...process.env, EVE_TEST_HOME: profile, SUWEN_TEST_HOME: profile};
 delete env.ELECTRON_RUN_AS_NODE;
 const packaged = process.env.SUWEN_SMOKE_PACKAGED === '1' || process.env.EVE_SMOKE_PACKAGED === '1';
 const executablePath = packaged
-  ? join(project, 'release', 'win-unpacked', 'Eve.exe')
+  ? join(resolve(process.env.EVE_SMOKE_PACKAGED_DIR ?? join(project, 'release', 'win-unpacked')), 'Eve.exe')
   : join(project, 'node_modules', 'electron', 'dist', 'electron.exe');
 const launchArgs = packaged ? [] : [project];
 

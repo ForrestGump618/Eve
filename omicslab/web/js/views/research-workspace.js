@@ -3,13 +3,6 @@ import {navigate} from '../store.js?v=1.0.0';
 import {openModal,toastError,toastSuccess} from '../ui.js?v=1.0.0';
 
 const statuses={pending:'未开始',running:'执行中',needs_evidence:'待登记证据',recorded:'证据已登记',failed:'失败',cancelled:'已取消',interrupted:'待恢复'};
-const mappings=[
- ['课题与 Research Map','持久课题、工作区与阶段图','research.py / ResearchQuests'],
- ['Baseline Gate','数据集、评估协议、指标方向和真实文件哈希','ResearchQuests.record'],
- ['Experiment / Findings Memory','实验对照、阴性结果、证据历史','research_quest / findings'],
- ['Runner / Stage Skills','同一个 durable Agent Loop、按需技能与权限','RunService → Engine → Tool Registry'],
- ['Artifacts / Finalize','产物溯源、人工复核、结题恢复点','artifact hashes / human review'],
-];
 const field=(label,id,value='')=>`<label class="sw-field"><span>${esc(label)}</span><input class="input" id="${id}" value="${escAttr(value)}"/></label>`;
 const area=(label,id,value='')=>`<label class="sw-field"><span>${esc(label)}</span><textarea class="input" id="${id}" rows="4">${esc(value)}</textarea></label>`;
 
@@ -29,7 +22,7 @@ export async function mountResearchWorkspace(root,{request}){
   root.innerHTML=`<section class="sw-card eve-research-head"><div><span class="sw-overline">研究课题</span><h2>研究阶段与证据</h2><p>阶段、运行和产物都保留记录。</p></div><div class="sw-inline">${action('new','新建课题')}${action('refresh','刷新状态')}</div></section>
   <div class="eve-quest-layout"><aside class="eve-quest-list" aria-label="科研课题">${quests.map(q=>`<button type="button" class="eve-quest-item ${q.id===selected?.id?'is-active':''}" data-research="select" data-id="${escAttr(q.id)}"><strong>${esc(q.title)}</strong><span>${q.stages.filter(s=>s.status==='recorded').length}/7 阶段 · ${q.status==='completed'?'已人工结题':'进行中'}</span></button>`).join('')||'<p class="sw-muted">创建一个课题，明确研究问题和比较契约。</p>'}</aside>
   <div class="eve-quest-body">${selected?questHtml(selected):''}</div></div>
-  <details class="sw-card"><summary>DeepScientist 与 Eve 的模块对应</summary><table class="eve-research-table"><thead><tr><th>参考机制</th><th>Eve 模块</th><th>实现</th></tr></thead><tbody>${mappings.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table><p class="sw-muted">参考提交 b36624417f0c6b8238ec02db37b94d6db2faa5b0。复用现有 Harness 执行，不创建第二套运行循环。</p></details>`;
+`;
  }
  function questHtml(q){
   return `<section class="sw-card"><header><div><h2>${esc(q.title)}</h2><p>${esc(q.question)}</p></div><span class="sw-badge">科学结论：待复核</span></header><div class="eve-contract"><span>数据集 <strong>${esc(q.dataset)}</strong></span><span>协议 <strong>${esc(q.protocol)}</strong></span><span>指标 ${q.metrics.map(m=>`${esc(m.name)} ${m.direction==='min'?'↓':'↑'}`).join(' · ')}</span></div></section>

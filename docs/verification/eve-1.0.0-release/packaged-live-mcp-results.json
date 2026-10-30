@@ -1,18 +1,18 @@
 {
-  "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+  "id": "9b6750b7-a712-4a85-a485-aad9585a26a3",
   "name": "Packaged live MCP public database QA",
   "parentId": null,
   "status": "completed",
   "version": 4,
-  "createdAt": 1793324021438,
-  "updatedAt": 1793324032651,
+  "createdAt": 1793353106483,
+  "updatedAt": 1793353109229,
   "limits": {},
   "calls": 2,
   "cost": 0,
   "tokens": 0,
   "steps": [
     {
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "id": "literature",
       "kind": "pubmed",
       "input": {
@@ -24,7 +24,7 @@
       "timeoutMs": 30000,
       "status": "completed",
       "version": 2,
-      "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+      "operationId": "b6b9002ba48ad980464784afe01ed107fcf2f75c5c53ef2f882b714b2569a708",
       "attempts": 1,
       "owner": null,
       "fence": 1,
@@ -33,7 +33,7 @@
       "output": {
         "database": "Europe PMC / PubMed",
         "query": "TP53 cancer",
-        "retrievedAt": "2026-10-30T01:33:42.318Z",
+        "retrievedAt": "2026-10-30T09:38:27.172Z",
         "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
         "results": [
           {
@@ -96,7 +96,7 @@
       "error": null
     },
     {
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "id": "protein",
       "kind": "uniprot",
       "input": {
@@ -107,55 +107,53 @@
       "maxAttempts": 1,
       "timeoutMs": 30000,
       "status": "completed",
-      "version": 4,
-      "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+      "version": 2,
+      "operationId": "24a1e009cadc1bf530717c4e0e7d3f9fc92a9be61191e32e52ad55dc0d5b52bb",
       "attempts": 1,
       "owner": null,
       "fence": 1,
       "leaseUntil": null,
       "dueAt": null,
       "output": {
-        "database": "UniProt via EBI Proteins",
+        "database": "UniProt",
         "query": "gene:TP53 AND organism_id:9606",
-        "retrievedAt": "2026-10-30T01:33:42.665Z",
-        "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
-        "fallback": true,
-        "fallbackReason": "The operation was aborted due to timeout",
+        "retrievedAt": "2026-10-30T09:38:27.512Z",
+        "release": "2026_03",
         "results": [
           {
-            "id": "A0A087WT22",
-            "name": "A0A087WT22_HUMAN",
+            "id": "P04637",
+            "name": "P53_HUMAN",
             "protein": "Cellular tumor antigen p53",
             "organism": "Homo sapiens",
-            "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+            "url": "https://www.uniprot.org/uniprotkb/P04637"
           },
           {
-            "id": "A0A087WXZ1",
-            "name": "A0A087WXZ1_HUMAN",
+            "id": "K7PPA8",
+            "name": "K7PPA8_HUMAN",
             "protein": "Cellular tumor antigen p53",
             "organism": "Homo sapiens",
-            "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+            "url": "https://www.uniprot.org/uniprotkb/K7PPA8"
           },
           {
-            "id": "A0A087X1Q1",
-            "name": "A0A087X1Q1_HUMAN",
+            "id": "E9PFT5",
+            "name": "E9PFT5_HUMAN",
             "protein": "Cellular tumor antigen p53",
             "organism": "Homo sapiens",
-            "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+            "url": "https://www.uniprot.org/uniprotkb/E9PFT5"
           },
           {
-            "id": "A0A0R9RRX7",
-            "name": "A0A0R9RRX7_HUMAN",
-            "protein": "Tumor protein p53",
-            "organism": "Homo sapiens",
-            "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
-          },
-          {
-            "id": "A0A0U1RQC9",
-            "name": "A0A0U1RQC9_HUMAN",
+            "id": "S4R334",
+            "name": "S4R334_HUMAN",
             "protein": "Cellular tumor antigen p53",
             "organism": "Homo sapiens",
-            "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+            "url": "https://www.uniprot.org/uniprotkb/S4R334"
+          },
+          {
+            "id": "H2EHT1",
+            "name": "H2EHT1_HUMAN",
+            "protein": "Cellular tumor antigen p53",
+            "organism": "Homo sapiens",
+            "url": "https://www.uniprot.org/uniprotkb/H2EHT1"
           }
         ]
       },
@@ -165,57 +163,57 @@
   "events": [
     {
       "sequence": 21,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": null,
       "type": "task.created",
       "version": 1,
-      "at": 1793324021438,
+      "at": 1793353106483,
       "data": {
         "stepCount": 2
       }
     },
     {
       "sequence": 22,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": "literature",
       "type": "step.claimed",
       "version": 1,
-      "at": 1793324021509,
+      "at": 1793353106514,
       "data": {
-        "owner": "worker-71188-0c267c99-95e0-4324-9953-fc13ef3906c4",
+        "owner": "worker-40940-3febf96b-5a2b-4438-bdd9-816324af7b76",
         "fence": 1,
-        "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+        "operationId": "b6b9002ba48ad980464784afe01ed107fcf2f75c5c53ef2f882b714b2569a708",
         "attempt": 1
       }
     },
     {
       "sequence": 23,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": "protein",
       "type": "step.claimed",
       "version": 1,
-      "at": 1793324021510,
+      "at": 1793353106515,
       "data": {
-        "owner": "worker-71188-0c267c99-95e0-4324-9953-fc13ef3906c4",
+        "owner": "worker-40940-3febf96b-5a2b-4438-bdd9-816324af7b76",
         "fence": 1,
-        "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+        "operationId": "24a1e009cadc1bf530717c4e0e7d3f9fc92a9be61191e32e52ad55dc0d5b52bb",
         "attempt": 1
       }
     },
     {
       "sequence": 24,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": "literature",
       "type": "step.completed",
       "version": 1,
-      "at": 1793324023499,
+      "at": 1793353108355,
       "data": {
-        "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+        "operationId": "b6b9002ba48ad980464784afe01ed107fcf2f75c5c53ef2f882b714b2569a708",
         "usage": {
           "output": {
             "database": "Europe PMC / PubMed",
             "query": "TP53 cancer",
-            "retrievedAt": "2026-10-30T01:33:42.318Z",
+            "retrievedAt": "2026-10-30T09:38:27.172Z",
             "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
             "results": [
               {
@@ -277,9 +275,9 @@
           },
           "artifacts": [
             {
-              "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
-              "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
-              "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+              "id": "bd09b638-85e2-4555-ad5f-d50d728b4626",
+              "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\bd09b638-85e2-4555-ad5f-d50d728b4626.artifact",
+              "sha256": "2745d1efc4deea2761b8102717510cb5a9d22ff46d1546779d3ca85da6994c07",
               "bytes": 11432,
               "mediaType": "application/json"
             }
@@ -289,87 +287,63 @@
     },
     {
       "sequence": 25,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
-      "stepId": "protein",
-      "type": "step.heartbeat",
-      "version": 1,
-      "at": 1793324026973,
-      "data": {
-        "fence": 1
-      }
-    },
-    {
-      "sequence": 26,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
-      "stepId": "protein",
-      "type": "step.heartbeat",
-      "version": 1,
-      "at": 1793324031987,
-      "data": {
-        "fence": 1
-      }
-    },
-    {
-      "sequence": 27,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": "protein",
       "type": "step.completed",
       "version": 1,
-      "at": 1793324032651,
+      "at": 1793353109229,
       "data": {
-        "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+        "operationId": "24a1e009cadc1bf530717c4e0e7d3f9fc92a9be61191e32e52ad55dc0d5b52bb",
         "usage": {
           "output": {
-            "database": "UniProt via EBI Proteins",
+            "database": "UniProt",
             "query": "gene:TP53 AND organism_id:9606",
-            "retrievedAt": "2026-10-30T01:33:42.665Z",
-            "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
-            "fallback": true,
-            "fallbackReason": "The operation was aborted due to timeout",
+            "retrievedAt": "2026-10-30T09:38:27.512Z",
+            "release": "2026_03",
             "results": [
               {
-                "id": "A0A087WT22",
-                "name": "A0A087WT22_HUMAN",
+                "id": "P04637",
+                "name": "P53_HUMAN",
                 "protein": "Cellular tumor antigen p53",
                 "organism": "Homo sapiens",
-                "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+                "url": "https://www.uniprot.org/uniprotkb/P04637"
               },
               {
-                "id": "A0A087WXZ1",
-                "name": "A0A087WXZ1_HUMAN",
+                "id": "K7PPA8",
+                "name": "K7PPA8_HUMAN",
                 "protein": "Cellular tumor antigen p53",
                 "organism": "Homo sapiens",
-                "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+                "url": "https://www.uniprot.org/uniprotkb/K7PPA8"
               },
               {
-                "id": "A0A087X1Q1",
-                "name": "A0A087X1Q1_HUMAN",
+                "id": "E9PFT5",
+                "name": "E9PFT5_HUMAN",
                 "protein": "Cellular tumor antigen p53",
                 "organism": "Homo sapiens",
-                "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+                "url": "https://www.uniprot.org/uniprotkb/E9PFT5"
               },
               {
-                "id": "A0A0R9RRX7",
-                "name": "A0A0R9RRX7_HUMAN",
-                "protein": "Tumor protein p53",
-                "organism": "Homo sapiens",
-                "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
-              },
-              {
-                "id": "A0A0U1RQC9",
-                "name": "A0A0U1RQC9_HUMAN",
+                "id": "S4R334",
+                "name": "S4R334_HUMAN",
                 "protein": "Cellular tumor antigen p53",
                 "organism": "Homo sapiens",
-                "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+                "url": "https://www.uniprot.org/uniprotkb/S4R334"
+              },
+              {
+                "id": "H2EHT1",
+                "name": "H2EHT1_HUMAN",
+                "protein": "Cellular tumor antigen p53",
+                "organism": "Homo sapiens",
+                "url": "https://www.uniprot.org/uniprotkb/H2EHT1"
               }
             ]
           },
           "artifacts": [
             {
-              "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
-              "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
-              "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
-              "bytes": 1077,
+              "id": "0b087dc5-aa22-4ddf-ad94-24e63c854b40",
+              "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\0b087dc5-aa22-4ddf-ad94-24e63c854b40.artifact",
+              "sha256": "13ef62c03658e9c1bcb1f14450251005cf05746672442753af8674c0648bee4e",
+              "bytes": 893,
               "mediaType": "application/json"
             }
           ]
@@ -377,30 +351,30 @@
       }
     },
     {
-      "sequence": 28,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "sequence": 26,
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": null,
       "type": "task.completed",
       "version": 1,
-      "at": 1793324032651,
+      "at": 1793353109229,
       "data": {}
     }
   ],
   "checkpoints": [
     {
       "id": 11,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
-      "at": 1793324023499,
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
+      "at": 1793353108355,
       "reason": "step.completed",
       "snapshot": {
         "task": {
-          "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+          "id": "9b6750b7-a712-4a85-a485-aad9585a26a3",
           "name": "Packaged live MCP public database QA",
           "parentId": null,
           "status": "running",
           "version": 3,
-          "createdAt": 1793324021438,
-          "updatedAt": 1793324023499,
+          "createdAt": 1793353106483,
+          "updatedAt": 1793353108355,
           "limits": {},
           "calls": 2,
           "cost": 0,
@@ -408,7 +382,7 @@
         },
         "steps": [
           {
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "id": "literature",
             "kind": "pubmed",
             "input": {
@@ -420,7 +394,7 @@
             "timeoutMs": 30000,
             "status": "completed",
             "version": 2,
-            "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+            "operationId": "b6b9002ba48ad980464784afe01ed107fcf2f75c5c53ef2f882b714b2569a708",
             "attempts": 1,
             "owner": null,
             "fence": 1,
@@ -429,7 +403,7 @@
             "output": {
               "database": "Europe PMC / PubMed",
               "query": "TP53 cancer",
-              "retrievedAt": "2026-10-30T01:33:42.318Z",
+              "retrievedAt": "2026-10-30T09:38:27.172Z",
               "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
               "results": [
                 {
@@ -492,7 +466,7 @@
             "error": null
           },
           {
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "id": "protein",
             "kind": "uniprot",
             "input": {
@@ -504,43 +478,43 @@
             "timeoutMs": 30000,
             "status": "running",
             "version": 1,
-            "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+            "operationId": "24a1e009cadc1bf530717c4e0e7d3f9fc92a9be61191e32e52ad55dc0d5b52bb",
             "attempts": 1,
-            "owner": "worker-71188-0c267c99-95e0-4324-9953-fc13ef3906c4",
+            "owner": "worker-40940-3febf96b-5a2b-4438-bdd9-816324af7b76",
             "fence": 1,
-            "leaseUntil": 1793324036510,
+            "leaseUntil": 1793353121515,
             "dueAt": null,
             "error": null
           }
         ],
         "artifacts": [
           {
-            "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "bd09b638-85e2-4555-ad5f-d50d728b4626",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "stepId": "literature",
-            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
-            "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\bd09b638-85e2-4555-ad5f-d50d728b4626.artifact",
+            "sha256": "2745d1efc4deea2761b8102717510cb5a9d22ff46d1546779d3ca85da6994c07",
             "bytes": 11432,
             "mediaType": "application/json",
-            "createdAt": 1793324023499
+            "createdAt": 1793353108355
           }
         ]
       }
     },
     {
       "id": 12,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
-      "at": 1793324032651,
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
+      "at": 1793353109229,
       "reason": "completed",
       "snapshot": {
         "task": {
-          "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+          "id": "9b6750b7-a712-4a85-a485-aad9585a26a3",
           "name": "Packaged live MCP public database QA",
           "parentId": null,
           "status": "completed",
           "version": 4,
-          "createdAt": 1793324021438,
-          "updatedAt": 1793324032651,
+          "createdAt": 1793353106483,
+          "updatedAt": 1793353109229,
           "limits": {},
           "calls": 2,
           "cost": 0,
@@ -548,7 +522,7 @@
         },
         "steps": [
           {
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "id": "literature",
             "kind": "pubmed",
             "input": {
@@ -560,7 +534,7 @@
             "timeoutMs": 30000,
             "status": "completed",
             "version": 2,
-            "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+            "operationId": "b6b9002ba48ad980464784afe01ed107fcf2f75c5c53ef2f882b714b2569a708",
             "attempts": 1,
             "owner": null,
             "fence": 1,
@@ -569,7 +543,7 @@
             "output": {
               "database": "Europe PMC / PubMed",
               "query": "TP53 cancer",
-              "retrievedAt": "2026-10-30T01:33:42.318Z",
+              "retrievedAt": "2026-10-30T09:38:27.172Z",
               "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
               "results": [
                 {
@@ -632,7 +606,7 @@
             "error": null
           },
           {
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "id": "protein",
             "kind": "uniprot",
             "input": {
@@ -643,55 +617,53 @@
             "maxAttempts": 1,
             "timeoutMs": 30000,
             "status": "completed",
-            "version": 4,
-            "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+            "version": 2,
+            "operationId": "24a1e009cadc1bf530717c4e0e7d3f9fc92a9be61191e32e52ad55dc0d5b52bb",
             "attempts": 1,
             "owner": null,
             "fence": 1,
             "leaseUntil": null,
             "dueAt": null,
             "output": {
-              "database": "UniProt via EBI Proteins",
+              "database": "UniProt",
               "query": "gene:TP53 AND organism_id:9606",
-              "retrievedAt": "2026-10-30T01:33:42.665Z",
-              "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
-              "fallback": true,
-              "fallbackReason": "The operation was aborted due to timeout",
+              "retrievedAt": "2026-10-30T09:38:27.512Z",
+              "release": "2026_03",
               "results": [
                 {
-                  "id": "A0A087WT22",
-                  "name": "A0A087WT22_HUMAN",
+                  "id": "P04637",
+                  "name": "P53_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+                  "url": "https://www.uniprot.org/uniprotkb/P04637"
                 },
                 {
-                  "id": "A0A087WXZ1",
-                  "name": "A0A087WXZ1_HUMAN",
+                  "id": "K7PPA8",
+                  "name": "K7PPA8_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+                  "url": "https://www.uniprot.org/uniprotkb/K7PPA8"
                 },
                 {
-                  "id": "A0A087X1Q1",
-                  "name": "A0A087X1Q1_HUMAN",
+                  "id": "E9PFT5",
+                  "name": "E9PFT5_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+                  "url": "https://www.uniprot.org/uniprotkb/E9PFT5"
                 },
                 {
-                  "id": "A0A0R9RRX7",
-                  "name": "A0A0R9RRX7_HUMAN",
-                  "protein": "Tumor protein p53",
-                  "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
-                },
-                {
-                  "id": "A0A0U1RQC9",
-                  "name": "A0A0U1RQC9_HUMAN",
+                  "id": "S4R334",
+                  "name": "S4R334_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+                  "url": "https://www.uniprot.org/uniprotkb/S4R334"
+                },
+                {
+                  "id": "H2EHT1",
+                  "name": "H2EHT1_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/H2EHT1"
                 }
               ]
             },
@@ -700,42 +672,42 @@
         ],
         "artifacts": [
           {
-            "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "bd09b638-85e2-4555-ad5f-d50d728b4626",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "stepId": "literature",
-            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
-            "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\bd09b638-85e2-4555-ad5f-d50d728b4626.artifact",
+            "sha256": "2745d1efc4deea2761b8102717510cb5a9d22ff46d1546779d3ca85da6994c07",
             "bytes": 11432,
             "mediaType": "application/json",
-            "createdAt": 1793324023499
+            "createdAt": 1793353108355
           },
           {
-            "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "0b087dc5-aa22-4ddf-ad94-24e63c854b40",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "stepId": "protein",
-            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
-            "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
-            "bytes": 1077,
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\0b087dc5-aa22-4ddf-ad94-24e63c854b40.artifact",
+            "sha256": "13ef62c03658e9c1bcb1f14450251005cf05746672442753af8674c0648bee4e",
+            "bytes": 893,
             "mediaType": "application/json",
-            "createdAt": 1793324032651
+            "createdAt": 1793353109229
           }
         ]
       }
     },
     {
       "id": 13,
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
-      "at": 1793324032651,
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
+      "at": 1793353109229,
       "reason": "step.completed",
       "snapshot": {
         "task": {
-          "id": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+          "id": "9b6750b7-a712-4a85-a485-aad9585a26a3",
           "name": "Packaged live MCP public database QA",
           "parentId": null,
           "status": "completed",
           "version": 4,
-          "createdAt": 1793324021438,
-          "updatedAt": 1793324032651,
+          "createdAt": 1793353106483,
+          "updatedAt": 1793353109229,
           "limits": {},
           "calls": 2,
           "cost": 0,
@@ -743,7 +715,7 @@
         },
         "steps": [
           {
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "id": "literature",
             "kind": "pubmed",
             "input": {
@@ -755,7 +727,7 @@
             "timeoutMs": 30000,
             "status": "completed",
             "version": 2,
-            "operationId": "89c9f2981d6703c485167f88b7c8f8de912bf8e922a2ce04bb040261f88d3e3b",
+            "operationId": "b6b9002ba48ad980464784afe01ed107fcf2f75c5c53ef2f882b714b2569a708",
             "attempts": 1,
             "owner": null,
             "fence": 1,
@@ -764,7 +736,7 @@
             "output": {
               "database": "Europe PMC / PubMed",
               "query": "TP53 cancer",
-              "retrievedAt": "2026-10-30T01:33:42.318Z",
+              "retrievedAt": "2026-10-30T09:38:27.172Z",
               "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
               "results": [
                 {
@@ -827,7 +799,7 @@
             "error": null
           },
           {
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "id": "protein",
             "kind": "uniprot",
             "input": {
@@ -838,55 +810,53 @@
             "maxAttempts": 1,
             "timeoutMs": 30000,
             "status": "completed",
-            "version": 4,
-            "operationId": "1a2bd6d403b779bfd4240cb0fc1f6397efa283fcb3957b33c826cb8c9a07b992",
+            "version": 2,
+            "operationId": "24a1e009cadc1bf530717c4e0e7d3f9fc92a9be61191e32e52ad55dc0d5b52bb",
             "attempts": 1,
             "owner": null,
             "fence": 1,
             "leaseUntil": null,
             "dueAt": null,
             "output": {
-              "database": "UniProt via EBI Proteins",
+              "database": "UniProt",
               "query": "gene:TP53 AND organism_id:9606",
-              "retrievedAt": "2026-10-30T01:33:42.665Z",
-              "endpoint": "https://www.ebi.ac.uk/proteins/api/proteins",
-              "fallback": true,
-              "fallbackReason": "The operation was aborted due to timeout",
+              "retrievedAt": "2026-10-30T09:38:27.512Z",
+              "release": "2026_03",
               "results": [
                 {
-                  "id": "A0A087WT22",
-                  "name": "A0A087WT22_HUMAN",
+                  "id": "P04637",
+                  "name": "P53_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A087WT22"
+                  "url": "https://www.uniprot.org/uniprotkb/P04637"
                 },
                 {
-                  "id": "A0A087WXZ1",
-                  "name": "A0A087WXZ1_HUMAN",
+                  "id": "K7PPA8",
+                  "name": "K7PPA8_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A087WXZ1"
+                  "url": "https://www.uniprot.org/uniprotkb/K7PPA8"
                 },
                 {
-                  "id": "A0A087X1Q1",
-                  "name": "A0A087X1Q1_HUMAN",
+                  "id": "E9PFT5",
+                  "name": "E9PFT5_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A087X1Q1"
+                  "url": "https://www.uniprot.org/uniprotkb/E9PFT5"
                 },
                 {
-                  "id": "A0A0R9RRX7",
-                  "name": "A0A0R9RRX7_HUMAN",
-                  "protein": "Tumor protein p53",
-                  "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A0R9RRX7"
-                },
-                {
-                  "id": "A0A0U1RQC9",
-                  "name": "A0A0U1RQC9_HUMAN",
+                  "id": "S4R334",
+                  "name": "S4R334_HUMAN",
                   "protein": "Cellular tumor antigen p53",
                   "organism": "Homo sapiens",
-                  "url": "https://www.uniprot.org/uniprotkb/A0A0U1RQC9"
+                  "url": "https://www.uniprot.org/uniprotkb/S4R334"
+                },
+                {
+                  "id": "H2EHT1",
+                  "name": "H2EHT1_HUMAN",
+                  "protein": "Cellular tumor antigen p53",
+                  "organism": "Homo sapiens",
+                  "url": "https://www.uniprot.org/uniprotkb/H2EHT1"
                 }
               ]
             },
@@ -895,24 +865,24 @@
         ],
         "artifacts": [
           {
-            "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "bd09b638-85e2-4555-ad5f-d50d728b4626",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "stepId": "literature",
-            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
-            "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\bd09b638-85e2-4555-ad5f-d50d728b4626.artifact",
+            "sha256": "2745d1efc4deea2761b8102717510cb5a9d22ff46d1546779d3ca85da6994c07",
             "bytes": 11432,
             "mediaType": "application/json",
-            "createdAt": 1793324023499
+            "createdAt": 1793353108355
           },
           {
-            "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
-            "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+            "id": "0b087dc5-aa22-4ddf-ad94-24e63c854b40",
+            "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
             "stepId": "protein",
-            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
-            "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
-            "bytes": 1077,
+            "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\0b087dc5-aa22-4ddf-ad94-24e63c854b40.artifact",
+            "sha256": "13ef62c03658e9c1bcb1f14450251005cf05746672442753af8674c0648bee4e",
+            "bytes": 893,
             "mediaType": "application/json",
-            "createdAt": 1793324032651
+            "createdAt": 1793353109229
           }
         ]
       }
@@ -920,24 +890,24 @@
   ],
   "artifacts": [
     {
-      "id": "e051e31f-4f1f-429d-a713-1279178b5f51",
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "id": "bd09b638-85e2-4555-ad5f-d50d728b4626",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": "literature",
-      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\e051e31f-4f1f-429d-a713-1279178b5f51.artifact",
-      "sha256": "bdd561324c244bb83c95fbf02c30b3c59b2bdc23df5e7ce7295e72633f22e1a9",
+      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\bd09b638-85e2-4555-ad5f-d50d728b4626.artifact",
+      "sha256": "2745d1efc4deea2761b8102717510cb5a9d22ff46d1546779d3ca85da6994c07",
       "bytes": 11432,
       "mediaType": "application/json",
-      "createdAt": 1793324023499
+      "createdAt": 1793353108355
     },
     {
-      "id": "da2ce1ca-87c5-4f1d-8291-9c4048f3b81f",
-      "taskId": "ee0eadd2-1d6e-4259-ae97-760397cb6bd7",
+      "id": "0b087dc5-aa22-4ddf-ad94-24e63c854b40",
+      "taskId": "9b6750b7-a712-4a85-a485-aad9585a26a3",
       "stepId": "protein",
-      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-live-1.0-final\\work\\electron-e2e-profile-1793323897242\\runtime\\artifacts\\da2ce1ca-87c5-4f1d-8291-9c4048f3b81f.artifact",
-      "sha256": "bab36b40cf238b929d52cdc090b4d1638f632d85f4826d5f061480ac9e6a5046",
-      "bytes": 1077,
+      "path": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source\\desktop\\release\\smoke-modern-ready\\work\\electron-e2e-profile-1793353044174\\runtime\\artifacts\\0b087dc5-aa22-4ddf-ad94-24e63c854b40.artifact",
+      "sha256": "13ef62c03658e9c1bcb1f14450251005cf05746672442753af8674c0648bee4e",
+      "bytes": 893,
       "mediaType": "application/json",
-      "createdAt": 1793324032651
+      "createdAt": 1793353109229
     }
   ],
   "stream": null

@@ -9,12 +9,32 @@ import {chromium} from '../desktop/node_modules/playwright-core/index.mjs';
 
 const web = fileURLToPath(new URL('../omicslab/web/', import.meta.url));
 const root = fileURLToPath(new URL('../', import.meta.url));
-const output = path.join(root, 'docs/verification/eve-1.0.0-release');
+const output = process.env.EVE_VERIFY_OUTPUT || path.join(root, 'docs/verification/eve-1.0.0-release');
 const models = {
   mode: 'balanced', strategy: 'quality', roles: {}, fallbacks: [], context_window: 32000,
   verification: 'standard', sage_verification: false, orchestration: true,
+  auxiliary_profiles: {},
+  shared_profile: {enabled: false, provider: '', model: '', api_base: '', credential_ref: ''},
   capabilities: {'research-model': {temperature: 0.7, context_window: 64000, max_output: 8192,
     modalities: ['text', 'image'], token_parameter: 'max_tokens', supported_parameters: ['temperature']}},
+};
+const providers = {
+  mock: {
+    id: 'mock',
+    label: 'Mock',
+    family: 'mock',
+    configured: true,
+    default_model: 'research-model',
+    models: ['research-model', 'reasoning-model'],
+  },
+  custom_openai: {
+    id: 'custom_openai',
+    label: 'Custom OpenAI',
+    family: 'openai',
+    configured: true,
+    default_model: 'science-model',
+    models: ['science-model', 'vision-model'],
+  },
 };
 const permissions = Object.fromEntries(['files', 'shell', 'network', 'agents'].map(key => [key, 'allow']));
 permissions.tools = {run_shell: 'ask'};
@@ -38,7 +58,9 @@ const server = createServer(async (req, res) => {
       json({value: permissions});return;
     }
     if (url.pathname === '/api/platform/bootstrap') {json(bootstrap);return;}
-    if (url.pathname === '/api/settings') {json({providers: {},llm: {provider: 'mock',model: 'research-model'}});return;}
+    if(url.pathname==='/api/settings/models'){let raw='';for await(const chunk of req)raw+=chunk;calls.push({section:'discover',body:JSON.parse(raw)});json({models:['lab-fast','lab-deep','lab-vision']});return;}
+    if(url.pathname==='/api/settings/keys'){let raw='';for await(const chunk of req)raw+=chunk;calls.push({section:'provider-save',body:JSON.parse(raw)});json({ok:true,provider_id:'fixture-lab'});return;}
+    if (url.pathname === '/api/settings') {json({providers,llm: {provider: 'mock',model: 'research-model'}});return;}
     if (url.pathname.startsWith('/api/')) {json({error: {message: 'Unexpected fixture endpoint'}});return;}
     const target = path.resolve(web, '.' + decodeURIComponent(url.pathname));
     if (path.relative(web, target).startsWith('..')) {res.writeHead(403);res.end();return;}
@@ -76,6 +98,12 @@ test('model parameters and permission form save real structured values', {timeou
   assert.equal(await cap.locator('[data-cap-field="context_window"]').inputValue(), '64000');
   await cap.locator('[data-cap-field="temperature"]').fill('0.4');
   await page.locator('[data-role-key="reasoning"] [data-role-model]').fill('reasoning-with-default-provider');
+  await page.locator('[data-action="model-share-default"]').click();
+  await page.waitForFunction(() => document.querySelector('#shared-profile-enabled')?.checked);
+  assert.equal(await page.locator('#shared-provider').inputValue(), 'mock');
+  assert.equal(await page.locator('#shared-model').inputValue(), 'research-model');
+  await page.locator('#shared-provider').selectOption('custom_openai');
+  await page.locator('#shared-model').fill('unified-science-model');
   await page.locator('#model-verification').selectOption('sage');
   await page.locator('[data-action="save-models"]').click();
   await page.waitForFunction(() => document.querySelector('#model-verification').value === 'sage');
@@ -85,10 +113,35 @@ test('model parameters and permission form save real structured values', {timeou
     provider: '',
     model: 'reasoning-with-default-provider',
   });
+  assert.deepEqual(savedModel.shared_profile, {
+    enabled: true,
+    provider: 'custom_openai',
+    model: 'unified-science-model',
+    api_base: '',
+    credential_ref: '',
+  });
   assert.equal(savedModel.verification, 'sage');
   assert.equal(savedModel.orchestration, true);
   await page.screenshot({path: path.join(output,'settings-models-desktop.png'),fullPage: true});
 
+  await page.locator('[data-action="provider-add"]').first().click();
+  await page.locator('#provider-editor-label').fill('实验室服务');
+  await page.locator('#provider-editor-base').fill('https://lab.example/v1');
+  await page.locator('#provider-editor-key').fill('fixture-only');
+  await page.locator('[data-model-discover]').click();
+  await page.locator('.eve-model-option input[value="lab-fast"]').check();
+  await page.locator('.eve-model-option input[value="lab-deep"]').check();
+  const discovery=calls.find(call=>call.section==='discover').body;
+  assert.equal(discovery.api_key,'fixture-only');
+  assert.equal(discovery.api_base,'https://lab.example/v1');
+  await page.locator('[data-model-default="lab-fast"]').click();
+  await page.locator('#provider-editor-test').uncheck();
+  await page.getByRole('dialog').getByRole('button',{name:'保存',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('#provider-editor-label'));
+  const connection=calls.find(call=>call.section==='provider-save').body;
+  assert.equal(connection.label,'实验室服务');assert.equal(connection.provider,'new_connection');
+  assert.deepEqual(connection.models,['lab-fast','lab-deep']);assert.equal(connection.model,'lab-fast');
+  assert.equal(connection.family,'openai');
   await page.locator('[data-section="permissions"]').click();
   await page.waitForSelector('[data-action="save-permissions"]');
   assert.equal(await page.locator('#permission-shell').inputValue(), 'allow');

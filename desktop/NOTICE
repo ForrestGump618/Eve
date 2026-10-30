@@ -52,3 +52,10 @@ unchanged original skill and script resources. Model weights and third-party
 services are not bundled and remain subject to their own access and terms.
 User-installed research packs with unspecified redistribution terms are kept
 in the user's runtime/science-library and are not included in this distribution.
+
+The Agent4Sci research ideation and research checkpoint workflows are adapted
+from maszhongming/agent4sci, revision
+74b0e8c4dc55610072bed4326b6bfac24dc77377 (Apache-2.0).
+Eve changes the tool names, workspace outputs, and checkpoint triggers to use
+its existing research stages. The upstream experiment skill is not included.
+The complete license is in third-party-licenses/agent4sci-Apache-2.0.txt.

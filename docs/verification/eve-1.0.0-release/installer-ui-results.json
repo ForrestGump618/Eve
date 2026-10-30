@@ -1,0 +1,16 @@
+﻿{
+    "checks":  {
+                   "probe-completed":  true,
+                   "welcome-controls":  true,
+                   "machine-scope-path":  true,
+                   "current-user-path":  true,
+                   "invalid-path-keeps-config":  true,
+                   "failed-engine-can-retry":  true,
+                   "running-hides-submit":  true,
+                   "verified-completion":  true,
+                   "completion-exits":  true
+               },
+    "passed":  9,
+    "failed":  0,
+    "note":  "Real custom installer windows. Engine failure/retry/completion use a local protocol fixture; no host installation or all-users elevation is claimed."
+}

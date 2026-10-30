@@ -11,6 +11,13 @@
       }
     },
     "auxiliary_profiles": {},
+    "shared_profile": {
+      "enabled": true,
+      "provider": "custom_openai",
+      "model": "unified-science-model",
+      "api_base": "",
+      "credential_ref": ""
+    },
     "capabilities": {
       "research-model": {
         "temperature": 0.4,

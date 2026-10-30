@@ -1,7 +1,7 @@
 import { spawn, execFile, type ChildProcessByStdio } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import type { Readable } from 'node:stream';
 
 type PipedChild = ChildProcessByStdio<null, Readable, Readable>;
@@ -25,6 +25,7 @@ export const WORKBENCH_REQUIREMENTS = [
   'httpx==0.28.1',
   'nbformat==5.11.1',
   'python-multipart==0.0.32',
+  'pypdf==6.21.4',
   'PyYAML==6.0.3',
   'rich==15.0.0',
   'prompt_toolkit==3.0.53',
@@ -45,7 +46,7 @@ export const WORKBENCH_SCHEMA = 1;
 export const WORKBENCH_DOWNLOAD_MB = 130;
 const INSTALL_TIMEOUT_MS = 20 * 60_000;
 const PROBE_TIMEOUT_MS = 20_000;
-const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'keyring', 'uv', 'proteus', 'pytest', 'pytest_asyncio', ...(process.platform==='win32'?['winpty']:[])];
+const PROBE_MODULES = ['fastapi', 'uvicorn', 'ipykernel', 'jupyter_client', 'paramiko', 'httpx', 'pypdf', 'keyring', 'uv', 'proteus', 'pytest', 'pytest_asyncio', ...(process.platform==='win32'?['winpty']:[])];
 const SAFE_ENV_KEYS = [
   'SYSTEMROOT', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA',
   'PROGRAMFILES', 'PROGRAMFILES(X86)', 'ARCHIFY_CHROME',
@@ -100,6 +101,20 @@ export function requirementsHash(requirements: readonly string[] = WORKBENCH_REQ
 export function pythonMinor(version: string | null): string | null {
   const match = String(version ?? '').match(/^(\d+)\.(\d+)\./);
   return match ? `${match[1]}.${match[2]}` : null;
+}
+
+/** Replace a managed directory only after its staged contents are verified. */
+export function promoteManagedDirectory(staging: string, depsDir: string): void {
+  const previous = depsDir + '.previous-' + Date.now();
+  const hadPrevious = existsSync(depsDir);
+  if (hadPrevious) renameSync(depsDir, previous);
+  try {
+    renameSync(staging, depsDir);
+  } catch (error) {
+    if (hadPrevious && !existsSync(depsDir)) renameSync(previous, depsDir);
+    throw error;
+  }
+  if (hadPrevious) rmSync(previous, { recursive: true, force: true });
 }
 
 export class WorkbenchManager {
@@ -203,10 +218,10 @@ export class WorkbenchManager {
     return total;
   }
 
-  private async probeDeps(): Promise<{ ok: boolean; detail: string }> {
+  private async probeDeps(depsDir = this.depsDir): Promise<{ ok: boolean; detail: string }> {
     const script = 'import sys;sys.path.insert(0,sys.argv[1]);import ' + PROBE_MODULES.join(',') + ';print("ok")';
     try {
-      const result = await this.runner(['-E', '-s', '-c', script, this.depsDir], { timeoutMs: PROBE_TIMEOUT_MS, env: {} });
+      const result = await this.runner(['-E', '-s', '-c', script, depsDir], { timeoutMs: PROBE_TIMEOUT_MS, env: {} });
       if (result.code === 0 && result.stdout.includes('ok')) return { ok: true, detail: '' };
       return { ok: false, detail: (result.stderr || result.stdout || 'dependency import failed').trim().slice(0, 400) };
     } catch (error) {
@@ -251,7 +266,8 @@ export class WorkbenchManager {
   async runtime():Promise<{ready:boolean;depsDir?:string}> {
     const managed=await this.status();if(managed.installed)return {ready:true,depsDir:this.depsDir};
     try {
-      const probe=await this.runner(['-E','-c','import uvicorn, fastapi, jupyter_client, ipykernel, nbformat, httpx, rich, yaml, prompt_toolkit, qrcode, paramiko, keyring;print("suwen-ready")'],{timeoutMs:PROBE_TIMEOUT_MS,env:{}});
+      const modules=[...new Set([...PROBE_MODULES,'nbformat','multipart','websockets','yaml','rich','prompt_toolkit','qrcode'])];
+      const probe=await this.runner(['-E','-c','import '+modules.join(',')+';print("suwen-ready")'],{timeoutMs:PROBE_TIMEOUT_MS,env:{}});
       return {ready:probe.code===0&&probe.stdout.includes('suwen-ready')};
     } catch { return {ready:false}; }
   }
@@ -283,64 +299,73 @@ export class WorkbenchManager {
         onProgress({ phase: 'installed', message: '科研工作台依赖已就绪', installed: current });
         return current;
       }
-      mkdirSync(this.depsDir, { recursive: true });
-      const requirementsPath = join(this.depsDir, 'requirements.suwen.txt');
+      mkdirSync(dirname(this.depsDir), { recursive: true });
+      // A fresh target prevents stale native extensions from another Python
+      // minor version surviving an upgrade. The active environment is only
+      // replaced after the staged dependency set imports successfully.
+      const staging = mkdtempSync(join(dirname(this.depsDir), '.eve-python-env-'));
+      const requirementsPath = join(staging, 'requirements.suwen.txt');
       writeFileSync(requirementsPath, WORKBENCH_REQUIREMENTS.join('\n') + '\n', { encoding: 'utf8' });
-      onProgress({ phase: 'installing', message: `正在下载并安装科研工作台依赖（约 ${WORKBENCH_DOWNLOAD_MB} MB，需要联网）…`, detail: this.depsDir });
-      const args = ['-E', '-s', '-m', 'pip', 'install', '--disable-pip-version-check', '--no-input', '--no-warn-script-location', '--upgrade', '--progress-bar', 'off', '--target', this.depsDir, '-r', requirementsPath];
-      const result = await new Promise<{ code: number | null; tail: string }>((resolveResult, reject) => {
-        let child: PipedChild;
-        try {
-          child = spawn(this.python(), args, { env: safeEnv(), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
-        } catch (error) { reject(error); return; }
-        this.child = child;
-        const tail: string[] = [];
-        let stderr = '';
-        const push = (line: string): void => {
-          if (!line) return;
-          tail.push(line);
-          if (tail.length > 8) tail.shift();
-          onProgress({ phase: 'installing', message: '正在安装依赖…', detail: tail.join('\n') });
-        };
-        let buffer = '';
-        const onData = (chunk: Buffer): void => {
-          buffer += chunk.toString('utf8');
-          const lines = buffer.split(/\r?\n/);
-          buffer = lines.pop() ?? '';
-          for (const line of lines) push(line.trim());
-        };
-        child.stdout.on('data', onData);
-        child.stderr.on('data', chunk => { stderr = (stderr + chunk.toString('utf8')).slice(-4000); });
-        const timer = setTimeout(() => { this.killTree(child); }, INSTALL_TIMEOUT_MS);
-        timer.unref?.();
-        child.on('error', error => { clearTimeout(timer); this.child = null; reject(error); });
-        child.on('close', code => {
-          clearTimeout(timer);
-          this.child = null;
-          if (buffer.trim()) push(buffer.trim());
-          resolveResult({ code, tail: (stderr || tail.join('\n')).slice(-4000) });
+      onProgress({ phase: 'installing', message: `正在下载并安装科研工作台依赖（约 ${WORKBENCH_DOWNLOAD_MB} MB，需要联网）…`, detail: staging });
+      const args = ['-E', '-s', '-m', 'pip', 'install', '--disable-pip-version-check', '--no-input', '--no-warn-script-location', '--progress-bar', 'off', '--target', staging, '-r', requirementsPath];
+      try {
+        const result = await new Promise<{ code: number | null; tail: string }>((resolveResult, reject) => {
+          let child: PipedChild;
+          try {
+            child = spawn(this.python(), args, { env: safeEnv(), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+          } catch (error) { reject(error); return; }
+          this.child = child;
+          const tail: string[] = [];
+          let stderr = '';
+          const push = (line: string): void => {
+            if (!line) return;
+            tail.push(line);
+            if (tail.length > 8) tail.shift();
+            onProgress({ phase: 'installing', message: '正在安装依赖…', detail: tail.join('\n') });
+          };
+          let buffer = '';
+          const onData = (chunk: Buffer): void => {
+            buffer += chunk.toString('utf8');
+            const lines = buffer.split(/\r?\n/);
+            buffer = lines.pop() ?? '';
+            for (const line of lines) push(line.trim());
+          };
+          child.stdout.on('data', onData);
+          child.stderr.on('data', chunk => { stderr = (stderr + chunk.toString('utf8')).slice(-4000); });
+          const timer = setTimeout(() => { this.killTree(child); }, INSTALL_TIMEOUT_MS);
+          timer.unref?.();
+          child.on('error', error => { clearTimeout(timer); this.child = null; reject(error); });
+          child.on('close', code => {
+            clearTimeout(timer);
+            this.child = null;
+            if (buffer.trim()) push(buffer.trim());
+            resolveResult({ code, tail: (stderr || tail.join('\n')).slice(-4000) });
+          });
         });
-      });
-      if (result.code !== 0) {
-        this.lastError = result.tail || 'dependency installation failed';
-        const status = await this.status();
-        onProgress({ phase: 'error', message: '依赖安装失败；可重试或检查网络/代理设置', detail: this.lastError.slice(-2000) });
-        return status;
+        if (result.code !== 0) {
+          this.lastError = result.tail || 'dependency installation failed';
+          const status = await this.status();
+          onProgress({ phase: 'error', message: '依赖安装失败；可重试或检查网络/代理设置', detail: this.lastError.slice(-2000) });
+          return status;
+        }
+        onProgress({ phase: 'verifying', message: '正在校验已安装依赖…' });
+        const probe = await this.probeDeps(staging);
+        if (!probe.ok) {
+          this.lastError = probe.detail;
+          const status = await this.status();
+          onProgress({ phase: 'error', message: '依赖校验失败', detail: probe.detail });
+          return status;
+        }
+        const marker = { schema: WORKBENCH_SCHEMA, requirementsHash: requirementsHash(), python: detected.version, installedAt: Date.now(), requirements: WORKBENCH_REQUIREMENTS.slice() };
+        const markerPath = join(staging, WORKBENCH_MARKER);
+        const tmp = markerPath + '.tmp';
+        writeFileSync(tmp, JSON.stringify(marker, null, 2), { encoding: 'utf8' });
+        renameSync(tmp, markerPath);
+        try { unlinkSync(requirementsPath); } catch { /* keep directory tidy; harmless */ }
+        promoteManagedDirectory(staging, this.depsDir);
+      } finally {
+        if (existsSync(staging)) rmSync(staging, { recursive: true, force: true });
       }
-      onProgress({ phase: 'verifying', message: '正在校验已安装依赖…' });
-      const probe = await this.probeDeps();
-      if (!probe.ok) {
-        this.lastError = probe.detail;
-        const status = await this.status();
-        onProgress({ phase: 'error', message: '依赖校验失败', detail: probe.detail });
-        return status;
-      }
-      const marker = { schema: WORKBENCH_SCHEMA, requirementsHash: requirementsHash(), python: detected.version, installedAt: Date.now(), requirements: WORKBENCH_REQUIREMENTS.slice() };
-      const markerPath = join(this.depsDir, WORKBENCH_MARKER);
-      const tmp = markerPath + '.tmp';
-      writeFileSync(tmp, JSON.stringify(marker, null, 2), { encoding: 'utf8' });
-      renameSync(tmp, markerPath);
-      try { unlinkSync(requirementsPath); } catch { /* keep directory tidy; harmless */ }
       const status = await this.status();
       onProgress({ phase: 'installed', message: '科研工作台依赖已就绪', installed: status });
       return status;

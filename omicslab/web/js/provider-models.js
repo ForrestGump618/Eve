@@ -25,9 +25,11 @@ export function mountProviderModels(body,initial=[]){
      provider:body.querySelector('#provider-editor-provider').value,
      model:body.querySelector('#provider-editor-model').value,
      api_base:body.querySelector('#provider-editor-base').value,
-     api_key:body.querySelector('#provider-editor-key').value}});
+     api_key:body.querySelector('#provider-editor-key').value,
+     family:body.querySelector('#provider-editor-family').value,
+     no_key_required:body.querySelector('#provider-editor-keyless').checked}});
     if(epoch!==generation)return;
-    available=[...new Set([...selected,...data.models])];render();
+    available=[...new Set([...selected,...(data.models||[])])];render();
     status.textContent=`已获取 ${data.models.length} 个模型${data.truncated?'（列表已分页截断）':''}，勾选后保存。`;
    }catch(error){if(epoch===generation)status.textContent=errorMessage(error);}
    finally{button.disabled=false;}

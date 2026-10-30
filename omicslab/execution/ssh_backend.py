@@ -613,6 +613,14 @@ class SSHExecutionBackend(ExecutionBackend):
             raise BackendError("timeout_s 必须大于 0")
         return min(value, float(MAX_TIMEOUT_S))
 
+    async def evolution_request(self, method: str, *, scope: str, **params) -> dict[str, Any]:
+        worker = await self._worker_client()
+        # Worker RPC uses encrypted SSH stdio and does not persist request data.
+        response = await self._call(worker.request, {'op':'evolution', 'method':method, 'scope':scope, 'params':params}, timeout_s=WORKER_REQUEST_TIMEOUT_S)
+        if not response.get('ok'):
+            raise BackendError(response.get('error') or '远端实验请求失败；未转为本地执行')
+        return response['result']
+
     async def execute_python(self, code: str, timeout_s: float | None = None) -> dict[str, Any]:
         if not isinstance(code, str) or not code.strip():
             raise BackendError("远端执行代码不能为空")

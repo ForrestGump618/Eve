@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -7,6 +7,7 @@ import {
   WORKBENCH_MARKER,
   WORKBENCH_SCHEMA,
   WorkbenchManager,
+  promoteManagedDirectory,
   pythonMinor,
   requirementsHash,
   type WorkbenchStatus,
@@ -26,6 +27,9 @@ function fakeRunner(options: { version?: string | null; pip?: boolean; probe?: b
     }
     if (joined.includes('pip') && joined.includes('--version')) {
       return options.pip ? { code: 0, stdout: 'pip 26.1.1\n', stderr: '' } : { code: 1, stdout: '', stderr: 'no pip' };
+    }
+    if (joined.includes('suwen-ready')) {
+      return options.probe ? { code: 0, stdout: 'suwen-ready\n', stderr: '' } : { code: 1, stdout: '', stderr: 'ModuleNotFoundError: pypdf' };
     }
     if (joined.includes('import fastapi')) {
       return options.probe ? { code: 0, stdout: 'ok\n', stderr: '' } : { code: 1, stdout: '', stderr: 'ModuleNotFoundError: fastapi' };
@@ -118,6 +122,19 @@ test('a marker whose import probe fails is not reported as installed', async () 
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
+test('reusing a system interpreter requires the PDF and upload dependencies', async () => {
+  const { root, manager, calls } = fixture({ python: '3.11.9', pip: true, probe: true });
+  try {
+    assert.deepEqual(await manager.runtime(), { ready: true });
+    const probe = calls.find(args => args.join(' ').includes('suwen-ready'));
+    assert.ok(probe, 'expected a runtime import probe');
+    const source = probe.join(' ');
+    assert.match(source, /\bpypdf\b/);
+    assert.match(source, /\bmultipart\b/);
+    assert.match(source, /\bwebsockets\b/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
 test('pythonMinor only accepts a full interpreter version', () => {
   assert.equal(pythonMinor('3.11.9'), '3.11');
   assert.equal(pythonMinor('3.12.0 (tags/v3.12.0)'), '3.12');
@@ -128,4 +145,30 @@ test('pythonMinor only accepts a full interpreter version', () => {
 test('cancel without an in-flight install is a no-op', () => {
   const { root, manager } = fixture({});
   try { assert.equal(manager.cancel(), false); } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('verified dependency staging replaces the active environment', () => {
+  const root = mkdtempSync(join(tmpdir(), 'suwen-wb-promote-'));
+  const active = join(root, 'python-env');
+  const staging = join(root, '.eve-python-env-test');
+  try {
+    mkdirSync(active);
+    mkdirSync(staging);
+    writeFileSync(join(active, 'version.txt'), 'old');
+    writeFileSync(join(staging, 'version.txt'), 'new');
+    promoteManagedDirectory(staging, active);
+    assert.equal(readFileSync(join(active, 'version.txt'), 'utf8'), 'new');
+    assert.equal(existsSync(staging), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('failed dependency promotion restores the previous environment', () => {
+  const root = mkdtempSync(join(tmpdir(), 'suwen-wb-restore-'));
+  const active = join(root, 'python-env');
+  try {
+    mkdirSync(active);
+    writeFileSync(join(active, 'version.txt'), 'old');
+    assert.throws(() => promoteManagedDirectory(join(root, 'missing-staging'), active));
+    assert.equal(readFileSync(join(active, 'version.txt'), 'utf8'), 'old');
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

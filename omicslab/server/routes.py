@@ -552,6 +552,19 @@ async def set_keys(request: Request) -> dict[str, Any]:
     if isinstance(payload.get("keys"), dict):
         raw_keys.update(payload["keys"])
     provider = str(payload.get("provider") or "").strip()
+    if provider == "new_connection":
+        import uuid
+        provider = "connection_" + uuid.uuid4().hex
+    if provider and ("models" in payload or payload.get("model") or payload.get("api_base")):
+        try:
+            settings.save_provider_connection(provider, str(payload.get("model") or "").strip(),
+                str(payload.get("api_base") or "").strip(), payload.get("models"),
+                label=payload.get("label"), family=payload.get("family"),
+                no_key_required=payload.get("no_key_required"))
+        except ConfigError as exc:
+            raise _error(str(exc), "settings_invalid") from exc
+    if provider and provider not in settings.provider_ids():
+        raise _error('供应商不存在，请重新选择', 'settings_invalid')
     if payload.get("key"):
         provider = provider or str(settings.provider or "").strip()
         meta = settings.provider_meta(provider) if provider else {}
@@ -579,9 +592,6 @@ async def set_keys(request: Request) -> dict[str, Any]:
     if not keys and not patch and not has_connection:
         raise _error("没有可保存的 Key 或配置")
     try:
-        if has_connection:
-            settings.save_provider_connection(provider, str(payload.get("model") or "").strip(),
-                str(payload.get("api_base") or "").strip(), payload.get("models"))
         if keys:
             settings.set_keys(keys)
         if patch:
@@ -594,6 +604,7 @@ async def set_keys(request: Request) -> dict[str, Any]:
     state.rebuild_approver()
     return {
         "ok": True,
+        "provider_id": provider,
         "saved_keys": sorted(keys.keys()),
         "settings": public_settings(settings),
         "llm": state.llm_info(),
@@ -628,6 +639,14 @@ def _test_llm_target(state, payload: dict[str, Any]):
         return settings.resolve_llm()
     effective_provider = provider or str(settings.provider or "").strip() or "auto"
     meta = settings.provider_meta(effective_provider)
+    if effective_provider == 'new_connection':
+        family = payload.get('family', 'openai')
+        if family not in {'openai', 'anthropic'}:
+            raise ConfigError('请选择有效的兼容协议')
+        meta = {'family': family, 'label': payload.get('label') or '新供应商',
+                'no_key_required': payload.get('no_key_required') is True}
+    elif effective_provider not in settings.provider_ids() and effective_provider != 'auto':
+        raise ConfigError('供应商不存在，请重新选择')
     # A test of the *currently selected* provider must use the stored endpoint/model
     # too, otherwise "测试连接" would silently test a different base URL (the classic
     # "配置了 API 后依然无效" symptom).

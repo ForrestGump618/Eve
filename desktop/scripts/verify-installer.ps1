@@ -96,9 +96,19 @@ if (-not $running) {
   Add-Step 'app_launch' 'FAIL' 'installed app exited before the 12s check (stderr not captured)'
 } else {
   Add-Step 'app_launch' 'PASS' ("pid={0} alive after 12s" -f $app.Id)
-  $health = Get-DaemonHealth
+  # First launch may install the pinned Python dependency set. Keep checking
+  # the authenticated daemon while the UI remains alive instead of treating a
+  # slow network/install as a failed launch.
+  $health = $null
+  $healthDeadline = (Get-Date).AddMinutes(4)
+  do {
+    $health = Get-DaemonHealth
+    if ($health) { break }
+    if (-not (Get-Process -Id $app.Id -ErrorAction SilentlyContinue)) { break }
+    Start-Sleep -Seconds 2
+  } while ((Get-Date) -lt $healthDeadline)
   if (-not $health) {
-    Add-Step 'daemon_health' 'FAIL' 'authenticated named-pipe health failed'
+    Add-Step 'daemon_health' 'FAIL' 'authenticated named-pipe health failed within 4 minutes'
   } else {
     $healthVersion = $health.result.version
     if ($healthVersion -ne $Version) { Add-Step 'daemon_health' 'FAIL' "daemon version $healthVersion != $Version" }

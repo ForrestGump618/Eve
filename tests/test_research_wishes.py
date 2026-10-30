@@ -1,5 +1,6 @@
 """Wish-driven research projects persist real workspace evidence without a new scheduler."""
 import hashlib
+from pathlib import Path
 from types import SimpleNamespace
 
 import httpx
@@ -21,6 +22,21 @@ def artifact(platform, path, text=None):
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text or f"evidence for {path}", encoding="utf-8")
     return path
+
+
+def test_agent4sci_skills_are_adapted_without_upstream_runtime_dependencies():
+    root = Path(__file__).resolve().parents[1] / "omicslab" / "skills"
+    expected = {
+        "agent4sci-research-ideation": ("rsi-discovery-loop", "hypothesis-generation"),
+        "agent4sci-research-checkpoint": ("rsi-discovery-loop", "experimental-design"),
+    }
+    for name, dependencies in expected.items():
+        text = (root / name / "SKILL.md").read_text(encoding="utf-8")
+        assert "maszhongming/agent4sci@74b0e8c4" in text
+        for dependency in dependencies:
+            assert dependency in text
+        for unsupported in ("spawn_agent", "wait_for_reviews.py", "$experiment", "hourly"):
+            assert unsupported not in text
 
 
 async def complete_charter(platform, wish):
@@ -64,6 +80,11 @@ async def test_charter_is_hash_recorded_and_unlocks_scouting(p):
     assert charter["evidence"][0]["sha256"] in ledger
     prompt = p.wishes.prompt("ws_main", wish["id"], "scouting", advance=True)
     assert "连续许愿推进" in prompt
+    assert "agent4sci-research-ideation" in prompt
+    assert "agent4sci-research-checkpoint" in prompt
+    assert "Research checkpoint" in prompt
+    assert wish["next_actions"][0]["skills"] == ["agent4sci-research-ideation"]
+    assert "next_actions.skills" in prompt
 
 
 @pytest.mark.asyncio
@@ -99,6 +120,15 @@ async def test_full_wish_loop_requires_chart_and_human_review(p):
         "analysis": ("analysis/results.md", "Executed the preregistered analysis and retained code, environment, logs and null results."),
     }
     for stage, (path, summary) in plan.items():
+        prompt = p.wishes.prompt("ws_main", wish["id"], stage)
+        expected_skill = (
+            "agent4sci-research-ideation"
+            if stage in {"scouting", "evidence_matrix", "hypotheses"}
+            else "agent4sci-research-checkpoint"
+        )
+        assert expected_skill in prompt
+        action = next(action for action in wish["next_actions"] if action["stage"] == stage)
+        assert action["skills"] == [expected_skill]
         wish = await p.wishes.record("ws_main", wish["id"], {
             "stage": stage,
             "artifacts": [artifact(p, f"{base}/{path}", f"# {stage}\n\n{summary}")],

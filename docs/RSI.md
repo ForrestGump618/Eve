@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | 科研发现闭环 | `rsi-discovery-loop` 技能、`discovery_*` 工具、`discovery-lead` 智能体 | 工作区内的假设、证据、策略账本 | 仅当前工作区的账本与报告 | 证据分级 + 独立复核 + 人工确认 |
 | 桌面策略调参 | 「工具 → RSI 自我改进」 | routing、prompt、skill、tool-selection、test-coverage 五类结构化策略 | 同一数据库中的策略版本 | `rsi.review` 后显式 `confirm:true` 晋升，可回滚 |
-| 源码副本进化 | 「自我改进」实验页 + `omicslab/evolution` | 独立冻结源码副本中的指令、技能、Python 工具 | 只写入实验快照，不触碰当前安装 | Proteus 回归门禁通过，且始终不替换当前安装 |
+| 源码副本进化 | 「自我改进」实验页 + `omicslab/evolution` | 独立冻结源码副本中的指令、技能、Python 工具 | 只写入实验快照，不触碰当前安装 | 回归门禁通过，且始终不替换当前安装 |
 
 ## 2. 科研发现闭环（Research-Scientist-in-the-loop）
 
@@ -52,9 +52,9 @@ run → review → promote / rollback
 
 相关实现：`desktop/src/domain/rsi.ts`、`desktop/src/rsi-evaluation.ts`、`desktop/src/activities/tools.ts`。
 
-## 4. 源码副本进化（Proteus 适配）
+## 4. 源码副本进化
 
-`omicslab/evolution` 是可选的本地 Proteus 实验层，依赖 `proteus-evolve==0.4.0`（固定上游 commit `69f766e...`）。完整运行还需要：
+`omicslab/evolution` 是可选、固定版本的源码进化层。完整运行还需要：
 
 - OpenAI-compatible 模型连接（`api_key` + `model`）；
 - 当前源码包含基线测试（`test_skills.py`、`test_tools.py`、`test_turn_governance.py`）；
@@ -63,7 +63,7 @@ run → review → promote / rollback
 实验机制：
 
 1. `EveHarness.seed()` 冻结一份源码副本（`src/omicslab/**` + 指令/技能/工具的罗列目录）。
-2. Proteus 阶段 worker 只暴露 `list_files` / `read_file` / `write_file`，写入被限制在声明的演进表面（loop、notes、skills、tools、instructions）。
+2. 进化阶段 worker 只暴露 `list_files` / `read_file` / `write_file`，写入被限制在声明的演进表面（loop、notes、skills、tools、instructions）。
 3. 回归测试放在 `.eve-validation`（信任基线），候选在每轮结束时校验：Python 语法编译 + 指定 pytest 门禁 + 文件体积/数量上限。
 4. 全程不读取用户凭据文件、不访问 SSH 主机、不启用 shell；模型 key 只经进程环境变量传递，公共轨迹不含模型 prose。
 5. 即使实验“通过”，也只表示副本回归通过，**不部署、不替换当前安装**；用户要采用任何产物都必须人工审查后另行落地。

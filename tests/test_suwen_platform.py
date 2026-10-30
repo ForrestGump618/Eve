@@ -88,6 +88,58 @@ async def test_settings_keys_keep_multiple_provider_credentials(p,client_app):
 
 
 @pytest.mark.asyncio
+async def test_named_connections_keep_models_keys_and_endpoints_independent_after_reload(p,client_app):
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        ids=[]
+        for name in ('实验室 A','实验室 B'):
+            response=await client.post('/api/settings/keys',json={'provider':'new_connection','label':name,
+                'family':'openai','api_base':'https://example.invalid/v1','model':'first',
+                'models':['first','second'],'key':'fixture-'+name,'activate':False})
+            assert response.status_code==200,response.text
+            ids.append(response.json()['provider_id'])
+        assert ids[0]!=ids[1]
+        loaded=Settings(home=p.settings.home).reload()
+        # Vault references are resolved by the existing secret store.
+        for id,name in zip(ids,('实验室 A','实验室 B')):
+            assert loaded.provider_meta(id)['label']==name
+            assert loaded.provider_catalog_map()[id]['models']==['first','second']
+            assert loaded.resolve_llm(id,'second').api_key=='fixture-'+name
+        loaded.update({'provider':ids[1],'model':'second'})
+        assert loaded.resolve_llm().model=='second'
+        assert loaded.resolve_llm(ids[0]).model=='first'
+
+
+@pytest.mark.asyncio
+async def test_invalid_named_provider_is_not_saved(p,client_app):
+    before=dict(p.settings.provider_connections)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        response=await client.post('/api/settings/keys',json={'provider':'new_connection','label':'test',
+            'api_base':'https://user:password@example.invalid/v1','model':'m','key':'never-save'})
+    assert response.status_code==400
+    assert p.settings.provider_connections==before
+    assert 'never-save' not in str(p.settings.auth())
+
+
+@pytest.mark.asyncio
+async def test_model_discovery_uses_unsaved_named_provider_key(p,client_app,monkeypatch):
+    from omicslab import provider_models
+    seen=[]
+    async def discover(target):
+        seen.append(target)
+        return {'models':['lab-fast','lab-deep']}
+    monkeypatch.setattr(provider_models,'discover_models',discover)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client_app),base_url='http://test') as client:
+        response=await client.post('/api/settings/models',json={
+            'provider':'new_connection','label':'实验室服务','family':'openai',
+            'api_base':'https://lab.example/v1','api_key':'fixture-key','model':'lab-fast'})
+    assert response.status_code==200,response.text
+    assert response.json()['models']==['lab-fast','lab-deep']
+    assert seen[0].api_key=='fixture-key'
+    assert seen[0].api_base=='https://lab.example/v1'
+    assert seen[0].model=='lab-fast'
+
+
+@pytest.mark.asyncio
 async def test_settings_keys_fall_back_to_session_without_plaintext(p,client_app,monkeypatch):
     def unavailable(*_args,**_kwargs):
         raise ValueError('OS credential vault unavailable')

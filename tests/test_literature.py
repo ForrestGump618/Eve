@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
+import hmac
+import json
 import os
 import subprocess
 import time
 from types import SimpleNamespace
+from urllib.parse import parse_qs, urlsplit
 
 import httpx
 import pytest
@@ -513,3 +517,461 @@ async def test_disabled_literature_coordinator_does_not_run_and_closes_cleanly(
     status = platform.literature.status("ws_main")
     assert status["enabled"] is False
     assert status["daily_enabled"] is False
+
+
+@pytest.mark.asyncio
+async def test_pubmed_efetch_parses_review_metadata_and_abstract(platform, monkeypatch):
+    calls = []
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+    <PubmedArticleSet>
+      <PubmedArticle>
+        <MedlineCitation>
+          <PMID>12345678</PMID>
+          <Article>
+            <ArticleTitle>Topological analysis in cancer imaging</ArticleTitle>
+            <Abstract>
+              <AbstractText Label="RESULTS">Persistence features stratified tissue regions.</AbstractText>
+            </Abstract>
+            <AuthorList>
+              <Author><ForeName>Ada</ForeName><LastName>Lovelace</LastName></Author>
+            </AuthorList>
+            <Journal>
+              <Title>Nature Methods</Title>
+              <JournalIssue>
+                <PubDate><Year>2026</Year><Month>Oct</Month><Day>3</Day></PubDate>
+              </JournalIssue>
+            </Journal>
+            <PublicationTypeList><PublicationType>Review</PublicationType></PublicationTypeList>
+          </Article>
+        </MedlineCitation>
+        <PubmedData>
+          <ArticleIdList><ArticleId IdType="doi">10.1000/pubmed-test</ArticleId></ArticleIdList>
+        </PubmedData>
+      </PubmedArticle>
+    </PubmedArticleSet>"""
+
+    async def http_json(url, params, timeout_s=20):
+        calls.append((url, params))
+        return {"esearchresult": {"idlist": ["12345678"]}}
+
+    async def http_text(url, params, timeout_s=20):
+        calls.append((url, params))
+        return xml
+
+    monkeypatch.setattr(platform.literature, "_http_json", http_json)
+    monkeypatch.setattr(platform.literature, "_http_text", http_text)
+    rows = await platform.literature._pubmed(
+        "topology imaging",
+        literature_module.date(2026, 9, 1),
+        literature_module.date(2026, 10, 30),
+        5,
+    )
+
+    assert calls[0][1]["db"] == "pubmed"
+    assert "2026/09/01:2026/10/30[dp]" in calls[0][1]["term"]
+    assert calls[1][1]["id"] == "12345678"
+    assert rows[0]["external_id"] == "12345678"
+    assert rows[0]["doi"] == "10.1000/pubmed-test"
+    assert rows[0]["published"] == "2026-10-03"
+    assert rows[0]["authors"] == "Ada Lovelace"
+    assert "RESULTS: Persistence features" in rows[0]["abstract"]
+    normalized = platform.literature._normalize("pubmed", rows[0], "topology")
+    assert normalized["publication_type"] == "review"
+
+
+@pytest.mark.asyncio
+async def test_medrxiv_uses_server_specific_endpoint_and_provenance(platform, monkeypatch):
+    calls = []
+
+    async def http_json(url, params, timeout_s=20):
+        calls.append(url)
+        return {
+            "collection": [
+                {
+                    "doi": "10.1101/2026.10.01.123456",
+                    "title": "Brain imaging cohort methods",
+                    "abstract": "Brain imaging methods for a clinical cohort.",
+                    "authors": "A. Author",
+                    "date": "2026-10-02",
+                    "version": "1",
+                }
+            ]
+        }
+
+    monkeypatch.setattr(platform.literature, "_http_json", http_json)
+    rows = await platform.literature._medrxiv(
+        "brain imaging",
+        literature_module.date(2026, 10, 1),
+        literature_module.date(2026, 10, 30),
+        5,
+    )
+
+    assert "api.biorxiv.org/details/medrxiv/" in calls[0]
+    assert rows[0]["source"] == "medrxiv"
+    assert rows[0]["venue"] == "medRxiv"
+    assert rows[0]["url"].startswith("https://www.medrxiv.org/content/")
+
+
+@pytest.mark.asyncio
+async def test_reference_ingest_resolves_doi_and_rejects_unknown_url(platform, monkeypatch):
+    async def openalex(query, start, end, limit, timeout_s=20):
+        return [
+            raw_paper(
+                "Reference resolved by DOI",
+                doi="https://doi.org/10.1000/resolved",
+            )
+        ]
+
+    monkeypatch.setattr(platform.literature, "_openalex", openalex)
+    item = await platform.literature._resolve_reference(
+        "ws_main",
+        "https://doi.org/10.1000/resolved",
+    )
+    assert item["doi"] == "10.1000/resolved"
+    assert item["resolved_by"] == "DOI"
+    assert item["user_fed"] is True
+
+    with pytest.raises(ValueError, match="只支持"):
+        await platform.literature._resolve_reference(
+            "ws_main",
+            "https://example.org/not-an-academic-source",
+        )
+
+
+@pytest.mark.asyncio
+async def test_reference_ingest_detects_existing_paper(platform, monkeypatch):
+    async def resolved(scope, reference):
+        return {
+            "id": "paper_existing_reference",
+            "title": "Existing reference",
+            "source": "pubmed",
+        }
+
+    platform.store.put(
+        "literature",
+        "paper_existing_reference",
+        {"title": "Existing reference"},
+        "ws_main",
+    )
+    monkeypatch.setattr(platform.literature, "_resolve_reference", resolved)
+    result = await platform.literature.ingest_reference(
+        "ws_main",
+        "PMID: 12345678",
+    )
+    assert result["duplicate"] is True
+    assert result["item"]["id"] == "paper_existing_reference"
+    assert result["reflection"] is None
+
+
+def _interaction_fixture(platform):
+    paper, reflection = support_records(platform, "interaction")
+    feed = platform.store.put(
+        "literature_feed",
+        "feed_interaction",
+        {
+            "id": "feed_interaction",
+            "literature_id": paper["id"],
+            "title": paper["title"],
+            "note": "A method note",
+            "source": "pubmed",
+            "created_at": time.time(),
+        },
+        "ws_main",
+    )
+    message = platform.store.put(
+        "literature_message",
+        "message_interaction",
+        {
+            "id": "message_interaction",
+            "literature_id": paper["id"],
+            "reflection_id": reflection["id"],
+            "title": paper["title"],
+            "body": "Consider the conflicting evidence.",
+            "status": "queued",
+            "created_at": time.time(),
+            "expires_at": time.time() + 3600,
+        },
+        "ws_main",
+    )
+    return paper, reflection, feed, message
+
+
+@pytest.mark.asyncio
+async def test_feed_comment_creates_visible_agent_reply_and_pending_correction(
+    platform,
+    monkeypatch,
+):
+    paper, _, _, _ = _interaction_fixture(platform)
+
+    async def response(scope, *, context, text, mode):
+        assert context["paper"]["id"] if "id" in context["paper"] else context["paper"]["title"]
+        return {
+            "reply": "证据只支持特定组织类型，不能直接外推。",
+            "stance": "disagree",
+            "adjustment": "把外推范围限制在具有相同成像协议的数据集。",
+            "confidence": 0.82,
+            "model": "reflection-model",
+            "model_error": "",
+        }
+
+    monkeypatch.setattr(platform.literature, "_interaction_response", response)
+    result = await platform.literature.comment(
+        "ws_main",
+        "feed_interaction",
+        "这个结论能外推到所有队列吗？",
+    )
+
+    assert result["comment"]["author"] == "user"
+    assert result["agent_comment"]["author"] == "agent"
+    assert result["agent_comment"]["stance"] == "disagree"
+    assert result["adjustment_candidate"]["kind"] == "correction"
+    refs = result["adjustment_candidate"]["evidence_refs"]
+    assert f"literature:{paper['id']}" in refs
+    assert f"comment:{result['comment']['id']}" in refs
+    comments = platform.literature.feed("ws_main", 10)["items"][0]["comments"]
+    assert [row["author"] for row in comments] == ["user", "agent"]
+
+
+@pytest.mark.asyncio
+async def test_feed_comment_keeps_user_text_when_model_is_unavailable(
+    platform,
+    monkeypatch,
+):
+    _interaction_fixture(platform)
+
+    async def unavailable(*args, **kwargs):
+        raise RuntimeError("model offline")
+
+    monkeypatch.setattr(platform.literature, "_model_json", unavailable)
+    result = await platform.literature.comment(
+        "ws_main",
+        "feed_interaction",
+        "补充一条相反证据。",
+    )
+
+    assert result["comment"]["text"] == "补充一条相反证据。"
+    assert result["agent_comment"]["model_error"]
+    assert "已保存" in result["agent_comment"]["text"]
+    assert result["adjustment_candidate"] is None
+
+
+@pytest.mark.asyncio
+async def test_proactive_share_reply_uses_same_reviewable_dialogue_contract(
+    platform,
+    monkeypatch,
+):
+    paper, _, _, _ = _interaction_fixture(platform)
+
+    async def response(scope, *, context, text, mode):
+        return {
+            "reply": "我会缩小结论，并把验证条件写入下一步。",
+            "stance": "adjust",
+            "adjustment": "在复现前增加独立队列校准。",
+            "confidence": 0.74,
+            "model": "reflection-model",
+            "model_error": "",
+        }
+
+    monkeypatch.setattr(platform.literature, "_interaction_response", response)
+    result = await platform.literature.reply_proactive(
+        "ws_main",
+        "message_interaction",
+        "现有数据不足以支持这个外推。",
+    )
+
+    assert result["reply"]["author"] == "user"
+    assert result["agent_reply"]["author"] == "agent"
+    assert result["adjustment_candidate"]["kind"] == "correction"
+    assert f"literature:{paper['id']}" in result["adjustment_candidate"]["evidence_refs"]
+    assert f"reply:{result['reply']['id']}" in result["adjustment_candidate"]["evidence_refs"]
+    assert "现有数据不足" in result["chat_prompt"]
+
+
+@pytest.mark.asyncio
+async def test_feishu_and_dingtalk_webhooks_validate_domains_and_sign(platform, monkeypatch):
+    import omicslab.suwen.extensions as extensions
+
+    assert platform.channels.capabilities("feishu")["outbound"] is True
+    assert platform.channels.capabilities("feishu")["inbound"] is False
+    assert platform.channels.capabilities("dingtalk")["outbound"] is True
+    assert platform.channels.capabilities("dingtalk")["inbound"] is False
+    with pytest.raises(ValueError, match="官方 HTTPS"):
+        platform.channels._webhook_url(
+            "feishu",
+            "https://example.org/open-apis/bot/v2/hook/token",
+        )
+    with pytest.raises(ValueError, match="官方 HTTPS"):
+        platform.channels._webhook_url(
+            "dingtalk",
+            "http://oapi.dingtalk.com/robot/send?access_token=token",
+        )
+
+    captured = []
+
+    class FakeResponse:
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"code": 0, "errcode": 0}
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return False
+
+        async def post(self, target, json):
+            captured.append((target, json))
+            return FakeResponse()
+
+    monkeypatch.setattr(extensions.httpx, "AsyncClient", FakeClient)
+    platform.vault.put(
+        "feishu_hook",
+        "https://open.feishu.cn/open-apis/bot/v2/hook/token",
+        persist=False,
+    )
+    platform.vault.put("feishu_sign", "feishu-secret", persist=False)
+    platform.store.put(
+        "channel",
+        "channel_feishu",
+        {
+            "name": "Feishu",
+            "adapter": "feishu",
+            "workspace": "ws_main",
+            "enabled": True,
+            "allow_send": True,
+            "webhook_ref": "feishu_hook",
+            "credential_ref": "feishu_sign",
+            "capabilities": platform.channels.capabilities("feishu"),
+        },
+    )
+    await platform.channels.send("channel_feishu", "", "hello", approved=True)
+    feishu_payload = captured[-1][1]
+    expected_feishu = base64.b64encode(
+        hmac.new(
+            f"{feishu_payload['timestamp']}\nfeishu-secret".encode(),
+            digestmod=hashlib.sha256,
+        ).digest()
+    ).decode()
+    assert feishu_payload["sign"] == expected_feishu
+
+    platform.vault.put(
+        "dingtalk_hook",
+        "https://oapi.dingtalk.com/robot/send?access_token=token",
+        persist=False,
+    )
+    platform.vault.put("dingtalk_sign", "dingtalk-secret", persist=False)
+    platform.store.put(
+        "channel",
+        "channel_dingtalk",
+        {
+            "name": "DingTalk",
+            "adapter": "dingtalk",
+            "workspace": "ws_main",
+            "enabled": True,
+            "allow_send": True,
+            "webhook_ref": "dingtalk_hook",
+            "credential_ref": "dingtalk_sign",
+            "capabilities": platform.channels.capabilities("dingtalk"),
+        },
+    )
+    await platform.channels.send("channel_dingtalk", "", "hello", approved=True)
+    dingtalk_target, dingtalk_payload = captured[-1]
+    query = parse_qs(urlsplit(dingtalk_target).query)
+    timestamp = query["timestamp"][0]
+    expected_dingtalk = base64.b64encode(
+        hmac.new(
+            b"dingtalk-secret",
+            f"{timestamp}\ndingtalk-secret".encode(),
+            hashlib.sha256,
+        ).digest()
+    ).decode()
+    assert query["sign"][0] == expected_dingtalk
+    assert dingtalk_payload["msgtype"] == "text"
+
+
+@pytest.mark.asyncio
+async def test_real_pdf_upload_parser_and_password_error(platform, monkeypatch):
+    import io
+    from pypdf import PdfWriter
+    from pypdf.generic import DictionaryObject, NameObject, DecodedStreamObject
+    writer=PdfWriter()
+    page=writer.add_blank_page(width=400,height=400)
+    font=DictionaryObject({NameObject('/Type'):NameObject('/Font'),NameObject('/Subtype'):NameObject('/Type1'),NameObject('/BaseFont'):NameObject('/Helvetica')})
+    page[NameObject('/Resources')]=DictionaryObject({NameObject('/Font'):DictionaryObject({NameObject('/F1'):writer._add_object(font)})})
+    stream=DecodedStreamObject();stream.set_data(b'BT /F1 12 Tf 20 300 Td (A reproducible biological experiment) Tj ET')
+    page[NameObject('/Contents')]=writer._add_object(stream)
+    data=io.BytesIO();writer.write(data)
+    from omicslab.suwen.knowledge import parse_document
+    assert 'biological experiment' in parse_document('paper.pdf',data.getvalue())[0][1]
+    # Real multipart upload through the production route, without an LLM call.
+    async def finish(scope,item,settings,**kwargs):return {'item':item,'reflection':None,'candidate_ids':[],'model_error':''}
+    monkeypatch.setattr(platform.literature,'_finish_ingest',finish)
+    app=FastAPI();app.state.omicslab=platform.state;app.include_router(literature_router)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app),base_url='http://test') as client:
+        response=await client.post('/api/literature/ingest?scope=ws_main',files={'file':('paper.pdf',data.getvalue(),'application/pdf')})
+    assert response.status_code==200,response.text
+    writer.encrypt('secret');encrypted=io.BytesIO();writer.write(encrypted)
+    with pytest.raises(ValueError,match='密码'):
+        parse_document('private.pdf',encrypted.getvalue())
+
+
+@pytest.mark.asyncio
+async def test_background_search_survives_request_end_and_is_workspace_scoped(platform,monkeypatch):
+    release=asyncio.Event();started=asyncio.Event();queries=[]
+    async def source(source,query,*args):
+        queries.append(query);started.set();await release.wait();return [raw_paper('Autonomous result')]
+    monkeypatch.setattr(platform.literature,'_source_search',source)
+    app=FastAPI();app.state.omicslab=platform.state;app.include_router(literature_router)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app),base_url='http://test') as client:
+        result=await client.post('/api/literature/search',json={'background':True,'query':'','sources':['pubmed'],'ground_novelty':False})
+        assert result.status_code==200,result.text
+        assert result.json()['status']=='running'
+        await asyncio.wait_for(started.wait(),1)
+        # A second view/request attaches to the same job instead of dispatching twice.
+        second=await client.post('/api/literature/search',json={'background':True,'query':'','sources':['pubmed']})
+        assert second.json()['job_id']==result.json()['job_id']
+        assert platform.literature.job_status('other','search') is None
+        release.set();await asyncio.gather(*platform.literature.jobs.values())
+        status=(await client.get('/api/literature/status')).json()
+        assert status['jobs']['search']['status']=='completed'
+        assert status['jobs']['search']['result']['items'][0]['title']=='Autonomous result'
+        assert queries and ' OR ' in queries[0]
+
+
+@pytest.mark.asyncio
+async def test_background_shutdown_is_interrupted_not_stuck_running(platform):
+    async def wait():await asyncio.Event().wait()
+    platform.literature.dispatch('ws_main','search',wait)
+    await asyncio.sleep(0)
+    await platform.literature.close()
+    assert platform.literature.job_status('ws_main','search')['status']=='interrupted'
+
+
+@pytest.mark.asyncio
+async def test_retrieval_retries_and_coalesces_identical_calls(platform):
+    calls=[]
+    async def handler(request):
+        calls.append(request)
+        return httpx.Response(503 if len(calls)==1 else 200,json={'result':'real fixture'})
+    platform.literature._client=httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    try:
+        results=await asyncio.gather(*(platform.literature._http_json('https://example.invalid/search',{'q':'same'}) for _ in range(4)))
+        assert len(calls)==2
+        assert all(item=={'result':'real fixture'} for item in results)
+    finally:
+        await platform.literature.close()
+
+
+@pytest.mark.asyncio
+async def test_all_sources_unavailable_is_failure_not_success(platform,monkeypatch):
+    async def broken(*args):raise httpx.ConnectError('offline')
+    monkeypatch.setattr(platform.literature,'_source_search',broken)
+    result=await platform.literature.search('ws_main','',sources=['pubmed'],ground_novelty=False)
+    assert result['status']=='failed'
+    assert result['source_status']['pubmed']['status']=='unavailable'

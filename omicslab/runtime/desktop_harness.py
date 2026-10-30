@@ -78,7 +78,8 @@ class DesktopHarness:
             config = platform.config.get("models", scope)["value"]
             _, _, selected = platform.models.prepare(settings, kwargs.get("provider"), kwargs.get("model"),
                                                      loop._resolve_agent(conv.agent or "lead"), backend, user_text)
-            capability = config.get("capabilities", {}).get(selected.model, {})
+            capabilities = config.get("capabilities", {})
+            capability = capabilities.get(selected.provider+"::"+selected.model, capabilities.get(selected.model, {}))
             context_window = int(capability.get("context_window", config.get("context_window", context_window)))
         # Configuration validation and API-key lookup stay in the existing provider layer.
         key = selected.api_key
@@ -93,7 +94,10 @@ class DesktopHarness:
         model_config = None
         if selected.provider != "mock" and key:
             requested_output = int(capability.get("max_output", settings.max_tokens or 8192))
-            model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=context_window, maxOutput=max(128, min(requested_output, 32767, context_window//2-1)))
+            model_config = dict(provider="anthropic" if selected.family=="anthropic" else "openai", baseUrl=selected.api_base, model=selected.model, apiKey=key, contextWindow=context_window, maxOutput=max(32, min(requested_output, 200000, context_window-1)),
+                                temperature=(float(capability['temperature']) if type(capability.get('temperature')) in {int,float} else settings.temperature if capability.get('temperature') is True else None),
+                                modalities=capability.get('modalities') or ['text'],
+                                tokenParameter=capability.get('token_parameter','max_tokens'))
         # Admission/compaction owns the budget. Dropping turns here prevents
         # search_context from recovering older goals and evidence at all.
         messages = [{"role": m.role, "content": m.content} for m in conv.messages if m.role in ("user", "assistant") and m.content]
@@ -181,7 +185,12 @@ class DesktopHarness:
                         if artifact_event:
                             try:
                                 raw = await self.rpc("artifact.read", taskId=task_id, artifactId=artifact_event["data"]["artifact"]["id"])
-                                preview = str(raw.get("text") or preview)[:4000]
+                                import json
+                                artifact = json.loads(str(raw.get("text") or '{}'))
+                                observation = artifact.get('observation') or {}
+                                result_data = observation.get('result') or {}
+                                if isinstance(result_data, dict):
+                                    preview = str(result_data.get('summary') or result_data.get('message') or result_data.get('error') or ('执行完成' if kind == 'tool.completed' else preview))[:1000]
                             except Exception:
                                 pass
                         tool_results[data.get("callId")] = {"ok":kind=="tool.completed","preview":preview,"duration_ms":data.get("durationMs")}
@@ -201,7 +210,8 @@ class DesktopHarness:
                 if status == "completed":
                     output = current["steps"][-1].get("output") or {}
                     text = output.get("text") or ""
-                    if not text.strip() or not output.get("verification",{}).get("passed"):
+                    budget_limited = output.get('stopReason') == 'token_budget' and output.get('completion') == 'partial'
+                    if not text.strip() or (not output.get("verification",{}).get("passed") and not budget_limited):
                         raise RuntimeError("Harness returned an unverified or empty answer")
                     tool_steps = []
                     for item in current.get("events", []):
@@ -214,10 +224,18 @@ class DesktopHarness:
                     conv.updated_at=time.time();loop._save(conv)
                     # Emit only verified final text; interim model preambles may be
                     # replaced between tool rounds and must not duplicate in this UI.
-                    await event("text_snapshot", {"text":text,"task_id":task_id,"verified":True})
-                    return {"finish_reason":"stop","text":text,"usage":{"total_tokens":current.get("tokens",0)},"evidence_gate":output.get("verification")}
+                    await event("text_snapshot", {"text":text,"task_id":task_id,"verified":not budget_limited})
+                    return {"finish_reason":"token_budget" if budget_limited else "stop","text":text,"usage":{"total_tokens":current.get("tokens",0)},"evidence_gate":output.get("verification"),
+                            **({'stop_reason': {'code': 'token_budget', 'message': '本轮预算已用尽，执行记录已保存'}} if budget_limited else {})}
                 if status in ("failed","cancelled","waiting_approval","paused"):
                     error = next((x.get("error") for x in current["steps"] if x.get("error")), None) or status
+                    if status in {'failed','paused'}:
+                        text = (last_text.strip() + '\n\n' if last_text.strip() else '') + '任务未完成：' + str(error)
+                        conv.messages.append(ChatMessage(role='assistant', content=text, meta={
+                            'run_id':kwargs.get('run_id'), 'harness_task_id':task_id,
+                            'status':status, 'partial':True, 'error':str(error),
+                            'tool_steps':[{'id':call_id,'result':result} for call_id,result in tool_results.items()]}))
+                        conv.updated_at=time.time();loop._save(conv)
                     await event("error", {"message":error,"code":"harness_"+status})
                     return {"finish_reason":"cancelled" if status=="cancelled" else "error","text":"","error":{"message":error}}
                 await asyncio.sleep(.15)

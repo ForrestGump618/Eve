@@ -18,7 +18,7 @@ import {workspaceFailure} from './execution-environment.js';
 import { Store } from './harness/store.js';
 import { Engine } from './harness/engine.js';
 import { ValidationError, type TaskDefinition, type Json } from './harness/types.js';
-import { ensureHome, newConnection, connectionPath, atomicJson, atomicJsonAsync, secretEqual, safeError } from './security.js';
+import { ensureHome, newConnection, connectionPath, atomicJson, atomicJsonAsync, secretEqual, safeError, isEveRuntimeProcess } from './security.js';
 import {queryContextAsync} from './context-query.js';
 import { ContextManager } from './context.js';
 import { prepareContextAsync } from './context-async.js';
@@ -57,8 +57,7 @@ function lock(): void {
   catch (err: any) {
     if (err.code !== 'EEXIST') throw err;
     const pid = Number(readFileSync(lockPath, 'utf8'));
-    if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error('Invalid daemon lock; review before recovery');
-    try { process.kill(pid, 0); } catch (e: any) { if (e.code === 'ESRCH') { unlinkSync(lockPath); lock(); return; } throw e; }
+    if (!isEveRuntimeProcess(pid)) { unlinkSync(lockPath); lock(); return; }
     throw new Error('Daemon already running');
   }
 }

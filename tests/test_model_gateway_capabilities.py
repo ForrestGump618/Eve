@@ -148,3 +148,100 @@ def test_auxiliary_profile_falls_back_to_role_model_when_unconfigured(p, monkeyp
         and row.get("data", {}).get("source") == "fallback"
         for row in route
     )
+
+
+def test_shared_profile_routes_text_but_auxiliary_and_agent_routes_win(p, monkeypatch):
+    resolved = []
+
+    def resolve(provider, model=None, **kwargs):
+        resolved.append((provider, model))
+        return SimpleNamespace(
+            provider=provider or "mock",
+            model=model or "global-default",
+            api_base=kwargs.get("api_base_override") or "http://127.0.0.1/v1",
+            api_key=None,
+        )
+
+    monkeypatch.setattr(p.settings, "resolve_llm", resolve)
+    p.config.update("models", {
+        "roles": {
+            "text": {"provider": "mock", "model": "role-text"},
+            "reasoning": {"provider": "mock", "model": "role-reasoning"},
+        },
+        "shared_profile": {
+            "enabled": True,
+            "provider": "custom_openai",
+            "model": "shared-model",
+            "api_base": "https://shared.example/v1",
+            "credential_ref": "",
+        },
+        "auxiliary_profiles": {
+            "reflection.reasoning": {
+                "provider": "mock",
+                "model": "reflection-model",
+            },
+        },
+    }, "ws_main")
+    p.store.put("agent", "explicit-agent", {
+        "name": "Explicit",
+        "provider": "mock",
+        "model": "agent-model",
+        "workspaces": ["ws_main"],
+    })
+    gateway = ModelGateway(p)
+    backend = SimpleNamespace(workspace=p.require_workspace("ws_main"))
+    settings = SimpleNamespace(request_timeout_s=30)
+    existing = SimpleNamespace(id="lead", category="research")
+    explicit = SimpleNamespace(id="explicit-agent", category="research")
+
+    _, _, ordinary = gateway.prepare(
+        settings, None, None, existing, backend, task_text="ordinary work",
+    )
+    _, _, reflected = gateway.prepare(
+        settings, None, None, existing, backend,
+        task_tag="reflection.reasoning",
+    )
+    _, _, agent_owned = gateway.prepare(
+        settings, None, None, explicit, backend, task_text="ordinary work",
+    )
+
+    assert (ordinary.provider, ordinary.model) == ("custom_openai", "shared-model")
+    assert (reflected.provider, reflected.model) == ("mock", "reflection-model")
+    assert (agent_owned.provider, agent_owned.model) == ("mock", "agent-model")
+
+
+def test_shared_text_profile_never_replaces_embedding_role(p, monkeypatch):
+    def resolve(provider, model=None, **kwargs):
+        return SimpleNamespace(
+            provider=provider or "mock",
+            model=model or "global-default",
+            api_base="http://127.0.0.1/v1",
+            api_key=None,
+        )
+
+    monkeypatch.setattr(p.settings, "resolve_llm", resolve)
+    p.config.update("models", {
+        "roles": {
+            "embedding": {"provider": "mock", "model": "embedding-model"},
+        },
+        "shared_profile": {
+            "enabled": True,
+            "provider": "custom_openai",
+            "model": "shared-text-model",
+            "api_base": "",
+            "credential_ref": "",
+        },
+    }, "ws_main")
+    gateway = ModelGateway(p)
+    backend = SimpleNamespace(workspace=p.require_workspace("ws_main"))
+
+    _, _, target = gateway.prepare(
+        SimpleNamespace(request_timeout_s=30),
+        None,
+        None,
+        SimpleNamespace(id="lead", category="research"),
+        backend,
+        task_tag="literature.embedding",
+    )
+
+    assert (target.provider, target.model) == ("mock", "embedding-model")

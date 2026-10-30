@@ -35,8 +35,8 @@ test('all built-in workbench workflows seed into the native registry and load wi
   const root=resolve('dist/bundled-skills');
   const first=await installBundledSkills(registry,root) as any;
   await installBundledSkills(registry,root);
-  assert.equal(first.count,40);assert.equal(registry.list().length,40);
-  for(const name of ['biomedical-discovery','primer-design','public-biomedical-data','remote-compute-ssh','statistical-rigor','wet-lab-experiment-design','classic-cell-and-molecular-assays','wet-lab-result-interpretation']){
+  assert.equal(first.count,42);assert.equal(registry.list().length,42);
+  for(const name of ['agent4sci-research-ideation','agent4sci-research-checkpoint','biomedical-discovery','primer-design','public-biomedical-data','remote-compute-ssh','statistical-rigor','wet-lab-experiment-design','classic-cell-and-molecular-assays','wet-lab-result-interpretation']){
    const skill=registry.list().find(s=>s.name===name)!;assert.ok(skill);
    assert.match((registry.load(skill.id) as any).instructions,/Eve 运行适配/);
    assert.equal(skill.executable,name==='wet-lab-result-interpretation');

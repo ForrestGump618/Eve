@@ -1,0 +1,12 @@
+﻿{
+    "checks":  {
+                   "welcome-controls":  true,
+                   "cancel-keeps-app":  true,
+                   "running-hides-submit":  true,
+                   "verified-removal":  true,
+                   "completion-exits":  true
+               },
+    "passed":  5,
+    "failed":  0,
+    "note":  "Actual installed uninstaller windows and actual file removal; current-user scope."
+}

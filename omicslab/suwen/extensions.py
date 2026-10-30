@@ -1,13 +1,17 @@
 """Managed, versioned skill copies and explicit channel capability states."""
 import asyncio
+import base64
 import hashlib
+import hmac
 import importlib.util
 import json
 import re
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
+from urllib.parse import urlencode, urlsplit
 
 import httpx
 
@@ -104,11 +108,15 @@ class Channels:
         if adapter=='webchat':return {'inbound':True,'outbound':True,'attachments':False,'groups':False,'qr_login':False,'implementation':'builtin'}
         if adapter=='telegram':return {'inbound':True,'outbound':True,'attachments':False,'groups':False,'qr_login':False,'implementation':'bot-api'}
         if adapter=='wechat':return {'inbound':True,'outbound':True,'attachments':False,'groups':False,'qr_login':True,'implementation':'weixin-ilink-text'}
+        if adapter=='feishu':return {'inbound':False,'outbound':True,'attachments':False,'groups':True,'qr_login':False,
+          'implementation':'feishu-custom-bot-webhook','reason':'仅支持飞书群自定义机器人外发；接收消息需要官方应用事件订阅'}
+        if adapter=='dingtalk':return {'inbound':False,'outbound':True,'attachments':False,'groups':True,'qr_login':False,
+          'implementation':'dingtalk-custom-bot-webhook','reason':'仅支持钉钉群自定义机器人外发；接收消息需要官方应用事件订阅'}
         return {'inbound':False,'outbound':False,'attachments':False,'groups':False,'qr_login':False,
           'implementation':'external_adapter_required','reason':'需要平台官方协议或受支持的 OpenClaw 适配器；未内置扫码登录，未假定互通'}
 
     def save(self,data,id=None):
-        if data.get('adapter') not in {'webchat','telegram','wechat','wecom','feishu','qq','openclaw'}:raise ValueError('未知消息渠道')
+        if data.get('adapter') not in {'webchat','telegram','wechat','wecom','feishu','dingtalk','qq','openclaw'}:raise ValueError('未知消息渠道')
         self.platform.require_workspace(data.get('workspace',''))
         row={k:v for k,v in data.items() if k in {'name','adapter','enabled','workspace','agent','contacts','credential_ref','webhook_ref','allow_send','read_only','bot_id','base_url'}}
         if row['adapter']=='wechat':
@@ -116,16 +124,43 @@ class Channels:
             row['base_url']=trusted_base(row.get('base_url') or 'https://ilinkai.weixin.qq.com')
             if row.get('enabled') and (not row.get('bot_id') or not self.platform.vault.get(row.get('credential_ref'))):raise ValueError('请通过微信扫码建立连接')
         row.setdefault('enabled',False);row.setdefault('contacts',[]);row.setdefault('read_only',True);row.setdefault('allow_send',False)
-        if not isinstance(row['contacts'],list) or len(row['contacts'])>100 or any(not isinstance(v,str) or not v for v in row['contacts']):raise ValueError('授权联系人需要非空 ID 的数组')
+        if not isinstance(row['contacts'],list) or len(row['contacts'])>100 or any(not isinstance(v,str) or not v.strip() for v in row['contacts']):raise ValueError('授权联系人需要非空 ID 的数组')
         row['capabilities']=self.capabilities(row['adapter'])
-        row['status']='disabled' if not row['enabled'] else 'configured' if row['capabilities']['inbound'] else 'external_dependency'
+        if row['adapter'] in {'feishu','dingtalk'} and row.get('enabled'):
+            webhook=self.platform.vault.get(row.get('webhook_ref'))
+            if not webhook:raise ValueError('请先加密保存群机器人 Webhook URL')
+            self._webhook_url(row['adapter'],webhook)
+        row['status']='disabled' if not row['enabled'] else 'configured' if (
+            row['capabilities']['inbound'] or row['capabilities']['outbound']
+        ) else 'external_dependency'
         return self.store.put('channel',id or uid('channel'),row)
+
+    @staticmethod
+    def _webhook_url(adapter,url):
+        parsed=urlsplit(str(url or '').strip())
+        host=(parsed.hostname or '').lower()
+        path=parsed.path or ''
+        allowed=(
+            adapter=='feishu' and host in {'open.feishu.cn','open.larksuite.com'}
+            and path.startswith('/open-apis/bot/v2/hook/')
+        ) or (
+            adapter=='dingtalk' and host in {'oapi.dingtalk.com','api.dingtalk.com'}
+            and '/robot/send' in path
+        )
+        if parsed.scheme!='https' or not allowed or parsed.username or parsed.password:
+            raise ValueError('Webhook 必须使用对应平台的官方 HTTPS 地址')
+        return str(url).strip()
 
     async def test(self,id):
         channel=self.store.get('channel',id)
         if not channel or not channel['enabled']:raise ValueError('渠道不存在或已停用')
         if channel['adapter']=='webchat':return {'ok':True,'method':'local_webchat','capabilities':channel['capabilities']}
         if channel['adapter']=='wechat':return await self.wechat.test(channel)
+        if channel['adapter'] in {'feishu','dingtalk'}:
+            webhook=self.platform.vault.get(channel.get('webhook_ref'))
+            if not webhook:raise ValueError('尚未配置群机器人 Webhook')
+            self._webhook_url(channel['adapter'],webhook)
+            return {'ok':True,'method':'webhook_configuration','note':'仅验证了本地配置；未发送测试消息','capabilities':channel['capabilities']}
         if channel['adapter']!='telegram':raise ValueError(channel['capabilities']['reason'])
         token=self.platform.vault.get(channel.get('credential_ref'))
         if not token:raise ValueError('尚未配置 Telegram Bot Token')
@@ -161,10 +196,48 @@ class Channels:
         channel=self.store.get('channel',id)
         if not channel or not channel['enabled'] or not channel.get('allow_send') or not approved:
             raise PermissionError('主动发送需启用渠道、允许外发并明确确认')
-        if str(contact) not in [str(c) for c in channel['contacts']]:raise PermissionError('接收者未授权')
+        webhook_adapter=channel['adapter'] in {'feishu','dingtalk'}
+        if not webhook_adapter and str(contact) not in [str(c) for c in channel['contacts']]:raise PermissionError('接收者未授权')
         if channel['adapter']=='webchat':
             return self.store.put('channel_message',uid(),{'channel':id,'contact':str(contact),'text':text,'direction':'outbound'},channel['workspace'])
         if channel['adapter']=='wechat':return await self.wechat.send(channel,str(contact),text)
+        if webhook_adapter:
+            webhook=self.platform.vault.get(channel.get('webhook_ref'))
+            if not webhook:raise ValueError('群机器人 Webhook 未配置')
+            target=self._webhook_url(channel['adapter'],webhook)
+            secret=self.platform.vault.get(channel.get('credential_ref')) or ''
+            now=str(int(time.time()))
+            if channel['adapter']=='feishu':
+                payload={'msg_type':'text','content':{'text':str(text)[:8000]}}
+                if secret:
+                    key=f'{now}\n{secret}'.encode()
+                    payload['timestamp']=now
+                    payload['sign']=base64.b64encode(
+                        hmac.new(key,digestmod=hashlib.sha256).digest()
+                    ).decode()
+            else:
+                payload={'msgtype':'text','text':{'content':str(text)[:8000]}}
+                if secret:
+                    signature=base64.b64encode(
+                        hmac.new(
+                            secret.encode(),
+                            f'{now}\n{secret}'.encode(),
+                            hashlib.sha256,
+                        ).digest()
+                    ).decode()
+                    separator='&' if '?' in target else '?'
+                    target+=separator+urlencode({'timestamp':now,'sign':signature})
+            async with httpx.AsyncClient(timeout=20) as client:
+                response=await client.post(target,json=payload)
+            if response.status_code>=400:
+                raise ValueError(f'{channel["adapter"]} 发送失败 HTTP {response.status_code}')
+            try:value=response.json()
+            except ValueError:value={}
+            code=value.get('code',value.get('errcode',0))
+            if code not in {0,None}:
+                raise ValueError(f'{channel["adapter"]} 拒绝消息：{value.get("msg") or value.get("errmsg") or code}')
+            return self.store.put('channel_message',uid(),{'channel':id,'contact':str(contact or 'webhook'),'text':str(text)[:8000],
+                'direction':'outbound','provider_response':{'code':code},'created_at':time.time()},channel['workspace'])
         if channel['adapter']!='telegram':raise ValueError('此适配器尚不支持发送')
         token=self.platform.vault.get(channel.get('credential_ref'))
         if not token:raise ValueError('Bot Token 未配置')

@@ -3,9 +3,11 @@ import {request, errorMessage} from '../api.js?v=1.0.0';
 import {icon} from '../icons.js?v=1.0.0';
 import {esc, escAttr, fmtNum, relTime, truncate} from '../util.js?v=1.0.0';
 import {navigate, getState} from '../store.js?v=1.0.0';
-import {confirmDialog, promptDialog, spinnerHtml} from '../ui.js?v=1.0.0';
+import {confirmDialog, openModal, promptDialog, spinnerHtml} from '../ui.js?v=1.0.0';
 
 const SOURCES = [
+  ['pubmed', 'PubMed'],
+  ['medrxiv', 'medRxiv'],
   ['europe_pmc', 'Europe PMC'],
   ['openalex', 'OpenAlex'],
   ['biorxiv', 'bioRxiv'],
@@ -29,10 +31,14 @@ const local = {
   tab: 'radar',
   data: null,
   search: null,
+  notice: null,
   busy: false,
   uploadBusy: false,
   disposed: false,
   generation: 0,
+  scope: null,
+  timer: 0,
+  form: null,
 };
 
 function scope() {
@@ -57,6 +63,10 @@ function percent(value) {
 
 function typeLabel(value) {
   return {research: '研究', review: '综述', method: '方法', position: '观点'}[value] || '研究';
+}
+
+function stanceLabel(value) {
+  return {agree: '同意', disagree: '反对', uncertain: '保留', adjust: '调整'}[value] || '';
 }
 
 function domainLabel(value) {
@@ -116,11 +126,9 @@ function topBar() {
     <div>
       <span class="lit-eyebrow">${esc(getState().workspace?.name || '当前工作区')}</span>
       <h1>文献雷达</h1>
-      <p>检索、精读、反思与课题联动。</p>
     </div>
     <div class="lit-head-actions">
-      <input type="file" id="lit-pdf" accept="application/pdf,.pdf" hidden/>
-      <button type="button" class="btn btn-ghost btn-sm" data-lit-action="upload">${icon('upload', {size: 15})}<span>${local.uploadBusy ? '解析中' : '投喂 PDF'}</span></button>
+      <button type="button" class="btn btn-ghost btn-sm" data-lit-action="ingest">${icon('upload', {size: 15})}<span>${local.uploadBusy ? '解析中' : '添加文献'}</span></button>
       <button type="button" class="btn btn-primary btn-sm" data-lit-action="run" ${local.busy ? 'disabled' : ''}>${icon('play', {size: 15})}<span>${local.busy ? '运行中' : '运行今日检索'}</span></button>
     </div>
   </header>
@@ -144,8 +152,8 @@ function searchPanel() {
   return `<form class="lit-search" id="lit-search-form">
     <div class="lit-search-main">
       ${icon('search', {size: 18})}
-      <input id="lit-query" name="query" autocomplete="off" placeholder="课题、机制、方法或作者" aria-label="文献检索主题"/>
-      <button type="submit" class="btn btn-primary btn-sm">${local.busy ? '检索中' : '检索'}</button>
+      <input id="lit-query" name="query" autocomplete="off" placeholder="留空自动探索，或输入主题" aria-label="文献检索主题"/>
+      <button type="submit" class="btn btn-primary btn-sm">${local.busy ? '检索中' : '探索文献'}</button>
     </div>
     <div class="lit-filters">
       <div class="lit-source-row" aria-label="文献来源">
@@ -185,13 +193,14 @@ function paperCard(item) {
 
 function radarView() {
   const result = local.search;
-  if (result?.loading) return `<section class="lit-panel">${spinnerHtml('检索文献')}</section>`;
+  const warnings=(result?.warnings||pageData().status?.last_run?.warnings||[]).map(item=>`<p class="lit-muted">${esc(typeof item==='string'?item:item.message||'来源暂不可用')}</p>`).join('');
+  if (result?.loading) return `${searchPanel()}<section class="lit-panel" role="status">${spinnerHtml('后台检索中，可离开此页')}</section>`;
   if (!result) {
     const last = pageData().status?.last_run;
-    return `${searchPanel()}<section class="lit-panel">${last ? `<div class="lit-run-summary"><span>${icon('history', {size: 16})}</span><div><strong>最近一次检索 ${when(last.finished_at || last.started_at)}</strong><p>${fmtNum(last.selected)} 篇入库 · ${fmtNum(last.deep_read)} 篇精读 · ${fmtNum(last.feed_posts)} 条朋友圈</p></div></div>` : ''}${empty('输入主题开始检索', '可检索论文、方法或综述。')}</section>`;
+    return `${searchPanel()}${warnings}<section class="lit-panel">${last ? `<div class="lit-run-summary"><span>${icon('history', {size: 16})}</span><div><strong>最近一次检索 ${when(last.finished_at || last.started_at)}</strong><p>${fmtNum(last.selected)} 篇入库 · ${fmtNum(last.deep_read)} 篇精读 · ${fmtNum(last.feed_posts)} 条朋友圈</p></div></div>` : ''}${empty('探索文献', '按课题与方法兴趣自动检索，也可指定主题。', 'retry-search', '开始探索')}</section>`;
   }
-  if (!result.items?.length) return `${searchPanel()}<section class="lit-panel">${empty('没有符合条件的文献', '可放宽日期、类型或最低兴趣度。', 'retry-search', '重新检索')}</section>`;
-  return `${searchPanel()}<section class="lit-result-head"><div><strong>${fmtNum(result.items.length)} 篇</strong><span>${esc(result.range?.from || '')} 至 ${esc(result.range?.to || '')}</span></div><button type="button" class="btn btn-ghost btn-sm" data-lit-action="retry-search">${icon('refresh', {size: 14})}刷新结果</button></section><div class="lit-paper-list">${result.items.map(paperCard).join('')}</div>`;
+  if (!result.items?.length) return `${searchPanel()}${warnings}<section class="lit-panel">${empty('没有符合条件的文献', '可放宽日期、类型或最低兴趣度。', 'retry-search', '重新检索')}</section>`;
+  return `${searchPanel()}${warnings}<section class="lit-result-head"><div><strong>${fmtNum(result.items.length)} 篇</strong><span>${esc(result.range?.from || '')} 至 ${esc(result.range?.to || '')}</span></div><button type="button" class="btn btn-ghost btn-sm" data-lit-action="retry-search">${icon('refresh', {size: 14})}刷新结果</button></section><div class="lit-paper-list">${result.items.map(paperCard).join('')}</div>`;
 }
 
 function feedView() {
@@ -204,7 +213,10 @@ function feedView() {
       <header><div><span>${esc(sourceLabel(post.source))}</span><time>${esc(when(post.created_at))}</time></div><b>${percent(scores.interestingness)}</b></header>
       <h2>${url ? `<a href="${escAttr(url)}" target="_blank" rel="noopener">${esc(post.title)}</a>` : esc(post.title)}</h2>
       <p>${esc(post.note || '')}</p>
-      <div class="lit-feed-comments">${(post.comments || []).map(comment => `<div><span>你</span><p>${esc(comment.text)}</p><time>${esc(when(comment.created_at))}</time></div>`).join('')}</div>
+      <div class="lit-feed-comments">${(post.comments || []).map(comment => {
+        const agent = comment.author === 'agent';
+        return `<div class="${agent ? 'is-agent' : 'is-user'}" data-comment-author="${agent ? 'agent' : 'user'}"><span>${agent ? 'Eve' : '你'}${comment.stance ? ` · ${esc({agree: '同意', disagree: '反对', uncertain: '保留', adjust: '调整'}[comment.stance] || comment.stance)}` : ''}</span><p>${esc(comment.text)}</p><time>${esc(when(comment.created_at))}</time></div>`;
+      }).join('')}</div>
       <form class="lit-comment-form" data-feed-id="${escAttr(post.id)}"><input placeholder="写下判断或补充证据" aria-label="评论"/><button type="submit" class="btn btn-ghost btn-sm">${icon('send', {size: 14})}评论</button></form>
     </article>`;
   }).join('')}</div>`;
@@ -253,10 +265,11 @@ function proactiveView() {
     <header><span>${icon('book', {size: 15})}主动分享</span><time>${esc(when(row.created_at))}</time></header>
     <h2>${esc(row.title)}</h2>
     <p>${esc(row.body)}</p>
+    ${(row.replies || []).length ? `<div class="lit-discussion-thread">${row.replies.map(reply => `<div class="${reply.author === 'agent' ? 'is-agent' : 'is-user'}"><span>${reply.author === 'agent' ? 'Eve' : '你'}${reply.stance ? ` · ${esc(stanceLabel(reply.stance))}` : ''}</span><p>${esc(reply.text)}</p></div>`).join('')}</div>` : ''}
     <footer>
       <button type="button" class="btn btn-ghost btn-sm" data-lit-action="dismiss-message" data-id="${escAttr(row.id)}">忽略</button>
-      <button type="button" class="btn btn-ghost btn-sm" data-lit-action="reply-message" data-id="${escAttr(row.id)}">回复</button>
-      <button type="button" class="btn btn-primary btn-sm" data-lit-action="send-message" data-id="${escAttr(row.id)}">继续讨论</button>
+      <button type="button" class="btn btn-primary btn-sm" data-lit-action="reply-message" data-id="${escAttr(row.id)}">继续讨论</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-lit-action="send-message" data-id="${escAttr(row.id)}">在工作台展开</button>
     </footer>
   </article>`).join('')}</div>`;
 }
@@ -271,34 +284,53 @@ function content() {
 
 function render(root) {
   if (local.disposed) return;
-  root.innerHTML = `<div class="lit-page">${topBar()}${tabs()}<div class="lit-content">${content()}</div></div>`;
+  const notice = local.notice
+    ? `<div class="lit-notice${local.notice.error ? ' is-error' : ''}" data-local-notice>${icon(local.notice.error ? 'alert' : 'check', {size: 16})}<span>${esc(local.notice.text)}</span></div>`
+    : '';
+  const active=root.contains(document.activeElement)?document.activeElement:null;
+  const focus=active?.id,selection=active?.selectionStart;
+  const oldForm=root.querySelector('#lit-search-form');
+  if(oldForm)local.form=[...oldForm.querySelectorAll('input,select')].map(node=>({id:node.id,name:node.name,value:node.value,checked:node.checked}));
+  root.innerHTML = `<div class="lit-page">${topBar()}${tabs()}<div class="lit-content">${notice}${content()}</div></div>`;
+  for(const saved of local.form||[]){
+    const node=saved.id?root.querySelector(`[id="${saved.id}"]`):[...root.querySelectorAll('input[name="source"]')].find(node=>node.value===saved.value);
+    if(node){if(node.type==='checkbox')node.checked=saved.checked;else node.value=saved.value;}
+  }
+  if(focus){const node=root.querySelector(`[id="${focus}"]`);node?.focus({preventScroll:true});if(typeof selection==='number'&&node?.type==='text')node.setSelectionRange(selection,selection);}
+
 }
 
-async function load(root, generation = local.generation) {
+async function load(root, generation = local.generation, quiet = false) {
   if (local.disposed || generation !== local.generation) return;
-  local.busy = true;
-  render(root);
+  clearTimeout(local.timer);
+  if(!quiet){local.busy = true;render(root);}
   const q = `scope=${encodeURIComponent(scope())}`;
   const results = await Promise.allSettled([
-    request(`/api/literature/status?${q}`),
-    request(`/api/literature/feed?${q}&limit=30`),
-    request(`/api/literature/reflections?${q}&status=pending&limit=30`),
-    request(`/api/literature/proactive?${q}&include_silent=false`),
-    request(`/api/platform/dreaming?${q}`),
+    request(`/api/literature/status?${q}`, {quiet:true}),
+    request(`/api/literature/feed?${q}&limit=30`, {quiet:true}),
+    request(`/api/literature/reflections?${q}&status=pending&limit=30`, {quiet:true}),
+    request(`/api/literature/proactive?${q}&include_silent=false`, {quiet:true}),
+    request(`/api/platform/dreaming?${q}`, {quiet:true}),
   ]);
   if (local.disposed || generation !== local.generation) return;
   const value = (index, fallback) => results[index]?.status === 'fulfilled' ? results[index].value : fallback;
+  const previous=JSON.stringify(local.data);
   local.data = {
-    status: value(0, {}),
+    status: value(0, local.data?.status||{}),
     feed: value(1, {items: []}).items || [],
     reflections: value(2, {items: []}).items || [],
     proactive: value(3, {items: []}).items || [],
     candidates: (value(4, {candidates: []}).candidates || []).filter(row => row.evidence_refs?.some(ref => String(ref).startsWith('literature:'))),
   };
-  local.busy = false;
-  render(root);
+  const searchJob=local.data.status.jobs?.search;
+  if(searchJob?.status==='running')local.search={loading:true};
+  else if(searchJob?.status==='completed')local.search=searchJob.result;
+  else if(searchJob&&['failed','interrupted'].includes(searchJob.status))local.search={items:[],warnings:[{message:searchJob.error||'检索已中断'}]};
+  local.busy = searchJob?.status==='running'||local.data.status.jobs?.daily?.status==='running';
+  if(!quiet||previous!==JSON.stringify(local.data))render(root);
+  local.timer=setTimeout(()=>load(root,generation,true),Number(local.data.status.settings?.ui_poll_seconds||5)*1000);
   const failed = results.find(result => result.status === 'rejected');
-  if (failed) {
+  if (failed && !quiet) {
     const message = errorMessage(failed.reason);
     const content = root.querySelector('.lit-content');
     if (content) content.insertAdjacentHTML('afterbegin', `<div class="lit-notice is-error">${icon('alert', {size: 16})}<span>${esc(message)}</span></div>`);
@@ -308,20 +340,21 @@ async function load(root, generation = local.generation) {
 async function runSearch(root) {
   const form = root.querySelector('#lit-search-form');
   const query = form?.querySelector('#lit-query')?.value.trim() || '';
-  if (!query) {
-    form?.querySelector('#lit-query')?.focus();
-    return;
-  }
-  const sources = [...form.querySelectorAll('input[name="source"]:checked')].map(input => input.value);
+  if(local.busy)return;
+  const generation=local.generation,currentScope=scope();
+  const sources = [...(form?.querySelectorAll('input[name="source"]:checked')||[])].map(input => input.value);
+  if(!sources.length){showNotice(root,'请选择文献来源',true);return;}
+  local.notice = null;
   local.search = {loading: true};
   local.busy = true;
   render(root);
   try {
-    local.search = await request(`/api/literature/search?scope=${encodeURIComponent(scope())}`, {
+    const result = await request(`/api/literature/search?scope=${encodeURIComponent(currentScope)}`, {
       method: 'POST',
       timeout: 120000,
       body: {
         query,
+        background:true,
         sources,
         type_filter: form.querySelector('#lit-type')?.value || 'all',
         date_from: form.querySelector('#lit-from')?.value || '',
@@ -332,69 +365,174 @@ async function runSearch(root) {
         ground_novelty: true,
       },
     });
+    if(local.disposed||generation!==local.generation||currentScope!==scope())return;
+    local.search=result.status==='running'?{loading:true}:result;
+    await load(root,generation,true);
+    if(!local.disposed&&generation===local.generation)render(root);
   } catch (err) {
-    local.search = {items: [], warnings: [{message: errorMessage(err)}]};
-  } finally {
-    local.busy = false;
-    render(root);
+    if(local.disposed||generation!==local.generation)return;
+    local.search = {items: [], warnings: [{message: errorMessage(err)}]};local.busy=false;render(root);
   }
 }
 
-async function uploadPdf(root, file) {
-  if (!file) return;
-  if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
-    const content = root.querySelector('.lit-content');
-    if (content) content.insertAdjacentHTML('afterbegin', `<div class="lit-notice is-error">${icon('alert', {size: 16})}<span>请选择 PDF 文件。</span></div>`);
-    return;
-  }
-  const form = new FormData();
-  form.append('file', file, file.name);
-  local.uploadBusy = true;
-  render(root);
-  let notice = null;
-  let loaded = false;
-  try {
-    const result = await request(`/api/literature/ingest?scope=${encodeURIComponent(scope())}`, {
-      method: 'POST',
-      body: form,
-      timeout: 180000,
-    });
-    local.tab = 'pending';
-    await load(root);
-    loaded = true;
-    notice = {
-      error: false,
-      text: result.duplicate ? '这篇文献已经投喂过。' : `已投喂：${result.item?.title || file.name}`,
-    };
-  } catch (err) {
-    notice = {error: true, text: errorMessage(err)};
-  } finally {
-    local.uploadBusy = false;
-    if (!loaded) render(root);
-    if (notice) {
-      const content = root.querySelector('.lit-content');
-      if (content) {
-        content.insertAdjacentHTML(
-          'afterbegin',
-          `<div class="lit-notice${notice.error ? ' is-error' : ''}">${icon(notice.error ? 'alert' : 'check', {size: 16})}<span>${esc(notice.text)}</span></div>`,
-        );
-      }
+function showNotice(root, text, error = false) {
+  local.notice = {text, error};
+  const content = root.querySelector('.lit-content');
+  if (!content) return;
+  content.querySelector('.lit-notice[data-local-notice]')?.remove();
+  content.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="lit-notice${error ? ' is-error' : ''}" data-local-notice>${icon(error ? 'alert' : 'check', {size: 16})}<span>${esc(text)}</span></div>`,
+  );
+}
+
+function openIngestDialog(root) {
+  const modal = openModal({
+    title: '添加文献',
+    size: 'lg',
+    html: `<div class="lit-ingest-dialog">
+      <label class="lit-drop-zone" for="lit-pdf">
+        ${icon('upload', {size: 22})}
+        <strong>选择 PDF</strong>
+        <span id="lit-file-label">上传后进入精读与反思队列</span>
+      </label>
+      <input type="file" id="lit-pdf" accept="application/pdf,.pdf" hidden/>
+      <div class="lit-ingest-divider"><span>或粘贴文献信息</span></div>
+      <label class="sw-field"><span>标题、DOI、PMID 或文献链接</span>
+        <textarea class="input" id="lit-reference" rows="4" placeholder="例如 10.1038/...、PMID: 12345678、完整标题，或 PubMed / arXiv / bioRxiv / medRxiv 链接"></textarea>
+      </label>
+      <p class="lit-muted">只解析公开学术来源；不确定时优先粘贴 DOI 或 PMID。</p>
+    </div>`,
+    actions: [
+      {label: '取消'},
+      {
+        label: '解析并加入',
+        kind: 'primary',
+        close: false,
+        onClick: async () => {
+          const file = modal.body.querySelector('#lit-pdf')?.files?.[0] || null;
+          const reference = modal.body.querySelector('#lit-reference')?.value.trim() || '';
+          if (!file && !reference) throw new Error('请选择 PDF，或填写标题、DOI、PMID 或链接');
+          local.uploadBusy = true;
+          let result;
+          try {
+            if (file) {
+              if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
+                throw new Error('请选择 PDF 文件');
+              }
+              const form = new FormData();
+              form.append('file', file, file.name);
+              result = await request(`/api/literature/ingest?scope=${encodeURIComponent(scope())}`, {
+                method: 'POST',
+                body: form,
+                timeout: 180000,
+              });
+            } else {
+              result = await request(`/api/literature/ingest?scope=${encodeURIComponent(scope())}`, {
+                method: 'POST',
+                timeout: 180000,
+                body: {reference},
+              });
+            }
+          } finally {
+            local.uploadBusy = false;
+          }
+          modal.close();
+          local.tab = 'pending';
+          await load(root);
+          showNotice(
+            root,
+            result.duplicate
+              ? '这篇文献已在当前工作区。'
+              : `已加入：${result.item?.title || reference || file?.name || '文献'}`,
+          );
+          return false;
+        },
+      },
+    ],
+  });
+  modal.body.querySelector('#lit-pdf')?.addEventListener('change', event => {
+    const file = event.target.files?.[0];
+    const label = modal.body.querySelector('#lit-file-label');
+    if (label) label.textContent = file?.name || '上传后进入精读与反思队列';
+  });
+}
+
+function openDiscussion(root, row) {
+  const existing = Array.isArray(row.replies) ? row.replies : [];
+  const thread = reply => `<div class="lit-discussion-line ${reply.author === 'agent' ? 'is-agent' : 'is-user'}"><span>${reply.author === 'agent' ? 'Eve' : '你'}${reply.stance ? ` · ${esc(stanceLabel(reply.stance))}` : ''}</span><p>${esc(reply.text)}</p></div>`;
+  const modal = openModal({
+    title: '讨论这条分享',
+    size: 'lg',
+    html: `<div class="lit-discussion" data-message-id="${escAttr(row.id)}">
+      <div class="lit-discussion-summary"><strong>${esc(row.title)}</strong><p>${esc(row.body)}</p></div>
+      <div class="lit-discussion-thread" id="lit-discussion-thread">${existing.map(thread).join('') || '<p class="lit-muted">还没有回复。</p>'}</div>
+      <label class="sw-field"><span>你的判断或问题</span><textarea class="input" id="lit-discussion-input" rows="3" placeholder="可以质疑结论、补充证据或提出下一步"></textarea></label>
+      <p class="lit-muted" id="lit-discussion-status" role="status"></p>
+    </div>`,
+    actions: [
+      {label: '关闭'},
+      {
+        label: '发送',
+        kind: 'primary',
+        close: false,
+        onClick: async () => {
+          const input = modal.body.querySelector('#lit-discussion-input');
+          const status = modal.body.querySelector('#lit-discussion-status');
+          const text = input?.value.trim() || '';
+          if (!text) throw new Error('请输入回复');
+          const result = await request(`/api/literature/proactive/${encodeURIComponent(row.id)}/reply?scope=${encodeURIComponent(scope())}`, {
+            method: 'POST',
+            timeout: 180000,
+            body: {text},
+          });
+          const target = modal.body.querySelector('#lit-discussion-thread');
+          if (target) {
+            target.querySelector('.lit-muted')?.remove();
+            target.insertAdjacentHTML('beforeend', thread({author: 'user', text}));
+            target.insertAdjacentHTML('beforeend', thread({author: 'agent', text: result.agent_reply?.text || '回复已保存。'}));
+            target.scrollTop = target.scrollHeight;
+          }
+          if (input) input.value = '';
+          if (status) {
+            status.textContent = result.model_error
+              ? '回复已保存；模型暂不可用，未生成完整回应。'
+              : result.adjustment_candidate
+                ? '已生成一条待审核的自我修正。'
+                : '已回复。';
+          }
+          return false;
+        },
+      },
+    ],
+    onClose: () => {
+      if (!local.disposed) void load(root);
+    },
+  });
+  const input = modal.body.querySelector('#lit-discussion-input');
+  input?.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault();
+      modal.footer.querySelector('button:last-child')?.click();
     }
-  }
+  });
 }
 
 async function runDaily(root) {
   if (local.busy) return;
+  const generation=local.generation,currentScope=scope();
+  local.notice = null;
   local.busy = true;
   render(root);
   try {
-    await request(`/api/literature/run?scope=${encodeURIComponent(scope())}`, {
+    await request(`/api/literature/run?scope=${encodeURIComponent(currentScope)}`, {
       method: 'POST',
       timeout: 240000,
-      body: {trigger: 'manual', force: false},
+      body: {trigger: 'manual', force: false, background:true},
     });
-    await load(root);
+    if(!local.disposed&&generation===local.generation)await load(root,generation,true);
   } catch (err) {
+    if(local.disposed||generation!==local.generation)return;
     local.busy = false;
     render(root);
     const content = root.querySelector('.lit-content');
@@ -419,8 +557,8 @@ function bind(root) {
         navigate('settings', {section: 'literature'});
       } else if (action === 'run') {
         await runDaily(root);
-      } else if (action === 'upload') {
-        root.querySelector('#lit-pdf')?.click();
+      } else if (action === 'ingest') {
+        openIngestDialog(root);
       } else if (action === 'retry-search') {
         await runSearch(root);
       } else if (action === 'save-paper' || action === 'hide-paper') {
@@ -476,17 +614,9 @@ function bind(root) {
         });
         await load(root);
       } else if (action === 'reply-message') {
-        const text = await promptDialog({
-          title: '继续讨论',
-          message: '回复会作为当前文献的讨论上下文。',
-          placeholder: '写下判断、问题或下一步',
-        });
-        if (!text) return;
-        const result = await request(`/api/literature/proactive/${encodeURIComponent(id)}/reply?scope=${encodeURIComponent(scope())}`, {
-          method: 'POST',
-          body: {text},
-        });
-        navigate('workbench', {prefill: result.chat_prompt || text});
+        const row = (pageData().proactive || []).find(item => item.id === id);
+        if (!row) throw new Error('这条分享已更新，请刷新后重试');
+        openDiscussion(root, row);
       }
     } catch (err) {
       const content = root.querySelector('.lit-content');
@@ -516,17 +646,11 @@ function bind(root) {
     }
   };
 
-  const onChange = event => {
-    if (event.target.id === 'lit-pdf') uploadPdf(root, event.target.files?.[0]);
-  };
-
   root.addEventListener('click', onClick);
   root.addEventListener('submit', onSubmit);
-  root.addEventListener('change', onChange);
   return () => {
     root.removeEventListener('click', onClick);
     root.removeEventListener('submit', onSubmit);
-    root.removeEventListener('change', onChange);
   };
 }
 
@@ -534,14 +658,15 @@ export async function mount(root) {
   local.generation += 1;
   const generation = local.generation;
   local.disposed = false;
-  local.search = null;
-  local.tab = 'radar';
+  if(local.scope!==scope()){
+    local.scope=scope();local.search=null;local.notice=null;local.tab='radar';local.data=null;local.form=null;local.busy=false;
+  }
   render(root);
   const dispose = bind(root);
   await load(root, generation);
   return {
     destroy() {
-      if (local.generation === generation) local.disposed = true;
+      if (local.generation === generation){local.disposed = true;clearTimeout(local.timer);}
       dispose();
     },
   };

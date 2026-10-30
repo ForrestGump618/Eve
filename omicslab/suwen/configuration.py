@@ -5,7 +5,12 @@ import math
 from urllib.parse import urlsplit
 
 DEFAULTS = {
- 'models': {'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[], 'capabilities':{},'auxiliary_profiles':{},'context_window':32000,'sage_verification':False,'orchestration':True,'verification':'standard'},
+ 'models': {
+   'mode':'balanced','strategy':'quality','roles':{},'fallbacks':[],'capabilities':{},
+   'auxiliary_profiles':{},
+   'shared_profile':{'enabled':False,'provider':'','model':'','api_base':'','credential_ref':''},
+   'context_window':32000,'sage_verification':False,'orchestration':True,'verification':'standard',
+ },
  'memory': {'enabled':True,'auto_capture':False,'embedding':'keyword','embedding_url':'','embedding_model':'','top_k':5,'retention_days':365},
  'appearance': {'theme':'light','font':'system','font_size':14,'accent':'#3157D5','density':'comfortable','radius':12,'mode':'research','home':'dashboard','onboarded':False,'agent_name':'Eve','avatar':'','shortcuts':{'palette':'k'}},
  'permissions': {'files':'allow','shell':'allow','network':'allow','browser':'allow','messages':'allow','mcp':'allow','memory':'allow','skills':'allow','agents':'allow','python':'allow','system':'allow','notebook':'allow','jobs':'allow','research':'allow','tools':{}},
@@ -33,11 +38,20 @@ DEFAULTS = {
      'max_upload_mb':10,
      'fulltext_char_limit':50000,
      'http_timeout_seconds':20,
+     'source_cache_seconds':300,
+     'source_cache_entries':128,
+     'source_retry_attempts':2,
+     'source_retry_delay_seconds':1,
+     'source_retry_after_limit_seconds':30,
+     'arxiv_interval_seconds':3,
+     'preprint_page_limit':3,
+     'prior_art_concurrency':2,
+     'ui_poll_seconds':5,
      'search_result_limit':50,
      'scan_limit':1000,
      'feedback_limit':500,
      'proactive_history_limit':200,
-     'sources':{'europe_pmc':True,'openalex':True,'biorxiv':True,'arxiv':True},
+     'sources':{'pubmed':True,'medrxiv':True,'europe_pmc':True,'openalex':True,'biorxiv':True,'arxiv':True},
      'quota':{'biology':50,'methods':20,'cross_disciplinary':15,'conference':15},
      'top_journals':['Nature','Science','Cell','Nature Medicine','Nature Biotechnology',
                      'Nature Methods','Nature Genetics','Cell Systems','Immunity','Cancer Cell'],
@@ -83,6 +97,19 @@ def _validate_nested_types(value, default, path=''):
             raise ValueError(f'{path or "设置"}必须为数值')
 
 
+def _fill_missing_defaults(value, default):
+    """Add newly introduced nested defaults without overwriting user values."""
+    if not isinstance(value, dict) or not isinstance(default, dict):
+        return value
+    merged = copy.deepcopy(value)
+    for key, item in default.items():
+        if key not in merged:
+            merged[key] = copy.deepcopy(item)
+        elif isinstance(item, dict) and isinstance(merged[key], dict):
+            merged[key] = _fill_missing_defaults(merged[key], item)
+    return merged
+
+
 class Configuration:
     def __init__(self,store):
         self.store=store
@@ -97,6 +124,9 @@ class Configuration:
         local=self.store.get('config',section,scope) if scope!='global' else global_record
         if local:
             value.update(local['value'])
+        # Older persisted records predate newer nested keys such as PubMed and
+        # medRxiv. Fill only absent keys so explicit false/empty values survive.
+        value=_fill_missing_defaults(value,DEFAULTS[section])
         # Legacy cumulative ceilings remain in historical records, but have no runtime effect.
         value={k:v for k,v in value.items() if k in DEFAULTS[section]}
         return {'value':value,'revision':local['revision'] if local else 0,'scope':scope,'section':section,'effective':'immediate'}
@@ -106,7 +136,10 @@ class Configuration:
             raise ValueError('设置分类或内容无效')
         if set(patch)-set(DEFAULTS[section]):
             raise ValueError('包含未知设置字段：'+','.join(set(patch)-set(DEFAULTS[section])))
-        value=dict(self.get(section,scope)['value'],**patch)
+        value=_fill_missing_defaults(
+            dict(self.get(section,scope)['value'],**patch),
+            DEFAULTS[section],
+        )
         enums={'mode': {'fast','balanced','deep'} if section=='models' else {'research','minimal','developer'},
                'theme':{'light','dark','system'},'strategy':{'quality','latency','cost','privacy'},'density':{'compact','comfortable'},
                'embedding':{'keyword','api'},'font':{'system','sans','mono'},
@@ -123,6 +156,9 @@ class Configuration:
                 'proactive_daily_limit':(0,20),'proactive_cooldown_minutes':(0,10080),
                 'proactive_ttl_hours':(1,168),'max_upload_mb':(1,100),
                 'fulltext_char_limit':(4000,200000),'http_timeout_seconds':(5,120),
+                'source_cache_seconds':(0,86400),'source_cache_entries':(1,1000),
+                'source_retry_attempts':(1,3),'source_retry_delay_seconds':(1,10),'ui_poll_seconds':(3,120),
+                'source_retry_after_limit_seconds':(1,120),'arxiv_interval_seconds':(3,60),'preprint_page_limit':(1,5),'prior_art_concurrency':(1,4),
                 'search_result_limit':(5,200),'scan_limit':(100,10000),
                 'feedback_limit':(20,5000),'proactive_history_limit':(20,2000)}
         for key,(low,high) in ranges.items():
@@ -148,11 +184,26 @@ class Configuration:
                     raise ValueError('temperature 需要布尔值开关或 0—2 的数值')
                 if 'context_window' in caps and (type(caps['context_window']) is not int or not 2048<=caps['context_window']<=2000000):
                     raise ValueError('模型 context_window 需要 2048—2000000 的整数')
+                if caps.get('max_output', 0) >= caps.get('context_window', value['context_window']):
+                    raise ValueError('模型最大输出必须小于上下文窗口')
                 if 'modalities' in caps and (not isinstance(caps['modalities'],list) or any(m not in {'text','image','audio'} for m in caps['modalities']) or not caps['modalities']):
                     raise ValueError('modalities 仅支持 text / image / audio 的非空数组')
                 if 'supported_parameters' in caps and (not isinstance(caps['supported_parameters'],list) or any(not isinstance(x,str) or not x.strip() for x in caps['supported_parameters'])):
                     raise ValueError('supported_parameters 需要非空白文本数组')
                 if caps.get('token_parameter','max_tokens') not in {'max_tokens','max_completion_tokens'}:raise ValueError('Token 参数名无效')
+            shared=value['shared_profile']
+            if set(shared)-{'enabled','provider','model','api_base','credential_ref'}:
+                raise ValueError('共享模型连接包含未知字段')
+            if not isinstance(shared.get('enabled'),bool):
+                raise ValueError('共享模型 enabled 必须为布尔值')
+            if any(not isinstance(shared.get(key),str) for key in ('provider','model','api_base','credential_ref')):
+                raise ValueError('共享模型连接需要文本字段')
+            if shared.get('api_base'):
+                url=urlsplit(shared['api_base'])
+                if url.scheme not in {'http','https'} or not url.hostname or url.username or url.password:
+                    raise ValueError('共享模型服务地址需要不含凭据的 HTTP(S) URL')
+            if shared.get('enabled') and not (shared.get('provider') or shared.get('model')):
+                raise ValueError('启用共享模型后需要选择模型；可先使用“统一使用当前默认模型”')
             if not isinstance(value['auxiliary_profiles'],dict):
                 raise ValueError('auxiliary_profiles 必须为对象')
             unknown_tags=set(value['auxiliary_profiles'])-AUXILIARY_TAGS

@@ -1,9 +1,9 @@
 {
   "tool": "suwen-security-scan",
-  "scannedAt": "2026-10-30T01:34:14.828Z",
+  "scannedAt": "2026-10-30T09:37:39.470Z",
   "root": "C:\\Users\\Qingyuan Zhuang\\Documents\\Codex\\SuWen\\Eve\\Source",
-  "trackedFiles": 1235,
-  "textFilesScanned": 890,
+  "trackedFiles": 1280,
+  "textFilesScanned": 912,
   "historyCommitsScanned": 50,
   "rules": [
     {
@@ -2847,7 +2847,17 @@
       {
         "source": "worktree",
         "file": "tests/test_suwen_platform.py",
-        "line": 547,
+        "line": 117,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://user:password@",
+        "match": "https://user…"
+      },
+      {
+        "source": "worktree",
+        "file": "tests/test_suwen_platform.py",
+        "line": 615,
         "rule": "password-assignment",
         "declaredSeverity": "medium",
         "severity": "low",
@@ -2855,6 +2865,61 @@
         "match": "password='pr…",
         "acceptedFixture": true,
         "reason": "Test fixture value, not a live credential (documented in docs/verification/security-review.md)."
+      },
+      {
+        "source": "git-history",
+        "commit": "fa98541b",
+        "file": "docs/verification/eve-1.0.0-release/security-scan.json",
+        "line": 61,
+        "rule": "api-key-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "apiKey: 'synthetic-chaos-key'",
+        "match": "apiKey: 'syn…"
+      },
+      {
+        "source": "git-history",
+        "commit": "fa98541b",
+        "file": "docs/verification/eve-1.0.0-release/security-scan.json",
+        "line": 71,
+        "rule": "openai-style-key",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "sk-legacy-e2e-sentinel-0123456789",
+        "match": "sk-legacy-e2…"
+      },
+      {
+        "source": "git-history",
+        "commit": "fa98541b",
+        "file": "docs/verification/eve-1.0.0-release/security-scan.json",
+        "line": 153,
+        "rule": "password-assignment",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "password: 'legacy-ssh-secret'",
+        "match": "password: 'l…"
+      },
+      {
+        "source": "git-history",
+        "commit": "fa98541b",
+        "file": "docs/verification/eve-1.0.0-release/security-scan.json",
+        "line": 175,
+        "rule": "bearer-token-literal",
+        "declaredSeverity": "medium",
+        "severity": "low",
+        "sample": "Bearer fixture-enterprise-credential",
+        "match": "Bearer fixtu…"
+      },
+      {
+        "source": "git-history",
+        "commit": "fa98541b",
+        "file": "docs/verification/eve-1.0.0-release/security-scan.json",
+        "line": 187,
+        "rule": "credential-url",
+        "declaredSeverity": "high",
+        "severity": "low",
+        "sample": "https://username:password@",
+        "match": "https://user…"
       },
       {
         "source": "git-history",
@@ -3357,7 +3422,7 @@
     ]
   },
   "highCount": 0,
-  "lowCount": 322,
+  "lowCount": 328,
   "acceptedTestFixtures": 20,
   "acceptedTestFixtureFindings": [
     {
@@ -3507,7 +3572,7 @@
     {
       "source": "worktree",
       "file": "tests/test_suwen_platform.py",
-      "line": 547,
+      "line": 615,
       "rule": "password-assignment",
       "declaredSeverity": "medium",
       "severity": "low",

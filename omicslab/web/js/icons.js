@@ -7,7 +7,7 @@ const PATHS = {
   vars: '<path d="M9 3H7a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h2"/><path d="M15 3h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-2"/>',
   files: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
   figures:
-    '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="9" r="1.6"/><path d="m4 17 4.5-4.5 3 3L15 12l5 5"/>',
+    '<path d="M4 19V5M4 19h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/><path d="m7 11 4-3 3 2 5-5"/>',
   jobs: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 2.5 3L7 15M12.5 15H17"/>',
   skills:
     '<path d="M12 3.5 13.8 9l5.5 1.8-5.5 1.8L12 18l-1.8-5.4L4.7 10.8 10.2 9Z"/><path d="M18.5 3.5v3M20 5h-3"/>',

@@ -368,7 +368,7 @@ class Settings:
             self.ui = data["ui"]
         if isinstance(data.get("provider_connections"), dict):
             self.provider_connections = {k: v for k, v in data["provider_connections"].items()
-                                         if k in PROVIDERS and isinstance(v, dict)}
+                                         if (k in PROVIDERS or re.fullmatch(r'connection_[a-f0-9]{32}', k)) and isinstance(v, dict)}
         if data.get("workspace"):
             try:
                 self.workspace = Path(data["workspace"]).expanduser().resolve()
@@ -429,7 +429,7 @@ class Settings:
         requested_provider = patch.get("provider")
         if requested_provider is not None:
             requested_provider = str(requested_provider).strip() or "auto"
-            if requested_provider != "auto" and requested_provider not in PROVIDERS:
+            if requested_provider != "auto" and requested_provider not in self.provider_ids():
                 raise ConfigError(
                     f"未知 provider: {requested_provider}。可用: {', '.join(sorted(PROVIDERS))}"
                 )
@@ -603,14 +603,38 @@ class Settings:
         }
 
     # -- LLM resolution ----------------------------------------------------
+    def provider_ids(self):
+        return list(dict.fromkeys([*PROVIDERS, *self.provider_connections]))
+
     def provider_meta(self, provider: str) -> dict[str, Any]:
+        if provider not in PROVIDERS and provider in self.provider_connections:
+            connection = self.provider_connections[provider]
+            return {**connection, "env_key": "EVE_" + provider.upper() + "_API_KEY",
+                    "needs_model": True, "hint": "", "fallback_env_key": ""}
         return {**PROVIDERS.get(provider, {}), **self.provider_connections.get(provider, {})}
 
-    def save_provider_connection(self, provider, model="", api_base="", models=None):
+    def save_provider_connection(self, provider, model="", api_base="", models=None, *, label=None, family=None, no_key_required=None):
         from urllib.parse import urlsplit
-        if provider not in PROVIDERS or provider == "mock":
+        if provider not in self.provider_ids() and not re.fullmatch(r'connection_[a-f0-9]{32}', provider):
+            raise ConfigError("请选择有效的供应商")
+        if provider == "mock":
             raise ConfigError("请选择有效的供应商")
         current = dict(self.provider_connections.get(provider, {}))
+        if label is not None:
+            if not isinstance(label, str) or not label.strip() or len(label) > 80 or any(ord(c) < 32 for c in label):
+                raise ConfigError("供应商名称需要 1–80 个字符")
+            current["label"] = label.strip()
+        if provider not in PROVIDERS:
+            protocol = family or current.get("family", "openai")
+            if protocol not in {"openai", "anthropic"}:
+                raise ConfigError("请选择 OpenAI 或 Anthropic 兼容协议")
+            current["family"] = protocol
+            if no_key_required is not None:
+                if type(no_key_required) is not bool:
+                    raise ConfigError("免 Key 选项必须是布尔值")
+                current["no_key_required"] = no_key_required
+            if not (api_base or current.get("api_base")) or not current.get("label"):
+                raise ConfigError("请填写供应商名称和 API 地址")
         if api_base:
             url = urlsplit(api_base)
             if (url.scheme != "https" and not (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"})) or url.username or url.password or url.query or url.fragment:
@@ -703,7 +727,7 @@ class Settings:
         keys = self.auth()
         if provider in {"", "auto"}:
             provider = self._infer_provider(model, keys) or "mock"
-        if provider not in PROVIDERS:
+        if provider not in self.provider_ids():
             raise ConfigError(
                 f"未知 provider: {provider}。可用: {', '.join(sorted(PROVIDERS))}"
             )
@@ -776,7 +800,7 @@ class Settings:
         keys = self.auth()
         saved_base = (self.api_base or "").strip()
         out: list[dict[str, Any]] = []
-        for provider, meta in PROVIDERS.items():
+        for provider in self.provider_ids():
             meta = self.provider_meta(provider)
             connection_base = str(meta.get("api_base") or "")
             effective_base = connection_base or (saved_base if provider == self.provider else "")
@@ -784,14 +808,14 @@ class Settings:
             fallback = str(meta.get("fallback_env_key") or "")
             has_key = bool(keys.get(env_key)) or bool(fallback and keys.get(fallback))
             no_key_required = bool(meta.get("no_key_required"))
-            needs_api_base = provider.startswith("custom")
+            needs_api_base = provider.startswith(("custom", "connection_"))
             needs_model = bool(meta.get("needs_model")) or not str(meta.get("default_model") or "")
             if provider == "custom_openai":
                 has_base = bool(effective_base or _env_first("CUSTOM_OPENAI_API_BASE"))
             elif provider == "custom_anthropic":
                 has_base = bool(effective_base or _env_first("CUSTOM_ANTHROPIC_API_BASE"))
             else:
-                has_base = True
+                has_base = bool(effective_base) if provider.startswith("connection_") else True
             configured = no_key_required or (has_key and has_base)
             out.append(
                 {
